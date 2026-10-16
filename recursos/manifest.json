@@ -1,0 +1,67 @@
+{
+ "estaticos": "ok",
+ "hero": {
+  "video_d.mp4": 7979,
+  "video_m.mp4": 4647,
+  "video_s.mp4": 2012,
+  "poster.webp": 59,
+  "poster_m.webp": 46,
+  "fin.webp": 104
+ },
+ "hotel": {
+  "video_d.mp4": 8215,
+  "video_m.mp4": 4739,
+  "video_s.mp4": 1129,
+  "poster.webp": 65,
+  "poster_m.webp": 41,
+  "fin.webp": 46
+ },
+ "restaurante": {
+  "video_d.mp4": 7765,
+  "video_m.mp4": 4253,
+  "video_s.mp4": 761,
+  "poster.webp": 61,
+  "poster_m.webp": 35,
+  "fin.webp": 49
+ },
+ "cafeteria": {
+  "video_d.mp4": 8287,
+  "video_m.mp4": 4628,
+  "video_s.mp4": 1799,
+  "poster.webp": 75,
+  "poster_m.webp": 42,
+  "fin.webp": 129
+ },
+ "oficina": {
+  "video_d.mp4": 6904,
+  "video_m.mp4": 3923,
+  "video_s.mp4": 1345,
+  "poster.webp": 46,
+  "poster_m.webp": 27,
+  "fin.webp": 79
+ },
+ "evento": {
+  "video_d.mp4": 7688,
+  "video_m.mp4": 4388,
+  "video_s.mp4": 1395,
+  "poster.webp": 53,
+  "poster_m.webp": 32,
+  "fin.webp": 74
+ },
+ "fondos": {
+  "cotizacion": 48,
+  "hotel_pods": 39,
+  "catering": 89,
+  "capacitacion": 78,
+  "activacion": 115,
+  "pop": 83
+ },
+ "barras": {
+  "video_d.mp4": 4857,
+  "video_m.mp4": 3151,
+  "video_s.mp4": 713,
+  "poster.webp": 6,
+  "poster_m.webp": 4,
+  "fin.webp": 46
+ }
+}
