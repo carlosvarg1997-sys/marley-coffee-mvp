@@ -2,7 +2,7 @@
 
 Nicolás Pérez y Carlos Vargas · TMA1103 · Duoc UC ·18-10-2026
 
-20 láminas principales · pauta de 8 minutos · 887 palabras habladas. Máximo 6 líneas por lámina principal; las dos transiciones tienen una. Los 6 apoyos se usan solo si preguntan.
+20 láminas principales · pauta de 8 minutos · 886 palabras habladas. Máximo 6 líneas por lámina principal; las dos transiciones tienen una. Los 6 apoyos se usan solo si preguntan.
 
 ## Cómo usarlo
 
@@ -107,14 +107,14 @@ Cada pregunta debe acercar al comprador a una decisión.
 
 ### Para decir
 
-Veamos el recorrido grabado del comprador en el prototipo.  
-Nombre y correo permiten retomar el avance con permiso; el teléfono es opcional.  
-Preguntas por capas preparan una propuesta según negocio y consumo.  
-El comprador compara arriendo y compra y ajusta antes de confirmar.  
-Consultar registra una duda; confirmar deja su elección para revisión comercial.  
-Ese cierre conserva la propuesta y el siguiente paso, sin contratar ni cobrar.
+Desde la tienda, Empresas abre un camino propio para el comprador profesional.  
+El inicio B2B explica la propuesta y organiza la solución según su negocio.  
+El registro permite retomar el avance con permiso.  
+Las preguntas por capas orientan máquina, consumo y zona de atención.  
+La propuesta permite comparar arriendo y compra antes de confirmar.  
+El cierre vigente conserva elección y siguiente paso, sin contratar ni cobrar.
 
-**Señal visual:** El video comienza automáticamente. Señalar entrada, registro, preguntas y propuesta; es una grabación previa a los últimos ajustes. Explicar el cierre vigente sin atribuirle una acción no visible.
+**Señal visual:** Señalar Empresas, título animado B2B, caso Hotel, registro y preguntas en la grabación. El catálogo completo de cuatro máquinas y las animaciones actuales requieren otra toma: no están filmados aquí. El cierre grabado precede a los últimos ajustes.
 
 **Respaldo:** Grabación previa del prototipo · Datos de demostración · Casos separados · Sin conexión externa
 
@@ -196,7 +196,7 @@ Al intervenir, debe detener respuestas y secuencias que dupliquen el contacto.
 El seguimiento comercial continúa por correo, con su número de referencia.  
 El ejemplo explica esa operación; la entrega externa sigue pendiente de integración.
 
-**Señal visual:** El video recuperado muestra contacto, resumen del agente y bandeja. La respuesta humana y el correo son parte del diseño propuesto; no se acredita un envío real.
+**Señal visual:** Señalar contacto, resumen del agente y controles de bandeja. La captura no muestra tomar conversación, respuesta humana enviada ni correo entregado. Esas acciones requieren una nueva toma funcional; no atribuirlas al clip.
 
 **Respaldo:** Grabación previa del prototipo · Datos de demostración · Casos separados · Sin conexión externa
 
@@ -573,4 +573,4 @@ Las cuatro láminas audiovisuales principales contienen grabaciones recuperadas 
 
 ## Controles de exposición
 
-Avanzar revela copys y después cambia de lámina. En las cuatro láminas de video, el clip y sus copys se activan automáticamente al entrar; se prepara con antelación el siguiente clip. Flecha derecha o Espacio hacen lo mismo. H oculta o muestra controles. G abre el guion de la lámina; D,la defensa. P reproduce o pausa;F,pantalla completa. En celular horizontal se conservan controles compactos y navegación lateral. Movimiento reducido elimina la animación decorativa; los videos mantienen autoarranque sin sonido y pueden pausarse. Si el navegador impide el autoarranque, Reproducir permite iniciarlo.
+Avanzar revela copys y después cambia de lámina. Las frases secundarias pequeñas se ven desde el inicio. En las cuatro láminas de video, el clip y sus copys se activan automáticamente al entrar; se prepara con antelación el siguiente clip. Siguiente momento del video continúa la reproducción sin pausarla. Flecha derecha o Espacio hacen lo mismo. H oculta o muestra controles. G abre el guion de la lámina; D,la defensa. P reproduce o pausa;F,pantalla completa. En celular horizontal se conservan controles compactos y navegación lateral. Movimiento reducido elimina la animación decorativa; los videos mantienen autoarranque sin sonido y pueden pausarse. Si el navegador impide el autoarranque, Reproducir permite iniciarlo.
