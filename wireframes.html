@@ -5910,13 +5910,36 @@ window.M7Chat = (() => {
   const operator = () => /^R\d{2}$/.test(route()) && route() !== 'R00';
   const canOperate = () => operator() && M.get().role === 'ventas';
   const allowed = () => /^C0[2-9]$/.test(route()) || operator();
-  const scope = () => String(M.get().lead?.id || 'visitante').slice(0, 80);
+  // C09 muestra una cuenta de demostración existente; su soporte no pertenece al lead comercial.
+  // En CRM solo la ficha R04 de esa misma cuenta permite abrir su historial de soporte.
+  const activeAccount = () => {
+    const s = M.get(), acc = D.ACCOUNTS?.[0] || null;
+    if (route() === 'C09') return acc;
+    if (route() === 'R04' && acc && acc.id === s.sel) return acc;
+    return null;
+  };
+  const scope = () => { const acc = activeAccount(); return acc ? 'cuenta:' + acc.id : String(M.get().lead?.id || 'visitante').slice(0, 80); };
   const key = () => 'marley:conversacion:consultiva-v2:' + M.MODE + ':' + (M.TEST || 'general') + ':' + scope();
   const range = (arr) => Array.isArray(arr) && arr.length === 2 && arr.every(Number.isFinite) ? arr.map(n => '$' + Math.round(n).toLocaleString('es-CL')).join(' a ') : 'Por confirmar';
   const statusLabels = { asistente:'Asistente automático', espera:'Consulta para el equipo', fuera:'Fuera del horario simulado', humano:'Persona atendiendo', cerrado:'Caso de soporte cerrado' };
   let state, stateKey = '', pane = null, priorFocus = null, background = [], signature = '', rendering = false, busy = false, deferred = false, allowAnonymousPromotion = false;
   const processed = new Set();
   function context() {
+    const acc = activeAccount();
+    if (acc) {
+      const s = M.get(), area = D.comuna?.(acc.comuna), lastOrder = acc.orders?.at(-1) || null;
+      const item = lastOrder?.items?.[0], product = item && D.PRODUCTS?.[item.p];
+      return { scope:scope(), role:s.role || null, accountId:acc.id, accountName:acc.name,
+        hasLead:false, formSeen:true, hasProposal:false, proposalId:'', accepted:false,
+        // Bar en arriendo y Tomás son los datos que ya muestra C09 para esta cuenta ficticia.
+        machineId:'bar', machine:D.MACHINES?.bar?.name || 'Bar', mode:'arriendo', modality:'Arriendo',
+        business:acc.business, place:acc.comuna, zone:area && D.ZONES?.[area.zone]?.name || 'Zona por confirmar',
+        executive:D.EXECS?.tomas?.name || 'Equipo de postventa', email:'', consent:false,
+        product:product?.name || 'Café Marley Coffee en grano', cups:null,
+        lastOrder:lastOrder ? clone(lastOrder) : null,
+        rentMonthly:'Por confirmar', rentFee:'Por confirmar', buyMonthly:'Por confirmar', buyOnce:'Por confirmar',
+        consumption:'Según el historial de esta cuenta de demostración', otherClient:false, postventa:true };
+    }
     const s = M.get(), p = s.proposal || s.quote || {}, machine = D.MACHINES?.[p.machine];
     const mode = ['arriendo','compra'].includes(p.mode) ? p.mode : null;
     const area = s.answers?.comuna && D.comuna ? D.comuna(s.answers.comuna) : null;
@@ -5932,8 +5955,14 @@ window.M7Chat = (() => {
       consumption:rent ? String(rent.units).replace('.',',') + ' ' + rent.unit + ' al mes (estimación)' : 'Se calcula al configurar',
       otherClient:Boolean(operator() && s.sel && s.sel !== s.lead?.id), postventa:route() === 'C09' };
   }
-  function summary(c) { return [c.hasProposal ? 'Propuesta ' + (c.proposalId || 'del recorrido') : 'Propuesta aún por configurar', 'Máquina: '+c.machine, 'Modalidad: '+c.modality, c.business, c.place, c.zone].join(' · '); }
-  function fresh() { return {v:VERSION,scope:scope(),seq:0,rev:0,purpose:'comercial',view:'inicio',status:'asistente',channel:'web',messages:[],audit:[],operations:[],effects:[],query:null,agreement:null,handoff:null,ticket:null,order:null,draft:null,paused:false,closePending:false,rating:null,outside:false,waPending:false,waLastClient:0,service:false,marketing:false,stopped:true,templateApproved:false,failed:null}; }
+  function summary(c) {
+    if (c.accountId) return ['Cuenta ' + c.accountId, c.accountName, 'Máquina: ' + c.machine,
+      'Modalidad: ' + c.modality, c.business, c.place, c.zone,
+      c.lastOrder ? 'Último pedido: ' + c.lastOrder.id + ' (' + c.lastOrder.status + ', demostración)' : 'Sin pedido registrado',
+      'Atención: ' + c.executive].join(' · ');
+    return [c.hasProposal ? 'Propuesta ' + (c.proposalId || 'del recorrido') : 'Propuesta aún por configurar', 'Máquina: '+c.machine, 'Modalidad: '+c.modality, c.business, c.place, c.zone].join(' · ');
+  }
+  function fresh() { return {v:VERSION,scope:scope(),seq:0,rev:0,purpose:activeAccount()?'postventa':'comercial',view:activeAccount()?'postventa':'inicio',status:'asistente',channel:'web',messages:[],audit:[],operations:[],effects:[],query:null,agreement:null,handoff:null,ticket:null,order:null,draft:null,paused:false,closePending:false,rating:null,outside:false,waPending:false,waLastClient:0,service:false,marketing:false,stopped:true,templateApproved:false,failed:null}; }
   function add(s, author, text, at, by) { s.messages.push({id:++s.seq,author,text:clean(text),at,...(by ? {by:clean(by,80)} : {})}); s.messages=s.messages.slice(-100); }
   function audit(s,text,at) { s.audit.push({text,at}); s.audit=s.audit.slice(-50); }
   function intent(text) {
@@ -5969,7 +5998,7 @@ window.M7Chat = (() => {
         sys('Caso '+s.ticket.id+' registrado en esta demostración. Pausamos las ofertas y los recordatorios de reposición mientras se atiende. Describe qué sucede; el equipo debe confirmar la revisión y sus condiciones.');audit(s,'Incidencia abierta; ampliación y recordatorios pausados.',at);return;
       }
       if (s.status==='humano' || s.status==='espera' || s.status==='fuera') {sys(s.status==='humano'?'Tu mensaje queda para la persona que te atiende. El asistente automático no responde en su nombre.':'Tu mensaje se añadió a la consulta del equipo. El seguimiento comercial se realiza por correo; no hay un plazo de respuesta confirmado en esta demostración.');return;}
-      if (name==='pedido') {service();s.view='pedido';if (!s.order)s.order={id:'DEMO-PED-01',status:'Estado por confirmar con el equipo'};say('Este es el pedido de ejemplo '+s.order.id+': '+s.order.status+'. No consultamos inventario ni transporte real. Puedes pedir ayuda con el caso o iniciar tú la postventa por WhatsApp.');return;}
+      if (name==='pedido') {service();s.view='pedido';if (!s.order)s.order=c.lastOrder?{id:c.lastOrder.id,status:c.lastOrder.status}:{id:'DEMO-PED-01',status:'Estado por confirmar con el equipo'};say((c.accountId?'Pedido de la cuenta '+c.accountId+' (demostración): ':'Este es el pedido de ejemplo ')+s.order.id+': '+s.order.status+'. No consultamos inventario ni transporte real. Puedes pedir ayuda con el caso o iniciar tú la postventa por WhatsApp.');return;}
       if (name==='reponer') {service();s.view='reposicion';if(s.paused){say('Primero atendamos la incidencia. La reposición sugerida está pausada; si necesitas una alternativa urgente, puedes dejarlo en tu caso para que una persona la revise.');return;}if(!s.draft)s.draft={id:'DEMO-REP-'+at,product:c.product,qty:2};say('Preparé una solicitud de ejemplo con '+s.draft.qty+' unidades de '+s.draft.product+'. Ajusta la cantidad y revisa el resumen antes de confirmarla. El equipo debe validar precio, disponibilidad y despacho; no genera un cobro.');return;}
       if (name==='persona') {s.handoff={summary:summary(c),pending:true,authorizedAt:null};s.view='persona';say('Puedo dejar tu contexto para una persona del equipo. Revisa el resumen antes de autorizarlo. Para ventas, la respuesta y el seguimiento se coordinan por correo; nadie ha tomado el caso todavía.');return;}
       if (name==='correo') {s.view='correo';say(s.query?.status==='registrada'?'Tu consulta ya está registrada. El correo sigue pendiente de envío real; no necesitas registrarla otra vez.':'Puedes registrar tu consulta con el contexto de tu propuesta para que el equipo continúe por correo. Revisa el mensaje y el permiso antes de confirmar.');return;}
@@ -5978,7 +6007,7 @@ window.M7Chat = (() => {
       if (name==='propuesta') {s.view=c.accepted?'confirmada':'propuesta';say(c.hasProposal?'Tu propuesta considera '+c.machine+' en '+c.modality.toLowerCase()+', para '+c.business.toLowerCase()+'. El consumo estimado es '+c.consumption+'. Revisa el resumen y decide si quieres ajustarla, consultar por correo o confirmarla.': 'Todavía falta configurar tu propuesta. Te guiamos con el negocio, el consumo y la forma de servir el café. Pulsa «Configurar mi propuesta» para continuar en el sitio.');return;}
       s.view='consulta';say('Entiendo. Para orientarte con tu caso, puedo revisar la propuesta o comparar arriendo y compra. Si tu pregunta necesita precio definitivo, disponibilidad o una condición especial, registra la consulta para que el equipo la confirme por correo.');
     };
-    if(a.type==='init' && !s.messages.length) say('Hola, soy el asistente automático de Marley Coffee Empresas. Te ayudo a entender la propuesta y elegir el siguiente paso. El seguimiento comercial se realiza por correo. ¿Quieres revisar tu propuesta o comparar arriendo y compra?');
+    if(a.type==='init' && !s.messages.length) say(c.accountId?'Hola, soy el asistente automático de postventa. Estás en la cuenta de demostración '+c.accountName+' ('+c.accountId+'). ¿Quieres revisar tu pedido, preparar una reposición o pedir soporte?':'Hola, soy el asistente automático de Marley Coffee Empresas. Te ayudo a entender la propuesta y elegir el siguiente paso. El seguimiento comercial se realiza por correo. ¿Quieres revisar tu propuesta o comparar arriendo y compra?');
     else if(a.type==='purpose'){s.purpose=a.value==='postventa'?'postventa':'comercial';s.view=s.purpose==='postventa'?'postventa':'inicio';}
     else if(a.type==='send' || a.type==='intent') {
       const text=clean(a.text || a.label || a.intent);if(!text)return s;add(s,'cliente',text,at);if(s.channel==='whatsapp')s.waLastClient=at;
@@ -6027,14 +6056,14 @@ window.M7Chat = (() => {
   }
   function load() {
     const k=key();if(state && stateKey===k)return state;
-    const anonymous=state?.scope==='visitante' && scope()!=='visitante' && (allowAnonymousPromotion||M.get().lead?.consent) ? clone(state):null;
+    const anonymous=!activeAccount() && state?.scope==='visitante' && scope()!=='visitante' && (allowAnonymousPromotion||M.get().lead?.consent) ? clone(state):null;
     stateKey=k;state=anonymous?Object.assign(anonymous,{scope:scope()}):fresh();
     if(!M.STATIC)try{const r=JSON.parse(localStorage.getItem(k)||'null');if(r?.v===VERSION && r.scope===scope() && Array.isArray(r.messages) && Array.isArray(r.operations)){state=Object.assign(fresh(),r);state.messages=r.messages.filter(m=>m && ['ia','cliente','equipo','sistema'].includes(m.author) && Number.isFinite(m.at)).slice(-100).map(m=>({...m,text:clean(m.text)}));state.audit=Array.isArray(r.audit)?r.audit.slice(-50):[];state.effects=[];if(!statusLabels[state.status])state.status='asistente';state.service=false;state.marketing=false;state.stopped=true;}}catch(_){}
     state=transition(state,{type:'init'},context());if(context().postventa)state.purpose='postventa';if(anonymous)allowAnonymousPromotion=false;return state;
   }
   function persist(){if(!M.STATIC)try{localStorage.setItem(stateKey,JSON.stringify(state));}catch(_){}}
   function mirror() {
-    if(!M.update || !M.get().lead)return;
+    if(activeAccount() || !M.update || !M.get().lead)return;
     const messages=load().messages.filter(m=>m.author==='cliente'||m.author==='equipo');
     if(!messages.length)return;
     const old=M.get().conv?.msgs || [];const missing=messages.filter(m=>!old.some(x=>x.id==='M7-'+scope()+'-'+m.id));if(!missing.length)return;
@@ -6053,8 +6082,9 @@ window.M7Chat = (() => {
       else if(e.type==='mode'){M.setQuote({mode:e.mode});dispatch({type:'mode-result',ok:true,mode:e.mode});}
       else if(e.type==='accept'){allowAnonymousPromotion=true;M.ensureDemoContact?.();M.acceptProposal();const ok=M.get().proposal?.status==='aceptada';dispatch({type:'proposal-result',ok});if(ok){close();window.MarleyApp?.go('C06');}}
       else if(e.type==='followup'){allowAnonymousPromotion=true;M.ensureDemoContact?.();M.chooseChannel('correo');}
-      else if(e.type==='core-take'){if(!M.get().conv)M.update(s=>{s.conv={status:'bot',msgs:[]};});M.execTake?.();}
+      else if(e.type==='core-take'){if(activeAccount())return;if(!M.get().conv)M.update(s=>{s.conv={status:'bot',msgs:[]};});M.execTake?.();}
       else if(e.type==='email'){
+        if(activeAccount()){dispatch({type:'email-result',ok:true,email:e.query.email,demoEmail:false},{mirror:false});return;}
         const q=e.query;allowAnonymousPromotion=true;M.ensureDemoContact?.();if(q.email && q.consent && M.saveContact)M.saveContact({name:M.get().lead?.name || '',email:q.email,phone:'',consent:true});
         M.chooseChannel('correo',{recordOnly:true,requestId:q.id});
         const destination=q.email || M.get().lead?.email || '';
