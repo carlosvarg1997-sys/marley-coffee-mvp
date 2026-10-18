@@ -2,11 +2,11 @@
 
 Nicolás Pérez y Carlos Vargas · TMA1103 · Duoc UC ·18-10-2026
 
-20 láminas principales · pauta de 8 minutos · 874 palabras habladas. Máximo 6 líneas por lámina principal; las dos transiciones tienen una. Los 6 apoyos se usan solo si preguntan.
+20 láminas principales · pauta de 8 minutos · 887 palabras habladas. Máximo 6 líneas por lámina principal; las dos transiciones tienen una. Los 6 apoyos se usan solo si preguntan.
 
 ## Cómo usarlo
 
-El texto bajo «Para decir» es el discurso. Las señales visuales y el respaldo son indicaciones, no se leen. Narrar encima de los 72 segundos de animaciones explicativas: ya están incluidos en la pauta. El ensayo determina la duración efectiva.
+El texto bajo «Para decir» es el discurso. Las señales visuales y el respaldo son indicaciones, no se leen. Narrar sobre las cuatro grabaciones del prototipo, ya incluidas en la pauta. El ensayo determina la duración efectiva.
 
 ## La idea que sostiene el relato
 
@@ -46,13 +46,13 @@ Priorizamos hoteles, restaurantes y cafeterías porque su compra recurrente nece
 ### Para decir
 
 La auditoría encontró ocho campos antes de orientar sobre máquina y costo.  
-El diagnóstico también documenta una espera de tres a cinco días hábiles.  
+La confirmación informa hasta tres días hábiles para que el equipo contacte.  
 Ese esfuerzo llega cuando el comprador todavía está decidiendo.  
 Por eso Empresas debe abrir un camino guiado desde la tienda.
 
-**Señal visual:** Señalar formulario y cita por separado; el plazo no tiene captura original conservada.
+**Señal visual:** Señalar formulario y confirmación auténticos; el plazo máximo se refiere al contacto, no a resolver ni entregar una cotización.
 
-**Respaldo:** Captura conservada del cotizador · Espera de 3–5 días: cita del diagnóstico, Informe EP3, §1.1 y Tabla 1
+**Respaldo:** Capturas auténticas del cotizador y su confirmación · Plazo informado: contacto en un máximo de 3 días hábiles
 
 ## 04. Completar no equivale a avanzar sin ayuda
 
@@ -107,16 +107,16 @@ Cada pregunta debe acercar al comprador a una decisión.
 
 ### Para decir
 
-Esta simulación explica el recorrido del modelo.  
+Veamos el recorrido grabado del comprador en el prototipo.  
 Nombre y correo permiten retomar el avance con permiso; el teléfono es opcional.  
 Preguntas por capas preparan una propuesta según negocio y consumo.  
 El comprador compara arriendo y compra y ajusta antes de confirmar.  
 Consultar registra una duda; confirmar deja su elección para revisión comercial.  
 Ese cierre conserva la propuesta y el siguiente paso, sin contratar ni cobrar.
 
-**Señal visual:** Narrar sobre sim_cliente; es un diagrama explicativo, no grabación del MVP. No llenar el silencio de observación.
+**Señal visual:** El video comienza automáticamente. Señalar entrada, registro, preguntas y propuesta; es una grabación previa a los últimos ajustes. Explicar el cierre vigente sin atribuirle una acción no visible.
 
-**Respaldo:** Simulación explicativa del modelo · No es grabación del MVP · Informe EP3 y Anexo E
+**Respaldo:** Grabación previa del prototipo · Datos de demostración · Casos separados · Sin conexión externa
 
 ## 08. Dos modalidades. Pagos distintos.
 
@@ -138,16 +138,16 @@ Los rangos son académicos, más IVA; Ventas confirma condiciones antes de contr
 
 ### Para decir
 
-Cada respuesta útil debe preparar una acción interna.  
-El correo autorizado identifica al contacto y registra su evento una sola vez.  
-Negocio y comuna aportan contexto, puntaje y responsable.  
-La confirmación conserva propuesta y número de seguimiento.  
-Así el equipo conoce de dónde viene la prioridad.  
-El correo ilustrado mantiene esa continuidad.
+Esta ficha grabada muestra qué recibe el equipo internamente.  
+Contacto, propuesta y responsable quedan disponibles para atender.  
+El puntaje de interacción aparece con sus razones: 93 sobre cien.  
+Es un acumulado de demostración; aquí no vemos crecer el puntaje.  
+La propuesta conecta cada acción útil con un evento registrado una sola vez.  
+El correo diseñado muestra cómo conservar ese contexto en el seguimiento.
 
-**Señal visual:** Narrar sobre sim_trazabilidad. Los incrementos son reglas ilustradas; no afirmar un envío externo ni un puntaje observado en producción.
+**Señal visual:** Narrar sobre la ficha y el detalle de puntaje. Es otro caso de demostración: no afirmar continuidad del folio móvil, incremento filmado ni envío externo.
 
-**Respaldo:** Simulación explicativa del modelo · No es grabación del MVP · Informe EP3 y Anexo E
+**Respaldo:** Grabación previa del prototipo · Datos de demostración · Casos separados · Sin conexión externa
 
 ## 10. Dos puntajes. Dos decisiones.
 
@@ -196,9 +196,9 @@ Al intervenir, debe detener respuestas y secuencias que dupliquen el contacto.
 El seguimiento comercial continúa por correo, con su número de referencia.  
 El ejemplo explica esa operación; la entrega externa sigue pendiente de integración.
 
-**Señal visual:** Narrar sobre sim_atencion y enfatizar propuesta junto al chat; correo diseñado, no enviado.
+**Señal visual:** El video recuperado muestra contacto, resumen del agente y bandeja. La respuesta humana y el correo son parte del diseño propuesto; no se acredita un envío real.
 
-**Respaldo:** Simulación explicativa del modelo · No es grabación del MVP · Informe EP3 y Anexo E
+**Respaldo:** Grabación previa del prototipo · Datos de demostración · Casos separados · Sin conexión externa
 
 ## 13. La venta termina.
 La relación comienza.
@@ -226,9 +226,9 @@ WhatsApp atiende postventa iniciada por el cliente.
 Los avisos comerciales van por correo autorizado.  
 La frecuencia habitual prepara una reposición que el cliente revisa y confirma.
 
-**Señal visual:** Narrar sobre sim_postventa. No presentar la confirmación de propuesta anterior como compra.
+**Señal visual:** Se muestra Mi cuenta y ayuda de otra cuenta ficticia. Después explicar ticket, pausa W9 y reposición como reglas propuestas; no afirmar que la grabación muestra una incidencia resuelta.
 
-**Respaldo:** Simulación explicativa del modelo · No es grabación del MVP · Informe EP3 y Anexo E
+**Respaldo:** Grabación previa del prototipo · Datos de demostración · Casos separados · Sin conexión externa
 
 ## 15. Cada táctica deja una señal útil
 
@@ -332,7 +332,7 @@ Así cada interacción prepara una decisión útil. Gracias. ¿Preguntas?
 ### Apoyo 1. La misma arquitectura, tres fidelidades
 
 La estructura se mantiene en tres entregables: wireframe, mockup y prototipo.  
-Las grabaciones históricas son ejemplos separados; la secuencia principal explica el modelo mediante diagramas.
+Las grabaciones del comprador y del CRM están en el recorrido principal; los esquemas explicativos son apoyos opcionales.
 
 **Cuándo abrir:** Abrir solo si preguntan por fidelidades o procedencia de videos.
 
@@ -569,8 +569,8 @@ Correo para contacto y seguimiento comercial autorizado. WhatsApp queda en postv
 
 ## Procedencia de los videos
 
-Los cuatro segmentos principales suman 72 s: son diagramas animados identificados como simulación explicativa y no grabación del MVP. La postventa distingue compra previa simulada. El Apoyo 1 conserva cuatro clips históricos de casos separados; no se unen para fingir una sesión. El PDF usa imágenes de respaldo; el HTML contiene los videos.
+Las cuatro láminas audiovisuales principales contienen grabaciones recuperadas del prototipo: B2B móvil, trazabilidad, Ventas y Mi cuenta. Son versiones previas y escenarios separados con datos ficticios, no una sesión continua ni una conexión productiva. El Apoyo 1 conserva cuatro esquemas animados opcionales, claramente identificados. El PDF usa fotogramas de respaldo; el HTML incluye los ocho MP4 completos.
 
 ## Controles de exposición
 
-Avanzar revela copys y después cambia de lámina. Flecha derecha o Espacio hacen lo mismo. H oculta o muestra controles. G abre el guion de la lámina; D,la defensa. P reproduce o pausa;F,pantalla completa. En celular horizontal se conservan controles compactos y navegación lateral. Movimiento reducido mantiene inicio manual del video.
+Avanzar revela copys y después cambia de lámina. En las cuatro láminas de video, el clip y sus copys se activan automáticamente al entrar; se prepara con antelación el siguiente clip. Flecha derecha o Espacio hacen lo mismo. H oculta o muestra controles. G abre el guion de la lámina; D,la defensa. P reproduce o pausa;F,pantalla completa. En celular horizontal se conservan controles compactos y navegación lateral. Movimiento reducido elimina la animación decorativa; los videos mantienen autoarranque sin sonido y pueden pausarse. Si el navegador impide el autoarranque, Reproducir permite iniciarlo.
