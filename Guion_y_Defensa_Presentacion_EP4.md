@@ -279,7 +279,7 @@ La viabilidad se completa verificando cada intercambio autorizado.
 
 **Respaldo:** Informe EP3, §1.3 y tabla de integración · Anexo E, 24_CONEXIONES · Auditoría técnica pública
 
-## 18. Invertir por etapas: dos caminos
+## 18. Cuánto cuesta conectar y escalar
 
 **Nicolás · 7:00–7:22 · 22 s**
 
@@ -294,7 +294,7 @@ Primero revalidamos; luego probamos noventa días con ocho cuentas antes de esca
 
 **Señal visual:** Comparar Camino 1 (APIs + baja de JUMP, corto plazo) y Camino 2 (Open Source + Python, mediano plazo). Destacar el peso < 1 % a 4,8 % sobre el presupuesto del brief.
 
-**Respaldo:** Informe EP3, §1.3 (Tabla 2) y §1.6 · Referencias de mercado en CLP/mes · Presupuesto brief: $220 M CLP/año
+**Respaldo:** Informe EP3, §1.3 (Tabla 2) y §1.6 · Estimación de mercado en CLP/mes · Presupuesto brief: $220 M CLP/año
 
 ## 19. Medir antes de decidir la escala
 
