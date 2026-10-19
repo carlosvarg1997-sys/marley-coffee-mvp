@@ -1,365 +1,305 @@
 # Guion de exposición y defensa · Marley Coffee Empresas
 
-Nicolás Pérez y Carlos Vargas · TMA1103 · Duoc UC ·18-10-2026
+Nicolás Pérez y Carlos Vargas · TMA1103 ·19 de octubre de 2026
 
-20 láminas principales · pauta de 8 minutos · 1627 palabras habladas. Máximo 6 líneas por lámina principal; las dos transiciones tienen una. Los 6 apoyos se usan solo si preguntan.
+20 láminas · pauta de 8 minutos · 896 palabras habladas. La duración final se comprueba ensayando; los clips se narran dentro del tiempo.
 
-## Cómo usarlo
+## Idea central
 
-El texto bajo «Para decir» es el discurso. Las señales visuales y el respaldo son indicaciones, no se leen. Narrar sobre las cuatro grabaciones del prototipo, ya incluidas en la pauta. El ensayo determina la duración efectiva.
+Cotizar con claridad y atender con contexto: conectar la experiencia del cliente con las decisiones del equipo.
 
-## La idea que sostiene el relato
-
-Una decisión comprensible para el comprador y un equipo que atiende con el mismo contexto. El diagnóstico explica la necesidad; el test orienta las correcciones; la ruta técnica define qué validar antes de escalar.
-
-## 01. Cotizar sin fricción. Operar sin trabajo manual.
+## 01. Cotizar con claridad. Atender con contexto.
 
 **Nicolás · 0:00–0:12 · 12 s**
 
 ### Para decir
 
-Nuestro MVP une tres pilares: Inbound Marketing, E-commerce B2B y Diseño UX/UI.  
-Por fuera, diseñamos una interfaz sin fricciones para atraer, cotizar en sesenta segundos y deleitar al cliente HORECA.  
-Por dentro, conectamos ventas y logística con seis agentes de IA que eliminan el trabajo manual y dejan la decisión crítica al equipo humano.
+Cotizar con claridad y atender con contexto: esa es nuestra propuesta para Marley Coffee.  
+Unimos inbound, e-commerce y UX para ayudar al comprador y al equipo.
 
-**Señal visual:** Avanzar un clic para destacar la experiencia cliente y un segundo clic para hacer zoom en el beneficio interno.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** MVP B2B HORECA · Inbound Marketing, E-commerce y Diseño UX/UI · Duoc UC TMA1103
 
-## 02. Un canal B2B clave frenado por gestión manual
+## 02. Un canal clave, una operación fragmentada
 
 **Carlos · 0:12–0:36 · 24 s**
 
 ### Para decir
 
-Hoy el canal B2B representa el sesenta y tres por ciento de la facturación de Marley Coffee, con foco en hoteles, restaurantes y cafeterías.  
-Sin embargo, el ochenta y dos por ciento de las reposiciones se gestiona de forma manual y solo el treinta por ciento de las fuentes está sincronizado.  
-Sobre un presupuesto anual de doscientos veinte millones, el brief nos exige tres metas a doce meses.  
-Debemos subir la conversión de doce a dieciocho por ciento, la recompra digital de dieciocho a cuarenta y la retención anual al noventa por ciento.
+En el caso estudiado, B2B concentra 63 % de la facturación y 82 % de la reposición sigue siendo manual.  
+El brief pide más conversión, reposición digital y retención.  
+Estas son las metas que orientan el MVP; todavía no son resultados conseguidos.
 
-**Señal visual:** Primer clic muestra el dolor del 82 % manual; segundo clic agranda las tres metas del brief integradas al punto de partida.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Informe EP3, §1.1 y §1.7 · Base académica del caso Duoc UC · Presupuesto brief: $220 M CLP/año
 
-## 03. Sin acceso claro, 8 campos y 3 días de espera
+## 03. El interés llega. La respuesta tarda.
 
 **Nicolás · 0:36–1:02 · 26 s**
 
 ### Para decir
 
-En la auditoría del recorrido actual detectamos tres fricciones críticas que frenan la compra empresarial.  
-Primero, el comprador entra por la tienda B2C sin un botón Empresas visible en celular y enfrenta ocho campos a ciegas sin ver máquinas ni precios.  
-Segundo, la confirmación le informa hasta tres días hábiles solo para ser contactado, enfriando su intención de compra.  
-Tercero, esa solicitud cae sin calificación ni contexto comercial para el equipo de Ventas.
+La intención llega a una tienda pensada para personas. En móvil cuesta encontrar Empresas.  
+Después aparecen ocho campos sin orientación de máquina o costo, y una confirmación anuncia hasta tres días hábiles para contactar.  
+Elegimos trabajar ese tramo: ayudar a decidir y preparar una respuesta con contexto.
 
-**Señal visual:** Señalar los 8 campos a la izquierda y luego avanzar para hacer foco en los 3 días hábiles de espera.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Capturas reales del sitio auditado · Formulario de 8 campos y espera de hasta 3 días hábiles
 
-## 04. Qué medimos en el test y qué descubrimos
+## 04. El test cambió las decisiones de diseño
 
 **Carlos · 1:02–1:34 · 32 s**
 
 ### Para decir
 
-Realizamos cinco sesiones moderadas de usabilidad: arriba vemos las métricas base, con un promedio de doscientos cuatro segundos y solo uno de tres compradores avanzando sin ayuda.  
-Lo más valioso fue lo que descubrimos abajo para rediseñar el producto y reducir la fricción.  
-En móvil no reconocían el ícono de navegación, por lo que agregamos la palabra MENÚ y el acceso directo a Empresas desde B2C.  
-Reemplazamos el formulario largo por tres datos iniciales y un cuestionario interactivo en tres capas donde comparan arriendo y compra.  
-Y como Ventas quedó bloqueada en el test por no ver lo cotizado, unificamos la ficha, la propuesta y el resumen de IA junto al chat.
+Probamos con tres compradores, una persona de Ventas y una de Jefatura.  
+Solo un comprador avanzó sin ayuda. El promedio fue 204,4 segundos y la usabilidad percibida,61,7 sobre 100.  
+Lo decisivo fueron los hallazgos: menú poco reconocible, captura lenta y Ventas sin lo cotizado.  
+Por eso cambiamos navegación, decisiones por capas y atención asistida. Falta revalidar las mejoras.
 
-**Señal visual:** Presentar brevemente la cinta superior de KPIs y avanzar para agrandar los tres descubrimientos accionables abajo.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Informe EP3, §1.4 (Tablas 5–7) · 5 sesiones moderadas: 3 compradores HORECA + Ventas + Jefatura
 
-## 05. Qué incluye el MVP, qué excluye y por qué
+## 05. El mínimo que permite probar la solución
 
 **Carlos · 1:34–2:02 · 28 s**
 
 ### Para decir
 
-Esto define el alcance estratégico de nuestro MVP y el porqué de cada decisión.  
-Incluimos el ecosistema completo donde hoy se pierde la demanda: el sitio B2B, los cinco Lead Magnets, el portal Mi cuenta y el CRM con seis agentes de IA.  
-Dejamos fuera la tienda B2C porque ya resuelve la venta unitaria a personas.  
-Y excluimos el cobro y la línea de crédito automática en vivo, porque en HORECA las condiciones finales exigen validación humana de Finanzas y conexión privada al ERP en el piloto.
+El mínimo viable conecta tres espacios: Empresas, Mi cuenta y CRM.  
+Incluimos lo que permite probar captación, propuesta, atención y recompra.  
+Conservamos la tienda B2C con acceso Empresas. Pagos, crédito y conexiones privadas quedan para el piloto.  
+La decisión reduce riesgo y permite aprender antes de desarrollar toda la operación.
 
-**Señal visual:** Avanzar para contrastar lo incluido (Front + CRM) frente a lo excluido estratégicamente.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Informe EP3, §1.3 (Tabla 4) y §1.4 · Cambios implementados pendientes de revalidación en Ronda 2
 
-## 06. Cuatro máquinas para atraer en Google y convertir
+## 06. Cuatro máquinas, cuatro necesidades
 
 **Nicolás · 2:02–2:28 · 26 s**
 
 ### Para decir
 
-Para atraer y orientar mejor, estructuramos la propuesta de valor en cuatro soluciones según el giro: Bar, Oficina, Café al paso y Pods.  
-Esta arquitectura no solo guía al comprador por tazas al día, sino que crea páginas específicas que indexan en Google y potencian el SEO B2B.  
-Además, transparenta el negocio: en un hotel de doscientas cincuenta tazas diarias, equivalentes a cincuenta y nueve coma cero nueve kilos al mes, la máquina abre la cuenta y el café asegura la recompra.  
-El cliente compara con claridad un arriendo llave en mano de uno coma treinta y dos a uno coma setenta y cinco millones mensuales frente a la compra directa del equipo.
+Mostramos las cuatro máquinas con su uso, no solo una ficha genérica.  
+Así el comprador reconoce qué sirve para su negocio. Esos contenidos también permiten trabajar búsquedas por intención y giro.  
+La indexación se comprobará; no afirmamos haber ganado posiciones en Google.
 
-**Señal visual:** Primero destacar las 4 máquinas y su rol SEO; luego avanzar para hacer zoom en la tabla comparativa Arriendo vs. Compra.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
-**Respaldo:** Informe EP3, §1.5–1.6 y Anexo E hoja 19 · Caso Hotel 250 tazas/día (59,09 kg/mes) · CLP + IVA
+**Respaldo:** Informe EP3, §1.3 y §1.5 · Máquinas oficiales · SEO propuesto, sin resultados de posicionamiento medidos
 
-## 07. Recorramos estos momentos clave en el prototipo B2B
+## 07. Elegir primero. Cotizar con contexto.
 
 **Nicolás · 2:28–2:34 · 6 s**
 
 ### Para decir
 
-Veamos cómo estos momentos clave de experiencia e Inbound cobran vida en el prototipo del cliente.
+Veamos cómo una necesidad se transforma en una propuesta.
 
-**Señal visual:** Pausa de dos segundos y avanzar.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
-**Respaldo:** Frase narrativa, sin afirmación empírica.
+**Respaldo:** 
 
-## 08. Cinco momentos UX e Inbound en el prototipo
+## 08. El comprador construye su solución
 
 **Carlos · 2:34–3:16 · 42 s**
 
 ### Para decir
 
-Aquí vemos cinco momentos clave: en el segundo cero aparece en celular la palabra MENÚ y el acceso Empresas para orientar a quien entra desde B2C.  
-Luego recorremos las cuatro máquinas por giro pensadas para indexar en Google y convertir.  
-En el segundo once, el formulario de solo tres datos reduce la fricción, guarda el avance como Lead Magnet y activa el marketing automatizado.  
-El cuestionario interactivo en tres capas con consumo premarcado motiva a Camila a armar su solución en menos de un minuto.  
-Finalmente, la propuesta inmediata la deleita mostrándole máquina, café y la comparación entre arriendo y compra antes de confirmar el folio PROP-1NJLD.
+En móvil hacemos visible MENÚ y Empresas. La entrada deja de depender de reconocer un ícono.  
+Las máquinas orientan antes de pedir datos. Nombre, correo y celular opcional permiten guardar el avance con permiso.  
+Después, el comprador elige por capas y recibe equipo, consumo y estimación. Puede comparar arriendo y compra antes de confirmar.  
+Cada paso entrega algo útil. El objetivo es facilitar la decisión; su mejora en tiempo se medirá en la segunda ronda.
 
-**Señal visual:** Clip de 29,5 s: 0 s MENÚ móvil y Empresas; 4,5 s 4 máquinas SEO; 11,5 s 3 datos LM2; 14 s 3 capas LM3; 19,5 s propuesta y comparación LM4.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
-**Respaldo:** Grabación HTTPS del prototipo MVP · Flujo conectado sin envío externo · Informe EP3 §1.3–1.7
+**Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
 
-## 09. Cada clic actualiza el CRM y el puntaje en vivo
+## 09. Cada interacción deja una señal útil
 
 **Carlos · 3:16–3:42 · 26 s**
 
 ### Para decir
 
-Al mismo tiempo, el espejo en vivo conecta el sitio con el CRM interno bajo el mismo folio de Camila.  
-El registro inicial con permiso le otorga veinte puntos y cada capa del cuestionario suma contexto comercial sin duplicar eventos.  
-Al confirmar su propuesta, el puntaje sube a ochenta y seis sobre cien, superando el umbral de cuarenta puntos para calificar como MQL.  
-El sistema deja preparados tres borradores de correo locales para acompañar la decisión sin trabajo manual.
+La misma sesión pasa de 20 a 86 puntos y prepara tres correos locales.  
+El valor no es acumular datos: es conservar origen, permiso, necesidad y propuesta para la siguiente persona.  
+Esta grabación prueba el comportamiento del prototipo, no un envío real ni una conexión externa.
 
-**Señal visual:** Clip de 17 s: 0 s 20 puntos; 3 s respuestas en vivo; 5,5 s subida a 86 puntos (MQL); 11 s tres correos locales W1, W4 y W5.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
-**Respaldo:** Grabación HTTPS del prototipo MVP · Flujo conectado sin envío externo · Informe EP3 §1.3–1.7
+**Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
 
-## 10. Dos puntajes separados: captar hoy y retener mañana
+## 10. Priorizar el interés. Cuidar la cuenta.
 
 **Carlos · 3:42–4:06 · 24 s**
 
 ### Para decir
 
-Para ordenar la operación sin confundir etapas, separamos dos modelos de puntaje de cero a cien.  
-Antes de comprar, el puntaje de interacción mide encaje e interés: con cuarenta puntos, perfil HORECA y permiso califica a MQL, y Ventas valida el SQL.  
-Después de comprar, el puntaje financiero evalúa ticket, frecuencia habitual, margen, categorías y zona logística.  
-Así la frecuencia habitual prepara la recompra automática y las cuentas sobre setenta puntos activan campañas de referidos.
+Antes de comprar, el puntaje de interacción ayuda a priorizar: perfil, permiso y al menos 40 puntos califican al contacto.  
+Ventas revisa la oportunidad y decide el SQL.  
+Después de comprar usamos otro puntaje: frecuencia, ticket, margen y variedad ayudan a cuidar la cuenta. No confundimos intención con valor financiero.
 
-**Señal visual:** Primer clic enfoca la captación (MQL a SQL); segundo clic enfoca el valor financiero de cuentas activas.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Informe EP3, §1.5 · Anexo E, hojas 01 y 03 · Reglas deterministas auditables
 
-## 11. Ventas recibe el contexto, pausa la IA y decide
+## 11. La IA prepara. La ejecutiva responde.
 
 **Carlos · 4:06–4:36 · 30 s**
 
 ### Para decir
 
-En la bandeja de Ventas resolvemos el bloqueo del test: la ejecutiva Paula recibe la ficha cotizada y el resumen preparado por el agente de IA.  
-Cuando Paula toma la conversación en el segundo cinco coma cinco, la regla W6 pausa automáticamente al asistente para evitar dos voces.  
-Paula responde en menos de cinco minutos sobre el contexto exacto del hotel, sin pedirle al cliente que repita sus datos.  
-Finalmente, es la persona quien revisa las condiciones y acepta la oportunidad comercial como SQL.
+La ejecutiva recibe la consulta y lo que el cliente cotizó.  
+La IA resume y propone un borrador interno; no conversa en nombre de la ejecutiva.  
+Al tomar el caso, Paula conserva el control: revisa, edita y envía. También decide si acepta la oportunidad.  
+Así reducimos transcripción y evitamos respuestas sin contexto; el efecto comercial se medirá en el piloto.
 
-**Señal visual:** Clip de 17 s: 0 s resumen IA; 3 s bandeja unificada; 5,5 s toma humana e IA en pausa (W6); 9,3 s respuesta; 14 s aceptación SQL.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
-**Respaldo:** Grabación HTTPS del prototipo MVP · Flujo conectado sin envío externo · Informe EP3 §1.3–1.7
+**Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
 
-## 12. La venta inicia la relación. El Flywheel y la logística la sostienen.
+## 12. La venta abre la relación. La operación la sostiene.
 
 **Carlos · 4:36–4:42 · 6 s**
 
 ### Para decir
 
-La primera venta abre la cuenta; el Flywheel, la logística y la recompra en un clic construyen la rentabilidad.
+La venta abre la relación. La operación la sostiene.
 
-**Señal visual:** Pausa breve antes de entrar al Flywheel y postventa.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
-**Respaldo:** Frase narrativa, sin afirmación empírica.
+**Respaldo:** 
 
-## 13. Atraer por intención, interactuar en capas y deleitar
+## 13. Un ciclo comercial, tres momentos conectados
 
 **Nicolás · 4:42–5:10 · 28 s**
 
 ### Para decir
 
-Aquí vemos cómo el MVP articula todo el flujo de Inbound Marketing bajo un mismo identificador trazable.  
-Atraemos con páginas SEO por giro, anuncios SEM y el comparador de máquinas como primer Lead Magnet.  
-Interactuamos con el registro de tres datos, el diagnóstico en tres capas, la propuesta instantánea y los workflows de recuperación a veinticuatro y setenta y dos horas.  
-Y deleitamos en el portal Mi cuenta con recompra en un clic, soporte técnico que pausa ofertas ante una falla y referidos que reinician el ciclo.
+Atraemos con información útil por negocio y conservamos el origen.  
+Interactuamos con datos breves, decisiones progresivas y propuesta guardada.  
+Deleitamos cuando volver a comprar o pedir ayuda exige menos esfuerzo.  
+El CRM convierte esas señales en tareas y seguimiento por correo. Las campañas y contenidos se aprueban antes de activarse.
 
-**Señal visual:** Avanzar para recorrer de izquierda a derecha cómo cada etapa alimenta el CRM y el retorno del ciclo.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Informe EP3, §1.5 · Blueprint Inbound y Anexo E, hojas 05, 06 y 18 · 5 Lead Magnets y 10 Workflows
 
-## 14. Recompra en un clic y soporte que cuida la cuenta
+## 14. Reponer fácil. Resolver antes de vender.
 
 **Carlos · 5:10–5:36 · 26 s**
 
 ### Para decir
 
-En este video del portal Mi cuenta vemos cómo eliminamos la fricción en la retención y la recompra.  
-Gracias a los datos guardados desde el cuestionario y su ciclo de catorce días, el cliente repite su último pedido en un solo clic.  
-Si reporta un problema técnico, la regla W9 abre un ticket con responsable y pausa de inmediato todas las ofertas y recordatorios comerciales.  
-Además, el cliente puede iniciar soporte por WhatsApp conservando todo el resumen de su caso sin repetir su historia.
+La cuenta conserva pedido, máquina e historial: reponer comienza desde lo que ya conoce.  
+Si aparece una falla, primero se atiende el problema y se pausan las ofertas.  
+WhatsApp queda para la postventa que inicia el cliente; el seguimiento comercial usa correo.  
+No es solo vender otra vez: es cuidar la continuidad del negocio.
 
-**Señal visual:** Clip de 12 s: 0 s Mi cuenta y ciclo de 14 días; 3 s botón Repetir último pedido en 1 clic; 6 s ticket DEMO-INC y pausa W9; 9 s WhatsApp entrante.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
-**Respaldo:** Grabación HTTPS del prototipo MVP · Flujo conectado sin envío externo · Informe EP3 §1.3–1.7
+**Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
 
-## 15. El stock gobierna qué promovemos, reservamos y entregamos
+## 15. Prometer según stock. Entregar con seguimiento.
 
 **Nicolás · 5:36–5:58 · 22 s**
 
 ### Para decir
 
-Este e-commerce B2B no solo conecta las ventas, sino toda la cadena logística y de abastecimiento.  
-Cada pedido recorre seis hitos trazables: confirmar crédito, reservar lote, preparar, facturar, despachar por ruta y medir entregas a tiempo sobre el noventa y cinco por ciento.  
-Además, la regla W8 conecta el stock del ERP con Marketing: si un grano baja de siete días de cobertura, pausa su promoción, sugiere un sustituto y alerta a Abastecimiento.
+La experiencia promete solo lo que la operación puede cumplir.  
+El pedido debe pasar por disponibilidad, reserva, preparación, facturación, despacho y seguimiento.  
+Con el ERP integrado, una cobertura crítica debe alertar al equipo antes de seguir promoviendo.  
+OTIF es la entrega completa y a tiempo;95 % es una meta del piloto, no un resultado actual.
 
-**Señal visual:** Primer clic muestra los 6 pasos de fulfillment; segundo clic destaca la alerta de stock crítico W8.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Informe EP3, §1.7 · Flujo operativo propuesto conectado a ERP · Meta de servicio: OTIF al menos 95 %
 
-## 16. Conectar el ecosistema actual sin perder trazabilidad
+## 16. Aprovechar lo existente. Validar la conexión.
 
 **Nicolás · 5:58–6:22 · 24 s**
 
 ### Para decir
 
-Técnicamente, diseñamos una arquitectura pensada para dar trazabilidad total sin perder lo que Marley Coffee ya construyó.  
-Aprovechamos el catálogo público en VTEX y la huella de Connectif y Google Tag Manager observada en la auditoría.  
-Sobre esa base, el MVP demuestra localmente el folio único, el motor de puntajes y los diez flujos automatizados.  
-En el piloto validaremos con TI las llaves privadas hacia el ERP y WhatsApp para controlar cada punto de extremo a extremo.
+Encontramos activos que podemos aprovechar: catálogo, eventos y plataformas.  
+El MVP demuestra folio, puntaje, reglas y conversación local.  
+TI debe validar accesos, permisos, stock y errores antes de conectar producción. La viabilidad se defiende separando evidencia de condiciones pendientes.
 
-**Señal visual:** Recorrer los tres niveles de la tabla y rematar con la trazabilidad en tiempo real.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Informe EP3, §1.3 (Tabla 2) y Anexo E hoja 24 · Evidencia pública, demostración local y validación TI
 
-## 17. Dos caminos: conectar hoy o migrar a Open Source
+## 17. Dos caminos de integración, un costo comparable
 
 **Nicolás · 6:22–6:52 · 30 s**
 
 ### Para decir
 
-En costos, comparamos la realidad actual frente a dos caminos estratégicos que representan menos del cinco por ciento del presupuesto del brief.  
-Hoy Marley gasta entre quinientos veinte mil y uno coma diecinueve millones al mes en software desconectado, operando con un ochenta y dos por ciento manual.  
-El Camino uno para el piloto conecta ese ecosistema vía APIs, da de baja JUMP y suma Claude Code y Ollama Max quedando prácticamente al mismo costo actual.  
-El Camino dos para escalar migra a WooCommerce y CRM propio Open Source en un VPS con automatización matemática en Python, bajando el gasto a unos ciento cincuenta mil pesos —o cincuenta mil en régimen—, ahorrando hasta un ochenta y cinco por ciento.
+Comparamos costos recurrentes estimados bajo la misma unidad: pesos al mes.  
+El primer camino conecta las plataformas actuales. El segundo migra comercio y CRM a código abierto.  
+Son escenarios de arquitectura, no cotizaciones. Implementación, comisiones y soporte necesitan presupuesto.  
+La decisión depende del piloto y de quién pueda operar y mantener cada alternativa.
 
-**Señal visual:** Primer clic presenta el gasto actual y el Camino 1 (APIs); segundo clic hace zoom en el ahorro estructural del Camino 2 (Open Source + Python).
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
-**Respaldo:** Informe EP3, §1.3 (Tablas 2 y 3) y §1.6 · Valores en CLP/mes · Presupuesto brief: $220.000.000 CLP/año
+**Respaldo:** Informe EP3, Tabla 2 · Escenarios estimados, no cotizaciones · Implementación, comisiones y soporte deben presupuestarse
 
-## 18. La arquitectura base conecta las 6 áreas en un caso
+## 18. Cada área recibe contexto y asume una decisión
 
 **Carlos · 6:52–7:16 · 24 s**
 
 ### Para decir
 
-¿Cuál es el beneficio real de esta inversión? Primero, una arquitectura base sólida que ordena el trabajo de las seis áreas sobre un mismo caso.  
-Marketing ve el origen y permiso; Ventas recibe la cotización y el chat; Servicio gestiona tickets y pausas comerciales.  
-Al mismo tiempo, Logística controla stock y rutas, Finanzas autoriza líneas de crédito y Jefatura monitorea capacidad y conversión por cohorte.
+Un folio conserva la historia entre seis áreas.  
+Marketing conoce origen y permiso; Ventas, la propuesta; Servicio, el caso y el equipo.  
+Logística decide con stock y ruta; Finanzas valida condiciones; Jefatura distribuye capacidad.  
+La arquitectura sostiene el dato y evita que cada área empiece desde cero.
 
-**Señal visual:** Primer clic destaca Marketing, Ventas y Servicio; segundo clic enfoca Logística, Finanzas y Jefatura.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Informe EP3, §1.3 y §1.7 · Anexo E, hoja 20 · Base estructural sobre la que operan los agentes
 
-## 19. La IA elimina el 82 % manual; la persona decide
+## 19. Automatizar la tarea. Conservar el criterio.
 
 **Ambos · 7:16–7:40 · 24 s**
 
 ### Para decir
 
-Sobre esa arquitectura base, los seis agentes de IA aportan la fluidez operativa que elimina el ochenta y dos por ciento de trabajo manual.  
-En Marketing y Calificación, la IA captura orígenes, guarda el avance y calcula el puntaje en vivo, dejando al humano la estrategia creativa.  
-En Ventas, el agente resume lo cotizado y pausa el bot cuando entra Paula, para que ella negocie, valide el SQL y cierre en menos de cinco minutos.  
-Y en Logística y Postventa, la IA cruza el stock, prepara la recompra en un clic y pausa ofertas ante fallas, mientras las personas autorizan compras y cierran incidencias.
+La IA aporta fluidez al trabajo repetitivo: clasifica, resume, prepara y alerta.  
+La persona conserva campañas, negociación, crédito, abastecimiento y cierre técnico.  
+El 82 % describe reposición manual actual, no una reducción ya medida.  
+El beneficio se comprobará con tiempo operativo, respuesta, recompra y retención.
 
-**Señal visual:** Primer clic muestra qué automatiza la IA en cada eslabón; segundo clic hace zoom en el alcance humano y el beneficio directo en los KPIs.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Informe EP3, §1.7 (Figura 4 y Tabla 10) · Arquitectura base + 6 Agentes de IA + Alcance humano
 
-## 20. Resolvimos conversión y retención. Escalemos la atracción.
+## 20. Una experiencia clara. Un equipo conectado.
 
 **Ambos · 7:40–8:00 · 20 s**
 
 ### Para decir
 
-En conclusión, este MVP resuelve el corazón del problema: convierte el interés en propuesta y la postventa en recompra sin trabajo manual.  
-Nuestro paso uno es revalidar las mejoras en una segunda ronda logrando al menos ochenta por ciento de autonomía y cero bloqueos.  
-El paso dos es desplegar el piloto de noventa días en ocho cuentas HORECA conectando inventario y atención.  
-Y con la interacción y el deleite ya resueltos y trazados, el paso tres es escalar toda la comunicación creativa y campañas de atracción en Google y redes sabiendo que cada lead entrará a una máquina comercial que convierte y fideliza. Muchas gracias. ¿Preguntas?
+La siguiente decisión es revalidar con usuarios y luego probar la integración con ocho cuentas.  
+Con esa evidencia podremos escalar atracción y creatividad sobre una experiencia medible.  
+Una experiencia clara para el cliente. Un equipo conectado para hacerla posible.
 
-**Señal visual:** Primer clic muestra Ronda 2 y Piloto; segundo clic hace zoom en el gancho final de escalar la comunicación y atracción.
+**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
 
 **Respaldo:** Propuesta estratégica EP4 · Segunda ronda UX, piloto de 90 días y escalamiento creativo de atracción
 
----
-
-## Apoyos · fuera del relato de ocho minutos
-
-### Apoyo 1. La misma arquitectura, tres fidelidades
-
-La evolución de diseño se documenta en tres niveles: wireframe de estructura, mockup visual y prototipo funcional.  
-Las cuatro grabaciones principales muestran el flujo real en HTTPS; los esquemas animados quedan aquí como respaldo.
-
-**Cuándo abrir:** Abrir solo si consultan por la progresión wireframe -> mockup -> prototipo.
-
-### Apoyo 2. Cada automatización tiene una salida
-
-Los diez workflows (W1 a W10) operan con disparador, condición de permiso, acción automatizada y salida auditable.  
-W6 detiene la IA cuando interviene Ventas y W9 pausa toda oferta comercial mientras exista un ticket técnico abierto.
-
-**Cuándo abrir:** Explicar en detalle W1–W10 si preguntan por la lógica de automatización.
-
-### Apoyo 3. Segunda ronda: criterios de salida
-
-Antes de pasar al piloto exigimos cumplir siete criterios en la Ronda 2 con usuarios.  
-Buscamos al menos 80 % de autonomía sin ayuda, SUS mayor o igual a 68, registro en menos de 30 segundos y cero bloqueos.
-
-**Cuándo abrir:** Mostrar si preguntan cómo se validarán los cambios de usabilidad.
-
-### Apoyo 4. Los indicadores deben cambiar una decisión
-
-Cada KPI del brief tiene fórmula, denominador por cohorte, fuente en el CRM o ERP y responsable de decisión.  
-Así vinculamos métricas de usabilidad del test con indicadores comerciales de conversión, recompra digital, OTIF y retención.
-
-**Cuándo abrir:** Abrir si piden el detalle de sesiones del test o fórmulas de KPIs.
-
-### Apoyo 5. IA con revisión humana
-
-Utilizamos IA generativa y agentes bajo supervisión humana: la arquitectura valida las reglas y las personas toman las decisiones.  
-En el Camino 2, los cálculos repetitivos pasan a scripts matemáticos en Python para operar 24/7 sin costo marginal por token.
-
-**Cuándo abrir:** Abrir si preguntan por gobernanza de IA o automatización en Python.
-
-### Apoyo 6. Tu propuesta tiene continuidad
-
-Cada correo transaccional conserva el folio de la cotización, desglosa máquina y café y mantiene un único hilo con la ejecutiva.  
-En el MVP se registran localmente como borradores auditables antes de conectar el servidor de envío en el piloto.
-
-**Cuándo abrir:** Mostrar cuando se consulte por las plantillas de correo W1, W4 o W5.
-
----
-
-## Banco de preguntas · consultar solo si preguntan
+## Defensa · consultar solo si preguntan
 
 ### ¿Para quién es la propuesta y por qué priorizar HORECA?
 
 La propuesta prioriza hoteles, restaurantes y cafeterías por su compra recurrente y necesidad de servicio. El caso académico sitúa al B2B en el 63 % de la facturación total; no es un dato interno auditado. Concentrar el MVP en este recorrido permite probar una necesidad concreta antes de ampliar segmentos.
 
-**Fuente:** Informe EP3 vigente, §1.1 y nota metodológica; base académica Duoc UC (2026b).
+**Fuente:** Informe EP3 vigente, §1.1 y nota metodológica; base académica Duoc UC (2026 b).
 
 ### ¿Cuál es el valor real del MVP y por qué esta solución?
 
@@ -407,13 +347,13 @@ Con 250 tazas diarias y 26 días, la calculadora supone 6.500 tazas y 59,09 kg a
 
 El puntaje de interacción va de 0 a 100, reúne señales de interés y ajuste al negocio, suma cada evento una sola vez y no usa gasto ni margen. La captura funcional del 18 de octubre muestra a Camila, MC-HOR-2089, pasar de 20 a 86 con sus razones. Marketing califica con correo autorizado, perfil HORECA y al menos 40 puntos; una persona de Ventas acepta la oportunidad. En la misma sesión Paula realiza esa aceptación: 86 puntos no crean por sí solos una oportunidad aceptada. El puntaje financiero también va de 0 a 100, pero usa ticket 30 %, frecuencia 25 %, margen 20 %, categorías 10 % y zona 15 %. Se aplica a cuentas con compras y no se suma al de interacción. W7 usa frecuencia habitual para preparar reposición; W8 exige financiero de al menos 70, frecuencia, satisfacción y ausencia de incidencia, con beneficio aprobado. La grabación demuestra estados locales, no un modelo predictivo ni una integración productiva.
 
-**Fuente:** Informe EP3, §1.3 y §1.5; Anexo E, hojas 01–03 y 12. Captura funcional HTTPS del 18-10-2026, MC-HOR-2089 y PROP-1NJLD; no sustituye la segunda ronda con usuarios.
+**Fuente:** Informe EP3, §1.3 y §1.5; Anexo E, hojas 01–03 y 12. Captura funcional HTTPS del 18-10-2026, MC-HOR-2089 y PROP-1 NJLD; no sustituye la segunda ronda con usuarios.
 
 ### ¿Qué hace la IA y qué sigue decidiendo una persona?
 
 Los agentes preparan cálculos, resumen la necesidad, sugieren propuestas y ordenan tareas. En la captura funcional del mismo caso Camila, Paula toma la conversación, la IA queda en pausa, responde en el chat local y acepta la oportunidad comercial. Ventas confirma precio y oportunidad; Finanzas, crédito; Logística, disponibilidad y despacho. El video acredita esas acciones en el prototipo; no acredita mensajes entregados ni un asistente conectado a producción. Las condiciones, integraciones y controles operativos deben probarse en el piloto.
 
-**Fuente:** Informe EP3, §1.7; Anexo E, hojas 20, 23 y 24. Captura funcional HTTPS del 18-10-2026, MC-HOR-2089 y PROP-1NJLD; pruebas productivas y segunda ronda con usuarios pendientes.
+**Fuente:** Informe EP3, §1.7; Anexo E, hojas 20, 23 y 24. Captura funcional HTTPS del 18-10-2026, MC-HOR-2089 y PROP-1 NJLD; pruebas productivas y segunda ronda con usuarios pendientes.
 
 ### ¿Cuándo se envían los correos y cómo evitan molestar?
 
@@ -443,7 +383,7 @@ Antes de comprometer se validan producto, cantidad, precio y fecha. Después se 
 
 Hay una vía técnica documentada: se comprobó lectura del catálogo público y se detectaron recursos del sitio; los proveedores documentan interfaces. Eso no prueba contratos, accesos privados ni una integración completa. TI debe confirmar VTEX, automatización, ERP y sistema de atención reales. Cada adaptador debe superar pruebas autorizadas de ida y vuelta, identidad, stock, eventos únicos y recuperación antes de declararlo conectado.
 
-**Fuente:** Informe EP3, tabla 2; Anexo E, hoja 24, estados V/H/P/D y pruebas I00–I16. Las rutas /v1 del MVP son contratos propuestos propios, no APIs oficiales ya desplegadas.
+**Fuente:** Informe EP3, tabla 2; Anexo E, hoja 24, estados V/H/P/D y pruebas I00–I16. Las rutas /v 1 del MVP son contratos propuestos propios, no APIs oficiales ya desplegadas.
 
 ### ¿Qué pasa si una conexión falla o llega dos veces un evento?
 
@@ -453,13 +393,13 @@ La arquitectura propuesta registra el evento, comprueba su referencia, evita una
 
 ### ¿Cuánto cuesta implementar y mantener la solución?
 
-En pesos chilenos mensuales, estimamos que Marley Coffee hoy gasta entre $569.000 y $854.000 CLP/mes en licencias desconectadas (VTEX Basic/Business $190.000–$475.000, Connectif $123.000, JUMP B2B $190.000 y Zoho/ERP $66.000). Proponemos dos caminos: el Camino 1 (corto plazo / piloto) conecta el stack actual vía APIs, da de baja JUMP porque el MVP absorbe todo el flujo B2B y suma Claude Code Pro ($19.000/mes) más Ollama Cloud Max ($190.000/mes), quedando en ~$589.000–$874.000 CLP/mes (+$20.000/mes neto). El Camino 2 (mediano plazo) migra a Open Source (WooCommerce + CRM propio en VPS Hostinger KVM 8 de 32 GB RAM por ~$30.000/mes) con automatizaciones predictivas en Python mediante Skills y subagentes por KPI, bajando a ~$265.000–$285.000 CLP/mes (53 % a 67 % de ahorro y menos del 1 % del presupuesto anual de $220 millones del brief).
+Tabla 2 del informe: escenario actual $520.000–$1.195.000 CLP/mes; caminoAPI $565.000–$1.110.000; código abierto $139.700–$170.500. Son estimaciones del caso, no cotizaciones ni ahorro garantizado. No se resta el rango menor de un escenario del mayor de otro para anunciar ahorro. Implementación, comisiones, soporte, accesos y continuidad operativa requieren presupuesto y validación con TI.
 
 **Fuente:** Informe EP3 actualizado, §1.3 (Tabla 2) y §1.6; Anexo E, hojas 16 y 24; referencias de mercado en CLP/mes (1 USD ≈ $950 CLP).
 
 ### ¿Qué harían primero y quién se hace responsable?
 
-Primero UX repite las tareas con las correcciones y TI confirma accesos y pruebas. Si cumple, se propone un piloto de 90 días en Oriente y Centro con ocho cuentas, como supuesto del plan. Marketing mide captación; Ventas atiende; Logística valida cumplimiento; Postventa resuelve; Finanzas controla inversión y margen. Gerencia decide continuar con evidencia. Horarios, dotación y condiciones crediticias se confirman; no se compromete crédito a 30 días por defecto.
+Tabla 2 del informe: escenario actual $520.000–$1.195.000 CLP/mes; caminoAPI $565.000–$1.110.000; código abierto $139.700–$170.500. Son estimaciones del caso, no cotizaciones ni ahorro garantizado. No se resta el rango menor de un escenario del mayor de otro para anunciar ahorro. Implementación, comisiones, soporte, accesos y continuidad operativa requieren presupuesto y validación con TI.
 
 **Fuente:** Informe EP3, §1.1, tabla 3, §1.2, §1.6 y tabla 10; Anexo E, hojas 04, 12 y 22. Ocho cuentas y 90 días son diseño propuesto del piloto, no ejecución aprobada.
 
@@ -481,76 +421,64 @@ Dos de tres compradores quisieron elegir modalidad o extras antes de recibir la 
 
 **Fuente:** Anexo E,10_HALLAZGOS H24,H25,H28;22_CAMBIOS_TEST;Informe EP3,§1.4
 
-### ¿El canal digital solo aporta el18% de la facturación?
+### ¿El canal digital solo aporta el 18% de la facturación?
 
-No hay una medición de facturación digital del18% en este informe. Ese porcentaje corresponde a reposiciones digitales; el82% se gestiona de forma manual. El63% se refiere a facturaciónB2B del caso académico. No son datos internos auditados de Marley Coffee y sus denominadores son distintos.
+No hay una medición de facturación digital del 18% en este informe. Ese porcentaje corresponde a reposiciones digitales; el 82% se gestiona de forma manual. El 63% se refiere a facturaciónB2B del caso académico. No son datos internos auditados de Marley Coffee y sus denominadores son distintos.
 
 **Fuente:** Informe EP3,resumen y §1.7;Anexo E,16_ECONOMIA_UNITARIA
 
+### ¿La IA ya eliminó el 82%del trabajo manual?
+
+No.82%es la línea base de reposiciones manuales del caso. El prototipo muestra automatizaciones locales y ayuda interna; su reducción de horas, impacto comercial y operación productiva se medirán en el piloto. La segunda ronda de usabilidad continúa pendiente.
+
+**Fuente:** Informe EP3,§1.1,§1.4 y§1.7; AnexoE, hojas 17 y 24.
+
 ## Correspondencia con la rúbrica
 
-### 1.1. Explica el alcance del MVP
+### 1.1 · Explica el alcance del MVP
 
-Láminas: 5, 8, 18, 15, 16. Distinguir sitio Empresas, CRM y Mi cuenta de las conexiones privadas, crédito, firma y cobro real que quedan fuera. Explicar por qué ese mínimo permite probar la ruta sin desarrollar toda la operación.
+Láminas: 5, 16. Distinguir sitio Empresas, CRM y Mi cuenta de las conexiones privadas, crédito, firma y cobro real que quedan fuera. Explicar por qué ese mínimo permite probar la ruta sin desarrollar toda la operación.
 
-Fuentes: Rúbrica EP4, instrucciones específicas 1.1; Informe EP3, §1.2 y tabla 4; Anexo E, hojas 17 y 24
+### 1.2 · Justifica la propuesta de valor del MVP
 
-### 1.2. Justifica la propuesta de valor del MVP
+Láminas: 1, 2, 5, 6. Vincular comprador HORECA, fricción de acceso y cotización, beneficio de claridad y continuidad de atención. Mostrar cómo se comprobará la utilidad, no limitarse a una promesa o a una interfaz atractiva.
 
-Láminas: 1, 2, 3, 8, 6, 20. Vincular comprador HORECA, fricción de acceso y cotización, beneficio de claridad y continuidad de atención. Mostrar cómo se comprobará la utilidad, no limitarse a una promesa o a una interfaz atractiva.
+### 1.3 · Defiende la viabilidad del plan de mejora
 
-Fuentes: Rúbrica EP4, instrucciones específicas 1.2; Informe EP3, §1.1, tablas 1 y 3; Anexo E, hojas 12 y 15
+Láminas: 16, 17, 20. Explicar infraestructura observada, accesos por confirmar, recursos humanos, partidas iniciales y recurrentes, riesgos y controles. Ronda 2 antes del piloto propuesto de 90 días; responsables y decisión de avanzar.
 
-### 1.3. Defiende la viabilidad del plan de mejora
+### 1.4 · Presenta la arquitectura, flujos y wireframes del prototipo
 
-Láminas: 2, 16, 17, 19. Explicar infraestructura observada, accesos por confirmar, recursos humanos, partidas iniciales y recurrentes, riesgos y controles. Ronda 2 antes del piloto propuesto de 90 días; responsables y decisión de avanzar.
+Láminas: 5, 8, 11, 18. Mostrar arquitectura de los tres espacios y recorrido principal: acceso Empresas, datos, diagnóstico, propuesta, atención y cuenta activa. El recurso audiovisual debe permitir entender navegación y efecto interno de cada acción.
 
-Fuentes: Rúbrica EP4, instrucciones específicas 1.3; Informe EP3, tablas 2–3 y tabla 10; Anexo E, hojas 12, 16 y 24
+### 1.5 · Argumenta las decisiones UX/UI del prototipo
 
-### 1.4. Presenta la arquitectura, flujos y wireframes del prototipo
+Láminas: 3, 4, 8, 11. Relacionar cada elección con una fricción: acceso visible en móvil, registro breve con beneficio, opciones sugeridas, costos separados, siguiente paso claro y cotización junto al chat. Explicar la jerarquía de la acción y la continuidad entre canales.
 
-Láminas: 5, 8, 9, 18, 11, 21. Mostrar arquitectura de los tres espacios y recorrido principal: acceso Empresas, datos, diagnóstico, propuesta, atención y cuenta activa. El recurso audiovisual debe permitir entender navegación y efecto interno de cada acción.
+### 1.6 · Evalúa los resultados de la validación temprana
 
-Fuentes: Rúbrica EP4, instrucciones específicas 1.4; Informe EP3, §1.3 y figura 2; Anexos A–D: prototipo, wireframes, mockups y diagramas
+Láminas: 4, 20. Exponer muestra y método; 1/3 de compradores autónomo, media 204,4 s y SUS 61,7/100. Identificar bloqueo de Ventas y cambios implementados. Explicar la ronda 2 y sus criterios antes del piloto.
 
-### 1.5. Argumenta las decisiones UX/UI del prototipo
+### 1.7 · Describe la propuesta de Inbound automatizado
 
-Láminas: 3, 4, 5, 8, 11. Relacionar cada elección con una fricción: acceso visible en móvil, registro breve con beneficio, opciones sugeridas, costos separados, siguiente paso claro y cotización junto al chat. Explicar la jerarquía de la acción y la continuidad entre canales.
+Láminas: 9, 10, 11, 13, 14. Conectar SEO, SEM y contenido orgánico por segmento HORECA con diagnóstico y correos útiles. Mostrar al menos un workflow con evento, condición, espera, acción y salida: W1/W2, abandono W4 o pausa W9. Relacionar reposición y referidos con el flywheel.
 
-Fuentes: Rúbrica EP4, instrucciones específicas 1.5; Informe EP3, §1.3–1.4 y tabla 7; Anexo E, hojas 10 y 22
+### 1.8 · Relaciona la estrategia de e-commerce con la operación logística
 
-### 1.6. Evalúa los resultados de la validación temprana
+Láminas: 14, 15, 16. Explicar compra asistida, arriendo o compra directa, aceptación, validación comercial, reserva, preparación, verificación, facturación, despacho por ruta y seguimiento. Aterrizar almacén por SKU, restricciones de stock, servicio y persona responsable.
 
-Láminas: 4, 5, 17, 23. Exponer muestra y método; 1/3 de compradores autónomo, media 204,4 s y SUS 61,7/100. Identificar bloqueo de Ventas y cambios implementados. Explicar la ronda 2 y sus criterios antes del piloto.
+### 1.9 · Sustenta los KPIs declarados
 
-Fuentes: Rúbrica EP4, instrucciones específicas 1.6; Informe EP3, §1.4 y tablas 5–7; Anexo E, hojas 07–11 y 22
+Láminas: 2, 4, 10, 19, 15. Para conversión, reposición y retención, explicar fórmula, fuente, responsable, horizonte y decisión. Añadir autonomía de uso, primera respuesta y entrega completa y a tiempo como controles. Separar las metas académicas a doce meses de resultados medidos en test.
 
-### 1.7. Describe la propuesta de Inbound automatizado
+## Controles y medios
 
-Láminas: 9, 10, 11, 14, 13, 22. Conectar SEO, SEM y contenido orgánico por segmento HORECA con diagnóstico y correos útiles. Mostrar al menos un workflow con evento, condición, espera, acción y salida: W1/W2, abandono W4 o pausa W9. Relacionar reposición y referidos con el flywheel.
+El título se escribe al entrar. Avanzar revela conjuntos de copys y después cambia la lámina. Los remates pequeños están visibles desde el inicio. Los videos arrancan sin sonido, conservan imagen de respaldo y se narran mientras avanzan. H:modo limpio; G:guion; D:defensa. Los seis apoyos viven dentro de Defensa, sin sumar páginas.
 
-Fuentes: Rúbrica EP4, instrucciones específicas 1.7; Informe EP3, §1.5; Blueprint Inbound; Anexo E, hojas 01, 05, 15, 18 y 21
+## Límites de la evidencia
 
-### 1.8. Relaciona la estrategia de e-commerce con la operación logística
+Datos y operaciones de demostración.60 s,respuesta en menos de 5 minutos y metas comerciales son objetivos, no mejoras verificadas después del rediseño. WhatsApp solo para postventa iniciada por cliente; contacto comercial por correo. La viabilidad productiva necesita accesos y pruebas con TI.
 
-Láminas: 6, 14, 15, 16. Explicar compra asistida, arriendo o compra directa, aceptación, validación comercial, reserva, preparación, verificación, facturación, despacho por ruta y seguimiento. Aterrizar almacén por SKU, restricciones de stock, servicio y persona responsable.
+## Precisión económica
 
-Fuentes: Rúbrica EP4, instrucciones específicas 1.8; Informe EP3, §1.6–1.7 y tablas 8–10; Anexo E, hojas 17, 19, 23 y 24
-
-### 1.9. Sustenta los KPIs declarados
-
-Láminas: 4, 10, 13, 19, 24. Para conversión, reposición y retención, explicar fórmula, fuente, responsable, horizonte y decisión. Añadir autonomía de uso, primera respuesta y entrega completa y a tiempo como controles. Separar las metas académicas a doce meses de resultados medidos en test.
-
-Fuentes: Rúbrica EP4, instrucciones específicas 1.9; Informe EP3, tabla 3 y §1.7; Anexo E, hojas 04, 12 y 16
-
-## Canales y alcance de los ejemplos
-
-Correo para contacto y seguimiento comercial autorizado. WhatsApp queda en postventa iniciada por el cliente. Confirmar una propuesta no contrata, no reserva y no cobra. Precios y metas están rotulados como académicos; la ejecutiva valida condiciones. La segunda ronda y las conexiones privadas continúan pendientes.
-
-## Procedencia de los videos
-
-Tres capturas funcionales HTTPS del 18 de octubre de 2026 comparten la sesión ficticia Camila Demostración, MC-HOR-2089 y propuesta PROP-1NJLD: recorrido del comprador (29,5 s), trazabilidad (17 s) y atención de Paula (17 s). El CRM registra el cambio de 20 a 86 puntos y tres correos generados localmente; Paula toma la conversación, la IA queda en pausa, responde en el chat local y acepta la oportunidad. No hubo envíos externos ni integración productiva. Estas capturas no sustituyen la segunda ronda con usuarios, todavía pendiente, ni miden tiempos de tarea. La toma histórica de postventa se conserva como escenario separado hasta disponer del nuevo clip AC101; no es la compra posterior de Camila. El Apoyo 1 conserva cuatro esquemas animados opcionales, claramente identificados. El PDF usa fotogramas de respaldo; el HTML incluye los ocho MP4 completos.
-
-## Controles de exposición
-
-Avanzar revela copys y después cambia de lámina. Las frases secundarias pequeñas se ven desde el inicio. En las cuatro láminas de video, el clip y sus copys se activan automáticamente al entrar; se prepara con antelación el siguiente clip. Siguiente momento del video continúa la reproducción sin pausarla. Flecha derecha o Espacio hacen lo mismo. H oculta o muestra controles. G abre el guion de la lámina; D,la defensa. P reproduce o pausa;F,pantalla completa. En celular horizontal se conservan controles compactos y navegación lateral. Movimiento reducido elimina la animación decorativa; los videos mantienen autoarranque sin sonido y pueden pausarse. Si el navegador impide el autoarranque, Reproducir permite iniciarlo.
+Los costos provienen de escenarios académicos del informe. No son cotizaciones. No confundir gasto recurrente con presupuesto total: implementación, comisiones, soporte y migración requieren evaluación. El informe no fue modificado.
