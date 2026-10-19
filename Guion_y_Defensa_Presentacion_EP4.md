@@ -2,11 +2,24 @@
 
 Nicolás Pérez y Carlos Vargas · TMA1103 ·19 de octubre de 2026
 
-20 láminas · pauta de 8 minutos · 915 palabras habladas. La duración final se comprueba ensayando; los clips se narran dentro del tiempo.
+20 láminas · pauta de 8 minutos · 936 palabras habladas. La duración final se comprueba ensayando; los clips se narran dentro del tiempo.
 
 ## Idea central
 
 Cotizar con claridad y atender con contexto: conectar la experiencia del cliente con las decisiones del equipo.
+
+## Ruta de los diez momentos
+
+1. Gancho:01.
+2. Situación y fricciones:02–03.
+3. Test y decisiones:04.
+4. Propuesta y alcance:05–06.
+5. DemostraciónB2B:07–08.
+6. CRM y atención comercial:09–11.
+7. Cumplimiento, recompra y ciclo inbound:12–15.
+8. Integración y costos:16–17.
+9. Arquitectura y beneficio de agentes:18–19.
+10. Cierre:20.
 
 ## 01. Cotizar con claridad. Atender con contexto.
 
@@ -112,12 +125,12 @@ Veamos cómo una necesidad se transforma en una propuesta.
 
 ### Para decir
 
-En móvil hacemos visible MENÚ y Empresas. La entrada deja de depender de reconocer un ícono.  
-Las máquinas orientan antes de pedir datos. Nombre, correo y celular opcional permiten guardar el avance con permiso.  
-Después, el comprador elige por capas y recibe equipo, consumo y estimación. Puede comparar arriendo y compra antes de confirmar.  
-Cada paso entrega algo útil. El objetivo es facilitar la decisión; su mejora en tiempo se medirá en la segunda ronda.
+En móvil hacemos visible MENÚ y Empresas. Las máquinas orientan antes de pedir datos.  
+Nombre, correo y celular opcional permiten guardar el avance con permiso.  
+Después, el comprador elige por capas, recibe una estimación y compara arriendo y compra antes de confirmar.  
+Cada paso entrega algo útil. Veamos ahora qué información recibe el equipo.
 
-**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
+**Señal visual:** Narrar el video original completo; del recorrido del comprador pasar al espejo CRM sin desvío explicativo.
 
 **Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
 
@@ -128,41 +141,40 @@ Cada paso entrega algo útil. El objetivo es facilitar la decisión; su mejora e
 ### Para decir
 
 La misma sesión pasa de 20 a 86 puntos y prepara tres correos locales.  
-El valor no es acumular datos: es conservar origen, permiso, necesidad y propuesta para la siguiente persona.  
-Esta grabación prueba el comportamiento del prototipo, no un envío real ni una conexión externa.
+Conservamos origen, permiso, necesidad y propuesta para que el equipo atienda con contexto.  
+La grabación demuestra el comportamiento local; el envío real y la conexión externa quedan para el piloto. Ahora veamos la atención comercial.
 
-**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
+**Señal visual:** Mostrar acción y efecto en el mismo caso Camila. Seguir directamente con la conversación comercial de otro caso, Elena.
 
 **Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
 
-## 10. Priorizar el interés. Cuidar la cuenta.
+## 10. La IA prepara. La ejecutiva responde.
 
-**Carlos · 3:42–4:06 · 24 s**
+**Carlos · 3:42–4:12 · 30 s**
 
 ### Para decir
 
-Antes de comprar, el puntaje de interacción ayuda a priorizar: perfil, permiso y al menos 40 puntos califican al contacto.  
-Ventas revisa la oportunidad y decide el SQL.  
-Después de comprar usamos otro puntaje: frecuencia, ticket, margen y variedad ayudan a cuidar la cuenta. No confundimos intención con valor financiero.
+En otro caso de demostración, Elena consulta por arriendo y compra. La ejecutiva recibe la pregunta y la propuesta.  
+La IA resume y prepara un borrador interno. Paula revisa, edita y envía; también decide si acepta la oportunidad.  
+Así la persona conserva el control con menos transcripción. Los puntajes ayudan a priorizar esa atención; no reemplazan su criterio.
 
-**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
+**Señal visual:** Video original de Elena. Consulta →borrador interno →respuesta humana →aceptación SQL. A continuación explicar el criterio de los puntajes.
+
+**Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
+
+## 11. Priorizar antes. Cuidar después.
+
+**Carlos · 4:12–4:36 · 24 s**
+
+### Para decir
+
+Antes de comprar, el puntaje de interacción orienta a quién atender: perfil HORECA, permiso y al menos 40 puntos. Ventas valida la oportunidad.  
+Cuando existe una compra, la pregunta cambia: cómo cuidar esa cuenta. El puntaje financiero considera frecuencia, ticket y margen para orientar continuidad y referidos.  
+Son decisiones distintas. Pasamos ahora de atender la oportunidad a cumplir el pedido y facilitar la siguiente compra.
+
+**Señal visual:** Primer avance: priorizar antes de comprar. Segundo: cuenta activa. Puente breve hacia cumplimiento y continuidad; criterios completos en Defensa.
 
 **Respaldo:** Informe EP3, §1.5 · Anexo E, hojas 01 y 03 · Reglas deterministas auditables
-
-## 11. La IA prepara. La ejecutiva responde.
-
-**Carlos · 4:06–4:36 · 30 s**
-
-### Para decir
-
-La ejecutiva recibe la consulta y lo que el cliente cotizó.  
-La IA resume y propone un borrador interno; no conversa en nombre de la ejecutiva.  
-Al tomar el caso, Paula conserva el control: revisa, edita y envía. También decide si acepta la oportunidad.  
-Así reducimos transcripción y evitamos respuestas sin contexto; el efecto comercial se medirá en el piloto.
-
-**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
-
-**Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
 
 ## 12. La venta abre la relación. La operación la sostiene.
 
@@ -176,50 +188,49 @@ La venta abre la relación. La operación la sostiene.
 
 **Respaldo:** 
 
-## 13. Un ciclo comercial, tres momentos conectados
+## 13. Prometer según stock. Entregar con seguimiento.
 
-**Nicolás · 4:42–5:10 · 28 s**
+**Nicolás · 4:42–5:04 · 22 s**
 
 ### Para decir
 
-Atraemos con información útil por negocio y conservamos el origen.  
-Interactuamos con datos breves, decisiones progresivas y propuesta guardada.  
-Deleitamos cuando volver a comprar o pedir ayuda exige menos esfuerzo.  
-El CRM convierte esas señales en tareas y seguimiento por correo. Las campañas y contenidos se aprueban antes de activarse.
+Después de la validación comercial, la promesa debe pasar a la operación.  
+El pedido requiere disponibilidad, reserva, preparación, facturación, despacho y seguimiento.  
+Con el ERP integrado, una cobertura crítica debe alertar antes de seguir promoviendo. La entrega completa y a tiempo es la meta que debemos medir.  
+Cumplir bien deja una cuenta lista para volver a comprar.
 
-**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
+**Señal visual:** Recorrer la cadena horizontal de izquierda a derecha. Es conexión propuesta, no integración ERP demostrada. Pasar a cuenta activa.
 
-**Respaldo:** Informe EP3, §1.5 · Blueprint Inbound y Anexo E, hojas 05, 06 y 18 · 5 Lead Magnets y 10 Workflows
+**Respaldo:** Informe EP3, §1.7 · Flujo operativo propuesto conectado a ERP · Meta de servicio: OTIF al menos 95 %
 
 ## 14. Reponer fácil. Resolver antes de vender.
 
-**Carlos · 5:10–5:36 · 26 s**
+**Carlos · 5:04–5:30 · 26 s**
 
 ### Para decir
 
-La cuenta conserva pedido, máquina e historial: reponer comienza desde lo que ya conoce.  
+Con una cuenta activa, Mi cuenta conserva pedido, máquina e historial: reponer parte de lo que el cliente ya conoce.  
 Si aparece una falla, primero se atiende el problema y se pausan las ofertas.  
-WhatsApp queda para la postventa que inicia el cliente; el seguimiento comercial usa correo.  
-No es solo vender otra vez: es cuidar la continuidad del negocio.
+Este es soporte de postventa: WhatsApp solo cuando el cliente inicia el contacto. La atención comercial sigue por correo.  
+Con esto podemos unir atracción, interacción y deleite en un mismo ciclo.
 
-**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
+**Señal visual:** Video original de cuenta activa. Recompra →incidencia →pausa de ofertas →soporte entrante. Distinguir de la conversación comercial ya presentada.
 
 **Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
 
-## 15. Prometer según stock. Entregar con seguimiento.
+## 15. Así se conecta el ciclo completo.
 
-**Nicolás · 5:36–5:58 · 22 s**
+**Nicolás · 5:30–5:58 · 28 s**
 
 ### Para decir
 
-La experiencia promete solo lo que la operación puede cumplir.  
-El pedido debe pasar por disponibilidad, reserva, preparación, facturación, despacho y seguimiento.  
-Con el ERP integrado, una cobertura crítica debe alertar al equipo antes de seguir promoviendo.  
-OTIF es la entrega completa y a tiempo;95 % es una meta del piloto, no un resultado actual.
+Ahora juntamos lo demostrado: atraer con SEO, anuncios y contenido útil por negocio; interactuar con datos breves, propuesta y atención con contexto.  
+Deleitar significa cumplir lo vendido, facilitar la recompra y resolver antes de volver a ofrecer.  
+El CRM conecta las señales con tareas y seguimiento. Este es el ciclo que proponemos integrar y medir. Veamos qué exige conectarlo y cuánto podría costar.
 
-**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
+**Señal visual:** Síntesis de tres columnas de izquierda a derecha. Referir a lo ya visto; no abrir otro chat ni presentar un módulo nuevo. Conducir a integración y costos.
 
-**Respaldo:** Informe EP3, §1.7 · Flujo operativo propuesto conectado a ERP · Meta de servicio: OTIF al menos 95 %
+**Respaldo:** Informe EP3, §1.5 · Blueprint Inbound y Anexo E, hojas 05, 06 y 18 · 5 Lead Magnets y 10 Workflows
 
 ## 16. Aprovechar lo existente. Validar la conexión.
 
@@ -450,11 +461,11 @@ Láminas: 16, 17, 20. Explicar infraestructura observada, accesos por confirmar,
 
 ### 1.4 · Presenta la arquitectura, flujos y wireframes del prototipo
 
-Láminas: 5, 8, 11, 18. Mostrar arquitectura de los tres espacios y recorrido principal: acceso Empresas, datos, diagnóstico, propuesta, atención y cuenta activa. El recurso audiovisual debe permitir entender navegación y efecto interno de cada acción.
+Láminas: 5, 8, 10, 18. Mostrar arquitectura de los tres espacios y recorrido principal: acceso Empresas, datos, diagnóstico, propuesta, atención y cuenta activa. El recurso audiovisual debe permitir entender navegación y efecto interno de cada acción.
 
 ### 1.5 · Argumenta las decisiones UX/UI del prototipo
 
-Láminas: 3, 4, 8, 11. Relacionar cada elección con una fricción: acceso visible en móvil, registro breve con beneficio, opciones sugeridas, costos separados, siguiente paso claro y cotización junto al chat. Explicar la jerarquía de la acción y la continuidad entre canales.
+Láminas: 3, 4, 8, 10. Relacionar cada elección con una fricción: acceso visible en móvil, registro breve con beneficio, opciones sugeridas, costos separados, siguiente paso claro y cotización junto al chat. Explicar la jerarquía de la acción y la continuidad entre canales.
 
 ### 1.6 · Evalúa los resultados de la validación temprana
 
@@ -462,15 +473,15 @@ Láminas: 4, 20. Exponer muestra y método; 1/3 de compradores autónomo, media 
 
 ### 1.7 · Describe la propuesta de Inbound automatizado
 
-Láminas: 9, 10, 11, 13, 14. Conectar SEO, SEM y contenido orgánico por segmento HORECA con diagnóstico y correos útiles. Mostrar al menos un workflow con evento, condición, espera, acción y salida: W1/W2, abandono W4 o pausa W9. Relacionar reposición y referidos con el flywheel.
+Láminas: 9, 10, 11, 14, 15. Conectar SEO, SEM y contenido orgánico por segmento HORECA con diagnóstico y correos útiles. Mostrar al menos un workflow con evento, condición, espera, acción y salida: W1/W2, abandono W4 o pausa W9. Relacionar reposición y referidos con el flywheel.
 
 ### 1.8 · Relaciona la estrategia de e-commerce con la operación logística
 
-Láminas: 14, 15, 16. Explicar compra asistida, arriendo o compra directa, aceptación, validación comercial, reserva, preparación, verificación, facturación, despacho por ruta y seguimiento. Aterrizar almacén por SKU, restricciones de stock, servicio y persona responsable.
+Láminas: 13, 14, 16. Explicar compra asistida, arriendo o compra directa, aceptación, validación comercial, reserva, preparación, verificación, facturación, despacho por ruta y seguimiento. Aterrizar almacén por SKU, restricciones de stock, servicio y persona responsable.
 
 ### 1.9 · Sustenta los KPIs declarados
 
-Láminas: 2, 4, 10, 19, 15. Para conversión, reposición y retención, explicar fórmula, fuente, responsable, horizonte y decisión. Añadir autonomía de uso, primera respuesta y entrega completa y a tiempo como controles. Separar las metas académicas a doce meses de resultados medidos en test.
+Láminas: 2, 4, 11, 13, 19. Para conversión, reposición y retención, explicar fórmula, fuente, responsable, horizonte y decisión. Añadir autonomía de uso, primera respuesta y entrega completa y a tiempo como controles. Separar las metas académicas a doce meses de resultados medidos en test.
 
 ## Controles y medios
 
