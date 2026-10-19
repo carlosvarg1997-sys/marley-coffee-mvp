@@ -2,7 +2,7 @@
 
 Nicolás Pérez y Carlos Vargas · TMA1103 · Duoc UC ·18-10-2026
 
-20 láminas principales · pauta de 8 minutos · 949 palabras habladas. Máximo 6 líneas por lámina principal; las dos transiciones tienen una. Los 6 apoyos se usan solo si preguntan.
+20 láminas principales · pauta de 8 minutos · 956 palabras habladas. Máximo 6 líneas por lámina principal; las dos transiciones tienen una. Los 6 apoyos se usan solo si preguntan.
 
 ## Cómo usarlo
 
@@ -82,9 +82,9 @@ La versión actual permite comparar modalidad y ajustar antes de confirmar.
 También separa consultar de confirmar, aclarando cómo termina cada camino.  
 Ventas recibe la propuesta junto al chat.  
 Son correcciones aplicadas, todavía pendientes de una segunda prueba.  
-Exigiremos al menos 80 % de autonomía por grupo y cero bloqueos críticos.
+En esa segunda ronda exigiremos que al menos el 80 % complete la tarea sin ayuda y con cero bloqueos.
 
-**Señal visual:** Revelar los cambios juntos. No decir que modalidad se elige antes de recibir propuesta: se compara en C05 antes de confirmar.
+**Señal visual:** Revelar los cambios juntos. Explicar que 80 % significa pasar de 1 de 3 usuarios que terminaron sin ayuda en Ronda 1 a al menos 80 % sin ayuda en Ronda 2.
 
 **Respaldo:** Anexo E, H24, H25 y H31 · Paráfrasis del registro del moderador; cambios pendientes de revalidación
 
@@ -114,7 +114,7 @@ Recibe máquina, café y una referencia de costo.
 Compara arriendo y compra antes de confirmar.  
 Su elección queda registrada, con un correo generado en el prototipo y sin cobro.
 
-**Señal visual:** Clip de 38 s: Empresas 0; inicio animado 2,5; catálogo de cuatro máquinas 6; registro 16; preguntas por capas 19; propuesta 26; comparación 29; confirmación y siguiente correo 34. Mismo caso Camila MC-HOR-2089 y PROP-1NJLD. Confirmar no contrata, reserva ni cobra; el correo se genera localmente.
+**Señal visual:** Clip de 29,5 s: Empresas 0; inicio animado 2; catálogo de cuatro máquinas 4,5; registro 11,5; preguntas por capas 14; propuesta 19,5; comparación 22; confirmación y siguiente correo 26,2. Mismo caso Camila MC-HOR-2089 y PROP-1NJLD.
 
 **Respaldo:** Grabación HTTPS · Camila MC-HOR-2089 · Misma sesión local · Sin envío externo
 
@@ -145,7 +145,7 @@ El CRM registra también tres correos generados localmente.
 Así vemos qué ocurrió, qué se preparó y quién debe actuar.  
 No son correos entregados ni una integración productiva.
 
-**Señal visual:** Clip de 22 s: 20 puntos al inicio; acción del mismo cliente 4; 86 puntos y razones 7; tres correos locales 14. MC-HOR-2089 y PROP-1NJLD coinciden con el comprador y Ventas. Mostrar la diferencia observada, sin convertirla en probabilidad de compra ni puntaje financiero.
+**Señal visual:** Clip de 17 s: 20 puntos al inicio; acción del mismo cliente 3; 86 puntos y razones 5,5; tres correos locales 11. MC-HOR-2089 y PROP-1NJLD coinciden con el comprador y Ventas.
 
 **Respaldo:** Grabación HTTPS · Camila MC-HOR-2089 · Misma sesión local · Sin envío externo
 
@@ -196,7 +196,7 @@ Paula responde en el chat y acepta la oportunidad comercial.
 El puntaje orienta; una persona decide.  
 Son acciones locales del prototipo, todavía sin conexión productiva.
 
-**Señal visual:** Clip de 22 s: contexto y resumen IA 0; bandeja 4; Paula toma el caso e IA pausada 7; respuesta local 12; aceptación humana de oportunidad (SQL) 18. Mantener visible el estado de pausa y el nombre de Paula. Ningún mensaje ni correo se entrega externamente.
+**Señal visual:** Clip de 17 s: contexto y resumen IA 0; bandeja 3; Paula toma el caso e IA pausada 5,5; respuesta local 9,3; aceptación humana de oportunidad (SQL) 14. Mantener visible el estado de pausa y el nombre de Paula.
 
 **Respaldo:** Grabación HTTPS · Camila MC-HOR-2089 · Misma sesión local · Sin envío externo
 
@@ -570,7 +570,7 @@ Correo para contacto y seguimiento comercial autorizado. WhatsApp queda en postv
 
 ## Procedencia de los videos
 
-Tres capturas funcionales HTTPS del 18 de octubre de 2026 comparten la sesión ficticia Camila Demostración, MC-HOR-2089 y propuesta PROP-1NJLD: recorrido del comprador (38 s), trazabilidad (22 s) y atención de Paula (22 s). El CRM registra el cambio de 20 a 86 puntos y tres correos generados localmente; Paula toma la conversación, la IA queda en pausa, responde en el chat local y acepta la oportunidad. No hubo envíos externos ni integración productiva. Estas capturas no sustituyen la segunda ronda con usuarios, todavía pendiente, ni miden tiempos de tarea. La toma histórica de postventa se conserva como escenario separado hasta disponer del nuevo clip AC101; no es la compra posterior de Camila. El Apoyo 1 conserva cuatro esquemas animados opcionales, claramente identificados. El PDF usa fotogramas de respaldo; el HTML incluye los ocho MP4 completos.
+Tres capturas funcionales HTTPS del 18 de octubre de 2026 comparten la sesión ficticia Camila Demostración, MC-HOR-2089 y propuesta PROP-1NJLD: recorrido del comprador (29,5 s), trazabilidad (17 s) y atención de Paula (17 s). El CRM registra el cambio de 20 a 86 puntos y tres correos generados localmente; Paula toma la conversación, la IA queda en pausa, responde en el chat local y acepta la oportunidad. No hubo envíos externos ni integración productiva. Estas capturas no sustituyen la segunda ronda con usuarios, todavía pendiente, ni miden tiempos de tarea. La toma histórica de postventa se conserva como escenario separado hasta disponer del nuevo clip AC101; no es la compra posterior de Camila. El Apoyo 1 conserva cuatro esquemas animados opcionales, claramente identificados. El PDF usa fotogramas de respaldo; el HTML incluye los ocho MP4 completos.
 
 ## Controles de exposición
 
