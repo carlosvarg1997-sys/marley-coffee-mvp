@@ -2,7 +2,7 @@
 
 Nicolás Pérez y Carlos Vargas · TMA1103 ·19 de octubre de 2026
 
-20 láminas · pauta de 8 minutos · 936 palabras habladas. La duración final se comprueba ensayando; los clips se narran dentro del tiempo.
+20 láminas · pauta de8min10s · 966 palabras habladas. La duración final se comprueba ensayando; los clips se narran dentro del tiempo.
 
 ## Idea central
 
@@ -121,22 +121,24 @@ Veamos cómo una necesidad se transforma en una propuesta.
 
 ## 08. El comprador construye su solución
 
-**Carlos · 2:34–3:16 · 42 s**
+**Carlos · 2:34–3:26 · 52 s**
 
 ### Para decir
 
-En móvil hacemos visible MENÚ y Empresas. Las máquinas orientan antes de pedir datos.  
-Nombre, correo y celular opcional permiten guardar el avance con permiso.  
-Después, el comprador elige por capas, recibe una estimación y compara arriendo y compra antes de confirmar.  
-Cada paso entrega algo útil. Veamos ahora qué información recibe el equipo.
+El acceso Empresas abre una experiencia pensada para el comprador profesional.  
+En comodato, el café y los insumos sostienen la relación comercial.  
+Los CTA llevan primero a Productos y luego a Máquinas y sus condiciones.  
+El cliente puede explorar sin comprometer una compra ni elegir un equipo definitivo.  
+Su selección se conserva al guardar contacto y responder el diagnóstico por capas.  
+Ventas recibe productos, cantidades y referencia; valida compatibilidad y precios por correo.
 
-**Señal visual:** Narrar el video original completo; del recorrido del comprador pasar al espejo CRM sin desvío explicativo.
+**Señal visual:** Narrar el recorrido base y la demostración gráfica de productos seguida por máquinas y condiciones antes de los datos. El ejemplo gráfico es independiente del caso grabado; no presentarlo como captura nueva ni resultado de test.
 
-**Respaldo:** Grabación del prototipo · Datos ficticios y acciones locales · No prueba conexión productiva ni mejora de tiempos
+**Respaldo:** Metraje previo + demostración gráfica identificada del catálogo · Datos de ejemplo · Sin contrato, pedido ni cobro
 
 ## 09. Cada interacción deja una señal útil
 
-**Carlos · 3:16–3:42 · 26 s**
+**Carlos · 3:26–3:52 · 26 s**
 
 ### Para decir
 
@@ -150,11 +152,11 @@ La grabación demuestra el comportamiento local; el envío real y la conexión e
 
 ## 10. La IA prepara. La ejecutiva responde.
 
-**Carlos · 3:42–4:12 · 30 s**
+**Carlos · 3:52–4:22 · 30 s**
 
 ### Para decir
 
-En otro caso de demostración, Elena consulta por arriendo y compra. La ejecutiva recibe la pregunta y la propuesta.  
+En otro caso histórico de demostración, Elena consulta las condiciones del equipo; el modelo vigente es comodato y compra mensual de insumos. La ejecutiva recibe la pregunta y la propuesta.  
 La IA resume y prepara un borrador interno. Paula revisa, edita y envía; también decide si acepta la oportunidad.  
 Así la persona conserva el control con menos transcripción. Los puntajes ayudan a priorizar esa atención; no reemplazan su criterio.
 
@@ -164,7 +166,7 @@ Así la persona conserva el control con menos transcripción. Los puntajes ayuda
 
 ## 11. Priorizar antes. Cuidar después.
 
-**Carlos · 4:12–4:36 · 24 s**
+**Carlos · 4:22–4:46 · 24 s**
 
 ### Para decir
 
@@ -178,7 +180,7 @@ Son decisiones distintas. Pasamos ahora de atender la oportunidad a cumplir el p
 
 ## 12. La venta abre la relación. La operación la sostiene.
 
-**Carlos · 4:36–4:42 · 6 s**
+**Carlos · 4:46–4:52 · 6 s**
 
 ### Para decir
 
@@ -190,7 +192,7 @@ La venta abre la relación. La operación la sostiene.
 
 ## 13. Prometer según stock. Entregar con seguimiento.
 
-**Nicolás · 4:42–5:04 · 22 s**
+**Nicolás · 4:52–5:14 · 22 s**
 
 ### Para decir
 
@@ -205,7 +207,7 @@ Cumplir bien deja una cuenta lista para volver a comprar.
 
 ## 14. Reponer fácil. Resolver antes de vender.
 
-**Carlos · 5:04–5:30 · 26 s**
+**Carlos · 5:14–5:40 · 26 s**
 
 ### Para decir
 
@@ -220,7 +222,7 @@ Con esto podemos unir atracción, interacción y deleite en un mismo ciclo.
 
 ## 15. Así se conecta el ciclo completo.
 
-**Nicolás · 5:30–5:58 · 28 s**
+**Nicolás · 5:40–6:08 · 28 s**
 
 ### Para decir
 
@@ -234,7 +236,7 @@ El CRM conecta las señales con tareas y seguimiento. Este es el ciclo que propo
 
 ## 16. Aprovechar lo existente. Validar la conexión.
 
-**Nicolás · 5:58–6:22 · 24 s**
+**Nicolás · 6:08–6:32 · 24 s**
 
 ### Para decir
 
@@ -248,7 +250,7 @@ TI debe validar accesos, permisos, stock y errores antes de conectar producción
 
 ## 17. Dos caminos de integración, un costo comparable
 
-**Nicolás · 6:22–6:52 · 30 s**
+**Nicolás · 6:32–7:02 · 30 s**
 
 ### Para decir
 
@@ -263,7 +265,7 @@ La decisión depende del piloto y de quién pueda operar y mantener cada alterna
 
 ## 18. Cada área recibe contexto y asume una decisión
 
-**Carlos · 6:52–7:16 · 24 s**
+**Carlos · 7:02–7:26 · 24 s**
 
 ### Para decir
 
@@ -278,7 +280,7 @@ La arquitectura sostiene el dato y evita que cada área empiece desde cero.
 
 ## 19. Automatizar la tarea. Conservar el criterio.
 
-**Ambos · 7:16–7:40 · 24 s**
+**Ambos · 7:26–7:50 · 24 s**
 
 ### Para decir
 
@@ -293,7 +295,7 @@ El beneficio se comprobará con tiempo operativo, respuesta, recompra y retenci�
 
 ## 20. Una experiencia clara. Un equipo conectado.
 
-**Ambos · 7:40–8:00 · 20 s**
+**Ambos · 7:50–8:10 · 20 s**
 
 ### Para decir
 
@@ -321,7 +323,7 @@ El diagnóstico encontró cortes entre cotizar, recibir atención y reponer. El 
 
 ### ¿Qué incluye el MVP y qué queda fuera?
 
-Incluye acceso Empresas desde la tienda, diagnóstico guiado, rangos estimados en arriendo o compra, portal del cliente y CRM por rol con puntaje, contexto y secuencias locales. Quedan fuera cobros reales, firma contractual, crédito aprobado y conexiones privadas productivas. Ese recorte permite probar la experiencia y especificar la integración antes de comprometer sistemas y condiciones de la empresa.
+Incluye acceso Empresas desde la tienda, diagnóstico guiado, catálogo y carrito cotizador, equipo en comodato y abastecimiento mensual por cotizar, portal del cliente y CRM por rol con puntaje, contexto y secuencias locales. Quedan fuera cobros reales, firma contractual, crédito aprobado y conexiones privadas productivas. Ese recorte permite probar la experiencia y especificar la integración antes de comprometer sistemas y condiciones de la empresa.
 
 **Fuente:** Informe EP3, tabla 4 y §1.2–1.3; Anexo E, hojas 17 y 24.
 
