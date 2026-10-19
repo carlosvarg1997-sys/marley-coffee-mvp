@@ -2,7 +2,7 @@
 
 Nicolás Pérez y Carlos Vargas · TMA1103 ·19 de octubre de 2026
 
-20 láminas · pauta de 8 minutos · 896 palabras habladas. La duración final se comprueba ensayando; los clips se narran dentro del tiempo.
+20 láminas · pauta de 8 minutos · 915 palabras habladas. La duración final se comprueba ensayando; los clips se narran dentro del tiempo.
 
 ## Idea central
 
@@ -79,19 +79,20 @@ La decisión reduce riesgo y permite aprender antes de desarrollar toda la opera
 
 **Respaldo:** Informe EP3, §1.3 (Tabla 4) y §1.4 · Cambios implementados pendientes de revalidación en Ronda 2
 
-## 06. Cuatro máquinas, cuatro necesidades
+## 06. Elegir fácil. Atender sin empezar de cero.
 
 **Nicolás · 2:02–2:28 · 26 s**
 
 ### Para decir
 
-Mostramos las cuatro máquinas con su uso, no solo una ficha genérica.  
-Así el comprador reconoce qué sirve para su negocio. Esos contenidos también permiten trabajar búsquedas por intención y giro.  
-La indexación se comprobará; no afirmamos haber ganado posiciones en Google.
+La propuesta une dos experiencias: el cliente decide y el equipo conserva ese contexto.  
+El sitio orienta con máquinas por giro, guarda el avance y construye la propuesta por capas.  
+El CRM recibe necesidad, permiso y propuesta; la IA ayuda a preparar la atención y una persona decide.  
+Esa continuidad conecta interacción y recompra. Ahora vamos a verla en el prototipo.
 
-**Señal visual:** Título al entrar; revelar uno o dos conjuntos. En videos, narrar sobre la reproducción continua.
+**Señal visual:** Primer avance: decisiones del cliente a la izquierda. Segundo: los conectores llevan ese contexto al CRM. Pasar al video para demostrarlo.
 
-**Respaldo:** Informe EP3, §1.3 y §1.5 · Máquinas oficiales · SEO propuesto, sin resultados de posicionamiento medidos
+**Respaldo:** Informe EP3, §1.3 y §1.6 · Arquitectura propuesta; conexiones privadas por validar en piloto
 
 ## 07. Elegir primero. Cotizar con contexto.
 
@@ -473,7 +474,7 @@ Láminas: 2, 4, 10, 19, 15. Para conversión, reposición y retención, explicar
 
 ## Controles y medios
 
-El título se escribe al entrar. Avanzar revela conjuntos de copys y después cambia la lámina. Los remates pequeños están visibles desde el inicio. Los videos arrancan sin sonido, conservan imagen de respaldo y se narran mientras avanzan. H:modo limpio; G:guion; D:defensa. Los seis apoyos viven dentro de Defensa, sin sumar páginas.
+El título se escribe al entrar. Avanzar conecta bloques de izquierda a derecha y después cambia la lámina. Cada columna conserva juntos su título, dato y explicación; en videos y tablas el encuadre permanece estable. Los remates pequeños están visibles desde el inicio. Los videos arrancan sin sonido, conservan imagen de respaldo y se narran mientras avanzan. H:modo limpio; G:guion; D:defensa. Los seis apoyos viven dentro de Defensa, sin sumar páginas.
 
 ## Límites de la evidencia
 
