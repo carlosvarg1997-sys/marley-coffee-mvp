@@ -2,7 +2,7 @@
 
 Nicolás Pérez y Carlos Vargas · TMA1103 · Duoc UC ·18-10-2026
 
-20 láminas principales · pauta de 8 minutos · 886 palabras habladas. Máximo 6 líneas por lámina principal; las dos transiciones tienen una. Los 6 apoyos se usan solo si preguntan.
+20 láminas principales · pauta de 8 minutos · 949 palabras habladas. Máximo 6 líneas por lámina principal; las dos transiciones tienen una. Los 6 apoyos se usan solo si preguntan.
 
 ## Cómo usarlo
 
@@ -107,16 +107,16 @@ Cada pregunta debe acercar al comprador a una decisión.
 
 ### Para decir
 
-Desde la tienda, Empresas abre un camino propio para el comprador profesional.  
-El inicio B2B explica la propuesta y organiza la solución según su negocio.  
-El registro permite retomar el avance con permiso.  
-Las preguntas por capas orientan máquina, consumo y zona de atención.  
-La propuesta permite comparar arriendo y compra antes de confirmar.  
-El cierre vigente conserva elección y siguiente paso, sin contratar ni cobrar.
+Desde la tienda, Empresas abre un camino propio para negocios.  
+El inicio animado explica la propuesta y muestra cuatro máquinas según la operación.  
+Camila guarda su avance con permiso; después responde preguntas breves.  
+Recibe máquina, café y una referencia de costo.  
+Compara arriendo y compra antes de confirmar.  
+Su elección queda registrada, con un correo generado en el prototipo y sin cobro.
 
-**Señal visual:** Señalar Empresas, título animado B2B, caso Hotel, registro y preguntas en la grabación. El catálogo completo de cuatro máquinas y las animaciones actuales requieren otra toma: no están filmados aquí. El cierre grabado precede a los últimos ajustes.
+**Señal visual:** Clip de 38 s: Empresas 0; inicio animado 2,5; catálogo de cuatro máquinas 6; registro 16; preguntas por capas 19; propuesta 26; comparación 29; confirmación y siguiente correo 34. Mismo caso Camila MC-HOR-2089 y PROP-1NJLD. Confirmar no contrata, reserva ni cobra; el correo se genera localmente.
 
-**Respaldo:** Grabación previa del prototipo · Datos de demostración · Casos separados · Sin conexión externa
+**Respaldo:** Grabación HTTPS · Camila MC-HOR-2089 · Misma sesión local · Sin envío externo
 
 ## 08. Dos modalidades. Pagos distintos.
 
@@ -138,16 +138,16 @@ Los rangos son académicos, más IVA; Ventas confirma condiciones antes de contr
 
 ### Para decir
 
-Esta ficha grabada muestra qué recibe el equipo internamente.  
-Contacto, propuesta y responsable quedan disponibles para atender.  
-El puntaje de interacción aparece con sus razones: 93 sobre cien.  
-Es un acumulado de demostración; aquí no vemos crecer el puntaje.  
-La propuesta conecta cada acción útil con un evento registrado una sola vez.  
-El correo diseñado muestra cómo conservar ese contexto en el seguimiento.
+Seguimos con Camila, el mismo contacto del recorrido.  
+Su puntaje pasa de veinte a ochenta y seis; las razones quedan visibles.  
+Las acciones se convierten en contexto para priorizar la atención.  
+El CRM registra también tres correos generados localmente.  
+Así vemos qué ocurrió, qué se preparó y quién debe actuar.  
+No son correos entregados ni una integración productiva.
 
-**Señal visual:** Narrar sobre la ficha y el detalle de puntaje. Es otro caso de demostración: no afirmar continuidad del folio móvil, incremento filmado ni envío externo.
+**Señal visual:** Clip de 22 s: 20 puntos al inicio; acción del mismo cliente 4; 86 puntos y razones 7; tres correos locales 14. MC-HOR-2089 y PROP-1NJLD coinciden con el comprador y Ventas. Mostrar la diferencia observada, sin convertirla en probabilidad de compra ni puntaje financiero.
 
-**Respaldo:** Grabación previa del prototipo · Datos de demostración · Casos separados · Sin conexión externa
+**Respaldo:** Grabación HTTPS · Camila MC-HOR-2089 · Misma sesión local · Sin envío externo
 
 ## 10. Dos puntajes. Dos decisiones.
 
@@ -189,16 +189,16 @@ Cada persona conserva la decisión que le corresponde.
 
 ### Para decir
 
-La ejecutiva debe comenzar donde el comprador quedó.  
-Aquí reúne lo cotizado, las dudas y el diagnóstico.  
-La IA resume; la persona toma el caso y revisa condiciones.  
-Al intervenir, debe detener respuestas y secuencias que dupliquen el contacto.  
-El seguimiento comercial continúa por correo, con su número de referencia.  
-El ejemplo explica esa operación; la entrega externa sigue pendiente de integración.
+Paula encuentra la necesidad y lo cotizado junto a la conversación.  
+La IA prepara un resumen; la ejecutiva toma el caso.  
+La pausa de la IA queda visible para evitar respuestas duplicadas.  
+Paula responde en el chat y acepta la oportunidad comercial.  
+El puntaje orienta; una persona decide.  
+Son acciones locales del prototipo, todavía sin conexión productiva.
 
-**Señal visual:** Señalar contacto, resumen del agente y controles de bandeja. La captura no muestra tomar conversación, respuesta humana enviada ni correo entregado. Esas acciones requieren una nueva toma funcional; no atribuirlas al clip.
+**Señal visual:** Clip de 22 s: contexto y resumen IA 0; bandeja 4; Paula toma el caso e IA pausada 7; respuesta local 12; aceptación humana de oportunidad (SQL) 18. Mantener visible el estado de pausa y el nombre de Paula. Ningún mensaje ni correo se entrega externamente.
 
-**Respaldo:** Grabación previa del prototipo · Datos de demostración · Casos separados · Sin conexión externa
+**Respaldo:** Grabación HTTPS · Camila MC-HOR-2089 · Misma sesión local · Sin envío externo
 
 ## 13. La venta termina.
 La relación comienza.
@@ -279,21 +279,22 @@ La viabilidad se completa verificando cada intercambio autorizado.
 
 **Respaldo:** Informe EP3, §1.3 y tabla de integración · Anexo E, 24_CONEXIONES · Auditoría técnica pública
 
-## 18. Invertir por etapas
+## 18. Invertir por etapas: dos caminos
 
 **Nicolás · 7:00–7:22 · 22 s**
 
 ### Para decir
 
-Proponemos invertir por etapas, con costos y responsables acordados.  
-Inicio: integración, contenidos, pruebas y capacitación.  
-Operación: infraestructura, licencias, IA, correo y supervisión.  
-Tras revalidar, planteamos un piloto de 90 días y ocho cuentas.  
-Aún falta cotizarlo y confirmar accesos y capacidad.
+Estimamos que Marley hoy gasta entre quinientos sesenta y nueve mil y ochocientos cincuenta y cuatro mil pesos al mes en software desconectado.  
+El Camino uno conecta las APIs actuales, da de baja JUMP e integra Claude Code y Ollama Max por solo veinte mil pesos adicionales.  
+El Camino dos migra a WooCommerce y CRM propio en VPS con automatización en Python y Skills de IA.  
+Eso baja la operación a unos doscientos setenta y cinco mil pesos mensuales: un ahorro de hasta sesenta y siete por ciento.  
+Ambos caminos representan entre el uno y el cuatro coma ocho por ciento del presupuesto mensual del brief.  
+Primero revalidamos; luego probamos noventa días con ocho cuentas antes de escalar.
 
-**Señal visual:** Separar inversión inicial de operación recurrente. El piloto es propuesta, no ejecución aprobada.
+**Señal visual:** Comparar Camino 1 (APIs + baja de JUMP, corto plazo) y Camino 2 (Open Source + Python, mediano plazo). Destacar el peso < 1 % a 4,8 % sobre el presupuesto del brief.
 
-**Respaldo:** Informe EP3, plan de mejora · Anexo E, hojas 12, 16 y 24 · No existe presupuesto aprobado
+**Respaldo:** Informe EP3, §1.3 (Tabla 2) y §1.6 · Referencias de mercado en CLP/mes · Presupuesto brief: $220 M CLP/año
 
 ## 19. Medir antes de decidir la escala
 
@@ -425,21 +426,21 @@ Con 250 tazas diarias y 26 días, la calculadora supone 6.500 tazas y 59,09 kg a
 
 ### ¿Qué significa el puntaje y quién decide si hay oportunidad?
 
-El puntaje de interacción va de0a100, reúne señales de interés y ajuste al negocio, suma cada evento una sola vez y no usa gasto ni margen. Marketing califica con correo autorizado, perfilHORECA y al menos40puntos. Una persona deVentas acepta la oportunidad;80puntos no crean por sí solos unSQL. El puntaje financiero también va de0a100, pero usa ticket30%,frecuencia25%,margen20%,categorías10%y zona15%. Se aplica a cuentas con compras y no se suma al de interacción. W7 usa frecuencia habitual para preparar reposición; W8 exige financiero≥70,frecuencia,satisfacción y ausencia deincidencia, con beneficio aprobado.
+El puntaje de interacción va de 0 a 100, reúne señales de interés y ajuste al negocio, suma cada evento una sola vez y no usa gasto ni margen. La captura funcional del 18 de octubre muestra a Camila, MC-HOR-2089, pasar de 20 a 86 con sus razones. Marketing califica con correo autorizado, perfil HORECA y al menos 40 puntos; una persona de Ventas acepta la oportunidad. En la misma sesión Paula realiza esa aceptación: 86 puntos no crean por sí solos una oportunidad aceptada. El puntaje financiero también va de 0 a 100, pero usa ticket 30 %, frecuencia 25 %, margen 20 %, categorías 10 % y zona 15 %. Se aplica a cuentas con compras y no se suma al de interacción. W7 usa frecuencia habitual para preparar reposición; W8 exige financiero de al menos 70, frecuencia, satisfacción y ausencia de incidencia, con beneficio aprobado. La grabación demuestra estados locales, no un modelo predictivo ni una integración productiva.
 
-**Fuente:** Informe EP3, §1.3 y §1.5; Anexo E, hojas 01–03 y 12. Reglas de demostración, no modelo predictivo validado.
+**Fuente:** Informe EP3, §1.3 y §1.5; Anexo E, hojas 01–03 y 12. Captura funcional HTTPS del 18-10-2026, MC-HOR-2089 y PROP-1NJLD; no sustituye la segunda ronda con usuarios.
 
 ### ¿Qué hace la IA y qué sigue decidiendo una persona?
 
-Los agentes preparan cálculos, resumen la necesidad, sugieren propuestas y ordenan tareas. Ventas confirma precio y oportunidad; Finanzas, crédito; Logística, disponibilidad y despacho. La toma humana debe pausar la respuesta autónoma y las secuencias que puedan duplicar el contacto. El prototipo demuestra estados locales; no acredita un asistente conectado que ya opere decisiones financieras o contractuales de Marley Coffee.
+Los agentes preparan cálculos, resumen la necesidad, sugieren propuestas y ordenan tareas. En la captura funcional del mismo caso Camila, Paula toma la conversación, la IA queda en pausa, responde en el chat local y acepta la oportunidad comercial. Ventas confirma precio y oportunidad; Finanzas, crédito; Logística, disponibilidad y despacho. El video acredita esas acciones en el prototipo; no acredita mensajes entregados ni un asistente conectado a producción. Las condiciones, integraciones y controles operativos deben probarse en el piloto.
 
-**Fuente:** Informe EP3, §1.7; Anexo E, hojas 20, 23 y 24. Pruebas de aceptación del traspaso y de operación privada pendientes del piloto.
+**Fuente:** Informe EP3, §1.7; Anexo E, hojas 20, 23 y 24. Captura funcional HTTPS del 18-10-2026, MC-HOR-2089 y PROP-1NJLD; pruebas productivas y segunda ronda con usuarios pendientes.
 
 ### ¿Cuándo se envían los correos y cómo evitan molestar?
 
-W1 confirma el seguimiento al registrar datos con permiso; W2 entrega el resumen estimado al completar el diagnóstico; W4 recupera abandono a 24 horas y W5 sigue una propuesta comercial sin respuesta a 72 horas. Una respuesta humana, aceptación o baja debe detener lo que corresponda. Las piezas mostradas son ejemplos diseñados, no correos ya enviados ni contratos formales. Se probarán remitente, finalidad, entregabilidad y duplicados antes de operar.
+W1 confirma el seguimiento al registrar datos con permiso; W2 entrega el resumen estimado al completar el diagnóstico; W4 recupera abandono a 24 horas y W5 sigue una propuesta sin respuesta a 72 horas. Una respuesta humana, aceptación o baja debe detener la secuencia correspondiente. La grabación del mismo caso Camila muestra tres correos generados localmente: eso no demuestra que se enviaran o entregaran. El respaldo visual de correo es ilustrativo. Remitente, finalidad, entregabilidad y duplicados requieren pruebas antes de operar con destinatarios reales.
 
-**Fuente:** Informe EP3, §1.3 y §1.5; Anexo E, hojas 05, 23 y 24. W4 requiere revisar la compuerta: ausencia de atención humana activa, no mera ausencia de ejecutiva asignada.
+**Fuente:** Informe EP3, §1.3 y §1.5; Anexo E, hojas 05, 23 y 24. Captura HTTPS del 18-10-2026: tres registros locales del caso MC-HOR-2089, sin envío externo. W4 exige ausencia de atención humana activa.
 
 ### ¿Cómo funcionaría WhatsApp en postventa?
 
@@ -473,9 +474,9 @@ La arquitectura propuesta registra el evento, comprueba su referencia, evita una
 
 ### ¿Cuánto cuesta implementar y mantener la solución?
 
-No hay presupuesto aprobado ni costo total verificado. Se cotizan configuración, integración, diseño final, medición, pruebas y capacitación; la operación suma infraestructura, licencias que falten, mensajería, uso de IA, soporte, pauta y capacidad humana. Reutilizar plataformas puede evitar reemplazarlas, pero no demuestra licencias adicionales a cero. Finanzas y TI deben confirmar partidas y alcance antes de comprometer el piloto.
+En pesos chilenos mensuales, estimamos que Marley Coffee hoy gasta entre $569.000 y $854.000 CLP/mes en licencias desconectadas (VTEX Basic/Business $190.000–$475.000, Connectif $123.000, JUMP B2B $190.000 y Zoho/ERP $66.000). Proponemos dos caminos: el Camino 1 (corto plazo / piloto) conecta el stack actual vía APIs, da de baja JUMP porque el MVP absorbe todo el flujo B2B y suma Claude Code Pro ($19.000/mes) más Ollama Cloud Max ($190.000/mes), quedando en ~$589.000–$874.000 CLP/mes (+$20.000/mes neto). El Camino 2 (mediano plazo) migra a Open Source (WooCommerce + CRM propio en VPS Hostinger KVM 8 de 32 GB RAM por ~$30.000/mes) con automatizaciones predictivas en Python mediante Skills y subagentes por KPI, bajando a ~$265.000–$285.000 CLP/mes (53 % a 67 % de ahorro y menos del 1 % del presupuesto anual de $220 millones del brief).
 
-**Fuente:** Informe EP3, §1.1, §1.6–1.7; Anexo E, hojas 16 y 24. No existe cotización aprobada; la presencia de un recurso público no acredita plan o precio contratado.
+**Fuente:** Informe EP3 actualizado, §1.3 (Tabla 2) y §1.6; Anexo E, hojas 16 y 24; referencias de mercado en CLP/mes (1 USD ≈ $950 CLP).
 
 ### ¿Qué harían primero y quién se hace responsable?
 
@@ -569,7 +570,7 @@ Correo para contacto y seguimiento comercial autorizado. WhatsApp queda en postv
 
 ## Procedencia de los videos
 
-Las cuatro láminas audiovisuales principales contienen grabaciones recuperadas del prototipo: B2B móvil, trazabilidad, Ventas y Mi cuenta. Son versiones previas y escenarios separados con datos ficticios, no una sesión continua ni una conexión productiva. El Apoyo 1 conserva cuatro esquemas animados opcionales, claramente identificados. El PDF usa fotogramas de respaldo; el HTML incluye los ocho MP4 completos.
+Tres capturas funcionales HTTPS del 18 de octubre de 2026 comparten la sesión ficticia Camila Demostración, MC-HOR-2089 y propuesta PROP-1NJLD: recorrido del comprador (38 s), trazabilidad (22 s) y atención de Paula (22 s). El CRM registra el cambio de 20 a 86 puntos y tres correos generados localmente; Paula toma la conversación, la IA queda en pausa, responde en el chat local y acepta la oportunidad. No hubo envíos externos ni integración productiva. Estas capturas no sustituyen la segunda ronda con usuarios, todavía pendiente, ni miden tiempos de tarea. La toma histórica de postventa se conserva como escenario separado hasta disponer del nuevo clip AC101; no es la compra posterior de Camila. El Apoyo 1 conserva cuatro esquemas animados opcionales, claramente identificados. El PDF usa fotogramas de respaldo; el HTML incluye los ocho MP4 completos.
 
 ## Controles de exposición
 
