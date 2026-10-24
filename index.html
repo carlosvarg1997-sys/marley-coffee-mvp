@@ -2849,7 +2849,172 @@ body[data-artifact=wireframes] .m8-sales-advice,body[data-artifact=wireframes] .
 .m9-selection-bar{display:flex;justify-content:space-between;align-items:center;gap:18px;border:1px solid #aaa;border-left:4px solid #276943;background:#fff;color:#171717;padding:16px 20px;margin:18px 0 26px;font-size:15px;line-height:1.5}.m9-header-cart{border-color:#cba600!important}.m9-header-cart .m9-count{background:#efc600;color:#111}.m9-basket{scroll-margin-top:100px}body.wireframe .m9-selection-bar,body.wireframe .m9-header-cart{border-color:#555!important}body.wireframe .m9-header-cart .m9-count{background:#ddd!important;color:#111!important}@media(max-width:1200px){.m9-header-cart>span{display:none!important}}@media(max-width:640px){.m9-selection-bar{display:block;padding:16px}.m9-selection-bar .m5-link{margin-top:10px}}
 </style><style id="marley-recorrido-productos-maquinas">.m10-progress{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 36px;font-size:15px}.m10-progress span{padding:12px 16px;border:1px solid #aaa;border-radius:4px;color:#444}.m10-progress [aria-current]{background:#171717;color:#fff;border-color:#171717;box-shadow:inset 0 -3px #e5bc00}.m10-machines{padding-top:48px;padding-bottom:64px}.m10-machines h1{font-size:clamp(38px,4.8vw,64px);line-height:1.08;margin:0 0 24px;max-width:850px}.m10-machine-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}.m10-machine{display:grid;grid-template-columns:minmax(100px,38%) minmax(0,1fr);align-items:center;gap:24px;padding:28px;border:1px solid #aaa;border-radius:8px;background:#fff;color:#171717}.m10-machine.is-selected{border:2px solid #286b3d}.m10-machine img,.m10-machine-photo{width:100%;height:230px;object-fit:contain}.m10-machine h2{font-size:32px;margin:8px 0 14px}.m10-machine p{font-size:16px;line-height:1.55;margin:12px 0}.m10-machine button{white-space:normal;min-height:48px;line-height:1.3;margin-top:8px}.m10-conditions{margin:40px 0;padding:28px;border:1px solid #aaa;border-top:4px solid #e5bc00;border-radius:8px;background:#fff;color:#171717}.m10-conditions h2{font-size:30px;margin:0 0 24px}.m10-condition-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}.m10-condition-grid b{font-size:20px}.m10-condition-grid p{font-size:16px;line-height:1.6;margin:12px 0 0}.m10-next{display:flex;align-items:center;gap:24px;flex-wrap:wrap}.m10-next p{font-size:14px;line-height:1.5;margin:10px 0}.m9-photo-caption{display:block;font-size:12px;line-height:1.45;color:#555;margin-top:10px;padding:0 2px}.m9-product-photo figure{margin:0}.m9-photo-caption--generated{border-left:3px solid #ae8500;padding-left:9px}.m10-next .m5-btn{min-height:50px}.m10-machines button:focus-visible{outline:3px solid #9d6c00;outline-offset:3px}body.wireframe .m10-progress [aria-current]{box-shadow:none;background:#333}body.wireframe .m10-conditions,body.wireframe .m10-machine.is-selected{border-color:#555}@media(max-width:950px){.m10-machine-grid{grid-template-columns:1fr}.m10-condition-grid{grid-template-columns:1fr;gap:24px}}@media(max-width:600px){.m10-machines{padding-top:28px}.m10-progress{gap:8px;margin-bottom:28px}.m10-progress span{font-size:13px;padding:10px}.m10-machine{padding:22px;grid-template-columns:1fr;gap:18px}.m10-machine img{height:235px}.m10-conditions{padding:22px}.m10-next{display:grid;gap:18px}.m10-next .m5-btn{width:100%}.m10-machine h2{font-size:30px}}
 .m9-home-grid figure,.m9-product-photo figure{margin:0;width:100%}
-</style></head><body><div id="app" class="app"></div><script>window.MARLEY_ARTIFACT_MODE="prototype";window.MARLEY_STATIC=false;window.M5_RES="recursos/";window.M4_TEST=(function(){var t=new URLSearchParams(location.search).get('test');return t==='sitio'||t==='crm'?t:'';})();if(window.M4_TEST){window.M4_TIMING={exec_join:9000,bot_wait:[2500,5000,7200],proposal_after_join:12000,call_auto:15000,call_done:8000,mail_auto:15000,proposal_after:8000};(function(){var q=new URLSearchParams(location.search),s=q.get('sala');if(s&&/^https?:$/.test(location.protocol)){window.M4_SYNC={url:'/api/estado/'+encodeURIComponent(s)};}})();}window.MARLEY_EXTRA_ASSETS={};</script><script>
+</style><style id="m4-demo-shell-style">#m4-demo-dock{position:relative;top:auto;z-index:10000;width:100%;font-family:Arial,sans-serif;pointer-events:auto}
+#m4-demo-dock *{box-sizing:border-box}
+#m4-demo-dock .m4-demo-desktop{display:flex;align-items:center;gap:8px;min-height:52px;padding:4px 8px;background:#171717;color:#f5f5f5}
+#m4-demo-dock .m4-demo-desktop-host{flex:1 1 auto;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;touch-action:pan-x}
+#m4-demo-dock .m4-demo-action{min-height:36px;padding:7px 12px;border:1px solid #777;border-radius:999px;background:#292929;color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+#m4-demo-dock .m4-demo-action:hover{background:#3a3a3a}
+#m4-demo-dock .m4-demo-hide{flex:0 0 auto}
+#m4-demo-dock .m4-strip{position:relative!important;top:auto!important;z-index:auto!important;display:flex!important;flex-flow:row nowrap!important;align-items:center!important;gap:6px!important;width:100%;max-width:100%;margin:0!important;padding:2px 0!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin;white-space:nowrap}
+#m4-demo-dock .m4-strip>*{flex:0 0 auto!important;max-width:none}
+#m4-demo-dock .m4-strip .m4-strip-mode{display:none!important}
+#m4-demo-dock .m4-strip .m4-strip-mode small{display:none!important}
+#m4-demo-dock .m4-strip .m4-strip-go select{max-width:135px!important;font-size:11px!important}
+#m4-demo-dock .m4-strip .m4-strip-btn{min-height:32px;padding:4px 8px!important;font-size:11px!important}
+#m4-demo-dock .m4-strip .m4-strip-check{gap:4px;font-size:11px}
+#m4-demo-dock .m4-demo-launcher,#m4-demo-dock .m4-demo-sheet,#m4-demo-dock .m4-demo-scrim{display:none}
+#m4-demo-dock.m4-demo-hidden .m4-demo-desktop{display:none}
+#m4-demo-dock.m4-demo-hidden .m4-demo-launcher{display:inline-flex}
+#m4-demo-dock .m4-demo-launcher{align-items:center;justify-content:center;min-height:42px;padding:0 16px;border:1px solid #f7be00;border-radius:999px;background:#171717;color:#f7be00;box-shadow:0 5px 18px #0003;font-size:14px;font-weight:800;cursor:pointer}
+@media(max-width:767px){
+  #m4-demo-dock{position:fixed;left:0;right:0;bottom:0;top:auto;height:0;z-index:10000;overflow:visible;pointer-events:none}
+  #m4-demo-dock .m4-demo-desktop{display:none!important}
+  #m4-demo-dock .m4-demo-launcher{display:inline-flex;position:absolute;left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));z-index:3;pointer-events:auto;min-height:42px;padding:0 17px}
+  #m4-demo-dock.m4-demo-open .m4-demo-launcher{display:none!important}
+  #m4-demo-dock.m4-demo-hidden .m4-demo-launcher{min-height:38px;padding:0 14px;font-size:13px}
+  #m4-demo-dock .m4-demo-scrim:not([hidden]){display:block;position:fixed;inset:0;z-index:1;background:rgb(0 0 0 / .48);pointer-events:auto}
+  #m4-demo-dock .m4-demo-sheet:not([hidden]){display:flex;position:fixed;left:0;right:0;bottom:0;z-index:2;flex-direction:column;gap:12px;max-height:min(85dvh,760px);padding:14px 14px max(14px,env(safe-area-inset-bottom));overflow:auto;border-radius:20px 20px 0 0;background:#171717;color:#f5f5f5;box-shadow:0 -8px 32px #0004;pointer-events:auto;overscroll-behavior:contain}
+  #m4-demo-dock .m4-demo-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:38px}
+  #m4-demo-dock .m4-demo-sheet-head strong{font-size:15px}
+  #m4-demo-dock .m4-demo-close{background:#f7be00;color:#171717;border-color:#f7be00}
+  #m4-demo-dock .m4-demo-sheet-host{min-width:0}
+  #m4-demo-dock .m4-strip{flex-flow:column nowrap!important;align-items:stretch!important;gap:8px!important;width:100%;padding:0!important;overflow:visible!important;white-space:normal}
+  #m4-demo-dock .m4-strip>*{width:100%!important;max-width:100%!important;min-height:42px}
+  #m4-demo-dock .m4-strip .m4-strip-mode{display:block;width:100%!important;max-width:100%;white-space:normal;font-size:13px}
+  #m4-demo-dock .m4-strip .m4-strip-mode small{display:none!important}
+  #m4-demo-dock .m4-strip .m4-strip-go{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  #m4-demo-dock .m4-strip .m4-strip-go select{flex:1 1 auto;width:auto!important;max-width:none!important;min-width:0}
+  #m4-demo-dock .m4-strip .m4-strip-check{display:flex;align-items:center;justify-content:flex-start;min-height:42px}
+  #m4-demo-dock .m4-strip .m4-strip-check input{width:20px;height:20px;flex:0 0 auto}
+}
+</style>
+<script id="m4-demo-shell-script">(() => {
+  if (window !== window.top) return;
+  function startDemoShell() {
+
+  const KEY = 'marley-demo-controls-hidden-v1';
+  const mobileQuery = window.matchMedia('(max-width: 767px)');
+  let controlsHidden = false;
+  let open = false;
+  let toolbar = null;
+  let focusBeforeOpen = null;
+
+  try { controlsHidden = window.localStorage.getItem(KEY) === '1'; } catch (_) { /* storage may be disabled */ }
+
+  const root = document.createElement('div');
+  root.id = 'm4-demo-dock';
+  root.innerHTML = `
+    <div class="m4-demo-desktop" data-demo-desktop>
+      <div class="m4-demo-desktop-host" data-demo-desktop-host></div>
+      <button class="m4-demo-action m4-demo-hide" type="button" data-demo-hide>Ocultar controles</button>
+    </div>
+    <button class="m4-demo-launcher" type="button" data-demo-open aria-label="Abrir controles de demostración" aria-expanded="false" aria-controls="m4-demo-sheet">Demo</button>
+    <div class="m4-demo-scrim" data-demo-scrim hidden></div>
+    <section class="m4-demo-sheet" id="m4-demo-sheet" role="dialog" aria-modal="true" aria-label="Controles de demostración" hidden>
+      <header class="m4-demo-sheet-head">
+        <strong>Controles de demostración</strong>
+        <button class="m4-demo-action" type="button" data-demo-hide>Ocultar controles</button>
+        <button class="m4-demo-action m4-demo-close" type="button" data-demo-close>Cerrar</button>
+      </header>
+      <div class="m4-demo-sheet-host" data-demo-sheet-host></div>
+    </section>`;
+
+  const desktopHost = root.querySelector('[data-demo-desktop-host]');
+  const sheetHost = root.querySelector('[data-demo-sheet-host]');
+  const sheet = root.querySelector('[data-demo-sheet]') || root.querySelector('#m4-demo-sheet');
+  const scrim = root.querySelector('[data-demo-scrim]');
+  const launcher = root.querySelector('[data-demo-open]');
+
+  function isMobile() { return mobileQuery.matches; }
+  function setHidden(value) {
+    controlsHidden = Boolean(value);
+    root.classList.toggle('m4-demo-hidden', controlsHidden);
+    try { window.localStorage.setItem(KEY, controlsHidden ? '1' : '0'); } catch (_) { /* private mode or storage disabled */ }
+    if (controlsHidden) closeSheet();
+  }
+  function interactiveItems() {
+    return [...sheet.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+      .filter(el => el.getClientRects().length);
+  }
+  function openSheet() {
+    if (controlsHidden) setHidden(false);
+    open = true;
+    focusBeforeOpen = document.activeElement;
+    sheet.hidden = false;
+    scrim.hidden = false;
+    root.classList.add('m4-demo-open');
+    launcher.setAttribute('aria-expanded', 'true');
+    const first = interactiveItems()[0];
+    (first || root.querySelector('[data-demo-close]')).focus({ preventScroll: true });
+  }
+  function closeSheet() {
+    if (!open) return;
+    open = false;
+    sheet.hidden = true;
+    scrim.hidden = true;
+    root.classList.remove('m4-demo-open');
+    launcher.setAttribute('aria-expanded', 'false');
+    if (focusBeforeOpen && focusBeforeOpen.isConnected) focusBeforeOpen.focus({ preventScroll: true });
+    else launcher.focus({ preventScroll: true });
+  }
+  function placeToolbar() {
+    const all = [...document.querySelectorAll('.m4-strip')];
+    const next = all.find(el => !root.contains(el)) || (toolbar && toolbar.isConnected ? toolbar : all.find(el => root.contains(el)));
+    if (!next) return;
+    if (toolbar && toolbar !== next && toolbar.isConnected) toolbar.remove();
+    toolbar = next;
+    const host = isMobile() ? sheetHost : desktopHost;
+    if (toolbar.parentElement !== host) host.appendChild(toolbar);
+    root.classList.toggle('m4-demo-mobile', isMobile());
+    if (!isMobile() && open) closeSheet();
+    if (isMobile() && open) {
+      sheet.hidden = false;
+      scrim.hidden = false;
+    }
+  }
+
+  root.addEventListener('click', event => {
+    if (event.target.closest('[data-demo-hide]')) setHidden(true);
+    else if (event.target.closest('[data-demo-close]')) closeSheet();
+    else if (event.target.closest('[data-demo-open]')) {
+      if (controlsHidden) setHidden(false);
+      if (isMobile()) openSheet();
+    }
+  });
+  scrim.addEventListener('click', event => { if (event.target === scrim) closeSheet(); });
+  document.addEventListener('keydown', event => {
+    if (!open || !isMobile()) return;
+    if (event.key === 'Escape') { event.preventDefault(); closeSheet(); return; }
+    if (event.key !== 'Tab') return;
+    const items = interactiveItems();
+    if (!items.length) { event.preventDefault(); return; }
+    const first = items[0], last = items[items.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !sheet.contains(document.activeElement))) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !sheet.contains(document.activeElement))) {
+      event.preventDefault(); first.focus();
+    }
+  }, true);
+
+  root.classList.toggle('m4-demo-hidden', controlsHidden);
+  root.classList.toggle('m4-demo-mobile', isMobile());
+  document.body.insertBefore(root, document.body.firstChild);
+  const observer = new MutationObserver(placeToolbar);
+  observer.observe(document.body, { childList: true, subtree: true });
+  placeToolbar();
+  if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', placeToolbar);
+  else mobileQuery.addListener(placeToolbar);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startDemoShell, { once: true });
+  } else {
+    startDemoShell();
+  }
+})();
+</script>
+</head><body><div id="app" class="app"></div><script>window.MARLEY_ARTIFACT_MODE="prototype";window.MARLEY_STATIC=false;window.M5_RES="recursos/";window.M4_TEST=(function(){var t=new URLSearchParams(location.search).get('test');return t==='sitio'||t==='crm'?t:'';})();if(window.M4_TEST){window.M4_TIMING={exec_join:9000,bot_wait:[2500,5000,7200],proposal_after_join:12000,call_auto:15000,call_done:8000,mail_auto:15000,proposal_after:8000};(function(){var q=new URLSearchParams(location.search),s=q.get('sala');if(s&&/^https?:$/.test(location.protocol)){window.M4_SYNC={url:'/api/estado/'+encodeURIComponent(s)};}})();}window.MARLEY_EXTRA_ASSETS={};</script><script>
 /* Marley Coffee Empresas · v4 · datos de demostración.
    Zonas, comunas, ejecutivas (nombres ficticios), productos oficiales (sin precios) y cuentas ficticias con compras.
    Todos los montos son ficticios y se rotulan así en pantalla. */
@@ -6035,12 +6200,12 @@ window.MarleyApp = (() => {
   }
   // La barra del artefacto vive también sobre el inicio del legado (C01), donde handles() es falso: sus botones
   // y sus paneles tienen que responder igual ahí. El legado no usa data-a, así que nada suyo se cuela por esta puerta.
-  const mine = (e) => handles() || Boolean(e.target.closest && e.target.closest('#app > .m4-strip,#m4-notes,#m4-mail,#m4-toasts,#m7-omni-bar,#m7-omni-drawer'));
+  const mine = (e) => handles() || Boolean(e.target.closest && e.target.closest('#app > .m4-strip,#m4-demo-dock .m4-strip,#m4-notes,#m4-mail,#m4-toasts,#m7-omni-bar,#m7-omni-drawer'));
   document.addEventListener('click', (e) => {
     if (!mine(e)) return;
     // Un toque fuera del panel de avisos lo cierra (y si tocó otra acción, esa acción igual se hace).
     if (R.ui.bell && !(e.target.closest && e.target.closest('.m5-bellwrap'))) { R.ui.bell = false; schedule(); }
-    const el = e.target.closest('[data-a],[data-go]'); if (!el || !app().contains(el) && !el.closest('#m4-mail,#m4-toasts,#m4-notes,#m7-omni-bar,#m7-omni-drawer')) return;
+    const el = e.target.closest('[data-a],[data-go]'); if (!el || !app().contains(el) && !el.closest('#m4-demo-dock,#m4-mail,#m4-toasts,#m4-notes,#m7-omni-bar,#m7-omni-drawer')) return;
     if (el.matches('select,input[type=checkbox]')) return;
     if (el.dataset.a) { if (el.tagName === 'FORM') return; e.preventDefault(); act(el.dataset.a, el, e); return; }
     if (el.dataset.go) { if (el.target === '_blank') return; e.preventDefault(); go(el.dataset.go); }
