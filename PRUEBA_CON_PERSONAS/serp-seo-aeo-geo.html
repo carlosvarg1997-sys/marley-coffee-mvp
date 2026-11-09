@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Exploración de búsqueda · simulación local</title>
+  <style>
+    :root{color-scheme:light;--ink:#202124;--muted:#5f6368;--line:#dadce0;--blue:#1a73e8;--gold:#f3c900;--paper:#fff;--soft:#f8f9fa}
+    *{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font:15px/1.55 Arial,Helvetica,sans-serif}
+    header{border-bottom:1px solid var(--line);padding:16px clamp(16px,4vw,48px);display:flex;align-items:center;gap:12px}.brand{font-weight:700;letter-spacing:.02em}.google-wordmark{font:500 25px/1 Arial,sans-serif;letter-spacing:-.07em;white-space:nowrap}.google-wordmark span:nth-child(1),.google-wordmark span:nth-child(4){color:#4285f4}.google-wordmark span:nth-child(2),.google-wordmark span:nth-child(6){color:#ea4335}.google-wordmark span:nth-child(3){color:#fbbc05}.google-wordmark span:nth-child(5){color:#34a853}.test-label{margin-left:auto;color:var(--muted);font-size:12px}
+    main{max-width:940px;margin:0 auto;padding:clamp(22px,5vw,48px) clamp(16px,4vw,28px)}h1{font-size:clamp(24px,4vw,34px);line-height:1.18;margin:0 0 8px;letter-spacing:-.025em}h2{font-size:20px;line-height:1.3;margin:0 0 8px}h3{font-size:17px;line-height:1.35;margin:0 0 8px}p{margin:8px 0;color:#45484d}.intro{max-width:760px;margin-bottom:24px}.notice{border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:10px 12px;color:#45484d;font-size:12px;margin:16px 0 18px}.task-context{border-left:3px solid var(--blue);border-radius:8px;background:var(--soft);padding:9px 12px;margin:16px 0}.task-context .eyebrow{margin-bottom:2px}.task-context p{margin:0;color:var(--ink);font-size:14px}
+    form{display:flex;gap:8px;max-width:760px;margin:0 0 16px}input{min-width:0;flex:1;border:1px solid #bdc1c6;border-radius:999px;padding:14px 18px;font:inherit;box-shadow:0 1px 5px #0001}input:focus,button:focus-visible,a:focus-visible{outline:3px solid #8ab4f8;outline-offset:2px}button,.primary{border:0;border-radius:999px;padding:12px 18px;font:700 14px Arial,sans-serif;cursor:pointer;background:var(--gold);color:#171717;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px}
+    .results{max-width:780px}.query-label{color:var(--muted);font-size:13px;padding:8px 0 12px;border-bottom:1px solid var(--line)}.serp-list{display:flex;flex-direction:column}.result{padding:17px 0;border-bottom:1px solid #eceff1}.source{font-size:12px;color:#3c4043;margin-bottom:2px}.title{display:inline-block;color:var(--blue);font-size:20px;line-height:1.3;text-decoration:none}.title:hover,.sitelinks a:hover,.citation a:hover{text-decoration:underline}.description{max-width:700px;color:#4d5156;margin:5px 0 0}.sitelinks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;margin-top:12px}.sitelinks a,.citation a{color:var(--blue);text-decoration:none;font-size:14px}.answer,.ai,.blog{background:var(--soft);border:1px solid #e4e6e8;border-radius:12px;padding:18px;margin:18px 0}.answer p,.ai p,.blog p{margin:6px 0}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#5f6368;font-weight:700;margin-bottom:6px}.citation{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px}.citation a{font-size:12px}.disclosure{font-size:12px;color:var(--muted);border-top:1px solid #e0e2e5;margin-top:12px;padding-top:9px}.blog section{margin-top:16px}.blog h3{font-size:15px}.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}.secondary{border:1px solid #c7c9cc;border-radius:999px;padding:10px 15px;color:#333;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;min-height:44px}.moderator{margin-top:30px;border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:12px}.moderator summary{cursor:pointer;font-weight:700}.moderator button{margin-top:10px;background:#f1f3f4;min-height:38px;padding:8px 12px}
+    [hidden]{display:none!important}@media(max-width:560px){header{padding-block:14px}.test-label{max-width:120px;text-align:right}form{flex-direction:column}form button{width:100%}.sitelinks{grid-template-columns:1fr;gap:8px}.title{font-size:18px}.result{padding:15px 0}.actions{align-items:stretch}.actions a{width:100%}}
+  </style>
+</head>
+<body>
+  <header aria-label="Google · simulación de búsqueda"><span class="google-wordmark" aria-hidden="true"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span></span><span class="test-label">Simulación</span></header>
+  <main>
+    <section class="intro">
+      <h1>¿Qué buscarías?</h1>
+      <p>Escribe lo que buscarías normalmente.</p>
+      <section class="task-context" id="task-context" aria-label="Situación de la tarea" hidden><div class="eyebrow">Tu situación</div><p id="task-text"></p></section>
+      <form id="search" role="search">
+        <label for="query" hidden>Consulta escrita por la persona</label>
+        <input id="query" name="q" type="search" autocomplete="off" placeholder="Buscar en la web" aria-label="Buscar en la web" required>
+        <button type="submit">Buscar</button>
+      </form>
+      <div class="notice">Simulación controlada de Google: los resultados no son en vivo y no representan posiciones reales. Tu consulta se guarda solo en esta pestaña.</div>
+    </section>
+    <section class="results" id="results" aria-live="polite" hidden>
+      <div class="query-label" id="query-label"></div>
+      <div class="serp-list" id="serp-list">
+        <article class="result" id="brand-result" data-result="marley">
+          <div class="source">marleycoffee.cl › empresas · ejemplo simulado</div>
+          <a class="title" id="organic-title" data-surface="resultado-organico" data-prototype data-screen="C02" href="../index.html#C02" target="_blank" rel="noopener"></a>
+          <p class="description" id="organic-description"></p>
+          <nav class="sitelinks" aria-label="Accesos directos propuestos">
+            <a href="#machine" data-surface="acceso-maquinas">Máquinas</a>
+            <a href="#packs" data-surface="acceso-packs">Productos y packs</a>
+            <a href="#how" data-surface="acceso-como-funciona">Cómo funciona</a>
+            <a href="#faq" data-surface="acceso-preguntas">Preguntas</a>
+          </nav>
+        </article>
+        <article class="result" id="guide-result" data-result="guide">
+          <div class="source">Guía práctica · resultado simulado</div>
+          <a class="title" href="../guia-servicio-cafe.html" data-surface="resultado-guia" data-handoff="../guia-servicio-cafe.html" target="_blank" rel="noopener">Planificar el servicio de café de un negocio</a>
+          <p class="description">Una guía general para ordenar quién prepara, cuándo se sirve y qué productos conviene revisar.</p>
+        </article>
+        <article class="result" id="content-result" data-result="content">
+          <div class="source">Contenido para negocios · resultado simulado</div>
+          <a class="title" href="../blog-empresas.html" data-surface="resultado-contenido" data-handoff="../blog-empresas.html" target="_blank" rel="noopener">Ideas prácticas para organizar café en tu negocio</a>
+          <p class="description">Guías breves para oficinas, hoteles y restaurantes, desde la operación diaria hasta la reposición de productos.</p>
+        </article>
+        <article class="result" id="compare-result" data-result="compare">
+          <div class="source">Comparación general · resultado simulado</div>
+          <a class="title" href="#machine" data-surface="resultado-comparacion">Criterios para comparar un servicio de café</a>
+          <p class="description">Revisa modalidad de atención, ritmo de servicio, abastecimiento y puntos pendientes de confirmar.</p>
+        </article>
+      </div>
+      <section class="answer" id="faq" aria-labelledby="faq-title">
+        <div class="eyebrow">Respuesta directa · propuesta AEO</div>
+        <h2 id="faq-title">¿Cómo elegir una máquina para un negocio?</h2>
+        <p>Parte por cómo se prepara y sirve el café, los momentos de mayor demanda, las bebidas y los productos de reposición. Si aún no conoces la máquina, el diagnóstico orienta la recomendación; si ya tienes una preferencia, puedes conservarla y avanzar desde los productos.</p>
+        <a href="../index.html#C02" class="secondary" data-surface="respuesta-directa" data-prototype data-screen="C02" target="_blank" rel="noopener">Ver mi solución</a>
+      </section>
+      <section class="answer" id="machine" aria-labelledby="machine-title">
+        <div class="eyebrow">Acceso directo · máquinas</div>
+        <h2 id="machine-title">La alternativa depende de la operación</h2>
+        <p>Describe el servicio, el volumen aproximado y las bebidas. La compatibilidad de equipos y productos se confirma con el equipo antes de una propuesta final.</p>
+        <a href="../index.html#C11" class="secondary" data-surface="maquinas-cta" data-prototype data-screen="C11" target="_blank" rel="noopener">Explorar opciones</a>
+      </section>
+      <section class="answer" id="packs" aria-labelledby="packs-title">
+        <div class="eyebrow">Acceso directo · productos</div>
+        <h2 id="packs-title">Empieza por una selección y ajústala</h2>
+        <p>Un pack puede servir como referencia inicial. Revisa sus productos y cantidades, cambia lo que necesites o elige cada producto por separado.</p>
+        <a href="../index.html#C10" class="secondary" data-surface="packs-cta" data-prototype data-screen="C10" target="_blank" rel="noopener">Ver productos y packs</a>
+      </section>
+      <section class="ai" id="ai-overview" aria-labelledby="ai-title">
+        <div class="eyebrow">Resumen de IA · concepto GEO para evaluar</div>
+        <h2 id="ai-title">Qué considerar antes de cotizar café para un negocio</h2>
+        <p>Define la forma de atención, las bebidas y el consumo que esperas. Una propuesta puede orientar el equipo y los productos, pero las cantidades, la compatibilidad y las condiciones deben validarse antes de avanzar.</p>
+        <div class="citation" id="sources">
+          <a href="../index.html#C02" data-surface="fuente-solucion" data-prototype target="_blank" rel="noopener">Soluciones para negocios</a>
+          <a href="#faq" data-surface="fuente-preguntas">Respuesta frecuente</a>
+          <a href="../guia-servicio-cafe.html" data-surface="fuente-guia" data-handoff="../guia-servicio-cafe.html" target="_blank" rel="noopener">Guía práctica</a>
+        </div>
+        <div class="disclosure">Estas fuentes son destinos propuestos para el test. No son citas emitidas por Google, ChatGPT ni otra herramienta de IA.</div>
+      </section>
+      <article class="blog" id="blog" aria-labelledby="blog-title">
+        <div class="eyebrow">Contenido útil · propuesta editorial</div>
+        <h2 id="blog-title">¿Quieres comparar ideas para tu operación?</h2>
+        <p>Consulta guías breves para oficinas, hoteles y restaurantes, y luego continúa por la ruta que prefieras.</p>
+        <div class="actions"><a href="../blog-empresas.html" class="primary" data-surface="hub-contenido" data-handoff="../blog-empresas.html" target="_blank" rel="noopener">Ver guías para negocios</a><a href="../index.html#C02" class="secondary" data-surface="articulo-cta" data-prototype data-screen="C02" target="_blank" rel="noopener">Abrir Marley Coffee Empresas</a></div>
+        <div class="disclosure">Contenido propuesto para probar la experiencia. La SERP, la respuesta directa y las fuentes GEO son simuladas.</div>
+      </article>
+      <section class="actions" id="how">
+        <a href="../index.html#C02" class="primary" data-surface="resultado-cta" data-prototype data-screen="C02" target="_blank" rel="noopener">Abrir Marley Coffee Empresas</a>
+        <a href="#machine" class="secondary" data-surface="ver-maquinas">Ver máquinas</a>
+        <a href="#packs" class="secondary" data-surface="ver-packs">Ver productos y packs</a>
+      </section>
+      <details class="moderator">
+        <summary>Registro local para quien modera</summary>
+        <p>Exporta una fila por cada consulta y sus interacciones. El archivo conserva la fase, la variante, el orden del resultado, la hora del primer clic y la secuencia completa.</p>
+        <button type="button" id="download">Descargar registro CSV</button>
+      </details>
+    </section>
+  </main>
+  <script>
+    (()=>{
+      const params=new URLSearchParams(location.search);
+      const phase=['title','description'].includes(params.get('phase'))?params.get('phase'):'title';
+      const pid=params.get('pid')||'';
+      const integratedJourney=params.get('journey')==='full';
+      const taskScenarios={hotel:'Tienes un hotel y quieres cambiar el café del desayuno.',restaurante:'Tienes un restaurante y quieres cambiar el café de la carta.',cafeteria:'Tienes una cafetería y quieres cambiar el café que sirves.',eventos:'Organizas eventos o catering y quieres café para tus servicios.'};
+      const scenario=params.get('scenario')||'';
+      const taskText=taskScenarios[scenario]||'';
+      const taskContext=document.getElementById('task-context');
+      if(taskText){document.getElementById('task-text').textContent=taskText;taskContext.hidden=false;}
+      const journeyStartedAt=params.get('journey_started_at')||'';
+      const returnFile=['index.html','prototipo.html'].includes(params.get('return'))?params.get('return'):'index.html';
+      const validVariant=(value)=>/^[ab]$/i.test(value||'');
+      const requestedVariant=validVariant(params.get('v'))?params.get('v').toUpperCase():'';
+      const read=(storage,key,fallback)=>{try{return JSON.parse(storage.getItem(key)||'null')??fallback}catch(_){return fallback}};
+      const write=(storage,key,value)=>{try{storage.setItem(key,JSON.stringify(value))}catch(_){}};
+      let sessionId=params.get('sid')||'';
+      const activeSession=read(sessionStorage,'marley-serp-active',null);
+      if(!sessionId&&activeSession?.id&&activeSession.participant===(pid||''))sessionId=activeSession.id;
+      if(!sessionId)sessionId='SERP-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+      write(sessionStorage,'marley-serp-active',{id:sessionId,participant:pid||''});
+      const sessionKey='marley-serp-test-v2:'+sessionId+':'+phase;
+      const saved=read(sessionStorage,sessionKey,null);
+      const assignments=read(localStorage,'marley-serp-assignments-v1',{});
+      const assignmentKey='phase:'+phase;
+      const orderKey='order:'+phase;
+      let variant=saved?.phase===phase?saved.variant:'';
+      let assignment=saved?.assignment||'';
+      let order=saved?.order||'';
+      if(!variant){
+        const n=Number(assignments[assignmentKey]||0);
+        variant=requestedVariant||((n%2)?'B':'A');
+        assignment=requestedVariant?'manual':'alternada';
+        if(!requestedVariant)assignments[assignmentKey]=n+1;
+        const o=Number(assignments[orderKey]||0);
+        order=(o%2)?'alternativas-primero':'marley-primero';
+        assignments[orderKey]=o+1;
+        write(localStorage,'marley-serp-assignments-v1',assignments);
+      }
+      const titleVariants={A:'Café para empresas | Marley Coffee',B:'Servicio de café para hoteles, oficinas y restaurantes | Marley Coffee'};
+      const descriptionVariants={A:'Cuéntanos cómo funciona tu negocio y recibe orientación para explorar máquina y productos de café.',B:'Explora opciones de café para tu negocio. El equipo orienta la elección de máquina y productos según tu operación.'};
+      const session=saved?.phase===phase?saved:{schema:2,sessionId,participant:pid||sessionId,phase,variant,assignment,order,openedAt:new Date().toISOString(),queries:[],currentQueryIndex:-1};
+      const form=document.getElementById('search'),input=document.getElementById('query'),results=document.getElementById('results'),list=document.getElementById('serp-list');
+      const brand=document.getElementById('brand-result'),guide=document.getElementById('guide-result'),compare=document.getElementById('compare-result'),content=document.getElementById('content-result');
+      const save=()=>write(sessionStorage,sessionKey,session);
+      const current=()=>session.queries[session.currentQueryIndex]||null;
+      const renderLinks=(query)=>{
+        const linkQuery=new URLSearchParams({utm_source:'marley-serp-lab',utm_medium:'research',utm_campaign:'seo_'+phase+'_'+variant,utm_content:order,mc_source:'serp_lab',mc_session:session.sessionId,mc_phase:phase,mc_variant:variant,mc_assignment:assignment,mc_order:order,mc_query_id:String(query.index)});
+        if(integratedJourney){
+          linkQuery.set('test','sitio');linkQuery.set('qa','1');linkQuery.set('journey','resume');
+          linkQuery.set('journey_started_at',journeyStartedAt||query.startedAt);
+          linkQuery.set('return',returnFile);
+          if(query.firstClickMs)linkQuery.set('mc_first_click_ms',query.firstClickMs);
+          if(query.firstClickSurface)linkQuery.set('mc_first_click_surface',query.firstClickSurface);
+        }
+        document.querySelectorAll('[data-prototype],[data-handoff]').forEach(el=>{
+          const q=new URLSearchParams(linkQuery);q.set('mc_surface',el.dataset.surface||'sin-superficie');
+          const target=el.dataset.handoff||'../'+returnFile;const screen=el.dataset.screen?'#'+el.dataset.screen:'';
+          el.href=target+'?'+q.toString()+screen;el.target=integratedJourney?'_self':'_blank';
+          if(integratedJourney)el.removeAttribute('rel');
+        });
+        document.getElementById('organic-title').textContent=phase==='title'?titleVariants[variant]:titleVariants.A;
+        document.getElementById('organic-description').textContent=phase==='description'?descriptionVariants[variant]:descriptionVariants.A;
+        document.getElementById('query-label').textContent='Búsqueda registrada: '+query.query;
+      };
+      const showCurrent=()=>{
+        const query=current();if(!query)return;
+        input.value=query.query;results.hidden=false;renderLinks(query);
+        if(query.order==='alternativas-primero')list.append(guide,brand,compare,content);else list.append(brand,guide,compare,content);
+      };
+      form.addEventListener('submit',e=>{
+        e.preventDefault();const q=input.value.trim();if(!q)return;
+        const item={index:session.queries.length+1,query:q,phase,variant,assignment,order,startedAt:new Date().toISOString(),firstClickMs:'',firstClickSurface:'',brandPosition:order==='marley-primero'?1:2,clicks:[]};
+        session.queries.push(item);session.currentQueryIndex=session.queries.length-1;save();showCurrent();
+        results.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+      });
+      document.addEventListener('click',e=>{
+        const el=e.target.closest('[data-surface]'),query=current();if(!el||!query)return;
+        const at=Date.now(),click={surface:el.dataset.surface,at:new Date(at).toISOString(),elapsedMs:Math.max(0,at-Date.parse(query.startedAt))};
+        if(!query.firstClickMs){query.firstClickMs=String(click.elapsedMs);query.firstClickSurface=click.surface;}
+        query.clicks.push(click);save();
+        if(el.matches('[data-prototype],[data-handoff]'))renderLinks(query);
+      });
+      const csvCell=value=>{let text=String(value??'');if(/^[\s]*[=+@\-]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"'};
+      document.getElementById('download').addEventListener('click',()=>{
+        const headers=['session_id','participant','phase','variant','assignment','result_order','query_index','query','started_at','brand_position','first_click_ms','first_click_surface','click_count','clicks'];
+        const rows=session.queries.map(q=>[session.sessionId,session.participant,q.phase,q.variant,q.assignment,q.order,q.index,q.query,q.startedAt,q.brandPosition,q.firstClickMs,q.firstClickSurface,q.clicks.length,JSON.stringify(q.clicks)]);
+        const csv=[headers,...rows].map(r=>r.map(csvCell).join(',')).join('\r\n');
+        const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='marley-serp-test-'+session.sessionId+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0);
+      });
+      save();showCurrent();
+    })();
+  </script>
+</body>
+</html>
