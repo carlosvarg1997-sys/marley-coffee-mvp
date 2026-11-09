@@ -9143,7 +9143,7 @@ const agentExamples={R01:{agent:'Orquestador',signal:'Un diagnóstico de prueba 
     render();
   }
   function render() {
-    if (window.MarleyApp) { if (window.MarleyApp.handles()) { window.MarleyApp.render(); return; } window.MarleyApp.leave(); }
+    if (window.MarleyApp) { if (window.MarleyApp.handles()) { window.MarleyApp.render(); bindMotion(); return; } window.MarleyApp.leave(); }
     const id=currentId(), isPanel=['C04','C05'].includes(id);
     if (id === 'C02' && !getState().origin) { setState({origin:'SEO · entrada orgánica'}); track('entry-b2b','Entrada B2B',3,'SEO'); }
     if (id === 'C03' && !getState().origin) { setState({origin:'SEM · campaña de demostración'}); track('entry-b2b','Entrada B2B',3,'SEM'); }
