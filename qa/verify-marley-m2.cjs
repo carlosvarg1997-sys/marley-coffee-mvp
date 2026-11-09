@@ -770,6 +770,10 @@ function verifySearchLab() {
   assert.match(html, /id="query" name="q" type="search" autocomplete="off" placeholder="Buscar en la web" aria-label="Buscar en la web" required/, 'participant enters their own query without suggestions');
   assert.match(html, /aria-label="Google · simulación de búsqueda"/, 'the first study screen is clearly a Google-style search simulation');
   assert.match(html, /id="task-context"[^>]*hidden/, 'task scenario remains hidden unless it is explicitly passed by the integrated test');
+  assert.match(html, /main\{width:100%;min-width:0\}/, 'mobile main fits the viewport');
+  assert.match(html, /form\{flex-direction:column;width:100%;max-width:100%;min-width:0\}/, 'mobile search form stays within its content column');
+  assert.match(html, /form input,form button\{width:100%;min-width:0\}/, 'mobile search input and button do not cause horizontal overflow');
+  assert.match(html, /\.notice,\.task-context\{width:100%;overflow-wrap:anywhere\}/, 'mobile notice and scenario text wrap inside the viewport');
   assert.match(html, /const taskScenarios=\{[\s\S]*hotel:[\s\S]*restaurante:[\s\S]*cafeteria:[\s\S]*eventos:/, 'the search entry can show the selected buyer task without seeding a keyword');
   assert.match(html, /el\.target=integratedJourney\?'_self':'_blank'/, 'integrated journey continues in the same tab');
   assert.match(html, /linkQuery\.set\('journey','resume'\)/, 'prototype return resumes the active usability session');
