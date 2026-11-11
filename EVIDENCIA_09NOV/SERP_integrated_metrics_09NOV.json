@@ -1,0 +1,75 @@
+{
+  "sourceCommit": "91b380195a7196f72900e1f4f679f5a07a8f2439",
+  "method": "isolated headless Chrome; CDP mobile emulation",
+  "results": [
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/PRUEBA_CON_PERSONAS/serp-seo-aeo-geo.html?journey=full&journey_started_at=1794261724629&pid=P1&sid=MC-P1-mw9t3r9x&phase=title&scenario=hotel&return=index.html",
+      "innerWidth": 1440,
+      "clientWidth": 1440,
+      "docScrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "h1": "¿Qué buscarías?",
+      "queryEmpty": true,
+      "resultsHidden": true,
+      "googleScreen": true,
+      "siteBeforeResult": false,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "preflight": {
+        "title": "Antes de empezar",
+        "nameField": true,
+        "consent": true,
+        "start": true
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/PRUEBA_CON_PERSONAS/serp-seo-aeo-geo.html?journey=full&journey_started_at=1794261726677&pid=P1&sid=MC-P1-mw9t3sut&phase=title&scenario=hotel&return=index.html",
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "docScrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "h1": "¿Qué buscarías?",
+      "queryEmpty": true,
+      "resultsHidden": true,
+      "googleScreen": true,
+      "siteBeforeResult": false,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "preflight": {
+        "title": "Antes de empezar",
+        "nameField": true,
+        "consent": true,
+        "start": true
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/PRUEBA_CON_PERSONAS/serp-seo-aeo-geo.html?journey=full&journey_started_at=1794261728668&pid=P1&sid=MC-P1-mw9t3ue4&phase=title&scenario=hotel&return=index.html",
+      "innerWidth": 320,
+      "clientWidth": 320,
+      "docScrollWidth": 320,
+      "bodyScrollWidth": 320,
+      "h1": "¿Qué buscarías?",
+      "queryEmpty": true,
+      "resultsHidden": true,
+      "googleScreen": true,
+      "siteBeforeResult": false,
+      "viewport": {
+        "width": 320,
+        "height": 800
+      },
+      "preflight": {
+        "title": "Antes de empezar",
+        "nameField": true,
+        "consent": true,
+        "start": true
+      },
+      "horizontalOverflow": false
+    }
+  ]
+}

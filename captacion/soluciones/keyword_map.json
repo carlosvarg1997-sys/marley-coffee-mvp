@@ -1,0 +1,212 @@
+{
+  "source": {
+    "file": "ecosistema_captacion_10nov/CLASIFICACION_FRASES_B2B_09NOV.csv",
+    "classification_date": "2026-11-09",
+    "consulted_date": "2026-11-11"
+  },
+  "counts": {
+    "total": 97,
+    "coherente": 83,
+    "fuera": 7,
+    "revision": 5,
+    "investigar": 2
+  },
+  "groups": {
+    "index": {
+      "url": "https://empresas.marleycoffee.cl/captacion/soluciones/index.html",
+      "intent": "Intención comercial genérica B2B, sin comprador específico",
+      "phrases": [
+        "café para empresa en grano",
+        "café para empresas",
+        "café para negocios",
+        "insumos para máquinas de café",
+        "mantención máquina de café profesional",
+        "máquina de café comercial",
+        "máquina de café en comodato",
+        "máquina de café para negocio pequeño",
+        "máquina de café profesional",
+        "máquinas de café para empresas",
+        "máquinas de café para negocios",
+        "servicio de café para empresas"
+      ]
+    },
+    "restaurantes": {
+      "url": "https://empresas.marleycoffee.cl/captacion/soluciones/restaurantes.html",
+      "intent": "Intención comercial para restaurantes",
+      "phrases": [
+        "cafetera automatica para restaurante",
+        "cafetera comercial para restaurante",
+        "cafetera espresso para restaurante",
+        "cafetera grande para restaurante",
+        "cafetera industrial para restaurante",
+        "cafetera italiana para restaurante",
+        "cafetera para restaurante",
+        "cafetera profesional para restaurante",
+        "cafeteras industriales para restaurante",
+        "café para restaurante",
+        "mejor cafetera para restaurante",
+        "máquina de café para restaurante",
+        "máquina de café para restaurante en comodato",
+        "máquina de café para restaurantes",
+        "proveedor de café para restaurante",
+        "proveedor de café para restaurantes"
+      ]
+    },
+    "hoteles": {
+      "url": "https://empresas.marleycoffee.cl/captacion/soluciones/hoteles.html",
+      "intent": "Intención comercial para hoteles",
+      "phrases": [
+        "café en grano para hoteles",
+        "café para desayuno de hotel",
+        "café para hoteles",
+        "equipamiento de café para hotel",
+        "máquina de café para hostal",
+        "máquina de café para hotel en comodato",
+        "máquinas de café para hoteles",
+        "proveedor de café en grano para hoteles",
+        "proveedor de café para hoteles"
+      ]
+    },
+    "cafeterias": {
+      "url": "https://empresas.marleycoffee.cl/captacion/soluciones/cafeterias.html",
+      "intent": "Intención comercial para cafeterías",
+      "phrases": [
+        "cafetera espresso para cafetería",
+        "cafetera para cafetería pequeña",
+        "cafeteria pequeña cafetera profesional",
+        "café en grano para cafeterías",
+        "café para cafeterías",
+        "insumos de café para cafeterías",
+        "máquina de café para cafetería",
+        "máquina de café para cafetería profesional",
+        "máquina para cafetería",
+        "proveedor de café para cafeterías"
+      ]
+    },
+    "oficinas": {
+      "url": "https://empresas.marleycoffee.cl/captacion/soluciones/oficinas.html",
+      "intent": "Intención comercial para oficinas",
+      "phrases": [
+        "arriendo de máquinas de café para oficinas",
+        "cafetera automatica para oficinas",
+        "cafetera industrial para oficinas",
+        "cafetera para oficina pequeña",
+        "cafeteras para oficinas",
+        "cafeteras para oficinas grandes",
+        "cafeteras para oficinas pequeñas",
+        "cafeterias para oficinas",
+        "café en grano para oficinas",
+        "café para oficina",
+        "café para oficina en grano",
+        "café para oficinas",
+        "coffee break para oficinas",
+        "comodato de café para oficinas",
+        "estaciones de cafe para oficinas",
+        "insumos para máquinas de café para oficina",
+        "maquinas de cafe en grano para oficinas",
+        "maquinas de cafe para oficinas alquiler",
+        "máquina de café para oficina en comodato",
+        "máquinas de café para oficinas",
+        "proveedores de cafe para oficinas",
+        "renta de maquinas de cafe para oficinas",
+        "servicio de cafe para oficinas",
+        "servicio de maquinas de cafe para oficinas"
+      ]
+    },
+    "eventos-catering": {
+      "url": "https://empresas.marleycoffee.cl/captacion/soluciones/eventos-catering.html",
+      "intent": "Intención comercial para eventos y catering",
+      "phrases": [
+        "catering de café para eventos",
+        "coffee break empresas",
+        "coffee break para eventos",
+        "servicio de coffee break"
+      ]
+    },
+    "conveniencia": {
+      "url": "https://empresas.marleycoffee.cl/captacion/soluciones/conveniencia.html",
+      "intent": "Intención comercial para conveniencia",
+      "phrases": [
+        "café para minimarket",
+        "café para tiendas de conveniencia",
+        "máquina de café para minimarket",
+        "máquina de café para tienda de conveniencia"
+      ]
+    },
+    "panaderias": {
+      "url": "https://empresas.marleycoffee.cl/captacion/soluciones/panaderias.html",
+      "intent": "Intención comercial para panaderías",
+      "phrases": [
+        "cafetera para panadería",
+        "café en grano para panaderías",
+        "café para panaderías",
+        "máquina de café para panadería"
+      ]
+    }
+  },
+  "not_assigned_to_commercial_pages": {
+    "fuera": [
+      {
+        "phrase": "cafetera barista",
+        "reason": "Consumo y barista; no es compra de empresa"
+      },
+      {
+        "phrase": "cafetera para restaurantes segunda mano",
+        "reason": "Usado; no encaja con el comodato"
+      },
+      {
+        "phrase": "cafeteras nespresso para oficinas",
+        "reason": "Marca competidora; sirve para investigación competitiva"
+      },
+      {
+        "phrase": "distribuidor de café al por mayor",
+        "reason": "Reventa"
+      },
+      {
+        "phrase": "maquinas expendedoras de cafe para oficinas",
+        "reason": "Vending: otro modelo de negocio"
+      },
+      {
+        "phrase": "máquina de café para clínica",
+        "reason": "Institucional; fuera de los segmentos"
+      },
+      {
+        "phrase": "máquina de café para hospital",
+        "reason": "Institucional; fuera de los segmentos"
+      }
+    ],
+    "investigar": [
+      {
+        "phrase": "proveedor de café",
+        "reason": "Genérica; sirve para investigar SEO y variantes comerciales"
+      },
+      {
+        "phrase": "proveedor de máquinas de café",
+        "reason": "Puede ser un comprador que no conoce el comodato; investigar"
+      }
+    ],
+    "revision": [
+      {
+        "phrase": "cafetera comercial precio",
+        "reason": "Búsqueda de precio; revisar si el mensaje de comodato compite aquí"
+      },
+      {
+        "phrase": "cafetera para restaurante precio",
+        "reason": "Búsqueda de precio; mantener solo en un grupo de comparación"
+      },
+      {
+        "phrase": "café al por mayor",
+        "reason": "Puede ser un restaurante que compra volumen; revisar"
+      },
+      {
+        "phrase": "repuestos máquina de café profesional",
+        "reason": "Solo si vendemos repuestos"
+      },
+      {
+        "phrase": "servicio técnico máquinas de café",
+        "reason": "Solo si hay servicio técnico propio"
+      }
+    ]
+  },
+  "routing_note": "Las 83 frases coherentes se asignan una sola vez. Los modificadores de comprador definen la URL; las frases sin comprador específico quedan en el índice de soluciones. Investigar y revision no se asignan a páginas comerciales."
+}

@@ -1,0 +1,29 @@
+# Archivo de propuesta: copiar a la raíz del host cuando se confirme el dominio.
+# Dejar rastreables las páginas noindex para que el buscador pueda leer su meta robots.
+User-agent: *
+Allow: /
+
+# Propuesta de exclusión de rastreo automático de entrenamiento generativo.
+User-agent: GPTBot
+Disallow: /
+User-agent: ClaudeBot
+Disallow: /
+User-agent: Google-Extended
+Disallow: /
+
+# Permitir acceso para recuperación en búsqueda y solicitudes iniciadas por usuarios.
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+
+# Actualizar la URL al instalar el sitemap en la raíz del dominio confirmado.
+Sitemap: https://empresas.marleycoffee.cl/sitemap.xml

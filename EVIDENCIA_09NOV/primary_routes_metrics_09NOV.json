@@ -1,0 +1,115 @@
+{
+  "sourceCommit": "91b380195a7196f72900e1f4f679f5a07a8f2439",
+  "method": "isolated Chrome CDP responsive emulation",
+  "results": [
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html#C01",
+      "title": "Marley Coffee Chile · Inicio",
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "docScrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "docHeight": 2381,
+      "h1": "Marley Coffee Chile",
+      "video": [],
+      "mainText": "Marley Coffee Chile\n‹\n›\n●\nChat Online\nÚNETE AL MARLEY\nCOFFEE CLUB\n\nRecibe descuentos especiales y noticias sobre todo lo",
+      "appText": "Prototipo · Marley Coffee Empresas\nControles de demostración · no forman parte del sitio del cliente\nIr a\nC01 · Inicio M",
+      "route": "HOME_C01",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html#C02",
+      "title": "Café para empresas, hoteles y restaurantes | Marley Coffee Empresas",
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "docScrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "docHeight": 6524,
+      "h1": "Café para empresas que mueve tu negocio.",
+      "video": [
+        {
+          "readyState": 4,
+          "paused": true,
+          "videoWidth": 720,
+          "videoHeight": 1280
+        }
+      ],
+      "mainText": "MARLEY COFFEE EMPRESAS\nCAFÉ PARA EMPRESAS QUE MUEVE TU NEGOCIO.\n\nNo necesitas saber qué máquina elegir. Cuéntanos cómo s",
+      "appText": "Prototipo · Marley Coffee Empresas\nControles de demostración · no forman parte del sitio del cliente\nIr a\nC01 · Inicio M",
+      "route": "B2B_C02",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html#C02",
+      "title": "Café para empresas, hoteles y restaurantes | Marley Coffee Empresas",
+      "innerWidth": 1440,
+      "clientWidth": 1425,
+      "docScrollWidth": 1425,
+      "bodyScrollWidth": 1425,
+      "docHeight": 6380,
+      "h1": "Café para empresas que mueve tu negocio.",
+      "video": [
+        {
+          "readyState": 4,
+          "paused": true,
+          "videoWidth": 720,
+          "videoHeight": 1280
+        }
+      ],
+      "mainText": "MARLEY COFFEE EMPRESAS\nCAFÉ PARA EMPRESAS QUE MUEVE TU NEGOCIO.\n\nNo necesitas saber qué máquina elegir. Cuéntanos cómo s",
+      "appText": "Prototipo · Marley Coffee Empresas\nControles de demostración · no forman parte del sitio del cliente\nIr a\nC01 · Inicio M",
+      "route": "B2B_C02",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html#R01",
+      "title": "CRM interno · Ventas · Mi día | Marley Coffee Empresas",
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "docScrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "docHeight": 2347,
+      "h1": "Ingreso de trabajadores",
+      "video": [],
+      "mainText": "CRM INTERNO · MARLEY COFFEE EMPRESAS\nINGRESO DE TRABAJADORES\n\nCada rol ve solo lo que necesita para decidir. Las métrica",
+      "appText": "Prototipo · Marley Coffee Empresas\nControles de demostración · no forman parte del sitio del cliente\nIr a\nC01 · Inicio M",
+      "route": "CRM_R01",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html#R01",
+      "title": "CRM interno · Ventas · Mi día | Marley Coffee Empresas",
+      "innerWidth": 1440,
+      "clientWidth": 1425,
+      "docScrollWidth": 1425,
+      "bodyScrollWidth": 1425,
+      "docHeight": 1102,
+      "h1": "Ingreso de trabajadores",
+      "video": [],
+      "mainText": "CRM INTERNO · MARLEY COFFEE EMPRESAS\nINGRESO DE TRABAJADORES\n\nCada rol ve solo lo que necesita para decidir. Las métrica",
+      "appText": "Prototipo · Marley Coffee Empresas\nControles de demostración · no forman parte del sitio del cliente\nIr a\nC01 · Inicio M",
+      "route": "CRM_R01",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "horizontalOverflow": false
+    }
+  ]
+}

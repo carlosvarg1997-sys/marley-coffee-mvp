@@ -1,0 +1,75 @@
+{
+  "source": "local published commit f6e0d5c + responsive fix pending publication",
+  "capturedAt": "2026-11-09T21:53:25.426Z",
+  "results": [
+    {
+      "innerWidth": 1440,
+      "clientWidth": 1440,
+      "docScrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "searchRect": {
+        "left": 278,
+        "right": 1038,
+        "width": 760
+      },
+      "noticeRect": {
+        "left": 278,
+        "right": 1038,
+        "width": 760
+      },
+      "queryEmpty": true,
+      "resultsHidden": true,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "docScrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "searchRect": {
+        "left": 16,
+        "right": 374,
+        "width": 358
+      },
+      "noticeRect": {
+        "left": 16,
+        "right": 374,
+        "width": 358
+      },
+      "queryEmpty": true,
+      "resultsHidden": true,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "innerWidth": 320,
+      "clientWidth": 320,
+      "docScrollWidth": 320,
+      "bodyScrollWidth": 320,
+      "searchRect": {
+        "left": 16,
+        "right": 304,
+        "width": 288
+      },
+      "noticeRect": {
+        "left": 16,
+        "right": 304,
+        "width": 288
+      },
+      "queryEmpty": true,
+      "resultsHidden": true,
+      "viewport": {
+        "width": 320,
+        "height": 800
+      },
+      "horizontalOverflow": false
+    }
+  ]
+}

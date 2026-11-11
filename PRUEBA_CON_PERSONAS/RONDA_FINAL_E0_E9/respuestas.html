@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0B0B0C">
+  <title>Respuestas · Prueba Marley Coffee Empresas</title>
+  <link rel="stylesheet" href="../../captacion/marca/negro-marley.css">
+  <link rel="stylesheet" href="cuestionarios.css">
+</head>
+<body class="mc">
+  <main class="mc-shell mc-shell--wide" id="response-app">
+    <div class="mc-brand"><span class="mc-mark" aria-hidden="true">M</span><span>Marley Coffee Empresas<small>Prueba académica · Duoc UC</small></span></div>
+    <div class="mc-tricolor" aria-hidden="true"></div>
+    <p class="mc-kicker">Consola de investigación</p>
+    <h1 class="mc-h1">Respuestas por camino</h1>
+    <p class="mc-lead">Las sesiones y respuestas permanecen en este navegador. Revisa o exporta el CSV largo, el resumen por persona o el JSON para analizarlos fuera de esta vista.</p>
+    <nav class="mc-nav" aria-label="Navegación de la prueba"><a href="inicio.html">Volver a la consola</a><a href="flujos.html">Vista de flujos</a><a href="Guion_moderador.md">Guion</a></nav>
+
+    <section class="mc-path-view" aria-labelledby="paths-title"><h2 id="paths-title" class="mc-console__subhead">Sesiones por camino</h2><div class="mc-grid mc-grid--3" id="path-summaries"></div></section>
+    <section aria-labelledby="filters-title"><h2 id="filters-title" class="mc-console__subhead">Filtrar respuestas</h2><div class="mc-filters">
+      <label class="mc-filter">Camino<select class="mc-select" id="filter-path"><option value="">Todos</option></select></label>
+      <label class="mc-filter">Rol<select class="mc-select" id="filter-role"><option value="">Todos</option></select></label>
+      <label class="mc-filter">Momento<select class="mc-select" id="filter-moment"><option value="">Todos</option></select></label>
+      <label class="mc-filter">Participante<select class="mc-select" id="filter-participant"><option value="">Todos</option></select></label>
+    </div></section>
+    <dl class="mc-summary" id="response-totals"></dl>
+    <section aria-labelledby="questions-title"><h2 id="questions-title" class="mc-console__subhead">Respuestas por pregunta</h2><div id="question-results" class="mc-grid"></div></section>
+    <section aria-labelledby="sus-title"><h2 id="sus-title" class="mc-console__subhead">SUS por persona</h2><p class="mc-muted">Fórmula estándar: suma de aportes impares (respuesta − 1) y pares (5 − respuesta), multiplicada por 2,5. Solo se calcula con los diez ítems respondidos.</p><div class="mc-table-wrap"><table class="mc-table"><thead><tr><th>Participante</th><th>Camino</th><th>Rol</th><th>SUS / 100</th><th>Estado</th></tr></thead><tbody id="sus-results"></tbody></table></div></section>
+    <section aria-labelledby="stages-title"><h2 id="stages-title" class="mc-console__subhead">Resultados por etapa</h2><div class="mc-table-wrap"><table class="mc-table"><thead><tr><th>Camino</th><th>Etapa</th><th>SEQ medio</th><th>% logrado</th><th>Tiempo mediano</th><th>Registros</th></tr></thead><tbody id="stage-results"></tbody></table></div></section>
+
+    <section aria-labelledby="export-title"><h2 id="export-title" class="mc-console__subhead">Exportar datos</h2><div class="mc-row">
+      <button class="mc-btn mc-btn--primary" type="button" id="export-long">Exportar CSV (una fila por respuesta)</button>
+      <button class="mc-btn" type="button" id="export-summary">Exportar resumen por persona (CSV)</button>
+      <button class="mc-btn" type="button" id="export-json">Exportar JSON</button>
+    </div><p class="mc-note">Los CSV incluyen BOM UTF-8 para abrirlos en Excel. Las exportaciones respetan los filtros seleccionados.</p></section>
+    <section class="mc-delete" aria-labelledby="delete-title"><h2 id="delete-title" class="mc-console__subhead">Borrar respuestas</h2><p class="mc-muted">Esta acción está disponible solo aquí. Antes de borrar, puedes exportar los datos. Escribe <strong>BORRAR</strong> para confirmar; se borrarán las respuestas, las sesiones archivadas y la sesión activa.</p>
+      <button class="mc-btn" type="button" id="prepare-delete">Preparar borrado</button>
+      <div id="delete-panel" hidden><div class="mc-row"><button class="mc-btn" type="button" id="delete-export-long">Descargar CSV largo</button><button class="mc-btn" type="button" id="delete-export-json">Descargar JSON</button></div><label class="mc-field mc-delete__confirm">Escribe BORRAR para confirmar<input class="mc-input" id="delete-phrase" autocomplete="off" spellcheck="false" aria-describedby="delete-help"></label><p class="mc-muted" id="delete-help">El navegador pedirá una segunda confirmación antes de borrar.</p><button class="mc-btn mc-btn--danger" type="button" id="delete-confirm" disabled>Borrar respuestas de investigación</button></div>
+    </section>
+    <p class="mc-footer" id="dashboard-status" role="status" aria-live="polite"></p>
+  </main>
+  <script src="cuestionarios.js"></script>
+  <script>
+  (()=>{
+    'use strict';
+    const M=window.MCPrueba;
+    const $=selector=>document.querySelector(selector);
+    const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const labels={path:{'A':'A · Google directo','B-Meta':'B · Meta','B-LinkedIn':'B · LinkedIn','B-Google':'B · Google','C':'C · interno','C-encadenada':'C · encadenada'},role:{externo:'Externo',ventas:'Ventas',marketing:'Marketing',jefatura:'Jefatura'}};
+    const distinct=values=>[...new Set(values.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'es'));
+    const median=values=>{const sorted=values.map(Number).filter(Number.isFinite).sort((a,b)=>a-b);if(!sorted.length)return null;const mid=Math.floor(sorted.length/2);return sorted.length%2?sorted[mid]:(sorted[mid-1]+sorted[mid])/2;};
+    const mean=values=>values.length?values.reduce((sum,value)=>sum+Number(value),0)/values.length:null;
+    const htmlNode=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;};
+    let bank=null;
+    const selectOptions=(selector,values,labelsMap={})=>{const select=$(selector);const first=select.options[0];select.replaceChildren(first);for(const value of values){const option=document.createElement('option');option.value=value;option.textContent=labelsMap[value]||value;select.append(option);}};
+    const filters=()=>({path:$('#filter-path').value,role:$('#filter-role').value,moment:$('#filter-moment').value,participant:$('#filter-participant').value});
+    const allRows=()=>M.readAnswers();
+    const allSessions=()=>M.readSessions();
+    const pass=(row,filter)=>((!filter.path||row.camino===filter.path)&&(!filter.role||row.rol===filter.role)&&(!filter.moment||row.momento===filter.moment)&&(!filter.participant||row.participante===filter.participant));
+    const filteredRows=()=>allRows().filter(row=>pass(row,filters()));
+    const filteredSessions=()=>{const f=filters();return allSessions().filter(session=>(!f.path||session.camino===f.path)&&(!f.role||session.rol===f.role)&&(!f.participant||session.participante===f.participant)&&(!f.moment||allRows().some(row=>row.sesion_id===session.id&&row.momento===f.moment)));};
+    const responseValue=row=>{const raw=row.respuesta;if(Array.isArray(raw))return raw;if(typeof raw==='string'&&raw.startsWith('[')){try{return JSON.parse(raw);}catch(_){return [raw];}}return raw===''?[]:[String(raw)];};
+    const questionList=()=>{const ids=[];Object.values(bank.fases).forEach(block=>{const list=Array.isArray(block)?block:[...(block.externos||[]),...(block.internos||[])];list.forEach(id=>{if(!ids.includes(id))ids.push(id);});});return ids.map(id=>({id,...bank.preguntas[id]})).filter(question=>question.tipo);};
+    const renderPathSummaries=()=>{
+      const holder=$('#path-summaries');holder.replaceChildren();
+      for(const path of ['A','B-Meta','B-LinkedIn','B-Google','C','C-encadenada']){
+        const sessions=allSessions().filter(session=>session.camino===path);const ids=new Set(sessions.map(session=>session.id));const responses=allRows().filter(row=>ids.has(row.sesion_id));
+        const card=htmlNode('article','mc-path-card');card.append(htmlNode('strong','',labels.path[path]),htmlNode('span','',`${sessions.length} ${sessions.length === 1 ? 'sesión' : 'sesiones'} · ${responses.length} ${responses.length === 1 ? 'respuesta' : 'respuestas'}`));
+        holder.append(card);
+      }
+    };
+    const refreshFilters=()=>{
+      const rows=allRows();const sessions=allSessions();
+      selectOptions('#filter-path',distinct([...rows.map(row=>row.camino),...sessions.map(item=>item.camino)]),labels.path);
+      selectOptions('#filter-role',distinct([...rows.map(row=>row.rol),...sessions.map(item=>item.rol)]),labels.role);
+      selectOptions('#filter-moment',distinct(rows.map(row=>row.momento)));
+      selectOptions('#filter-participant',distinct([...rows.map(row=>row.participante),...sessions.map(item=>item.participante)]));
+    };
+    const renderTotals=rows=>{
+      const sessions=filteredSessions();const el=$('#response-totals');
+      const completed=rows.filter(row=>!row.omitida).length;const sus=sessions.map(session=>session.sus_score??M.susForSession(session.id)).filter(value=>value!==null);
+      el.innerHTML=[['Sesiones',sessions.length],['Respuestas',rows.length],['Respondidas',completed],['SUS medio',sus.length?`${mean(sus).toFixed(1)}/100`:'—']].map(([key,value])=>`<div><dt>${esc(key)}</dt><dd>${esc(value)}</dd></div>`).join('');
+    };
+    const renderQuestions=rows=>{
+      const holder=$('#question-results');holder.replaceChildren();
+      const f=filters();const applicable=f.moment==='etapa'?[]:questionList().filter(q=>!f.moment||phaseForQuestion(q.id)===f.moment);
+      for(const question of applicable){
+        const entries=rows.filter(row=>row.pregunta_id===question.id);const answered=entries.filter(row=>!row.omitida&&row.respuesta!=='');
+        const card=htmlNode('article','mc-path-view');card.append(htmlNode('h3','',question.texto));
+        const count=htmlNode('p','mc-muted',`${answered.length} respuestas · ${entries.filter(row=>row.omitida).length} omitidas · pregunta ${question.id}`);card.append(count);
+        if(question.tipo==='open'){
+          if(!answered.length)card.append(htmlNode('p','mc-empty','Aún no hay respuestas abiertas.'));
+          for(const row of answered){const answer=htmlNode('blockquote','mc-open-answer',row.respuesta_texto||row.respuesta);const code=htmlNode('small','mc-muted',`${row.participante} · ${labels.path[row.camino]||row.camino}`);card.append(answer,code);}
+        }else{
+          const options=optionsFor(question);const numeric=question.tipo==='agreement'||question.tipo==='frequency';
+          if(numeric&&answered.length){const values=answered.map(row=>Number(row.respuesta)).filter(value=>Number.isFinite(value)&&value>=1&&value<=5);card.append(htmlNode('p','mc-note',`Media ${mean(values)?.toFixed(2)??'—'} · mediana ${median(values)?.toFixed(1)??'—'} · n=${values.length}`));}
+          const counts=new Map(options.map(item=>[String(item.value),0]));
+          for(const row of answered){for(const value of responseValue(row)){const key=String(value);counts.set(key,(counts.get(key)||0)+1);}}
+          if(!options.length)card.append(htmlNode('p','mc-empty','No hay opciones configuradas.'));
+          options.forEach(option=>{
+            const n=counts.get(String(option.value))||0;const pct=answered.length?Math.round(n/answered.length*100):0;
+            const line=htmlNode('div','mc-bar-row');line.append(htmlNode('span','',option.label));const track=htmlNode('span','mc-bar');track.setAttribute('role','img');track.setAttribute('aria-label',`${option.label}: ${n} respuestas, ${pct}%`);const fill=htmlNode('i','');fill.style.width=`${pct}%`;track.append(fill);line.append(track,htmlNode('strong','',`${n} · ${pct}%`));card.append(line);
+          });
+        }
+        holder.append(card);
+      }
+    };
+    function phaseForQuestion(id){for(const [phase,block] of Object.entries(bank.fases)){const ids=Array.isArray(block)?block:[...(block.externos||[]),...(block.internos||[])];if(ids.includes(id))return phase;}return '';}
+    function optionsFor(question){
+      if(question.tipo==='agreement')return bank.meta.scale_agreement.map((label,index)=>({value:String(index+1),label}));
+      if(question.tipo==='frequency')return bank.meta.scale_frequency.map((label,index)=>({value:String(index+1),label}));
+      return (question.opciones||[]).map(option=>typeof option==='string'?{value:option,label:option}:{value:option.texto,label:option.texto});
+    }
+    const renderSus=()=>{
+      const holder=$('#sus-results');holder.replaceChildren();const sessions=filteredSessions();const scores=[];
+      for(const session of sessions){const value=session.sus_score??M.susForSession(session.id);if(value!==null)scores.push(value);const tr=document.createElement('tr');[session.participante,labels.path[session.camino]||session.camino,labels.role[session.rol]||session.rol,value===null?'—':String(value),value===null?'Incompleto':'Completo'].forEach(text=>{const td=document.createElement('td');td.textContent=text;tr.append(td);});holder.append(tr);}
+      const average=scores.length?mean(scores).toFixed(1):'—';const title=$('#sus-title');title.textContent=`SUS por persona · promedio ${average}/100`;
+      if(!sessions.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=5;td.textContent='No hay sesiones para estos filtros.';tr.append(td);holder.append(tr);}
+    };
+    const renderStages=rows=>{
+      const holder=$('#stage-results');holder.replaceChildren();const stageRows=rows.filter(row=>row.momento==='etapa'&&row.pregunta_id==='registro_etapa');
+      const grouped=new Map();for(const row of stageRows){const record=M.stageRow(row);if(!record)continue;const key=`${row.camino}|${row.etapa}`;if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push({row,record});}
+      for(const items of grouped.values()){
+        const {row}=items[0];const complete=items.filter(item=>item.record.resultado);const seq=complete.map(item=>Number(item.record.seq)).filter(value=>value>=1&&value<=7);const achieved=complete.filter(item=>item.record.resultado==='Logrado').length;const times=complete.map(item=>Number(item.record.ms_respuesta)).filter(value=>value>0);const pct=complete.length?`${Math.round(achieved/complete.length*100)}%`:'—';
+        const tr=document.createElement('tr');[labels.path[row.camino]||row.camino,row.etapa,mean(seq)?.toFixed(2)??'—',pct,median(times)===null?'—':`${Math.round(median(times)/1000)} s`,String(complete.length)].forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.append(td);});holder.append(tr);
+      }
+      if(!stageRows.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=6;td.textContent='No hay etapas registradas para estos filtros.';tr.append(td);holder.append(tr);}
+    };
+    const render=()=>{const rows=filteredRows();renderPathSummaries();renderTotals(rows);renderQuestions(rows);renderSus();renderStages(rows);$('#dashboard-status').textContent=`Banco ${M.VERSION} · ${allSessions().length} sesiones locales · ${allRows().length} respuestas locales.`;};
+    const exportLong=()=>M.download('respuestas_largo.csv',M.csvText(filteredRows()),'text/csv;charset=utf-8');
+    const exportSummary=()=>{const sessions=filteredSessions();M.download('resumen_por_persona.csv',M.csvText(M.summaryRows(sessions,filteredRows()),[...M.PLANILLA_COLUMNS,'etapas_completadas','SUS','estado']),'text/csv;charset=utf-8');};
+    const exportJSON=()=>{const sessions=filteredSessions();const ids=new Set(sessions.map(session=>session.id));const data={version_banco:M.VERSION,sesiones:sessions,respuestas:filteredRows().filter(row=>ids.has(row.sesion_id))};M.download('respuestas_ronda_final.json','\uFEFF'+JSON.stringify(data,null,2),'application/json;charset=utf-8');};
+    $('#export-long').addEventListener('click',exportLong);$('#export-summary').addEventListener('click',exportSummary);$('#export-json').addEventListener('click',exportJSON);
+    $('#prepare-delete').addEventListener('click',()=>{$('#delete-panel').hidden=false;$('#delete-phrase').focus();});
+    $('#delete-export-long').addEventListener('click',exportLong);$('#delete-export-json').addEventListener('click',exportJSON);
+    $('#delete-phrase').addEventListener('input',event=>{$('#delete-confirm').disabled=event.target.value!=='BORRAR';});
+    $('#delete-confirm').addEventListener('click',()=>{
+      if($('#delete-phrase').value!=='BORRAR')return;
+      if(!window.confirm('Se eliminarán las respuestas, sesiones archivadas y sesión activa de investigación de este navegador. ¿Continuar?'))return;
+      [M.KEY.answers,M.KEY.sessions,M.KEY.active].forEach(key=>localStorage.removeItem(key));
+      $('#delete-phrase').value='';$('#delete-confirm').disabled=true;$('#delete-panel').hidden=true;refreshFilters();render();
+    });
+    M.loadBank().then(data=>{bank=data;refreshFilters();render();document.querySelectorAll('.mc-filter select').forEach(select=>select.addEventListener('change',render));window.addEventListener('storage',event=>{if(event.key?.startsWith('mc_prueba_')){refreshFilters();render();}});window.addEventListener('mc-prueba-change',()=>{refreshFilters();render();});}).catch(error=>{$('#dashboard-status').textContent=error.message;});
+  })();
+  </script>
+</body>
+</html>

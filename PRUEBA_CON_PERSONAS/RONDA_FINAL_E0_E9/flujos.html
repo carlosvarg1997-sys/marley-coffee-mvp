@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="color-scheme" content="dark light">
+  <title>Vistas de flujo · Prueba con personas</title>
+  <link rel="stylesheet" href="../../captacion/marca/negro-marley.css">
+  <style>
+    :root{--ink:#171717;--muted:#4a4a4a;--line:#d5d5d5;--paper:#fff;--black:#0b0b0c;--panel:#141415;--on-dark:#fff;--on-dark-muted:#d0d0d0;--green:#376a3c;--yellow:#f3c900;--touch:44px}
+    *{box-sizing:border-box}
+    html{background:var(--black);color:var(--on-dark);scroll-behavior:smooth}
+    body,body.nm{margin:0;background:var(--black)!important;color:var(--on-dark)!important;font:16px/1.5 "Helvetica Neue",Arial,sans-serif}
+    .flow-page{width:min(1500px,100%);margin:0 auto;padding:clamp(16px,3vw,36px);color:var(--on-dark)}
+    .mast{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:0 0 22px;border-bottom:2px solid var(--on-dark)}
+    .eyebrow{margin:0 0 6px;color:var(--on-dark-muted);font:500 12px/1.3 var(--nm-label);letter-spacing:.1em;text-transform:uppercase}
+    h1{max-width:17ch;margin:0;color:var(--on-dark)!important;font:500 clamp(30px,4vw,54px)/1.02 var(--nm-display);letter-spacing:.005em;text-transform:uppercase}
+    .intro{max-width:68ch;margin:12px 0 0;color:var(--on-dark-muted)!important}
+    .mast-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+    .btn,.chip,.open-view{min-height:44px;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--on-dark);border-radius:8px;padding:9px 14px;background:var(--paper);color:var(--ink);font:inherit;font-size:14px;font-weight:700;line-height:1.2;text-decoration:none;cursor:pointer}
+    .btn[hidden]{display:none!important}
+    .btn:hover,.chip:hover,.open-view:hover{background:var(--black);color:var(--paper)}
+    .btn:focus-visible,.chip:focus-visible,.open-view:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+    .btn--primary{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+    .btn--primary:hover{background:#e8bd00;border-color:#e8bd00}
+    .path-nav{display:flex;gap:8px;flex-wrap:wrap;padding:18px 0 14px}
+    .chip{border-radius:999px;min-height:44px;padding-inline:16px}
+    .chip[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+    .chip[data-camino="todos"]{font-weight:900}
+    .status{min-height:24px;margin:0 0 12px;color:var(--on-dark-muted);font-size:14px}
+    .flow-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:start;gap:14px}
+    .flow-lane{min-width:0;background:var(--paper);color:var(--ink);border:1px solid #c9c9c9;border-radius:12px;overflow:hidden;box-shadow:0 5px 18px rgba(0,0,0,.25)}
+    .flow-lane__head{position:relative;padding:16px 16px 14px;background:#171717;color:#fff}
+    .flow-lane__head:after{content:"";position:absolute;right:0;bottom:0;left:0;height:3px;background:var(--green)}
+    .flow-lane__head p{margin:0 0 3px;color:#d2d2d2;font:500 11px/1.35 var(--nm-label);letter-spacing:.08em;text-transform:uppercase}
+    .flow-lane__head h2{margin:0;font:500 19px/1.2 var(--nm-display);text-transform:uppercase}
+    .flow-lane__meta{margin-top:7px;color:#e0e0e0;font:500 12px/1.35 var(--nm-label)}
+    .flow-lane__deviation{margin:12px 12px 0;padding:10px 11px;border-left:3px solid var(--on-dark-muted);background:var(--panel);color:var(--on-dark);font-size:12px;line-height:1.45}
+    .node-list{display:grid;gap:9px;margin:0;padding:12px;list-style:none}
+    .flow-node{min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:9px;padding:10px;border:1px solid #d3d3d0;border-radius:9px;background:#fff}
+    .flow-node--question{border-style:dashed;border-color:#6f6f72;background:var(--black);color:var(--on-dark)}
+    .flow-node--close{background:var(--paper)}
+    .node-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .stage{font:500 11px/1.35 var(--nm-label);letter-spacing:.06em;text-transform:uppercase;color:#303030}
+    .type{display:inline-flex;align-items:center;gap:5px;color:#4b4b4b;font:500 10px/1.35 var(--nm-label);letter-spacing:.05em;text-transform:uppercase}
+    .type:before{content:"";width:8px;height:8px;border:1.5px solid currentColor;border-radius:50%}
+    .flow-node--question .type:before{border-radius:2px;transform:rotate(45deg)}
+    .flow-node--close .type:before{width:9px;height:5px;border-radius:0;border-width:0 0 2px 2px;transform:rotate(-45deg)}
+    .node-thumb{display:block;width:100%;aspect-ratio:1.35;object-fit:cover;object-position:top center;border:1px solid #d4d4d4;border-radius:6px;background:var(--paper)}
+    .node-thumb--placeholder{display:grid;place-items:center;padding:18px;color:#555;text-align:center;font-size:12px;line-height:1.4}
+    .flow-node h3{margin:0;color:var(--ink)!important;font:500 15px/1.25 var(--nm-display);text-transform:uppercase}
+    .screen{margin:3px 0 0;color:#585858;font:500 11px/1.35 var(--nm-label);overflow-wrap:anywhere}
+    .node-copy{display:grid;gap:6px;margin:7px 0 0}
+    .node-copy p{margin:0;color:#373737;font-size:12px;line-height:1.4}
+    .node-copy b{display:block;margin-bottom:1px;color:#4a4a4a;font:500 10px/1.3 var(--nm-label);letter-spacing:.04em;text-transform:uppercase}
+    .node-note{margin:7px 0 0;padding:7px 8px;border-left:2px solid #747474;background:var(--black);color:var(--on-dark);font-size:11px;line-height:1.4}
+    .flow-node--question .stage,.flow-node--question .type,.flow-node--question .screen,.flow-node--question .node-copy p,.flow-node--question .node-copy b,.flow-node--question h3{color:var(--on-dark)!important}
+    .flow-node--question .node-note{background:var(--paper);color:var(--ink)}
+    .node-actions{display:flex;justify-content:flex-end;margin-top:9px}
+    .open-view{min-height:44px;padding:8px 11px;border-radius:7px;font-size:12px}
+    .flow-single{display:block}
+    .flow-single .flow-lane{max-width:1100px;margin:0 auto}
+    .flow-single .flow-lane__head{padding:22px 24px}
+    .flow-single .flow-lane__head h2{font-size:26px}
+    .flow-single .node-list{gap:10px;padding:18px}
+    .flow-single .flow-node{grid-template-columns:minmax(150px,220px) minmax(0,1fr);gap:14px;padding:12px}
+    .flow-single .node-thumb{grid-row:1/7;align-self:start;aspect-ratio:1.25}
+    .flow-single .node-thumb--placeholder{min-height:120px}
+    .flow-single .node-top{grid-column:2}
+    .flow-single .node-main{grid-column:2}
+    .flow-single .node-copy{grid-column:2;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .flow-single .node-note,.flow-single .node-actions{grid-column:2}
+    .flow-single .flow-node h3{font-size:17px}
+    .flow-single .node-copy p{font-size:13px}
+    .flow-single .screen{font-size:12px}
+    .all-caption{margin:0 0 12px;color:var(--on-dark-muted);font:500 14px/1.4 var(--nm-label)}
+    @media(max-width:1100px){.flow-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.flow-single .flow-node{grid-template-columns:minmax(130px,190px) minmax(0,1fr)}}
+    @media(max-width:700px){
+      .flow-page{padding:16px 12px 32px}
+      .mast{display:block;padding-bottom:18px}
+      h1{max-width:15ch;color:var(--on-dark)!important;font-size:36px}
+      .mast-actions{justify-content:flex-start;margin-top:16px}
+      .path-nav{gap:7px;padding:14px 0}
+      .chip{padding:8px 12px;font-size:12px}
+      .flow-grid{grid-template-columns:1fr;gap:12px}
+      .flow-single .flow-node{grid-template-columns:1fr;gap:8px}
+      .flow-single .node-thumb{grid-row:auto;aspect-ratio:1.45}
+      .flow-single .node-top,.flow-single .node-main,.flow-single .node-copy,.flow-single .node-note,.flow-single .node-actions{grid-column:1}
+      .flow-single .node-copy{grid-template-columns:1fr}
+    }
+    @media(max-width:380px){.mast-actions .btn{flex:1}.node-copy p{font-size:11.5px}}
+    @page{size:A4 landscape;margin:10mm}
+    @media print{
+      html,body,body.nm{background:#fff!important;color:#111!important;font-size:10pt}
+      .flow-page{width:auto;max-width:none;padding:0}
+      .mast{padding-bottom:4mm}
+      h1{font-size:27pt}
+      .intro{font-size:9pt;margin-top:2mm}
+      .mast-actions,.path-nav,.status,.node-actions{display:none!important}
+      .flow-grid{display:block!important}
+      .flow-lane{box-shadow:none;border:0;border-radius:0;overflow:visible;break-after:page;page-break-after:always}
+      .flow-lane:last-child{break-after:auto;page-break-after:auto}
+      .flow-lane__head{padding:4mm 5mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .flow-lane__head h2{font-size:17pt}
+      .flow-lane__deviation{margin:3mm 0 0;font-size:8pt}
+      .node-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:2.5mm;padding:3mm 0}
+      .flow-single .node-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .flow-node,.flow-single .flow-node{grid-template-columns:27mm minmax(0,1fr);gap:2mm;padding:2mm;border-radius:2mm;break-inside:avoid;page-break-inside:avoid}
+      .node-thumb,.flow-single .node-thumb{grid-row:1/6;aspect-ratio:1.3;border-radius:1mm}
+      .node-top,.flow-single .node-top,.node-main,.flow-single .node-main,.node-copy,.flow-single .node-copy,.node-note,.flow-single .node-note{grid-column:2}
+      .node-copy,.flow-single .node-copy{grid-template-columns:1fr;gap:1mm;margin-top:1mm}
+      .flow-node h3,.flow-single .flow-node h3{font-size:9pt}
+      .stage,.type{font-size:6.8pt}
+      .screen,.flow-single .screen,.node-copy p,.flow-single .node-copy p,.node-note{font-size:7pt;line-height:1.25}
+      .node-copy b{font-size:6pt}
+      .flow-node--question{background:#fff!important;color:#171717!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .flow-node--question h3,.flow-node--question .stage,.flow-node--question .type,.flow-node--question .screen,.flow-node--question .node-copy p,.flow-node--question .node-copy b{color:#171717!important}
+      a{color:inherit;text-decoration:none}
+    }
+  </style>
+</head>
+<body class="nm">
+  <main class="flow-page">
+    <header class="mast">
+      <div>
+        <p class="eyebrow">Marley Coffee Empresas · prueba con personas</p>
+        <h1>Vistas de flujo por camino</h1>
+        <p class="intro">Secuencia de pantallas, tareas y mediciones para orientar la sesión. Usa los datos ficticios de las fichas y registra lo que ocurra, sin guiar la respuesta.</p>
+      </div>
+      <div class="mast-actions">
+        <a class="btn btn--primary" id="start-flow" href="inicio.html">Iniciar camino</a>
+        <button class="btn" type="button" id="print-flow">Imprimir A4</button>
+      </div>
+    </header>
+    <nav class="path-nav" aria-label="Selecciona un camino" id="path-nav"></nav>
+    <p class="status" id="status" role="status" aria-live="polite">Cargando secuencias y miniaturas…</p>
+    <div id="flow-root" aria-live="polite"></div>
+  </main>
+  <script>
+    (() => {
+      const root = document.getElementById('flow-root');
+      const nav = document.getElementById('path-nav');
+      const status = document.getElementById('status');
+      const start = document.getElementById('start-flow');
+      const currentParam = () => new URL(location.href).searchParams.get('camino') || 'Todos';
+      const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+      const isAll = (id) => id === 'Todos';
+      const helperUrl = (node, flow) => {
+        const stateful = Boolean(node.requiereRecorrido || node.tipo === 'cuestionario' && /pausa|inicial|final/.test(node.url) || node.pendienteArchivo);
+        const dest = node.url || flow.inicio || 'inicio.html';
+        const reason = node.pendienteArchivo
+          ? `El recurso de A7 (${node.archivo}) todavía no está presente; abre el lanzador para iniciar el camino.`
+          : stateful
+            ? 'Esta vista requiere la sesión y los pasos anteriores. Se abre el inicio del camino para usar el estado correcto.'
+            : 'Fuera del recorrido, esta vista muestra datos de ejemplo.';
+        const params = new URLSearchParams({ destino: stateful || node.pendienteArchivo ? (node.inicio || flow.inicio || 'inicio.html') : dest, solicitado: dest, aviso: reason, camino: flow.id });
+        return `abrir-vista.html?${params.toString()}`;
+      };
+      const nodeHtml = (node, flow, index) => {
+        const typeLabel = ({ entrada: 'Entrada', cuestionario: 'Cuestionario', vista: 'Vista', cierre: 'Cierre' })[node.tipo] || node.tipo;
+        const thumb = node.miniatura
+          ? `<img class="node-thumb" src="${esc(node.miniatura)}" alt="Miniatura: ${esc(node.titulo)}" loading="lazy">`
+          : `<div class="node-thumb node-thumb--placeholder">Miniatura pendiente de A7<br>${esc(node.archivo || '')}</div>`;
+        const classes = `flow-node flow-node--${esc(node.tipo)}`;
+        return `<li class="${classes}">
+          ${thumb}
+          <div class="node-top"><span class="stage">${esc(node.etapa || `Paso ${index + 1}`)}</span><span class="type">${esc(typeLabel)}</span></div>
+          <div class="node-main"><h3>${esc(node.titulo)}</h3><p class="screen">${esc(node.pantalla)}</p></div>
+          <div class="node-copy">
+            <p><b>Hace</b>${esc(node.hace)}</p>
+            <p><b>Observar</b>${esc(node.observar)}</p>
+            <p><b>Registrar</b>${esc(node.metrica)}</p>
+          </div>
+          ${node.notaReal ? `<p class="node-note">${esc(node.notaReal)}</p>` : ''}
+          <div class="node-actions"><a class="open-view" target="_blank" rel="noopener" href="${esc(helperUrl(node, flow))}">Abrir vista</a></div>
+        </li>`;
+      };
+      const laneHtml = (flow) => {
+        const count = flow.nodes.length;
+        const roleMeta = flow.rol ? ` · ${flow.tareas} tareas · rol ${flow.rol}` : ` · ${flow.viewport}`;
+        const deviations = (flow.desviaciones || []).map((item) => `<p class="flow-lane__deviation">${esc(item)}</p>`).join('');
+        return `<section class="flow-lane" aria-labelledby="lane-${esc(flow.id)}">
+          <header class="flow-lane__head"><p>${esc(flow.grupo === 'interno' ? 'Equipo interno' : 'Camino externo')}</p><h2 id="lane-${esc(flow.id)}">${esc(flow.nombre)}</h2><div class="flow-lane__meta">${count} nodos${esc(roleMeta)}</div></header>
+          ${deviations}<ol class="node-list">${flow.nodes.map((node, index) => nodeHtml(node, flow, index)).join('')}</ol>
+        </section>`;
+      };
+      const pick = (flows, selected) => {
+        const optionList = [{ id: 'Todos', nombre: 'Todos' }, ...flows.map((flow) => ({ id: flow.id, nombre: flow.nombre }))];
+        nav.innerHTML = optionList.map((item) => `<button class="chip" type="button" data-camino="${esc(item.id)}" aria-pressed="${item.id === selected}">${esc(item.nombre)}</button>`).join('');
+        nav.querySelectorAll('[data-camino]').forEach((button) => button.addEventListener('click', () => {
+          const camino = button.dataset.camino;
+          const url = new URL(location.href);
+          if (camino === 'Todos') url.searchParams.delete('camino'); else url.searchParams.set('camino', camino);
+          history.replaceState(null, '', url);
+          render(flows, camino);
+        }));
+      };
+      function render(flows, selected) {
+        pick(flows, selected);
+        if (isAll(selected)) {
+          start.hidden = true;
+          root.className = 'flow-grid';
+          root.innerHTML = `<p class="all-caption" style="grid-column:1/-1">Comparación de los siete caminos · cuatro externos e internos por rol · abre cualquier nodo en una pestaña nueva.</p>${flows.map(laneHtml).join('')}`;
+        } else {
+          const flow = flows.find((item) => item.id === selected);
+          if (!flow) { render(flows, 'Todos'); return; }
+          start.hidden = false;
+          start.href = `abrir-vista.html?${new URLSearchParams({ destino: flow.inicio || 'inicio.html', solicitado: flow.inicio || 'inicio.html', aviso: `Fuera del recorrido, ${flow.nombre} muestra datos de ejemplo.`, camino: flow.id })}`;
+          root.className = 'flow-single';
+          root.innerHTML = laneHtml(flow);
+        }
+        status.textContent = isAll(selected) ? 'Vista comparativa: selecciona un chip para centrarte en un camino.' : `Camino ${selected} · vista en orden; los saltos de cuestionario los abre el moderador.`;
+      }
+      document.getElementById('print-flow').addEventListener('click', () => window.print());
+      fetch('flujos.json', { cache: 'no-store' }).then((response) => {
+        if (!response.ok) throw new Error(`No se pudo abrir flujos.json (${response.status}).`);
+        return response.json();
+      }).then((data) => {
+        const flows = data.flows || [];
+        if (flows.length !== 7) throw new Error(`Se esperaban 7 caminos y se encontraron ${flows.length}.`);
+        const requested = currentParam();
+        const selected = flows.some((flow) => flow.id === requested) ? requested : 'Todos';
+        render(flows, selected);
+      }).catch((error) => {
+        status.textContent = error.message;
+        root.innerHTML = '<div class="flow-lane"><p class="node-note">Inicia la vista desde localhost para cargar la fuente flujos.json.</p></div>';
+      });
+    })();
+  </script>
+</body>
+</html>

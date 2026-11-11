@@ -1,0 +1,154 @@
+[
+  {
+    "page": "meta.html",
+    "selector": "[data-export=\"meta-carrusel-01\"]",
+    "name": "meta-carrusel-01-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "meta-carrusel-01-1080x1350.png"
+  },
+  {
+    "page": "meta.html",
+    "selector": "[data-export=\"meta-carrusel-02\"]",
+    "name": "meta-carrusel-02-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "meta-carrusel-02-1080x1350.png"
+  },
+  {
+    "page": "meta.html",
+    "selector": "[data-export=\"meta-carrusel-03\"]",
+    "name": "meta-carrusel-03-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "meta-carrusel-03-1080x1350.png"
+  },
+  {
+    "page": "meta.html",
+    "selector": "[data-export=\"meta-carrusel-04\"]",
+    "name": "meta-carrusel-04-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "meta-carrusel-04-1080x1350.png"
+  },
+  {
+    "page": "meta.html",
+    "selector": "[data-export=\"meta-carrusel-05\"]",
+    "name": "meta-carrusel-05-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "meta-carrusel-05-1080x1350.png"
+  },
+  {
+    "page": "meta.html",
+    "selector": "[data-export=\"meta-reel\"]",
+    "name": "meta-reel-1080x1920.png",
+    "width": 1080,
+    "height": 1920,
+    "path": "meta-reel-1080x1920.png"
+  },
+  {
+    "page": "linkedin.html",
+    "selector": "[data-export=\"linkedin-imagen\"]",
+    "name": "linkedin-imagen-1200x1200.png",
+    "width": 1200,
+    "height": 1200,
+    "path": "linkedin-imagen-1200x1200.png"
+  },
+  {
+    "page": "linkedin.html",
+    "selector": "[data-export=\"linkedin-documento-01\"]",
+    "name": "linkedin-documento-01-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "linkedin-documento-01-1080x1350.png"
+  },
+  {
+    "page": "linkedin.html",
+    "selector": "[data-export=\"linkedin-documento-02\"]",
+    "name": "linkedin-documento-02-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "linkedin-documento-02-1080x1350.png"
+  },
+  {
+    "page": "linkedin.html",
+    "selector": "[data-export=\"linkedin-documento-03\"]",
+    "name": "linkedin-documento-03-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "linkedin-documento-03-1080x1350.png"
+  },
+  {
+    "page": "linkedin.html",
+    "selector": "[data-export=\"linkedin-documento-04\"]",
+    "name": "linkedin-documento-04-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "linkedin-documento-04-1080x1350.png"
+  },
+  {
+    "page": "linkedin.html",
+    "selector": "[data-export=\"linkedin-documento-05\"]",
+    "name": "linkedin-documento-05-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "linkedin-documento-05-1080x1350.png"
+  },
+  {
+    "page": "linkedin.html",
+    "selector": "[data-export=\"linkedin-documento-06\"]",
+    "name": "linkedin-documento-06-1080x1350.png",
+    "width": 1080,
+    "height": 1350,
+    "path": "linkedin-documento-06-1080x1350.png"
+  },
+  {
+    "page": "youtube.html",
+    "selector": "[data-export=\"youtube-video\"]",
+    "name": "youtube-video-1280x720.png",
+    "width": 1280,
+    "height": 720,
+    "path": "youtube-video-1280x720.png"
+  },
+  {
+    "page": "youtube.html",
+    "selector": "[data-export=\"youtube-bumper\"]",
+    "name": "youtube-bumper-1280x720.png",
+    "width": 1280,
+    "height": 720,
+    "path": "youtube-bumper-1280x720.png"
+  },
+  {
+    "page": "display.html",
+    "selector": "[data-export=\"display-300x250\"]",
+    "name": "display-300x250.png",
+    "width": 300,
+    "height": 250,
+    "path": "display-300x250.png"
+  },
+  {
+    "page": "display.html",
+    "selector": "[data-export=\"display-728x90\"]",
+    "name": "display-728x90.png",
+    "width": 728,
+    "height": 90,
+    "path": "display-728x90.png"
+  },
+  {
+    "page": "display.html",
+    "selector": "[data-export=\"display-320x50\"]",
+    "name": "display-320x50.png",
+    "width": 320,
+    "height": 50,
+    "path": "display-320x50.png"
+  },
+  {
+    "page": "display.html",
+    "selector": "[data-export=\"display-300x600\"]",
+    "name": "display-300x600.png",
+    "width": 300,
+    "height": 600,
+    "path": "display-300x600.png"
+  }
+]

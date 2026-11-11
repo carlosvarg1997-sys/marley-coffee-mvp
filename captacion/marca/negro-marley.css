@@ -1,0 +1,158 @@
+/* ==========================================================================
+   NEGRO MARLEY · sistema de marca de Marley Coffee Empresas
+   Prototipo académico (TMA1103). Tipografías oficiales de la marca, servidas
+   desde su tienda. Superficies: negro o blanco. Nunca crema.
+   El amarillo es solo para la acción principal y las cifras clave.
+   ========================================================================== */
+
+@font-face{font-family:"Festivo";src:url(https://coffeemarleycl.vtexassets.com/assets/vtex/assets-builder/coffeemarleycl.a21/2.0.3/Festivo/Festivo___482a8574c9946a734d1fb5e58c3b78d7.ttf) format("truetype");font-weight:500;font-display:swap}
+@font-face{font-family:"Pressura";src:url(https://coffeemarleycl.vtexassets.com/assets/vtex/assets-builder/coffeemarleycl.a21/2.0.3/Pressura/GT-Pressura___226f58ab113a6d821def90a7d6dc2427.ttf) format("truetype");font-weight:500;font-display:swap}
+
+:root{
+  color-scheme:dark;
+  /* Superficies */
+  --nm-negro:#0B0B0C;
+  --nm-carbon:#141415;
+  --nm-grafito:#1D1D1F;
+  --nm-linea:#2B2B2E;
+  --nm-linea-2:#3D3D41;
+  /* Texto */
+  --nm-hueso:#F4F1EA;
+  --nm-humo:#B5B1A6;
+  --nm-ceniza:#8F8B81;
+  /* Acción y firma */
+  --nm-oro:#F3C900;
+  --nm-oro-2:#FFD92E;
+  --nm-oro-tinta:#141414;
+  --nm-verde:#376A3C;
+  --nm-rojo:#B33A2D;
+  /* Estados */
+  --nm-error:#FF9485;
+  --nm-ok:#9AD9A6;
+  /* Superficie clara */
+  --nm-blanco:#FFFFFF;
+  --nm-tinta:#171717;
+  --nm-tinta-2:#4A4A4A;
+  --nm-linea-clara:#E2E2E2;
+  /* Tipografía */
+  --nm-display:"Festivo","MC Festivo","Arial Narrow",Impact,sans-serif;
+  --nm-label:"Pressura","MC Pressura",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --nm-text:"Inter","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --nm-h1:clamp(2.6rem,6.6vw + .7rem,5.9rem);
+  --nm-h2:clamp(2rem,3.4vw + .9rem,3.6rem);
+  --nm-h3:clamp(1.25rem,.9vw + 1.05rem,1.6rem);
+  --nm-lead:clamp(1.06rem,.45vw + .96rem,1.28rem);
+  /* Espacio (múltiplos de 4 y 8) */
+  --nm-gutter:clamp(20px,5vw,56px);
+  --nm-max:1200px;
+  --nm-seccion:clamp(64px,10vw,136px);
+  --nm-radio:8px;
+  --nm-radio-lg:18px;
+  --nm-ease:cubic-bezier(.2,.7,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body.nm{
+  margin:0;background:var(--nm-negro);color:var(--nm-hueso);
+  font:400 1rem/1.6 var(--nm-text);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+.nm img,.nm video{display:block;max-width:100%}
+:where(.nm) a{color:inherit}
+.nm :focus-visible{outline:3px solid var(--nm-oro);outline-offset:3px;border-radius:4px}
+.nm-skip{position:absolute;left:-9999px;top:8px;z-index:20;background:var(--nm-oro);color:var(--nm-oro-tinta);padding:10px 14px;border-radius:6px;font-weight:700}
+.nm-skip:focus{left:12px}
+
+/* ---------- Estructura ---------- */
+.nm-wrap{width:100%;max-width:calc(var(--nm-max) + var(--nm-gutter)*2);margin-inline:auto;padding-inline:var(--nm-gutter)}
+.nm-seccion{padding-block:var(--nm-seccion)}
+.nm-seccion--carbon{background:var(--nm-carbon)}
+.nm-seccion--borde{border-top:1px solid var(--nm-linea)}
+
+/* ---------- Tipografía ---------- */
+.nm-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;margin:0 0 18px;
+  font:500 .78rem/1.3 var(--nm-label);letter-spacing:.14em;text-transform:uppercase;color:var(--nm-oro);
+}
+.nm-h1,.nm-h2,.nm-h3{font-family:var(--nm-display);font-weight:500;text-transform:uppercase;margin:0;text-wrap:balance}
+.nm-h1{font-size:var(--nm-h1);line-height:.94;letter-spacing:.005em}
+.nm-h2{font-size:var(--nm-h2);line-height:.98;letter-spacing:.008em}
+.nm-h3{font-size:var(--nm-h3);line-height:1.08;letter-spacing:.02em}
+.nm-lead{font-size:var(--nm-lead);line-height:1.5;color:var(--nm-hueso);max-width:38em;margin:0;text-wrap:pretty}
+.nm-p{margin:0;color:var(--nm-humo);max-width:36em;text-wrap:pretty}
+.nm-nota{font-size:.85rem;line-height:1.5;color:var(--nm-ceniza);margin:0}
+.nm-cifra{font-family:var(--nm-display);color:var(--nm-oro);line-height:.9;letter-spacing:.01em}
+
+/* ---------- Firma tricolor (delgada, nunca fondo) ---------- */
+.nm-firma{
+  display:block;width:72px;height:3px;border:0;margin:0;border-radius:2px;
+  background:linear-gradient(90deg,var(--nm-verde) 0 33.33%,var(--nm-oro) 33.33% 66.66%,var(--nm-rojo) 66.66% 100%);
+}
+
+/* ---------- Botones ---------- */
+.nm-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:12px;
+  min-height:54px;padding:14px 26px;border-radius:var(--nm-radio);border:1px solid transparent;
+  font:500 1.06rem/1 var(--nm-display);letter-spacing:.07em;text-transform:uppercase;text-decoration:none;
+  background:var(--nm-oro);color:var(--nm-oro-tinta);cursor:pointer;
+  transition:background .2s var(--nm-ease),transform .2s var(--nm-ease),border-color .2s var(--nm-ease);
+}
+.nm-btn:hover{background:var(--nm-oro-2)}
+.nm-btn:active{transform:translateY(1px)}
+.nm-btn svg{flex:none;transition:transform .25s var(--nm-ease)}
+.nm-btn:hover svg{transform:translateX(4px)}
+.nm-btn--linea{background:transparent;color:var(--nm-hueso);border-color:var(--nm-linea-2)}
+.nm-btn--linea:hover{background:transparent;border-color:var(--nm-hueso)}
+.nm-btn--ancho{width:100%}
+.nm-btn[disabled]{opacity:.55;cursor:not-allowed}
+.nm-gano{margin:12px 0 0;font-size:.86rem;line-height:1.45;color:var(--nm-humo)}
+
+/* ---------- Tarjetas y pasos ---------- */
+.nm-card{background:var(--nm-grafito);border:1px solid var(--nm-linea);border-radius:var(--nm-radio-lg);padding:clamp(22px,3vw,34px)}
+.nm-paso-num{display:block;font:500 .82rem/1 var(--nm-label);letter-spacing:.14em;color:var(--nm-oro);margin-bottom:18px}
+
+/* ---------- Hoja blanca: lo que queda por escrito ---------- */
+.nm-hoja{background:var(--nm-blanco);color:var(--nm-tinta);border-radius:var(--nm-radio-lg);padding:clamp(24px,4vw,52px)}
+.nm-hoja .nm-eyebrow{color:var(--nm-tinta-2)}
+.nm-hoja .nm-p{color:var(--nm-tinta-2)}
+.nm-hoja .nm-nota{color:#6A6A6A}
+
+/* ---------- Formulario ---------- */
+.nm-campo{display:grid;gap:8px}
+.nm-campo label,.nm-etiqueta{font:500 .76rem/1.3 var(--nm-label);letter-spacing:.12em;text-transform:uppercase;color:var(--nm-humo)}
+.nm-campo input,.nm-campo select{
+  width:100%;min-height:54px;padding:14px 16px;border-radius:var(--nm-radio);
+  border:1px solid var(--nm-linea-2);background:#101011;color:var(--nm-hueso);
+  font:400 1rem/1.3 var(--nm-text);appearance:none;
+  transition:border-color .2s var(--nm-ease),box-shadow .2s var(--nm-ease);
+}
+.nm-campo input::placeholder{color:#77736A}
+.nm-campo input:focus,.nm-campo select:focus{outline:none;border-color:var(--nm-oro);box-shadow:0 0 0 3px rgba(243,201,0,.22)}
+.nm-campo.es-error input{border-color:var(--nm-error)}
+.nm-error{min-height:1.2em;margin:0;font-size:.84rem;line-height:1.35;color:var(--nm-error)}
+.nm-check{display:grid;grid-template-columns:24px 1fr;gap:12px;align-items:start;font-size:.93rem;line-height:1.45;color:var(--nm-hueso);cursor:pointer}
+.nm-check input{appearance:none;width:24px;height:24px;margin:0;border-radius:6px;border:1px solid var(--nm-linea-2);background:#101011;cursor:pointer;display:grid;place-items:center}
+.nm-check input:checked{background:var(--nm-oro);border-color:var(--nm-oro)}
+.nm-check input:checked::after{content:"";width:11px;height:6px;border-left:2.5px solid var(--nm-oro-tinta);border-bottom:2.5px solid var(--nm-oro-tinta);transform:rotate(-45deg) translate(1px,-1px)}
+.nm-check small{display:block;color:var(--nm-ceniza);font-size:.82rem;margin-top:2px}
+
+/* ---------- Deslizador ---------- */
+.nm-rango{width:100%;height:32px;margin:0;background:transparent;appearance:none;cursor:pointer}
+.nm-rango::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--nm-linea-2)}
+.nm-rango::-moz-range-track{height:4px;border-radius:2px;background:var(--nm-linea-2)}
+.nm-rango::-webkit-slider-thumb{appearance:none;width:28px;height:28px;margin-top:-12px;border-radius:50%;background:var(--nm-oro);border:4px solid var(--nm-negro);box-shadow:0 0 0 1px var(--nm-oro)}
+.nm-rango::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--nm-oro);border:4px solid var(--nm-negro);box-shadow:0 0 0 1px var(--nm-oro)}
+
+/* ---------- Movimiento: el contenido se ve aunque no corra ---------- */
+.nm-js .nm-revela{opacity:0;transform:translateY(18px);transition:opacity .7s var(--nm-ease),transform .7s var(--nm-ease)}
+.nm-js .nm-revela.es-visible{opacity:1;transform:none}
+.nm-js .nm-revela[data-retraso="1"]{transition-delay:.08s}
+.nm-js .nm-revela[data-retraso="2"]{transition-delay:.16s}
+.nm-js .nm-revela[data-retraso="3"]{transition-delay:.24s}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .nm-js .nm-revela{opacity:1;transform:none;transition:none}
+  .nm-btn,.nm-btn svg{transition:none}
+}

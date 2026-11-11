@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0B0B0C">
+  <title>Inicio de sesión · Prueba Marley Coffee Empresas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230B0B0C%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%277%27 fill=%27%23F3C900%27/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../../captacion/marca/negro-marley.css">
+  <link rel="stylesheet" href="cuestionarios.css">
+  <style>
+    :root{--page:#0B0B0C;--panel:#141415;--line:#3D3D41;--text:#F4F1EA;--muted:#D0CDC5;--yellow:#F3C900;--green:#376A3C;--red:#B33A2D}
+    html{min-width:320px;background:var(--page);scroll-behavior:auto}
+    body.nm{background:var(--page);color:var(--text);font:400 16px/1.55 var(--nm-text,system-ui,sans-serif)}
+    .skip{position:absolute;left:-9999px;top:8px;z-index:5;background:#fff;color:#171717;padding:10px 14px;border-radius:6px}
+    .skip:focus{left:12px}
+    .wrap{width:min(100%,1240px);margin:0 auto;padding:24px clamp(16px,4vw,48px) 48px}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+    .brand-mark{width:38px;height:38px;border:2px solid var(--text);border-radius:50%;display:grid;place-items:center;color:var(--yellow);font:500 19px/1 var(--nm-display,Impact,sans-serif)}
+    .brand-word{font:500 15px/1.15 var(--nm-label,monospace);letter-spacing:.1em;text-transform:uppercase}
+    .brand-word small{display:block;margin-top:4px;color:var(--muted);font:500 12px/1.2 var(--nm-label,monospace);letter-spacing:.08em}
+    .signature{width:78px;height:3px;margin:0 0 18px;background:linear-gradient(90deg,var(--green) 0 33%,var(--yellow) 33% 66%,var(--red) 66%)}
+    h1,h2,p{margin-top:0}
+    h1{max-width:16ch;margin-bottom:12px;font:500 clamp(2.4rem,5vw,4.3rem)/.96 var(--nm-display,Impact,sans-serif);letter-spacing:.01em;text-transform:uppercase;color:var(--text)}
+    .intro{max-width:68ch;margin:0 0 26px;color:var(--muted);font-size:1.03rem}
+    .controls{display:grid;grid-template-columns:minmax(180px,.85fr) minmax(220px,1.15fr) auto;gap:14px;align-items:end;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:20px}
+    label{display:grid;gap:6px;color:var(--text);font:500 12px/1.3 var(--nm-label,monospace);letter-spacing:.04em;text-transform:uppercase}
+    select{width:100%;min-height:48px;padding:9px 42px 9px 12px;border:1px solid #7b7b7e;border-radius:6px;background:#0B0B0C;color:#F4F1EA;font:600 15px/1.35 var(--nm-text,system-ui,sans-serif)}
+    select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+    .btn{min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border:1px solid #929297;border-radius:6px;background:#1D1D1F;color:var(--text);font:700 14px/1.25 var(--nm-text,system-ui,sans-serif);text-align:center;text-decoration:none;cursor:pointer}
+    .btn:hover{border-color:#fff;background:#252527}
+    .btn--primary{border-color:var(--yellow);background:var(--yellow);color:#171717}
+    .btn--primary:hover{background:#FFD92E;color:#171717}
+    .btn:disabled{opacity:1;cursor:not-allowed;border-color:#626267;background:#333336;color:#A7A7AD}
+    .reset-wrap{display:flex;align-items:end}
+    .reset-wrap .btn{min-height:48px;width:100%;font-size:13px}
+    .group-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch}
+    .path-card{min-width:0;padding:20px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+    .path-card h2{margin:0 0 8px;font:500 25px/1.05 var(--nm-display,Impact,sans-serif);text-transform:uppercase;color:var(--text)}
+    .path-card p{min-height:52px;margin:0 0 16px;color:var(--muted);font-size:14px}
+    .path-actions{display:grid;gap:10px}
+    .path-actions .btn{width:100%}
+    .path-tag{display:inline-block;margin-bottom:10px;color:var(--text);font:500 12px/1.3 var(--nm-label,monospace);letter-spacing:.1em;text-transform:uppercase}
+    .relay{display:flex;align-items:flex-start;gap:10px;min-height:44px;margin:0 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;color:var(--text);font:500 14px/1.4 var(--nm-text,system-ui,sans-serif);letter-spacing:0;text-transform:none;cursor:pointer}
+    .relay:hover{border-color:#929297}
+    .relay input{flex:none;width:22px;height:22px;margin:0;accent-color:#FFFFFF;cursor:pointer}
+    .relay small{display:block;margin-top:2px;color:var(--muted);font-size:13px;font-weight:400}
+    .notice{margin-top:18px;padding:14px 16px;border-left:3px solid var(--yellow);background:#141415;color:var(--text);font-size:14px}
+    .notice strong{color:var(--text)}
+    .materials{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+    .materials a{min-height:44px;display:inline-flex;align-items:center;padding:9px 12px;border:1px solid #77777b;border-radius:6px;color:var(--text);font-size:14px;text-decoration:underline;text-underline-offset:3px}
+    .materials a:hover{border-color:#fff;background:#1D1D1F}
+    .status{min-height:26px;margin:14px 0 0;color:var(--text);font-size:14px}
+    .status[data-kind="error"]{color:#FFB4A9}
+    .status[data-kind="ok"]{color:#C4E7C8}
+    .foot{margin-top:24px;color:var(--muted);font-size:12px}
+    .mc-timejump-empty{margin:20px 0 0;padding:18px;border:1px solid var(--line);border-radius:10px;background:#101011}
+    .mc-timejump-empty h2{margin:0 0 8px;font:500 23px/1.05 var(--nm-display,Impact,sans-serif);text-transform:uppercase}
+    .mc-timejump-empty p{margin:0 0 12px;color:var(--muted);font-size:14px}
+    .mc-timejump-empty__actions{display:flex;flex-wrap:wrap;gap:10px}
+    .mc-timejump-empty[hidden]{display:none}
+    @media(max-width:900px){.group-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.controls{grid-template-columns:1fr 1fr}.reset-wrap{grid-column:1/-1}.reset-wrap .btn{width:auto}}
+    @media(max-width:560px){.wrap{padding:18px 16px 34px}.brand{margin-bottom:26px}.intro{font-size:15px}.controls,.group-grid{grid-template-columns:1fr}.controls{gap:12px;padding:14px}.reset-wrap{grid-column:auto}.reset-wrap .btn{width:100%}.path-card{padding:18px}.path-card p{min-height:0}.path-card h2{font-size:23px}.materials{display:grid}.materials a{width:100%}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+    @media print{body.nm{background:#fff;color:#171717}.wrap{padding:0}.brand,.signature,.controls,.group-grid,.notice,.status,.materials,.foot{display:none!important}h1{color:#171717}}
+  </style>
+</head>
+<body class="nm">
+  <a class="skip" href="#inicio">Saltar al lanzador</a>
+  <main class="wrap" id="inicio">
+    <div class="brand" aria-label="Marley Coffee Empresas">
+      <span class="brand-mark" aria-hidden="true">M</span>
+      <span class="brand-word">Marley Coffee<small>Empresas · prueba con personas</small></span>
+    </div>
+    <div class="signature" aria-hidden="true"></div>
+    <p class="path-tag">Ronda final · moderación</p>
+    <h1>Elige un camino de prueba</h1>
+    <p class="intro">Selecciona participante y perfil. Prepara la sesión desde esta consola: la bienvenida y los cuestionarios se abren en otra pestaña, mientras aquí registras cada etapa. Usa el lanzador desde un servidor local.</p>
+
+    <section class="controls" aria-label="Datos de sesión">
+      <label for="participant">Participante
+        <select id="participant">
+          <option value="P1">P1 · externo</option><option value="P2">P2 · externo</option><option value="P3">P3 · externo</option><option value="P4">P4 · externo</option><option value="P5">P5 · externo</option>
+          <option value="I1">I1 · Ventas</option><option value="I2">I2 · Marketing</option><option value="I3">I3 · Jefatura</option>
+        </select>
+      </label>
+      <label for="profile">Perfil de negocio
+        <select id="profile">
+          <option value="restaurante">Restaurante</option><option value="hotel">Hotel</option><option value="cafeteria">Cafetería</option><option value="oficina">Oficina</option><option value="eventos">Eventos y catering</option><option value="panaderia">Panadería</option><option value="conveniencia">Conveniencia</option>
+        </select>
+      </label>
+      <div class="reset-wrap"><button class="btn" type="button" id="reset">Reiniciar datos</button></div>
+    </section>
+
+    <div class="group-grid">
+      <section class="path-card" aria-labelledby="path-a">
+        <span class="path-tag">Camino A · búsqueda orgánica</span>
+        <h2 id="path-a">Google directo</h2>
+        <p>Empieza con la búsqueda simulada en blanco. No se precarga ninguna consulta.</p>
+        <div class="path-actions"><button class="btn btn--primary" type="button" data-route="A">Abrir Google directo</button></div>
+      </section>
+      <section class="path-card" aria-labelledby="path-b">
+        <span class="path-tag">Camino B · anuncio</span>
+        <h2 id="path-b">Desde un anuncio</h2>
+        <p>Meta, LinkedIn o resultado patrocinado en la búsqueda. Elige la ruta compatible con el perfil.</p>
+        <div class="path-actions">
+          <button class="btn" type="button" data-route="B-Meta">Abrir feed de Meta</button>
+          <button class="btn" type="button" data-route="B-LinkedIn">Abrir feed de LinkedIn</button>
+          <button class="btn" type="button" data-route="B-Google">Abrir anuncio en Google</button>
+        </div>
+      </section>
+      <section class="path-card" aria-labelledby="path-c">
+        <span class="path-tag">Camino C · equipo interno</span>
+        <h2 id="path-c">CRM por rol</h2>
+        <p>Abre el ingreso real de demostración del CRM en R00. Desde allí se entra al rol de la sesión.</p>
+        <label class="relay" for="relay"><input type="checkbox" id="relay"><span>Atender el lead de la persona anterior<small>No borra nada: el CRM muestra «En vivo» el lead que dejó la sesión A o B en este navegador, con su origen.</small></span></label>
+        <div class="path-actions">
+          <button class="btn" type="button" data-route="C" data-role="ventas">C · Ventas</button>
+          <button class="btn" type="button" data-route="C" data-role="marketing">C · Marketing</button>
+          <button class="btn" type="button" data-route="C" data-role="jefatura">C · Jefatura</button>
+        </div>
+      </section>
+    </div>
+
+    <p class="notice"><strong>Datos de ejemplo.</strong> Las pantallas del CRM contienen prospectos ficticios con orígenes simulados; no los reportes como leads reales ni como conversiones de esta prueba. «Reiniciar datos» limpia los datos del prototipo y conserva las respuestas y sesiones de investigación. <strong>Prueba encadenada:</strong> con «Atender el lead de la persona anterior» marcado, C conserva el lead ficticio que acaba de dejar la persona externa en este navegador.</p>
+    <nav class="materials" aria-label="Material de moderación">
+      <a href="Guion_moderador.md">Abrir guion del moderador</a>
+      <a href="Fichas_datos_ficticios.html">Fichas externas E3</a>
+      <a href="Fichas_internos_CRM.html">Fichas internas CRM</a>
+      <a href="flujos.html">Vista de flujos</a>
+      <a href="respuestas.html">Respuestas y exportación</a>
+    </nav>
+    <section class="mc-timejump-empty" id="time-jumps-empty" aria-labelledby="time-jumps-empty-title">
+      <h2 id="time-jumps-empty-title">Saltos de tiempo</h2>
+      <p id="time-jumps-empty-copy">No hay una sesión externa activa. Prepara un camino A o B para habilitar los saltos cuando corresponda.</p>
+      <div class="mc-timejump-empty__actions">
+        <button class="btn" type="button" data-timejump-placeholder="salto_3d" disabled>Saltar 3 días</button>
+        <button class="btn" type="button" data-timejump-placeholder="salto_30d" disabled>Saltar un mes</button>
+      </div>
+    </section>
+    <section class="mc-console" id="moderator-console" aria-labelledby="console-title" hidden>
+      <div class="mc-console__head">
+        <div><p class="path-tag">Consola del moderador</p><h2 id="console-title">Sesión activa</h2></div>
+        <span class="mc-chip" id="console-status">Preparando</span>
+      </div>
+      <dl class="mc-console__summary" id="console-summary"></dl>
+      <div class="mc-console__actions" id="console-actions"></div>
+      <div class="mc-stage-list" id="console-stages"></div>
+      <h3 class="mc-console__subhead">Resumen por etapa</h3>
+      <div class="mc-table-wrap"><table class="mc-table"><thead><tr><th>Etapa</th><th>Resultado</th><th>Tiempo</th><th>Errores</th><th>SEQ</th><th>Nota</th></tr></thead><tbody id="console-stage-summary"></tbody></table></div>
+    </section>
+    <p class="status" id="status" role="status" aria-live="polite">El lanzador solo inicia en localhost; fuera de ese entorno no borra almacenamiento.</p>
+    <p class="foot">Esta es una prueba local del prototipo. No se contacta a personas ni se envían anuncios, correos o propuestas.</p>
+  </main>
+  <script src="cuestionarios.js"></script>
+  <script src="consola.js"></script>
+</body>
+</html>

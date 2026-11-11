@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0B0B0C">
+  <title>Fichas ficticias · usuarios internos de prueba</title>
+  <link rel="stylesheet" href="../../captacion/marca/negro-marley.css">
+  <style>
+    :root{--black:#0B0B0C;--carbon:#141415;--line:#3D3D41;--bone:#F4F1EA;--muted:#D0CDC5;--yellow:#F3C900}
+    html{min-width:320px;background:var(--black)}body.nm{margin:0;background:var(--black);color:var(--bone);font:400 16px/1.55 var(--nm-text,system-ui,sans-serif)}
+    .wrap{width:min(100%,920px);margin:0 auto;padding:22px clamp(16px,4vw,40px) 56px}
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:20px;font:500 13px/1.2 var(--nm-label,monospace);letter-spacing:.08em;text-transform:uppercase}
+    .mark{width:34px;height:34px;border:2px solid var(--bone);border-radius:50%;display:grid;place-items:center;color:var(--yellow);font:500 18px/1 var(--nm-display,Impact,sans-serif)}
+    .signature{height:3px;width:72px;margin:0 0 18px;background:linear-gradient(90deg,#376A3C 0 33%,#F3C900 33% 66%,#B33A2D 66%)}
+    h1{max-width:18ch;margin:0 0 10px;color:var(--bone);font:500 clamp(2.25rem,5vw,3.7rem)/.98 var(--nm-display,Impact,sans-serif);text-transform:uppercase}
+    .intro{max-width:66ch;margin:0 0 18px;color:var(--muted)}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}
+    .btn,.link{min-height:48px;display:inline-flex;align-items:center;justify-content:center;padding:10px 15px;border:1px solid #85858a;border-radius:6px;background:#1D1D1F;color:var(--bone);font:700 14px/1.25 var(--nm-text,system-ui,sans-serif);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+    .btn--primary{background:var(--yellow);border-color:var(--yellow);color:#171717;text-decoration:none}
+    .btn:focus-visible,.link:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+    .cards{display:grid;gap:14px}
+    .credential{min-height:290px;padding:22px;border:1px solid #57575b;border-radius:10px;background:var(--carbon);break-inside:avoid}
+    .credential h2{margin:0 0 14px;color:var(--bone);font:500 28px/1.05 var(--nm-display,Impact,sans-serif);text-transform:uppercase}
+    .role{margin:0 0 18px;color:var(--muted)}
+    dl{display:grid;grid-template-columns:170px minmax(0,1fr);gap:10px;margin:0}
+    dt{color:var(--muted);font:500 12px/1.35 var(--nm-label,monospace);letter-spacing:.06em;text-transform:uppercase}
+    dd{margin:0;color:var(--bone);font-size:17px;font-weight:700;overflow-wrap:anywhere}
+    code{display:inline-block;padding:5px 8px;border:1px solid #77777b;border-radius:4px;background:#0B0B0C;color:#fff;font:700 18px/1.2 ui-monospace,Consolas,monospace}
+    .warning{margin:18px 0 0;padding:12px 14px;border-left:3px solid var(--yellow);background:#0B0B0C;color:var(--bone);font-size:14px}
+    .back{margin-top:20px;min-height:44px;display:inline-flex;align-items:center;color:var(--bone);text-decoration:underline;text-underline-offset:3px}
+    @media(max-width:520px){.credential{padding:18px;min-height:0}dl{grid-template-columns:1fr;gap:4px}dd{margin-bottom:8px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+    @page{size:A4;margin:16mm}
+    @media print{
+      body.nm{background:#fff;color:#171717}.wrap{width:auto;padding:0}.brand,.signature,.toolbar,.back{display:none!important}
+      h1{max-width:none;margin:0 0 5mm;color:#171717;font-size:28pt}.intro{margin:0 0 7mm;color:#333;font-size:10pt}
+      .cards{display:block}.credential{box-sizing:border-box;min-height:0;height:215mm;margin:0;padding:15mm;border:1px solid #777;border-radius:0;background:#fff;color:#171717;page-break-after:always;break-after:page}
+      .credential:last-child{page-break-after:auto;break-after:auto}.credential h2{color:#171717;font-size:25pt}.role,dt{color:#333}dd{color:#171717}code{background:#fff;color:#171717;border-color:#777}
+      .warning{background:#fff;color:#171717;border-color:#777}
+    }
+  </style>
+</head>
+<body class="nm">
+  <main class="wrap">
+    <div class="brand"><span class="mark" aria-hidden="true">M</span>Marley Coffee Empresas · prueba interna</div>
+    <div class="signature" aria-hidden="true"></div>
+    <h1>Accesos ficticios para el CRM</h1>
+    <p class="intro">Entrega solo la ficha del rol asignado. Son cuentas de prueba incorporadas al prototipo local; no corresponden a personas ni permiten entrar a sistemas reales.</p>
+    <div class="toolbar"><button class="btn btn--primary" type="button" onclick="window.print()">Imprimir fichas</button><a class="link" href="inicio.html">Volver al lanzador</a></div>
+    <section class="cards" aria-label="Fichas por rol">
+      <article class="credential">
+        <h2>Ventas</h2><p class="role">Participante interno sugerido: I1 · camino C</p>
+        <dl><dt>Usuario de prueba</dt><dd><code>paula.diaz</code></dd><dt>Clave de prueba</dt><dd><code>prueba</code></dd><dt>Entrada</dt><dd>CRM del prototipo local · pantalla de ingreso</dd></dl>
+        <p class="warning"><strong>Solo para la ronda.</strong> Los prospectos que se muestran son datos sintéticos. No escribas ni uses información de clientes reales.</p>
+      </article>
+      <article class="credential">
+        <h2>Marketing</h2><p class="role">Participante interno sugerido: I2 · camino C</p>
+        <dl><dt>Usuario de prueba</dt><dd><code>marketing</code></dd><dt>Clave de prueba</dt><dd><code>prueba</code></dd><dt>Entrada</dt><dd>CRM del prototipo local · pantalla de ingreso</dd></dl>
+        <p class="warning"><strong>Solo para la ronda.</strong> Los orígenes, piezas y estados son ejemplos. La revisión de marketing no da permiso para enviar un mensaje real.</p>
+      </article>
+      <article class="credential">
+        <h2>Jefatura</h2><p class="role">Participante interno sugerido: I3 · camino C</p>
+        <dl><dt>Usuario de prueba</dt><dd><code>jefatura</code></dd><dt>Clave de prueba</dt><dd><code>prueba</code></dd><dt>Entrada</dt><dd>CRM del prototipo local · pantalla de ingreso</dd></dl>
+        <p class="warning"><strong>Solo para la ronda.</strong> Los indicadores y aprobaciones de la pantalla son simulados; no representan resultados comerciales reales.</p>
+      </article>
+    </section>
+    <a class="back" href="inicio.html">Volver al lanzador de sesiones</a>
+  </main>
+</body>
+</html>

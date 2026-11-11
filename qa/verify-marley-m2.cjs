@@ -114,7 +114,10 @@ function verifyDemoShell(html, file) {
   assert.match(script, /m4-demo-during-task/, `${file}: demo controls disappear while a participant is completing the task`);
   assert.match(script, /if \(isMobile\(\)\) setHidden\(true\);/, `${file}: closing the mobile sheet returns to minimized state`);
   assert.match(css, /max-height:min\(85dvh,760px\)/, `${file}: mobile control sheet is bounded and scrollable`);
-  assert.match(html, /role="dialog" aria-modal="true" aria-label="Controles de demostración" hidden/, `${file}: mobile sheet starts closed and labeled`);
+  assert.match(html, /role="dialog" aria-modal="true" aria-label="Herramientas de revisión" hidden/, `${file}: mobile sheet starts closed and labeled`);
+  assert.match(script, /(?:params\.get\('qa'\) !== '1' \|\| params\.has\('test'\)|new URLSearchParams\(location\.search\)\.get\('qa'\) !== '1'\) return)/, `${file}: review controls only start on an explicit QA route`);
+  assert.match(html, /new URLSearchParams\(location\.search\)\.get\('qa'\) !== '1'\) return ''/, `${file}: customer and participant routes reserve no moderator strip`);
+  assert.doesNotMatch(script, /aria-label="Abrir controles de demostración"[^>]*>Demo<\/button>/, `${file}: no floating Demo tab is rendered`);
   assert.match(script, /localStorage\.setItem\(KEY/, `${file}: hidden preference is saved`);
   assert.match(script, /event\.key === 'Escape'/, `${file}: Escape closes the mobile sheet`);
   assert.match(script, /focusBeforeOpen/, `${file}: sheet manages focus on open and close`);
@@ -269,6 +272,11 @@ function verifyScoring(ctx, file) {
     assert.equal(M.stage(), 'MQL', `${file}: jefatura cannot accept SQL`);
     M.setRole('ventas');
     M.acceptSql();
+    if (['index.html', 'prototipo.html'].includes(file)) {
+      assert.equal(M.stage(), 'MQL', `${file}: SQL stays blocked until a person records MQL`);
+      M.update((s) => { s.events.push({ key: `cycle:${s.lead.id}:lead_qualified:MQL`, eventName: 'lead_qualified', qualification_status: 'MQL', actor_role: 'Marketing', actor_type: 'human', pts: 0, at: M.now() }); });
+      M.acceptSql();
+    }
     assert.equal(M.stage(), 'SQL', `${file}: human acceptance moves lead to SQL`);
     assert.equal(M.get().sql.by, ctx.M4D.ROLE_MENUS.ventas.user, `${file}: SQL records the acting sales user`);
   }
@@ -280,6 +288,10 @@ function verifyScoring(ctx, file) {
     assert.doesNotMatch(ctx.M4R.SCREENS.R07(), /data-a="accept-sql"/, `${file}: ${role} cannot see SQL acceptance in the agent queue`);
   }
   M.setRole('ventas');
+  if (['index.html', 'prototipo.html'].includes(file)) {
+    assert.doesNotMatch(ctx.M4R.SCREENS.R07(), /data-a="accept-sql"/, `${file}: sales cannot accept SQL before a person marks MQL`);
+    M.update((s) => { s.events.push({ key: `cycle:${s.lead.id}:lead_qualified:MQL`, eventName: 'lead_qualified', qualification_status: 'MQL', actor_role: 'Marketing', actor_type: 'human', pts: 0, at: M.now() }); });
+  }
   assert.match(ctx.M4R.SCREENS.R07(), /data-a="accept-sql"/, `${file}: sales sees the human SQL acceptance action`);
 
   const scenarioScores = [];
@@ -761,12 +773,12 @@ function verifySearchLab() {
   const file = path.join(root, 'PRUEBA_CON_PERSONAS', 'serp-seo-aeo-geo.html');
   const html = fs.readFileSync(file, 'utf8');
   assert.match(html, /name="robots" content="noindex,nofollow,noarchive"/i, 'search lab stays out of indexing');
-  assert.match(html, /no representan posiciones reales/i, 'simulated SERP results are not presented as real rankings');
-  assert.match(html, /no son citas emitidas/i, 'AI overview is not presented as a real citation');
-  assert.match(html, /aria-label="Accesos directos propuestos"/, 'search result exposes proposed sitelinks');
-  assert.match(html, /id="faq"[\s\S]*Respuesta directa/, 'AEO answer block exists');
-  assert.match(html, /id="ai-overview"[\s\S]*no son citas emitidas/i, 'GEO concept has explicit source disclosure');
-  assert.match(html, /id="blog"[\s\S]*Contenido útil/, 'value article is testable');
+  assert.match(html, /no consulta Google en vivo ni predice posiciones o citas reales/i, 'simulated SERP results are not presented as live rankings or citations');
+  assert.match(html, /no son una respuesta generada ni citas reales/i, 'AI summary is not presented as a real Google or AI citation');
+  assert.match(html, /aria-label="Accesos directos"/, 'search result exposes direct sitelinks');
+  assert.match(html, /id="faq"[\s\S]*Otras preguntas[\s\S]*¿Cómo elijo una máquina/, 'AEO answers appear as expandable related questions');
+  assert.match(html, /id="ai-overview"[\s\S]*Cotización para empresas[\s\S]*Catálogo de café[\s\S]*no son una respuesta generada/i, 'GEO concept has official sources and explicit simulation disclosure');
+  assert.match(html, /id="blog"[\s\S]*Contenido útil|id="blog"[\s\S]*Blog/, 'value article is testable');
   assert.match(html, /id="query" name="q" type="search" autocomplete="off" placeholder="Buscar en la web" aria-label="Buscar en la web" required/, 'participant enters their own query without suggestions');
   assert.match(html, /aria-label="Google · simulación de búsqueda"/, 'the first study screen is clearly a Google-style search simulation');
   assert.match(html, /id="task-context"[^>]*hidden/, 'task scenario remains hidden unless it is explicitly passed by the integrated test');
@@ -788,7 +800,7 @@ function verifySearchLab() {
   assert.match(html, /data-screen="C11"/, 'direct machine path retains its screen instead of resetting to home');
   assert.match(html, /data-screen="C10"/, 'direct products path retains its screen instead of resetting to home');
   assert.match(html, /data-result="marley"[\s\S]*data-result="guide"[\s\S]*data-result="compare"/, 'SERP stimulus includes alternatives and can control result order');
-  assert.match(html, /data-result="content"[\s\S]*blog-empresas\.html/, 'SERP exposes a value-content hub as a controlled organic result');
+  assert.match(html, /data-result="content"[\s\S]*captacion\/contenidos\/index\.html/, 'SERP exposes the existing content hub as a controlled organic result');
   assert.doesNotMatch(html.slice(0, html.indexOf('<section class="results"')), /Marley Coffee|máquina de café|café para empresas/i, 'brand/category language is hidden before the spontaneous query');
   assert.doesNotMatch(html, /<script[^>]+src=|\bfetch\s*\(/i, 'search lab makes no external analytics or network requests');
   const script = html.match(/<script>([\s\S]*?)<\/script>/i);
@@ -811,15 +823,23 @@ function bootSearchLab(search, sessionStorage, localStorage) {
     append(...children) { this.children = this.children.filter((node) => !children.includes(node)); this.children.push(...children); },
     scrollIntoView() {}, click() {}, matches(selector) { return selector === '[data-prototype]' ? Boolean(this.dataset.prototype) : selector === '[data-handoff]' ? Boolean(this.dataset.handoff) : Boolean(this.dataset.prototype || this.dataset.handoff); },
   }, extra);
-  const nodes = Object.fromEntries(['search','query','results','query-label','serp-list','brand-result','guide-result','compare-result','content-result','organic-title','organic-description','task-context','task-text','download'].map((id) => [id, makeNode({ id })]));
+  const nodes = Object.fromEntries(['search','query','results','query-label','serp-list','brand-result','guide-result','compare-result','content-result','organic-title','organic-description','task-context','task-text','download','ai-overview','ai-title','ai-copy','faq','faq-title'].map((id) => [id, makeNode({ id })]));
   nodes.results.hidden = true;
   nodes['task-context'].hidden = true;
   nodes['organic-title'].dataset.surface = 'resultado-organico'; nodes['organic-title'].dataset.prototype = '1'; nodes['organic-title'].dataset.screen = 'C02';
   nodes['guide-result'].dataset.surface = 'resultado-guia'; nodes['guide-result'].dataset.handoff = '../guia-servicio-cafe.html';
-  nodes['content-result'].dataset.surface = 'resultado-contenido'; nodes['content-result'].dataset.handoff = '../blog-empresas.html';
-  nodes['machine-cta'] = makeNode({ id: 'machine-cta', dataset: { surface: 'maquinas-cta', prototype: '1', screen: 'C11' } });
-  nodes['packs-cta'] = makeNode({ id: 'packs-cta', dataset: { surface: 'packs-cta', prototype: '1', screen: 'C10' } });
-  const links = ['organic-title', 'guide-result', 'machine-cta', 'packs-cta', 'compare-result', 'content-result'].map((id) => nodes[id]);
+  nodes['content-result'].dataset.surface = 'resultado-contenido'; nodes['content-result'].dataset.handoff = '../captacion/contenidos/index.html';
+  const faqItems=[0,1,2].map(()=>makeNode({open:false}));
+  nodes.faq.querySelectorAll=(selector)=>selector==='details'?faqItems:[];
+  const addPrototypeLink=(id,surface,screen)=>{nodes[id]=makeNode({id,dataset:{surface,prototype:'1',screen}});};
+  addPrototypeLink('sitelink-quote','acceso-cotizar','C04');
+  addPrototypeLink('sitelink-products','acceso-packs','C10');
+  addPrototypeLink('sitelink-machines','acceso-maquinas','C11');
+  addPrototypeLink('sitelink-service','acceso-servicio','C02');
+  addPrototypeLink('faq-machine','faq-maquinas','C11');
+  addPrototypeLink('faq-diagnostico','faq-diagnostico','C04');
+  addPrototypeLink('faq-packs','faq-packs','C10');
+  const links = ['organic-title', 'guide-result', 'sitelink-quote','sitelink-products','sitelink-machines','sitelink-service','faq-machine','faq-diagnostico','faq-packs','compare-result','content-result'].map((id) => nodes[id]);
   let blob = null;
   const document = {
     getElementById(id) { return nodes[id] || null; },
@@ -847,11 +867,14 @@ async function verifySearchLabSession() {
   assert.match(page.nodes['organic-title'].href, /mc_session=SERP-/i, 'first-party result carries a session handoff');
   assert.match(page.nodes['organic-title'].href, /mc_phase=title&mc_variant=A/, 'handoff records its actual phase and assigned variant');
   assert.match(page.nodes['organic-title'].href, /mc_surface=resultado-organico/, 'handoff records which result the participant selected');
-  assert.match(page.nodes['machine-cta'].href, /#C11$/, 'direct machine CTA remains a direct machine path');
-  assert.match(page.nodes['packs-cta'].href, /#C10$/, 'direct products CTA remains a direct products path');
+  assert.match(page.nodes['sitelink-machines'].href, /#C11$/, 'machine sitelink remains a direct machine path');
+  assert.match(page.nodes['sitelink-products'].href, /#C10$/, 'product sitelink remains a direct products path');
+  assert.match(page.nodes['sitelink-quote'].href, /#C04$/, 'quote sitelink opens first-contact route');
+  assert.equal(page.nodes['ai-overview'].hidden,false,'query-relevant AI overview appears after a B2B search');
+  assert.equal(page.nodes.faq.hidden,false,'query-relevant FAQ answers appear after a B2B search');
   assert.match(page.nodes['guide-result'].href, /^\.\.\/guia-servicio-cafe\.html\?/, 'guide result preserves its destination while handing off attribution');
   assert.match(page.nodes['guide-result'].href, /mc_surface=resultado-guia/, 'guide result records its entry surface');
-  assert.match(page.nodes['content-result'].href, /^\.\.\/blog-empresas\.html\?/, 'content hub result preserves its destination while handing off attribution');
+  assert.match(page.nodes['content-result'].href, /^\.\.\/captacion\/contenidos\/index\.html\?/, 'content hub result preserves its destination while handing off attribution');
   assert.match(page.nodes['content-result'].href, /mc_surface=resultado-contenido/, 'content hub result records its entry surface');
   assert.ok(page.nodes['serp-list'].children.includes(page.nodes['content-result']), 'value-content result appears in the SERP');
   const click = page.listeners.click[0];
@@ -879,7 +902,8 @@ async function verifySearchLabSession() {
   assert.equal(integrated.nodes['content-result'].target, '_self', 'integrated content result stays in the test tab');
   assert.match(integrated.nodes['organic-title'].href, /test=sitio.*qa=1.*journey=resume/, 'site return keeps test mode and resumes without a new preflight');
   assert.match(integrated.nodes['organic-title'].href, /return=prototipo\.html/, 'site return preserves the prototype entry file');
-  assert.doesNotMatch(integrated.nodes['organic-title'].href, /café|hotel/i, 'raw query is not copied into the CRM-facing URL');
+  const organicHandoffParams = new URL(integrated.nodes['organic-title'].href, 'http://localhost/').searchParams;
+  assert.equal([...organicHandoffParams.values()].includes(integrated.nodes.query.value), false, 'raw query is not copied into the CRM-facing URL');
   const integratedClick = integrated.listeners.click[0];
   integratedClick({ target: { closest() { return integrated.nodes['organic-title']; } } });
   assert.match(integrated.nodes['organic-title'].href, /mc_first_click_surface=resultado-organico/, 'site return records selected surface for test attribution');

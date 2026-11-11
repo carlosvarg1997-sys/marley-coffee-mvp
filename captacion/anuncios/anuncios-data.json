@@ -1,0 +1,1054 @@
+{
+  "site": {
+    "project": "Marley Coffee Empresas",
+    "asOf": "10-nov-2026",
+    "creativePlatform": "Cuentas claras",
+    "status": "Prototipo local · nada activado",
+    "disclaimer": "Pieza académica de Duoc UC (TMA1103). Las condiciones comerciales se confirman en la propuesta de Marley Coffee.",
+    "navigation": [
+      {
+        "id": "index",
+        "label": "Resumen",
+        "file": "index.html"
+      },
+      {
+        "id": "google",
+        "label": "Google Search",
+        "file": "google.html"
+      },
+      {
+        "id": "meta",
+        "label": "Meta",
+        "file": "meta.html"
+      },
+      {
+        "id": "linkedin",
+        "label": "LinkedIn",
+        "file": "linkedin.html"
+      },
+      {
+        "id": "youtube",
+        "label": "YouTube",
+        "file": "youtube.html"
+      },
+      {
+        "id": "display",
+        "label": "Display",
+        "file": "display.html"
+      },
+      {
+        "id": "remarketing",
+        "label": "Remarketing",
+        "file": "remarketing.html"
+      }
+    ]
+  },
+  "budget": {
+    "totalCLP": 24000000,
+    "label": "Presupuesto simulado del plan v2",
+    "assumption": "Distribución global de pauta del contexto vigente. No se propone ritmo mensual ni se proyectan clics, contactos ni resultados comerciales. Las condiciones de activación siguen pendientes.",
+    "rows": [
+      {
+        "channel": "Google Search",
+        "amountCLP": 600000,
+        "note": "Piso aproximado. Sube solo si el universo medido entrega inventario suficiente."
+      },
+      {
+        "channel": "LinkedIn",
+        "amountCLP": 8000000,
+        "note": "Por tramos, según el contexto vigente; no hay calendario aprobado."
+      },
+      {
+        "channel": "Meta",
+        "amountCLP": 1000000,
+        "note": "Línea de piloto del plan; el público medido aparece como demasiado pequeño."
+      },
+      {
+        "channel": "YouTube",
+        "amountCLP": 1000000,
+        "note": "Línea del plan; calendario y distribución de la partida quedan pendientes de revisión."
+      },
+      {
+        "channel": "Google Display",
+        "amountCLP": 1000000,
+        "note": "Condicionado a audiencia elegible, permisos, tamaño mínimo y control de frecuencia."
+      },
+      {
+        "channel": "ChatGPT Ads",
+        "amountCLP": 1000000,
+        "note": "Línea del contexto vigente, fuera de las páginas y maquetas de A4."
+      },
+      {
+        "channel": "Reserva",
+        "amountCLP": 11400000,
+        "note": "Reserva del plan; no se reasigna por intuición."
+      }
+    ]
+  },
+  "taxonomy": {
+    "sources": [
+      "google",
+      "facebook",
+      "instagram",
+      "linkedin",
+      "newsletter",
+      "tiktok"
+    ],
+    "mediums": [
+      "cpc",
+      "paid_social",
+      "email",
+      "organic_social"
+    ],
+    "campaigns": [
+      "horeca_captacion",
+      "horeca_decisores",
+      "horeca_nurturing"
+    ],
+    "rules": "UTM en minúsculas y sin datos personales. El nombre de plataforma sigue PAIS_PLATAFORMA_OBJETIVO_AUDIENCIA_OFERTA_FECHA_V01. Los enlaces internos no llevan UTM."
+  },
+  "google": {
+    "title": "Search con intención B2B",
+    "subtitle": "Cuatro grupos, cuatro anuncios adaptables y destinos alineados con cada intención.",
+    "sourceNote": "Universo de 97 frases de la investigación B2B del 9-nov: 83 coherentes, 7 negativas exactas, 2 para investigar y 5 en revisión. Se seleccionan 52 frases coherentes en cuatro grupos: 12 restaurantes, 9 cafeterías, 8 hoteles y 23 oficinas. Las 31 coherentes no seleccionadas siguen fuera de pauta y no pasan a negativas.",
+    "groups": [
+      {
+        "id": "restaurants",
+        "name": "Restaurantes",
+        "buyer": "Dueño, encargado de compras, jefe de operaciones o administración de restaurante.",
+        "stage": "Consideración y evaluación.",
+        "platformCampaign": "CL_GOOGLE_SEARCH_RESTAURANTES_COTIZA_202612_V01",
+        "primaryUrl": "../landing/restaurantes.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_captacion&utm_content=google_search_restaurantes_rsa_v01&utm_term=cafetera_para_restaurante",
+        "sitelinks": [],
+        "keywords": [
+          "cafetera automatica para restaurante",
+          "cafetera comercial para restaurante",
+          "cafetera industrial para restaurante",
+          "cafetera para restaurante",
+          "cafetera profesional para restaurante",
+          "cafeteras industriales para restaurante",
+          "café para restaurante",
+          "máquina de café para restaurante",
+          "máquina de café para restaurante en comodato",
+          "máquina de café para restaurantes",
+          "proveedor de café para restaurante",
+          "proveedor de café para restaurantes"
+        ],
+        "rsa": {
+          "headlines": [
+            "Café para restaurantes",
+            "Máquina para restaurantes",
+            "Comodato para restaurantes",
+            "Calcula tus tazas al día",
+            "Cuentas claras para tu local",
+            "Tu propuesta por escrito",
+            "Qué incluye el comodato",
+            "Revisa cada condición",
+            "Planifica tu consumo",
+            "Café para tu restaurante",
+            "Máquina para tu servicio",
+            "Consulta por tu negocio",
+            "Decide con información",
+            "Solicita una propuesta",
+            "Café para tu operación"
+          ],
+          "descriptions": [
+            "Indica cuántas tazas sirves y pregunta qué incluye el comodato para tu restaurante.",
+            "Revisa qué condiciones quedan por escrito antes de pedir una propuesta para el local.",
+            "Ordena el consumo de tu restaurante y conversa con el equipo Marley Coffee.",
+            "Consulta una propuesta para tu restaurante; el alcance se confirma por escrito."
+          ]
+        },
+        "hypothesis": {
+          "evidence": "La clasificación del 9-nov identifica frases coherentes con compra de café o máquinas para restaurantes. El inventario se considera bajo.",
+          "tension": "Elegir equipo y café sin tener claras las condiciones del comodato.",
+          "mechanism": "Poner el consumo y las preguntas por escrito al centro del anuncio.",
+          "variable": "Mensaje base de cuentas claras frente a argumento de continuidad (?m=continuidad), una variable por versión.",
+          "indicator": "Lead confirmado y posteriormente calificado por sesión de landing, desde CRM.",
+          "guard": "Coincidencia entre consulta y destino restaurantes; revisar términos reales; no añadir cifras, precios ni condiciones no confirmadas.",
+          "decision": "Mantener solo consultas B2B pertinentes y leads validados; documentar resultados inconclusos como inconclusos."
+        }
+      },
+      {
+        "id": "cafeterias",
+        "name": "Cafeterías",
+        "buyer": "Dueño, encargado de compras, jefe de operaciones o administración de una cafetería.",
+        "stage": "Consideración y evaluación.",
+        "platformCampaign": "CL_GOOGLE_SEARCH_CAFETERIAS_COTIZA_202612_V01",
+        "primaryUrl": "../landing/cafeterias.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_captacion&utm_content=google_search_cafeterias_rsa_v01&utm_term=cafetera_para_cafeteria",
+        "sitelinks": [],
+        "keywords": [
+          "cafetera espresso para cafetería",
+          "cafetera para cafetería pequeña",
+          "café en grano para cafeterías",
+          "café para cafeterías",
+          "insumos de café para cafeterías",
+          "máquina de café para cafetería",
+          "máquina de café para cafetería profesional",
+          "máquina para cafetería",
+          "proveedor de café para cafeterías"
+        ],
+        "rsa": {
+          "headlines": [
+            "Café para cafeterías",
+            "Máquina para cafeterías",
+            "Comodato para cafetería",
+            "Cafetera para tu cafetería",
+            "Tu café, tus condiciones",
+            "Qué incluye el comodato",
+            "Revisa cada condición",
+            "Planifica tus tazas al día",
+            "Tu propuesta por escrito",
+            "Calcula consumo de café",
+            "Máquina para tu servicio",
+            "Consulta por tu negocio",
+            "Decide con información",
+            "Solicita una propuesta",
+            "Café para tu operación"
+          ],
+          "descriptions": [
+            "Indica cuántas tazas sirves y pregunta qué incluye el comodato para tu cafetería.",
+            "Revisa qué condiciones quedan por escrito antes de pedir una propuesta para tu cafetería.",
+            "Ordena el consumo de tu cafetería y conversa con el equipo Marley Coffee.",
+            "Consulta una propuesta para tu cafetería; el alcance se confirma por escrito."
+          ]
+        },
+        "hypothesis": {
+          "evidence": "La clasificación del 9-nov identifica frases coherentes con compra de café o máquinas para cafeterías. El inventario se considera bajo.",
+          "tension": "Comparar equipo y café sin tener claras las condiciones del comodato.",
+          "mechanism": "Ordenar el consumo de la cafetería y pedir el detalle por escrito.",
+          "variable": "Mensaje base de cuentas claras frente a argumento de continuidad (?m=continuidad), una variable por versión.",
+          "indicator": "Lead confirmado y posteriormente calificado por sesión de landing, desde CRM.",
+          "guard": "Coincidencia entre consulta y destino cafeterías; revisar términos reales; no añadir cifras, precios ni condiciones no confirmadas.",
+          "decision": "Mantener solo consultas B2B pertinentes y leads validados; documentar resultados inconclusos como inconclusos."
+        }
+      },
+      {
+        "id": "hotels",
+        "name": "Hoteles",
+        "buyer": "Encargado de compras, administración, jefe de operaciones o responsable del servicio de desayuno.",
+        "stage": "Consideración y evaluación.",
+        "platformCampaign": "CL_GOOGLE_SEARCH_HOTELES_COTIZA_202612_V01",
+        "primaryUrl": "../landing/hoteles.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_captacion&utm_content=google_search_hoteles_rsa_v01&utm_term=cafe_para_hoteles",
+        "sitelinks": [],
+        "keywords": [
+          "café en grano para hoteles",
+          "café para desayuno de hotel",
+          "café para hoteles",
+          "equipamiento de café para hotel",
+          "máquina de café para hotel en comodato",
+          "máquinas de café para hoteles",
+          "proveedor de café en grano para hoteles",
+          "proveedor de café para hoteles"
+        ],
+        "rsa": {
+          "headlines": [
+            "Café para hoteles",
+            "Café para desayuno hotel",
+            "Máquina en comodato",
+            "Planifica el servicio de café",
+            "Calcula tus tazas al día",
+            "Comodato con cuentas claras",
+            "Qué incluye la propuesta",
+            "Consulta condiciones",
+            "Tu propuesta por escrito",
+            "Revisa antes de elegir",
+            "Café para tu alojamiento",
+            "Planifica el consumo",
+            "Café para tu operación",
+            "Pide una propuesta",
+            "Conversa sobre tu hotel"
+          ],
+          "descriptions": [
+            "Planifica el servicio de café del hotel y consulta qué opción se ajusta a tu operación.",
+            "Revisa qué incluye el comodato, quién responde y cómo se coordina la reposición.",
+            "Cuéntanos tus tazas y horarios. Las condiciones se confirman en tu propuesta.",
+            "Solicita una propuesta para tu hotel, con las condiciones por escrito."
+          ]
+        },
+        "hypothesis": {
+          "evidence": "El universo B2B contiene consultas específicas sobre café, desayuno, equipo y proveedores para hoteles. Las lecturas de Google entregan rangos pequeños, no una previsión de campaña para este grupo.",
+          "tension": "Planificar el servicio de café sin conocer consumo ni condiciones antes de comparar.",
+          "mechanism": "Invitar a ordenar tazas y revisar el contenido de la propuesta.",
+          "variable": "Argumento de planificación del servicio frente a argumento de cuentas claras.",
+          "indicator": "Lead confirmado y calificado por sesión de landing de hoteles.",
+          "guard": "No presentar volúmenes de búsqueda pequeños como alcance; validar que la consulta corresponda a un comprador del hotel.",
+          "decision": "Mantener el grupo solo si la consulta es relevante y el CRM confirma calidad; no inferir éxito desde impresiones."
+        }
+      },
+      {
+        "id": "offices",
+        "name": "Oficinas",
+        "buyer": "Encargado de compras, administración, jefatura de operaciones o responsable de OCS.",
+        "stage": "Consideración y evaluación.",
+        "platformCampaign": "CL_GOOGLE_SEARCH_OFICINAS_COTIZA_202612_V01",
+        "primaryUrl": "../landing/oficinas.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_captacion&utm_content=google_search_oficinas_rsa_v01&utm_term=cafe_para_oficinas",
+        "sitelinks": [],
+        "keywords": [
+          "arriendo de máquinas de café para oficinas",
+          "cafetera automatica para oficinas",
+          "cafetera industrial para oficinas",
+          "cafetera para oficina pequeña",
+          "cafeteras para oficinas",
+          "cafeteras para oficinas grandes",
+          "cafeteras para oficinas pequeñas",
+          "café en grano para oficinas",
+          "café para oficina",
+          "café para oficina en grano",
+          "café para oficinas",
+          "coffee break para oficinas",
+          "comodato de café para oficinas",
+          "estaciones de cafe para oficinas",
+          "insumos para máquinas de café para oficina",
+          "maquinas de cafe en grano para oficinas",
+          "maquinas de cafe para oficinas alquiler",
+          "máquina de café para oficina en comodato",
+          "máquinas de café para oficinas",
+          "proveedores de cafe para oficinas",
+          "renta de maquinas de cafe para oficinas",
+          "servicio de cafe para oficinas",
+          "servicio de maquinas de cafe para oficinas"
+        ],
+        "rsa": {
+          "headlines": [
+            "Café para oficinas",
+            "Café para tu equipo",
+            "Máquina en comodato",
+            "Calcula tazas de oficina",
+            "Planifica tu consumo",
+            "Cuentas claras para compras",
+            "Qué incluye la propuesta",
+            "Café en grano para oficina",
+            "Consulta el comodato",
+            "Compara cada condición",
+            "Café para empresas",
+            "Una propuesta por escrito",
+            "Revisa antes de decidir",
+            "Solución para tu operación",
+            "Solicita una propuesta"
+          ],
+          "descriptions": [
+            "Cuéntanos cuántas tazas sirves y revisa una propuesta para tu oficina.",
+            "Antes de decidir, confirma qué incluye el comodato y qué condiciones aplican.",
+            "Ordena tu consumo estimado y conversa con el equipo sobre tu negocio.",
+            "Pide una propuesta para oficinas. Las condiciones se confirman por escrito."
+          ]
+        },
+        "hypothesis": {
+          "evidence": "El export B2B contiene frases de café, máquinas, comodato e insumos para oficinas. LinkedIn sitúa la pauta de oficinas en un proxy caro; el contexto prioriza orgánico, SEO y venta directa.",
+          "tension": "Compras necesita entender uso, reposición y condiciones sin promesas de arriendo.",
+          "mechanism": "Usar lenguaje de comodato, consumo y condiciones por escrito incluso cuando la consulta diga arriendo o renta.",
+          "variable": "Intención de equipo frente a intención de café e insumos.",
+          "indicator": "Lead confirmado y calificado por sesión de landing de oficinas.",
+          "guard": "Las consultas con arriendo, renta o alquiler no prometen arriendo; las condiciones se confirman en la propuesta. No incluir vending como modelo Marley.",
+          "decision": "Mantener términos que generen conversaciones comerciales pertinentes; revisar búsquedas y exclusiones antes de cualquier activación."
+        }
+      }
+    ],
+    "negativeKeywords": [
+      "cafetera barista",
+      "cafetera para restaurantes segunda mano",
+      "distribuidor de café al por mayor",
+      "máquina de café para clínica",
+      "máquina de café para hospital",
+      "maquinas expendedoras de cafe para oficinas",
+      "cafeteras nespresso para oficinas"
+    ],
+    "negativeMatch": "Concordancia exacta: [frase]. No usar negativas amplias como «barista».",
+    "destinationCaveat": "Restaurantes y cafeterías tienen grupos separados, cada uno con su propio anuncio adaptable y su URL final a la landing correspondiente.",
+    "googleForecast": "Sin previsión nueva para el conjunto de 83 frases. El piso aproximado de CLP 600.000 del contexto no equivale a un pronóstico de clics o contactos."
+  },
+  "meta": {
+    "title": "Meta · Reel, carrusel y formulario instantáneo",
+    "subtitle": "Una pregunta concreta para dueños y administradores de locales de comida.",
+    "audience": {
+      "name": "Administradores de páginas de comida y restaurantes",
+      "location": "Santiago",
+      "size": "20.400–24.000",
+      "asOf": "7-nov-2026",
+      "label": "Previsión de tamaño de público de Meta; no es alcance, leads ni resultados.",
+      "caveat": "Meta marcó el público como demasiado pequeño en el borrador de tráfico. No se acepta el aviso de clientes potenciales ni se guarda o activa la campaña."
+    },
+    "reel": {
+      "durationSeconds": 18,
+      "format": "Vertical 9:16 · pieza planteada para Instagram/Facebook Reels",
+      "campaignName": "CL_META_REELS_RESTAURANTES_CONTINUIDAD_202612_V01",
+      "copy": "¿Cuántas tazas sirves al día? Revisa qué incluye el comodato y solicita una propuesta para tu negocio.",
+      "cta": "Solicitar propuesta",
+      "url": "../landing/restaurantes.html?utm_source=instagram&utm_medium=paid_social&utm_campaign=horeca_captacion&utm_content=meta_reel_continuidad_v01&m=continuidad",
+      "scenes": [
+        {
+          "time": "00–03 s",
+          "visual": "Plano cercano de una taza y una máquina de barra. El rótulo queda en el centro seguro.",
+          "overlay": "¿Cuántas tazas sirves al día?",
+          "voiceover": "¿Cuántas tazas sirves al día?"
+        },
+        {
+          "time": "03–07 s",
+          "visual": "Manos preparando una bebida; sin mostrar un local como cliente real.",
+          "overlay": "Parte por tu consumo",
+          "voiceover": "Parte por lo que sirves en tu local."
+        },
+        {
+          "time": "07–11 s",
+          "visual": "La imagen pasa a una hoja de propuesta con secciones sin cifras.",
+          "overlay": "Pregunta qué incluye",
+          "voiceover": "Antes de decidir, pregunta qué incluye el comodato."
+        },
+        {
+          "time": "11–15 s",
+          "visual": "La hoja destaca tres rótulos: quién responde, qué incluye y cómo se repone.",
+          "overlay": "Que quede por escrito",
+          "voiceover": "Confirma quién responde, qué queda incluido y cómo se coordina la reposición."
+        },
+        {
+          "time": "15–18 s",
+          "visual": "Cierre con máquina y firma tricolor delgada.",
+          "overlay": "Solicita una propuesta",
+          "voiceover": "Cuéntanos de tu negocio y solicita una propuesta."
+        }
+      ],
+      "hypothesis": {
+        "buyer": "Dueño, administrador o encargado de compras de restaurante o cafetería.",
+        "stage": "Descubrimiento y consideración.",
+        "evidence": "Social listening registró la pregunta repetida «cuántas tazas»; la muestra de 127 comentarios no es representativa. Meta midió el público definido en 20.400–24.000 personas.",
+        "tension": "No tener claro qué condiciones revisar antes de pedir una propuesta.",
+        "mechanism": "Abrir con el consumo diario y traducir la duda a preguntas verificables.",
+        "variable": "Gancho de tazas al día frente a gancho de condiciones por escrito.",
+        "indicator": "Lead confirmado y calificado por sesión; respuesta utilizable a la pregunta del formulario.",
+        "guard": "Público pequeño; controlar frecuencia y calidad. No presentar el rango de Meta como alcance.",
+        "decision": "Comparar solo con el mismo público y destino; mantener el gancho si ayuda a generar leads calificados sin subir errores o respuestas inútiles."
+      }
+    },
+    "carousel": {
+      "cardCount": 5,
+      "ratio": "4:5 por tarjeta · 1080 × 1350 px, dirección de arte del brief; la ayuda oficial de Meta no permitió confirmar el máximo.",
+      "campaignName": "CL_META_CARRUSEL_RESTAURANTES_COTIZA_202612_V01",
+      "copy": "Antes de comparar propuestas para tu local, empieza por las tazas y revisa qué queda por escrito.",
+      "cta": "Solicitar propuesta",
+      "url": "../landing/restaurantes.html?utm_source=facebook&utm_medium=paid_social&utm_campaign=horeca_captacion&utm_content=meta_carrusel_cuentas_claras_v01",
+      "cards": [
+        {
+          "title": "¿Cuántas tazas al día?",
+          "body": "Parte por tu consumo real.",
+          "image": "../../recursos/maquinas/bar_foto.webp",
+          "alt": "Máquina de espresso de barra Marley Coffee"
+        },
+        {
+          "title": "¿Qué equipo necesitas?",
+          "body": "Pregunta por la opción propuesta.",
+          "image": "../../recursos/maquinas/oficina.webp",
+          "alt": "Equipo para una estación de café de oficina"
+        },
+        {
+          "title": "¿Qué incluye?",
+          "body": "Pide el detalle por escrito.",
+          "image": "../../recursos/productos/catalog/grano.webp",
+          "alt": "Bolsa Marley Coffee de café en grano"
+        },
+        {
+          "title": "¿Quién responde?",
+          "body": "Confirma el canal y el alcance.",
+          "image": "../../recursos/maquinas/bar_foto.webp",
+          "alt": "Máquina de espresso de barra"
+        },
+        {
+          "title": "¿Qué queda por escrito?",
+          "body": "Confirma las condiciones en tu propuesta.",
+          "image": "../../recursos/productos/catalog/grano.webp",
+          "alt": "Café en grano Marley Coffee"
+        }
+      ],
+      "hypothesis": {
+        "buyer": "Comprador de un restaurante o cafetería; administración y dueño incluidos.",
+        "stage": "Consideración.",
+        "evidence": "La investigación de comentarios identifica preguntas sobre alcance del servicio, exclusividad y reposición; muestra no representativa.",
+        "tension": "Las condiciones del comodato se comparan desde puntos distintos y pueden quedar poco claras.",
+        "mechanism": "Secuencia de cinco preguntas que organiza la decisión sin afirmar qué incluye una oferta.",
+        "variable": "Secuencia de preguntas frente a una sola imagen con la misma idea central.",
+        "indicator": "Lead confirmado y calificado por sesión de landing.",
+        "guard": "Cinco tarjetas responden al formato solicitado; ayuda oficial de Meta redirigió a acceso en esta revisión, por lo que no se afirma un límite máximo de tarjetas.",
+        "decision": "Mantener el carrusel si las preguntas ayudan a entender la propuesta sin aumentar leads no pertinentes."
+      }
+    },
+    "instantForm": {
+      "campaignName": "CL_META_FORM_RESTAURANTES_TAZAS_202612_V01",
+      "formTitle": "Tu negocio y el café",
+      "intro": "Responde una pregunta sobre tu consumo. Marley Coffee podrá revisar tu solicitud y las condiciones se confirman en tu propuesta.",
+      "customQuestionCount": 1,
+      "question": "¿Cuántas tazas sirves al día?",
+      "answerPlaceholder": "Escribe una cantidad aproximada",
+      "prefillFields": [
+        "Nombre",
+        "Correo de contacto"
+      ],
+      "privacy": "Usamos tus datos para responder esta solicitud. Recibir guías o novedades es opcional y requiere permiso separado.",
+      "confirmation": "Recibimos tu respuesta. Puedes revisar la propuesta para tu negocio.",
+      "confirmationCta": "Ver propuesta",
+      "confirmationUrl": "../landing/restaurantes.html?utm_source=facebook&utm_medium=paid_social&utm_campaign=horeca_captacion&utm_content=meta_form_tazas_confirmacion_v01",
+      "hypothesis": {
+        "buyer": "Dueño, administrador o encargado de compras de un negocio de comida.",
+        "stage": "Consideración y primer contacto.",
+        "evidence": "La pregunta sobre tazas aparece repetidamente en escucha social; no equivale a validación de demanda.",
+        "tension": "Un formulario puede pedir más contexto del que la persona quiere entregar al inicio.",
+        "mechanism": "Una pregunta abierta y contacto precompletado; solo la respuesta enviada pasa a ser dato.",
+        "variable": "Una pregunta de consumo frente a formulario sin pregunta de calificación.",
+        "indicator": "Formularios confirmados, respuesta utilizable y lead calificado en CRM.",
+        "guard": "La pregunta personalizada es una; contacto y permisos se explican por separado. No guardar texto no enviado ni inferir cantidad.",
+        "decision": "Mantener la pregunta si entrega contexto útil sin deteriorar la calidad o comprensión de la solicitud."
+      }
+    },
+    "specNote": "El Reel de 18 s y las cinco tarjetas son elecciones del brief. El Ads Guide de Meta y el artículo de ayuda de formularios redirigieron a login/bloqueo el 10-nov; se deja constancia y no se atribuyen límites de caracteres o máximos de tarjetas."
+  },
+  "linkedin": {
+    "title": "LinkedIn · guía de comodato e imagen única",
+    "subtitle": "Públicos y previsiones separados por lo que realmente se midió.",
+    "audiences": [
+      {
+        "name": "Alojamiento y restauración + cuatro funciones",
+        "size": "120.000+",
+        "forecast": "30–76 contactos previstos; 140–380 clics previstos en 30 días; CLP 6.091–7.161 por contacto previsto.",
+        "source": "PDF v3 de lecturas LinkedIn y keywords, 9-nov-2026. El Markdown rehecho confirma el tamaño, pero no repite esta previsión.",
+        "buyer": "Operaciones, administración, compras y RR. HH. dentro del sector; el comprador puede ser dueño o encargado de compras.",
+        "status": "Previsión de herramienta, no resultado."
+      },
+      {
+        "name": "Alojamiento y restauración Y diez cargos del comprador",
+        "size": "28.000+",
+        "forecast": "9–41 contactos previstos; 78–190 clics previstos en 30 días; CLP 12.653–14.875 por contacto previsto.",
+        "source": "LECTURAS_LINKEDIN_REHECHO_09NOV.md, 9-nov-2026; cruce Y medido en Campaign Manager.",
+        "buyer": "Comprador, comprador superior, compras, propietario, propietario de restaurante, jefe de cocina, chef y jefe de operaciones.",
+        "status": "Previsión de herramienta, no resultado."
+      },
+      {
+        "name": "Servicios profesionales + funciones, oficinas (proxy)",
+        "size": "240.000+",
+        "forecast": "0–20 contactos previstos; 26–56 clics previstos en 30 días; CLP 44.641–52.482 por contacto previsto.",
+        "source": "PDF v3 de lecturas LinkedIn y keywords, 9-nov-2026. No está repetido en el Markdown rehecho; proxy parcial de oficinas.",
+        "buyer": "Administración y operaciones en servicios profesionales; no representa todas las oficinas.",
+        "status": "Previsión de herramienta, no resultado."
+      }
+    ],
+    "documentAd": {
+      "campaignName": "CL_LINKEDIN_DOCUMENTO_HORECA_COMODATO_202612_V01",
+      "intro": "Guía breve para revisar qué incluye un comodato de máquina de café y qué preguntar antes de comparar.",
+      "headline": "Preguntas antes de comparar un comodato",
+      "cta": "Ver documento",
+      "pageCount": 6,
+      "pages": [
+        {
+          "number": "01",
+          "title": "Preguntas antes de comparar",
+          "body": "Guía de Marley Coffee Empresas para conversar sobre máquina, café y condiciones con datos de tu negocio.",
+          "note": "Las condiciones comerciales se confirman en la propuesta."
+        },
+        {
+          "number": "02",
+          "title": "Empieza por tus tazas",
+          "body": "Anota tazas por día, días de operación y tu receta real. Usa los datos de tu negocio; no necesitas una cifra prestada.",
+          "note": "Estimación: tazas al día × días de operación × gramos por taza ÷ 1.000."
+        },
+        {
+          "number": "03",
+          "title": "Pregunta por la máquina",
+          "body": "¿Qué equipo se propone? ¿En qué horarios y preparaciones se usará? ¿Cómo se relaciona con tu consumo estimado?",
+          "note": "La recomendación depende de la propuesta."
+        },
+        {
+          "number": "04",
+          "title": "Pide el detalle de lo incluido",
+          "body": "Solicita que se especifiquen máquina, café, insumos y servicios asociados, si corresponde.",
+          "note": "No asumas que una categoría está incluida si no aparece por escrito."
+        },
+        {
+          "number": "05",
+          "title": "Aclara servicio y reposición",
+          "body": "¿Quién responde? ¿Por qué canal? ¿Cómo se coordina la reposición y qué ocurre si hay una incidencia?",
+          "note": "Confirma responsables y alcance en la propuesta."
+        },
+        {
+          "number": "06",
+          "title": "Revisa condiciones y cierre",
+          "body": "Pregunta qué compromisos asume cada parte y cuáles son las condiciones para terminar.",
+          "note": "Solicita las condiciones comerciales por escrito antes de decidir."
+        }
+      ],
+      "confirmationUrl": "../landing/restaurantes.html?utm_source=linkedin&utm_medium=paid_social&utm_campaign=horeca_captacion&utm_content=linkedin_documento_confirmacion_v01",
+      "hypothesis": {
+        "buyer": "Encargado de compras, dueño, administración u operaciones de una empresa HORECA.",
+        "stage": "Consideración y evaluación de alternativas.",
+        "evidence": "La escucha social identifica preguntas sobre alcance, exclusividad y servicio; la fuente es una muestra pequeña y no representativa.",
+        "tension": "No saber qué preguntar antes de aceptar un comodato.",
+        "mechanism": "Una guía de seis páginas convierte la evaluación en preguntas concretas.",
+        "variable": "Documento descargable frente a imagen única; mantener audiencia y argumento cuando se compare.",
+        "indicator": "Lead confirmado y calificado en CRM; no contar descarga como cliente.",
+        "guard": "No incluir condiciones Marley no confirmadas; un formulario nativo solo recoge cuatro campos y permiso informado.",
+        "decision": "Comparar calidad comercial y experiencia, no seleccionar por contactos previstos de la plataforma."
+      }
+    },
+    "singleImage": {
+      "campaignName": "CL_LINKEDIN_IMAGEN_HORECA_CUENTAS_CLARAS_202612_V01",
+      "dimensions": "1200 × 1200 px (1:1 cuadrado recomendado para escritorio y móvil)",
+      "intro": "¿Qué debe quedar claro antes de aceptar un comodato? Revisa máquina, alcance, respuesta y reposición.",
+      "imageHeadline": "Antes de comparar, pregunta qué incluye.",
+      "headline": "Cuentas claras para tu negocio",
+      "description": "Las condiciones se confirman en tu propuesta.",
+      "cta": "Solicitar propuesta",
+      "url": "../landing/restaurantes.html?utm_source=linkedin&utm_medium=paid_social&utm_campaign=horeca_captacion&utm_content=linkedin_imagen_cuentas_claras_v01",
+      "hypothesis": {
+        "buyer": "Dueño o responsable de compras y operaciones de un negocio HORECA.",
+        "stage": "Descubrimiento y consideración.",
+        "evidence": "El informe complementario prioriza una creatividad por tensión y una ficha de indicador, evidencia y resguardo.",
+        "tension": "Una propuesta comercial puede dejar preguntas sin resolver.",
+        "mechanism": "Titular de claridad con preguntas accionables, sin afirmar oferta ni beneficio garantizado.",
+        "variable": "Imagen única frente a documento con la misma tensión central.",
+        "indicator": "Lead calificado por sesión y solicitudes con buyer correcto.",
+        "guard": "Imagen estática de 1200 × 628; no usar logos de clientes ni cifras de desempeño.",
+        "decision": "Mantener si facilita solicitudes pertinentes y no crea expectativas sobre condiciones no confirmadas."
+      }
+    },
+    "leadForm": {
+      "formName": "Solicita la guía de comodato",
+      "offerHeadline": "Accede a la guía de comodato",
+      "offerDetail": "Seis páginas de preguntas para revisar antes de comparar propuestas.",
+      "fields": [
+        "Nombre",
+        "Correo de trabajo",
+        "Empresa",
+        "Cargo"
+      ],
+      "cta": "Desbloquear guía",
+      "privacy": "Usamos tus datos para responder esta solicitud. Las comunicaciones promocionales requieren permiso separado.",
+      "confirmation": "Listo. Revisa la guía y, si necesitas una propuesta, continúa con Marley Coffee Empresas.",
+      "confirmationUrl": "../landing/restaurantes.html?utm_source=linkedin&utm_medium=paid_social&utm_campaign=horeca_captacion&utm_content=linkedin_form_confirmacion_v01",
+      "hypothesis": {
+        "buyer": "Comprador o responsable de operaciones de un negocio HORECA.",
+        "stage": "Consideración y captura de solicitud.",
+        "evidence": "LinkedIn recomienda 3–4 campos como buena práctica; el prototipo usa cuatro.",
+        "tension": "Pedir demasiados datos puede dificultar el acceso al contenido.",
+        "mechanism": "Formulario nativo precompletado con cuatro campos relacionados con la solicitud.",
+        "variable": "Cuatro campos frente a una alternativa de tres, si se valida después.",
+        "indicator": "Solicitud confirmada y lead calificado, con campos utilizables.",
+        "guard": "No añadir teléfono, edad o datos no necesarios; separar permiso de respuesta y marketing.",
+        "decision": "Usar el mínimo de campos que permita responder a la solicitud con datos válidos."
+      }
+    },
+    "specNote": "La previsión de oficina procede del PDF v3, no del Markdown rehecho. Mantener ambas fuentes rotuladas; no atribuir al Markdown una cifra que no contiene."
+  },
+  "youtube": {
+    "title": "YouTube · pieza de decisión y bumper",
+    "subtitle": "Vídeo skippable de 20 s y bumper de 6 s; la prueba de pauta sigue pendiente.",
+    "video": {
+      "durationSeconds": 20,
+      "format": "Anuncio de vídeo in-stream saltable, 16:9",
+      "campaignName": "CL_YOUTUBE_VIDEO_RESTAURANTES_COTIZA_202612_V01",
+      "url": "../landing/restaurantes.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_captacion&utm_content=youtube_video_20s_cuentas_claras_v01&m=continuidad",
+      "scenes": [
+        {
+          "time": "00–03 s",
+          "visual": "Taza y máquina, plano cerrado.",
+          "voiceover": "¿Qué necesitas para mantener el servicio de café?",
+          "overlay": "Empieza por tus tazas"
+        },
+        {
+          "time": "03–07 s",
+          "visual": "Registro simple de tazas y horarios, sin cifras prefijadas.",
+          "voiceover": "Parte por lo que sirves y tus días de operación.",
+          "overlay": "Tazas · horarios · receta"
+        },
+        {
+          "time": "07–12 s",
+          "visual": "Hoja de propuesta con títulos, sin precios.",
+          "voiceover": "Pregunta qué incluye el comodato y cómo se coordinan máquina, café y reposición.",
+          "overlay": "Qué incluye · cómo se repone"
+        },
+        {
+          "time": "12–17 s",
+          "visual": "La propuesta destaca alcance, responsable y condiciones.",
+          "voiceover": "Confirma quién responde y qué condiciones quedan por escrito.",
+          "overlay": "Revisa antes de decidir"
+        },
+        {
+          "time": "17–20 s",
+          "visual": "Cierre de marca con una acción.",
+          "voiceover": "Cuéntanos de tu negocio. Solicita una propuesta.",
+          "overlay": "Solicita una propuesta"
+        }
+      ],
+      "hypothesis": {
+        "buyer": "Dueño o encargado de compras/operaciones de restaurante o cafetería; baristas son influenciadores, no necesariamente compradores.",
+        "stage": "Descubrimiento y consideración.",
+        "evidence": "El contexto indica que YouTube llega principalmente a baristas y aficionados; la compra la decide el comprador del negocio.",
+        "tension": "Mantener el servicio requiere saber consumo y condiciones antes de elegir.",
+        "mechanism": "Secuencia breve de consumo, condiciones y solicitud.",
+        "variable": "Vídeo de 20 s frente al bumper de 6 s; mantener tensión y destino.",
+        "indicator": "Formulario válido, lead confirmado y SQL aceptado en CRM.",
+        "guard": "El monto, el ritmo, la medición y la aprobación de la inversión siguen pendientes.",
+        "decision": "Pausar la recomendación si no se verifica el formulario o si la audiencia no es compradora; no decidir por vistas."
+      }
+    },
+    "bumper": {
+      "durationSeconds": 6,
+      "format": "Bumper no saltable · máximo oficial: 6 s",
+      "campaignName": "CL_YOUTUBE_BUMPER_RESTAURANTES_CONTINUIDAD_202612_V01",
+      "url": "../landing/restaurantes.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_captacion&utm_content=youtube_bumper_6s_continuidad_v01&m=continuidad",
+      "beats": [
+        {
+          "time": "00–02 s",
+          "overlay": "¿Qué sostiene tu servicio de café?"
+        },
+        {
+          "time": "02–04 s",
+          "overlay": "Revisa tu consumo y propuesta."
+        },
+        {
+          "time": "04–06 s",
+          "overlay": "Solicita una propuesta."
+        }
+      ],
+      "hypothesis": {
+        "buyer": "Dueño, administrador o compras en restaurante/cafetería.",
+        "stage": "Recordación y remarketing, sujeto a elegibilidad.",
+        "evidence": "El informe plantea YouTube como canal de apoyo y separa la recuperación de la captación.",
+        "tension": "Una pieza larga puede no ajustarse a una exposición breve.",
+        "mechanism": "Repetir una sola pregunta y un CTA simple.",
+        "variable": "Duración y profundidad del mensaje frente a la pieza de 20 s.",
+        "indicator": "Leads confirmados, oportunidades y frecuencia observada.",
+        "guard": "Límite de 6 s verificado en ayuda de Google; audiencia, consentimiento, pago y medición pendientes.",
+        "decision": "Usar como refuerzo únicamente si no sube frecuencia fuera del tope propuesto ni reemplaza la medición comercial."
+      }
+    },
+    "testBudget": {
+      "amountCLP": 200000,
+      "days": 90,
+      "dailyCapCLP": 2200,
+      "note": "Propuesta simulada del plan de prueba del 9-nov. CLP 2.200 × 90 = CLP 198.000; redondeo del plan a CLP 200.000. No está aprobado ni activo."
+    }
+  },
+  "display": {
+    "title": "Display · remarketing adaptable",
+    "subtitle": "Cuatro piezas HTML/CSS con tamaño exacto de inventario; solo se consideran con público elegible.",
+    "campaignName": "CL_GOOGLE_DISPLAY_HORECA_REMARKETING_202612_V01",
+    "creative": {
+      "headline": "Café para tu negocio",
+      "body": "Revisa qué incluye el comodato y qué condiciones quedan por escrito.",
+      "cta": "Solicita propuesta",
+      "background": "../../recursos/maquinas/bar_foto.webp",
+      "urlBase": "../landing/restaurantes.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_nurturing"
+    },
+    "banners": [
+      {
+        "id": "300x250",
+        "width": 300,
+        "height": 250,
+        "content": "display_300x250_cuentas_claras_v01"
+      },
+      {
+        "id": "728x90",
+        "width": 728,
+        "height": 90,
+        "content": "display_728x90_cuentas_claras_v01"
+      },
+      {
+        "id": "320x50",
+        "width": 320,
+        "height": 50,
+        "content": "display_320x50_cuentas_claras_v01"
+      },
+      {
+        "id": "300x600",
+        "width": 300,
+        "height": 600,
+        "content": "display_300x600_cuentas_claras_v01"
+      }
+    ],
+    "hypotheses": {
+      "buyer": "Visitante B2B elegible de la landing de restaurantes; la visita por sí sola no crea un lead.",
+      "stage": "Consideración y recuperación de visita.",
+      "evidence": "Google permite listas de datos propios; Display exige al menos 100 usuarios activos en los últimos 30 días para servir.",
+      "tension": "Dudas sobre qué queda escrito antes de decidir.",
+      "mechanism": "Recordatorio útil con una pregunta de compra y acceso a la landing del comprador.",
+      "variable": "Tamaño/formato de banner, con mensaje constante.",
+      "indicator": "Visita de landing y lead confirmado; después calidad en CRM.",
+      "guard": "Frecuencia propuesta de hasta 3 impresiones por usuario cada 7 días. Solo si el control existe y el público es elegible.",
+      "decision": "Mantener únicamente si el público supera el mínimo, el uso de datos está permitido y la frecuencia se controla."
+    },
+    "uploadNote": "Este artefacto HTML/CSS es una maqueta local, no un ZIP HTML5 listo para subir. Google enumera estos tamaños y exige cumplir elegibilidad de cuenta para HTML5; la cuenta no se modificó.",
+    "sources": [
+      {
+        "label": "Google Ads · tamaños y formatos de anuncios display",
+        "url": "https://support.google.com/google-ads/answer/1722096?hl=en"
+      },
+      {
+        "label": "Google Ads · tamaño mínimo de segmentos de datos",
+        "url": "https://support.google.com/google-ads/answer/7558048?hl=en"
+      }
+    ]
+  },
+  "remarketing": {
+    "title": "Remarketing · cinco escenarios condicionados",
+    "subtitle": "Sistema preparado para una futura validación; sin públicos conectados ni campañas activas.",
+    "googleMinimum": "Google Display, Search y YouTube: mínimo de 100 usuarios activos en los últimos 30 días para que el segmento pueda servir. Si no llega, no se activa.",
+    "frequency": {
+      "cap": 3,
+      "periodDays": 7,
+      "label": "Tope propuesto: hasta 3 impresiones por persona cada 7 días.",
+      "status": "Supuesto operativo de diseño, no frecuencia medida ni configuración activa. Confirmar que la plataforma lo permita; si no, vigilar el promedio y pausar al superar el tope."
+    },
+    "exclusions": [
+      "Clientes activos: excluir de toda campaña de captación y remarketing comercial.",
+      "Leads con solicitud confirmada: excluir de captación general y pasar al CRM.",
+      "Audiencias sin finalidad informada, permiso requerido o base elegible: no usar.",
+      "No subir listas de clientes ni conectar píxeles en este prototipo."
+    ],
+    "scenarios": [
+      {
+        "id": "s1",
+        "name": "Visitó la landing y no inició una solicitud",
+        "audience": "Evento landing_viewed, sin form_start ni lead_created; solo segmento de usuarios elegibles.",
+        "window": "30 días como hipótesis inicial de pertenencia.",
+        "action": "Pieza de Meta o Google que resuelve una pregunta sobre el comodato.",
+        "copy": "Antes de decidir, revisa qué debe quedar por escrito.",
+        "exclusion": "Excluir form_start, lead_created y clientes activos.",
+        "condition": "Permiso y tamaño mínimo de Google. La visita anónima no identifica a la persona.",
+        "destination": "../landing/restaurantes.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_nurturing&utm_content=remarketing_s1_visita_v01",
+        "hypothesis": {
+          "buyer": "Visitante anónimo de restaurante/cafetería con intención B2B.",
+          "stage": "Consideración.",
+          "evidence": "Visita a landing; no implica lead ni interés comercial confirmado.",
+          "tension": "Puede faltar una respuesta antes de iniciar la solicitud.",
+          "mechanism": "Invitar a revisar condiciones concretas, sin decir que sabemos que visitó.",
+          "variable": "Pregunta de comodato frente a mensaje base de propuesta.",
+          "indicator": "Inicio de formulario y lead confirmado, con registro de sesión permitido.",
+          "guard": "Excluir quien inició/completó formulario y clientes activos; mínimo 100 usuarios Google/30 días.",
+          "decision": "Activar solo con audiencia elegible y permiso; detener si el segmento queda bajo el mínimo."
+        }
+      },
+      {
+        "id": "s2",
+        "name": "Inició el formulario y lo abandonó",
+        "audience": "Evento form_start sin lead_created. Mantener el segmento anónimo; no deducir identidad de texto no enviado.",
+        "window": "30 días como hipótesis inicial de pertenencia.",
+        "action": "Recordatorio publicitario genérico. Mensaje individual solo si envió el paso 1 y aceptó recordatorios.",
+        "copy": "Retoma cuando quieras. Revisa la propuesta para tu negocio.",
+        "exclusion": "Excluir lead_created y clientes activos; correo solo con permiso de recordatorios.",
+        "condition": "Audiencia elegible, finalidad y permisos; mínimo de Google antes de servir.",
+        "destination": "../landing/restaurantes.html?utm_source=facebook&utm_medium=paid_social&utm_campaign=horeca_nurturing&utm_content=remarketing_s2_formulario_v01",
+        "hypothesis": {
+          "buyer": "Persona que empezó una solicitud de negocio.",
+          "stage": "Interacción.",
+          "evidence": "El evento form_start se puede registrar sin saber quién es la persona.",
+          "tension": "La persona puede necesitar más tiempo o contexto para completar la solicitud.",
+          "mechanism": "Recordatorio informativo, sin urgencia ni presión.",
+          "variable": "Recordatorio útil frente a ninguna exposición adicional.",
+          "indicator": "Lead confirmado, abandono y frecuencia observada.",
+          "guard": "No capturar correo no enviado. Un recordatorio individual requiere envío válido del paso 1 y permiso.",
+          "decision": "Separar anuncio de email; solo continuar por el canal permitido y con frecuencia dentro del tope."
+        }
+      },
+      {
+        "id": "s3",
+        "name": "Completó el formulario y no avanzó comercialmente",
+        "audience": "lead_created sin lead_qualified o quote_requested según fuente CRM; acceso publicitario solo si la finalidad y el permiso lo permiten.",
+        "window": "90 días propuestos para revisar el caso; periodo pendiente de validación comercial.",
+        "action": "Nurturing desde CRM. Guías promocionales solo con permiso de marketing; respuesta a solicitud sigue su propio propósito.",
+        "copy": "Aclara qué necesitas antes de comparar una propuesta.",
+        "exclusion": "Excluir quote_sent y clientes activos de la campaña de captación general.",
+        "condition": "CRM como fuente comercial; lista publicitaria no se crea ni se sincroniza en A4.",
+        "destination": "../landing/restaurantes.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_nurturing&utm_content=remarketing_s3_lead_v01",
+        "hypothesis": {
+          "buyer": "Lead confirmado, todavía sin avance comercial.",
+          "stage": "Nutrición.",
+          "evidence": "El informe recomienda diferenciar visita, contacto y avance comercial.",
+          "tension": "Puede faltar información para evaluar condiciones o responder dudas.",
+          "mechanism": "Contenido informativo relacionado con el negocio y su etapa.",
+          "variable": "Tema de preguntas frecuentes frente a guía de comodato.",
+          "indicator": "lead_qualified, quote_requested y calidad comercial en CRM.",
+          "guard": "Promoción requiere permiso; datos del CRM no se envían a plataforma en este prototipo.",
+          "decision": "Seguir en CRM según permiso y estado; no usar contactos de plataforma como sustituto de SQL."
+        }
+      },
+      {
+        "id": "s4",
+        "name": "Recibió una cotización y no contrató",
+        "audience": "quote_sent sin contract_signed, registrado por el equipo comercial en CRM.",
+        "window": "90 días propuestos; ajustar al ciclo comercial medido antes de cualquier puesta en marcha.",
+        "action": "Seguimiento comercial personalizado. Anuncio genérico solo si hay permiso, viabilidad y audiencia elegible.",
+        "copy": "Revisa las condiciones de tu propuesta con el equipo.",
+        "exclusion": "Excluir clientes activos, contrato firmado y oportunidades cerradas.",
+        "condition": "No usar presión repetitiva ni inventar descuentos, fechas o condiciones.",
+        "destination": "../landing/restaurantes.html?utm_source=google&utm_medium=cpc&utm_campaign=horeca_nurturing&utm_content=remarketing_s4_cotizacion_v01",
+        "hypothesis": {
+          "buyer": "Comprador y aprobador del negocio con una propuesta abierta.",
+          "stage": "Decisión comercial.",
+          "evidence": "El CRM debe registrar responsable, fecha, objeción y estado de la cotización.",
+          "tension": "Puede necesitar aclarar alcance, costos o condiciones antes de decidir.",
+          "mechanism": "Contacto humano basado en la objeción registrada; publicidad no reemplaza la conversación.",
+          "variable": "Seguimiento comercial individual frente a información genérica de apoyo.",
+          "indicator": "Estado de oportunidad, SQL y contrato según CRM.",
+          "guard": "Solo seguimiento de solicitud y datos permitidos; ninguna urgencia falsa.",
+          "decision": "Priorizar el CRM y mantener publicidad solo si aporta claridad, permiso y frecuencia controlada."
+        }
+      },
+      {
+        "id": "s5",
+        "name": "Contrató y es cliente activo",
+        "audience": "Cuenta con contract_signed y estado activo en CRM.",
+        "window": "Mientras la cuenta tenga estado activo; el estado debe sincronizarse desde CRM antes de cualquier campaña.",
+        "action": "Sale de la captación pagada. Soporte, reposición y expansión se gestionan desde el servicio y el CRM.",
+        "copy": "Tu equipo está disponible para consultas de servicio y reposición según tu acuerdo.",
+        "exclusion": "Exclusión absoluta de captación; no retargeting de cliente activo en este plan.",
+        "condition": "Comunicación de servicio separada de marketing; novedades promocionales requieren permiso.",
+        "destination": "Sin destino de anuncio. No crear campaña para clientes activos.",
+        "hypothesis": {
+          "buyer": "Cliente activo y sus roles de usuario/compra.",
+          "stage": "Alta, deleite y reposición.",
+          "evidence": "El informe indica que el cliente activo sale de captación y pasa a soporte, satisfacción, reposición y expansión.",
+          "tension": "Necesitar ayuda o reponer sin quedar expuesto a mensajes de captación.",
+          "mechanism": "Ruta de servicio en CRM, no anuncio de captación.",
+          "variable": "No aplica a publicidad pagada en A4.",
+          "indicator": "Casos de servicio y pedidos confirmados en sus sistemas fuente.",
+          "guard": "Excluir de todas las audiencias de captación; no inferir recompras por exposición a anuncios.",
+          "decision": "Mantener la exclusión mientras el estado de cliente esté activo; revisar solo el proceso de servicio."
+        }
+      }
+    ],
+    "assumptions": "Las ventanas de 30 y 90 días y el tope de frecuencia son supuestos de diseño, no datos medidos. La frecuencia propuesta es hasta 3 impresiones por usuario cada 7 días. Si no se puede configurar o supervisar, el escenario queda en pausa.",
+    "googleSource": "https://support.google.com/google-ads/answer/7558048?hl=en"
+  },
+  "experiments": [
+    {
+      "channel": "Search",
+      "hypothesis": "El mensaje centrado en las condiciones puede generar solicitudes más pertinentes que un mensaje general.",
+      "variable": "Tensión del mensaje; usar `?m=continuidad` solo en la variante asignada.",
+      "indicator": "Lead confirmado y SQL por sesión de landing.",
+      "guard": "Relevancia de búsqueda, negativas exactas y destino correcto.",
+      "rule": "Revisar términos y calidad en CRM; no escalar con datos insuficientes."
+    },
+    {
+      "channel": "Meta",
+      "hypothesis": "La pregunta sobre tazas facilita que el comprador describa su necesidad.",
+      "variable": "Gancho de los primeros 3 segundos del Reel.",
+      "indicator": "Lead confirmado, respuesta utilizable y SQL.",
+      "guard": "Público Meta medido como pequeño; una pregunta; frecuencia propuesta.",
+      "rule": "Mantener solo si mejora la utilidad sin bajar la calidad o comprensión."
+    },
+    {
+      "channel": "LinkedIn",
+      "hypothesis": "La guía puede ayudar a evaluar condiciones antes de solicitar una propuesta.",
+      "variable": "Documento frente a imagen única con el mismo argumento.",
+      "indicator": "SQL por lead confirmado y costo por SQL cuando exista dato real.",
+      "guard": "Previsiones de audiencia rotuladas; decisión de cuenta LinkedIn pendiente.",
+      "rule": "No escoger formato por contactos estimados; revisar calidad comercial."
+    },
+    {
+      "channel": "YouTube",
+      "hypothesis": "Una versión breve puede comunicar la misma pregunta de compra en menos tiempo.",
+      "variable": "Vídeo skippable de 20 s frente a bumper de 6 s.",
+      "indicator": "Lead confirmado y SQL en CRM.",
+      "guard": "Pago y medición sin validar; aplicar frecuencia propuesta.",
+      "rule": "Pausar si no se puede confirmar el formulario o el segmento elegible."
+    },
+    {
+      "channel": "Display",
+      "hypothesis": "Un recordatorio claro puede traer de vuelta a un comprador elegible.",
+      "variable": "Tamaño del banner; mensaje constante.",
+      "indicator": "Landing vista y lead confirmado, con atribución sin duplicar.",
+      "guard": "Mínimo 100 usuarios activos en 30 días y máximo propuesto de 3 impresiones/7 días.",
+      "rule": "No activar si el público no alcanza el mínimo o la frecuencia no se controla."
+    }
+  ],
+  "sources": [
+    {
+      "platform": "Google Search",
+      "label": "Responsive search ads · títulos y descripciones",
+      "url": "https://support.google.com/google-ads/answer/7684791?hl=en",
+      "checked": "10-nov-2026",
+      "status": "Verificado: 15 títulos hasta 30 caracteres; 4 descripciones hasta 90."
+    },
+    {
+      "platform": "Google Display",
+      "label": "Uploaded display ads · tamaños y HTML5",
+      "url": "https://support.google.com/google-ads/answer/1722096?hl=en",
+      "checked": "10-nov-2026",
+      "status": "Verificado: 300×250, 728×90, 320×50 y 300×600 admitidos; HTML5 ZIP con requisitos de cuenta."
+    },
+    {
+      "platform": "Google Remarketing",
+      "label": "Audience Manager · tamaño de listas",
+      "url": "https://support.google.com/google-ads/answer/7558048?hl=en",
+      "checked": "10-nov-2026",
+      "status": "Verificado: mínimo 100 usuarios activos en los últimos 30 días para Display, Search y YouTube."
+    },
+    {
+      "platform": "Meta Reels",
+      "label": "Ads Guide · Instagram Reels video ads",
+      "url": "https://www.facebook.com/business/ads-guide/update/video/instagram-reels",
+      "checked": "10-nov-2026",
+      "status": "URL oficial consultada; Meta redirigió a login/bloqueo. El 9:16 se usa como elección de maqueta; 18 s sigue el brief. No se afirma un límite oficial de texto."
+    },
+    {
+      "platform": "Meta Carousel",
+      "label": "Ayuda · carousel ads",
+      "url": "https://www.facebook.com/business/help/1033769603329681",
+      "checked": "10-nov-2026",
+      "status": "URL oficial consultada; Meta redirigió a login/bloqueo. Cinco tarjetas siguen el brief; no se afirma máximo de plataforma."
+    },
+    {
+      "platform": "Meta Instant Forms",
+      "label": "Lead Generation Guide · Instant Forms",
+      "url": "https://about.fb.com/ltam/wp-content/uploads/sites/14/2023/11/LeadGenerationGuide.pdf",
+      "checked": "10-nov-2026",
+      "status": "Guía oficial Meta sobre formularios instantáneos y captación; el número de una pregunta lo fija el brief."
+    },
+    {
+      "platform": "LinkedIn Document Ads",
+      "label": "Document ads advertising specifications",
+      "url": "https://www.linkedin.com/help/lms/answer/a499041",
+      "checked": "10-nov-2026",
+      "status": "Verificado: PDF para Lead Gen Forms, hasta 300 páginas; intro y titular con límites oficiales."
+    },
+    {
+      "platform": "LinkedIn Lead Gen",
+      "label": "Lead Gen Forms specifications",
+      "url": "https://business.linkedin.com/advertise/ads/sponsored-content/lead-gen-ads/specs",
+      "checked": "10-nov-2026",
+      "status": "Verificado: 3–4 campos recomendados; máximo de 12; cuestionarios personalizados separados."
+    },
+    {
+      "platform": "LinkedIn Single Image",
+      "label": "Single image ads advertising specifications",
+      "url": "https://www.linkedin.com/help/linkedin/answer/a426534",
+      "checked": "10-nov-2026",
+      "status": "Verificado: 1:1 cuadrado recomendado, 1200×1200 px; también 1.91:1 de 1200×628; texto inicial de 150 caracteres para evitar truncado."
+    },
+    {
+      "platform": "LinkedIn Single Image",
+      "label": "Image ad · recommended square dimensions",
+      "url": "https://business.linkedin.com/advertise/ads/ads-guide/single-image-ads",
+      "checked": "10-nov-2026",
+      "status": "Verificado: formato cuadrado 1:1 recomendado para escritorio y móvil, 1200×1200 px; también admite paisaje y vertical con límites propios."
+    },
+    {
+      "platform": "YouTube",
+      "label": "About video ad formats",
+      "url": "https://support.google.com/google-ads/answer/2375464?hl=en",
+      "checked": "11-nov-2026",
+      "status": "Verificado: bumper de 5–6 s; formato saltable de 20 s cabe en in-stream. La ayuda distingue cada subtipo."
+    },
+    {
+      "platform": "Meta Reels",
+      "label": "Reels Ads creative enhancements",
+      "url": "https://about.fb.com/br/news/2023/10/atualizacoes-do-reels-ads-novos-recursos-de-desempenho-criacao-automatizada-e-solucoes-de-adequacao/",
+      "checked": "10-nov-2026",
+      "status": "Fuente oficial Meta: menciona conversión de creatividades a proporción 9:16; no se usa como prueba de resultados para Marley."
+    },
+    {
+      "platform": "YouTube Thumbnails",
+      "label": "Add custom thumbnails ? YouTube Help",
+      "url": "https://support.google.com/youtube/answer/72431?hl=en",
+      "checked": "11-nov-2026",
+      "status": "Verificado: proporci?n 16:9 y ancho m?nimo de 640 px. La ayuda recomienda 3840?2160; 1280?720 se conserva como tama?o de maqueta solicitado y supera el m?nimo."
+    }
+  ]
+}

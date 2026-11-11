@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#f3f4f6">
+  <title>Feed simulado para prueba</title>
+  <style>
+    :root{color-scheme:light;--paper:#f3f4f6;--card:#fff;--ink:#1d1d1f;--muted:#62666b;--line:#e1e4e8;--yellow:#f3c900;--accent:#315d9a;--measure:560px}
+    *{box-sizing:border-box}
+    html{min-width:320px;background:var(--paper);scroll-behavior:auto}
+    body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 Arial,Helvetica,sans-serif}
+    img{display:block;max-width:100%}
+    a{color:inherit}
+    .feed-shell{width:min(100%,var(--measure));margin:0 auto;padding:0 12px 28px}
+    .feed-topbar{display:flex;align-items:center;gap:11px;min-height:58px;padding:9px 2px 7px}
+    .feed-mark{width:30px;height:30px;flex:0 0 30px;border:2px solid #292b2e;border-radius:9px;position:relative;background:#fff}
+    .feed-mark::before,.feed-mark::after{content:"";position:absolute;background:#303236;border-radius:2px}
+    .feed-mark::before{width:13px;height:3px;left:6px;top:8px;box-shadow:0 6px 0 #303236}
+    .feed-mark::after{width:3px;height:13px;right:6px;top:7px}
+    .feed-top-title{min-width:0;flex:1;font-size:17px;font-weight:700;letter-spacing:-.02em}
+    .feed-search{min-height:36px;display:flex;align-items:center;gap:7px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:#fff;color:#6c7075;font-size:13px;white-space:nowrap}
+    .feed-search::before{content:"";width:10px;height:10px;border:1.6px solid currentColor;border-radius:50%;display:inline-block;box-shadow:4px 4px 0 -2.5px currentColor}
+    .sim-label{margin:0 0 12px;padding:5px 9px;width:max-content;max-width:100%;border:1px solid #d9dde2;border-radius:4px;background:#fff;color:#53575c;font-size:11px;line-height:1.2;letter-spacing:.025em}
+    .feed-stream{display:grid;gap:12px}
+    .feed-post{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:0 1px 2px #15171a0a}
+    .post-head{display:flex;align-items:center;gap:9px;padding:12px 13px 0;min-width:0}
+    .avatar{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:linear-gradient(145deg,#b8c6bc,#e3d6c4);position:relative;overflow:hidden}
+    .avatar::before,.avatar::after{content:"";position:absolute;display:block}
+    .avatar::before{width:12px;height:12px;left:11px;top:6px;border-radius:50%;background:#fff9}
+    .avatar::after{width:25px;height:15px;left:4px;bottom:-5px;border-radius:50% 50% 0 0;background:#fff9}
+    .avatar--two{background:linear-gradient(145deg,#d3c5b4,#a8b9c3)}
+    .avatar--three{background:linear-gradient(145deg,#c9d0b8,#e3cbb9)}
+    .avatar--four{background:linear-gradient(145deg,#a9bbc2,#d8d2c3)}
+    .post-author{min-width:0;flex:1}
+    .post-author strong{display:block;overflow:hidden;color:#34373a;font-size:12px;font-weight:700;white-space:nowrap;text-overflow:ellipsis}
+    .post-author small{display:block;color:#73777c;font-size:11px;line-height:1.25}
+    .post-menu{width:30px;height:30px;display:grid;place-items:center;color:#73777c;font-size:20px;line-height:1}
+    .post-copy{margin:8px 13px 10px;color:#292c30;font-size:14px;line-height:1.4}
+    .neutral-art{height:116px;margin:0 12px;position:relative;overflow:hidden;border-radius:8px;background:#d7dfdc}
+    .neutral-art span{position:absolute;display:block}
+    .neutral-art--one{background:linear-gradient(130deg,#d9e2df 0 40%,#f0e4d1 40% 72%,#c8d1dc 72%)}
+    .neutral-art--one .shape-a{width:42%;height:74%;left:8%;top:13%;border-radius:12px;background:#faf8f1;transform:rotate(-5deg)}
+    .neutral-art--one .shape-b{width:27%;height:58%;right:12%;bottom:0;border-radius:45% 45% 0 0;background:#b4c4bc}
+    .neutral-art--one .shape-c{width:32%;height:3px;left:14%;top:35%;background:#9daaa5;box-shadow:0 12px 0 #c4ccc7,0 24px 0 #c4ccc7}
+    .neutral-art--two{background:linear-gradient(105deg,#d8d2c7,#ece8df 46%,#c3d0cc)}
+    .neutral-art--two .shape-a{width:32%;height:88%;left:9%;bottom:-19%;border-radius:50% 50% 0 0;background:#b7c5bd}
+    .neutral-art--two .shape-b{width:32%;height:68%;left:39%;top:16%;border-radius:8px;background:#fff9}
+    .neutral-art--two .shape-c{width:19%;height:56%;right:8%;bottom:0;background:#9caeb1}
+    .neutral-art--three{background:linear-gradient(145deg,#d8e0e8,#f1e8d8 55%,#d0d9d0)}
+    .neutral-art--three .shape-a{width:23%;aspect-ratio:1;left:12%;top:20%;border-radius:50%;background:#fdfbf6}
+    .neutral-art--three .shape-b{width:38%;height:55%;left:37%;top:27%;border-radius:11px;background:#c0cbc5;transform:rotate(4deg)}
+    .neutral-art--three .shape-c{width:18%;height:77%;right:8%;bottom:-8%;border-radius:50% 50% 0 0;background:#e1cdb7}
+    .neutral-art--four{background:linear-gradient(115deg,#e5dccd,#c8d7d2 50%,#dce1e7)}
+    .neutral-art--four .shape-a{width:70%;height:2px;left:15%;top:28%;background:#a9b4ad;box-shadow:0 16px 0 #b7c0ba,0 32px 0 #c2c8c3}
+    .neutral-art--four .shape-b{width:22%;height:60%;right:13%;bottom:0;background:#b4c2ba;border-radius:45% 45% 0 0}
+    .post-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 13px 11px;color:#656a70;font-size:11px}
+    .post-action-group{display:flex;gap:15px;flex-wrap:wrap}
+    .neutral-post{padding-bottom:1px}
+    .ad-post{border-color:#d4d7dc}
+    .ad-post-head{display:flex;align-items:center;gap:9px;padding:13px 13px 0}
+    .brand-dot{width:34px;height:34px;flex:0 0 34px;border-radius:9px;background:#111;color:#f4f1ea;display:grid;place-items:center;font-size:9px;font-weight:700;letter-spacing:.04em}
+    .ad-publisher{min-width:0;flex:1}
+    .ad-publisher strong{display:block;color:#202225;font-size:12px;line-height:1.25}
+    .ad-publisher small{display:block;color:#72767c;font-size:11px;line-height:1.3}
+    .ad-disclosure{padding:4px 6px;border:1px solid #d8dade;border-radius:3px;color:#65696f;font-size:10px;line-height:1.1;white-space:nowrap}
+    .ad-copy{margin:12px 14px 11px;color:#24272b;font-size:14px;line-height:1.48;overflow-wrap:anywhere}
+    .ad-tap{display:block;min-width:0;margin:0 12px 12px;border:1px solid #dfe1e4;border-radius:9px;overflow:hidden;text-decoration:none;color:inherit;background:#fff}
+    .ad-image{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;background:#0b0b0c}
+    .ad-image.is-square{aspect-ratio:1/1}
+    .ad-cta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;padding:8px 10px 8px 12px;background:#fff}
+    .ad-cta-text{min-width:0;color:#3c4045;font-size:12px;line-height:1.3}
+    .ad-cta-button{min-height:44px;min-width:120px;display:inline-flex;align-items:center;justify-content:center;padding:0 14px;border-radius:6px;background:var(--yellow);color:#151515;font-size:12px;font-weight:700;text-align:center;white-space:nowrap}
+    .ad-tap:focus-visible{outline:3px solid #1d1d1f;outline-offset:3px}
+    .feed-footer{margin:18px 2px 0;color:#747980;font-size:11px;text-align:center}
+    body[data-red="meta"]{--paper:#f2f3f5;--line:#e6e7e9}
+    body[data-red="meta"] .feed-topbar{padding-top:10px}
+    body[data-red="meta"] .feed-mark{border-radius:50%}
+    body[data-red="meta"] .feed-post{border:0;border-radius:16px;box-shadow:0 1px 4px #10151a14}
+    body[data-red="meta"] .post-actions{font-size:12px}
+    body[data-red="linkedin"]{--paper:#f3f4f5;--line:#d9dde1;--accent:#315d9a}
+    body[data-red="linkedin"] .feed-mark{border-radius:6px}
+    body[data-red="linkedin"] .feed-top-title{font-size:16px}
+    body[data-red="linkedin"] .feed-search{border-radius:6px}
+    body[data-red="linkedin"] .feed-post{border-radius:10px;box-shadow:0 1px 2px #10151a0b}
+    body[data-red="linkedin"] .neutral-art{height:104px;border-radius:5px}
+    body[data-red="linkedin"] .ad-post{border:1px solid #d4d7dc}
+    body[data-red="linkedin"] .ad-tap{border-radius:4px}
+    body[data-red="linkedin"] .ad-cta-button{background:#f3c900}
+    @media(min-width:600px){.feed-shell{padding-right:18px;padding-left:18px}.feed-topbar{min-height:64px}.post-copy,.ad-copy{font-size:15px}.neutral-art{height:132px}body[data-red="linkedin"] .neutral-art{height:116px}}
+    @media(max-width:359px){.feed-shell{padding-right:8px;padding-left:8px}.feed-search{padding:0 8px}.ad-cta-button{min-width:110px;padding:0 10px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <div class="feed-shell">
+    <header class="feed-topbar" aria-label="Cabecera del feed">
+      <span class="feed-mark" aria-hidden="true"></span>
+      <div class="feed-top-title">Feed</div>
+      <span class="feed-search" aria-hidden="true">Buscar</span>
+    </header>
+    <p class="sim-label">Simulación de feed para prueba</p>
+    <main id="feed" class="feed-stream" aria-label="Publicaciones">
+      <section id="posts-before" aria-label="Publicaciones anteriores"></section>
+      <article class="feed-post ad-post" id="sponsored-ad" data-testid="sponsored-ad">
+        <header class="ad-post-head">
+          <span class="brand-dot" aria-hidden="true">MC</span>
+          <span class="ad-publisher"><strong>Marley Coffee Empresas</strong><small id="ad-context">Contenido para negocios</small></span>
+          <span class="ad-disclosure">Publicidad</span>
+        </header>
+        <p class="ad-copy" id="ad-copy"></p>
+        <a class="ad-tap" id="ad-link" href="#">
+          <img class="ad-image" id="ad-image" src="" alt="">
+          <span class="ad-cta-row">
+            <span class="ad-cta-text" id="ad-cta-context"></span>
+            <span class="ad-cta-button" id="ad-cta"></span>
+          </span>
+        </a>
+      </article>
+      <section id="posts-after" aria-label="Más publicaciones"></section>
+    </main>
+    <footer class="feed-footer">Fin de la muestra simulada</footer>
+  </div>
+  <script>
+    (()=>{
+      const params=new URLSearchParams(location.search);
+      const red=params.get('red')==='linkedin'?'linkedin':'meta';
+      const profiles={
+        restaurante:{label:'restaurante',slug:'restaurantes',h1:'El café de tu restaurante, con cuentas claras.',copy:'Máquina en comodato, café y productos para tu carta, y un equipo que responde. Todo queda por escrito antes de firmar.',assetGroup:'restaurante',metaAsset:'meta-carrusel-01-1080x1350.png',metaAlt:'Pieza Marley Coffee con una taza y la palabra Tazas.',fallback:''},
+        hotel:{label:'hotel',slug:'hoteles',h1:'El café de tu hotel, del desayuno al evento.',copy:'Una solución para cada punto de servicio: desayuno, lobby y salones. Máquina en comodato, productos y un equipo que responde. Todo queda por escrito antes de firmar.',assetGroup:'hotel',metaAsset:'meta-carrusel-04-1080x1350.png',metaAlt:'Pieza Marley Coffee sobre servicio y alcance.',fallback:''},
+        cafeteria:{label:'cafetería',slug:'cafeterias',h1:'Café y máquina para tu cafetería, con cuentas claras.',copy:'Máquina de barra en comodato, café en grano y productos para tu carta, y un equipo que responde. Todo queda por escrito antes de firmar.',assetGroup:'cafeteria',metaAsset:'meta-carrusel-02-1080x1350.png',metaAlt:'Pieza Marley Coffee sobre el ritmo de servicio.',fallback:''},
+        oficina:{label:'oficina',slug:'oficinas',h1:'Buen café en tu oficina, sin complicarte.',copy:'Máquina automática en comodato, café y productos con reposición coordinada, y un equipo que responde. Todo queda por escrito antes de firmar.',assetGroup:'oficina',metaAsset:'meta-carrusel-03-1080x1350.png',metaAlt:'Pieza Marley Coffee con un ejemplo de tazas por día.',fallback:''},
+        eventos:{label:'eventos',slug:'eventos-catering',h1:'Café para eventos y catering, con cuentas claras.',copy:'Estima tus tazas por servicio y cuéntanos el formato de tus eventos. Las condiciones se confirman en tu propuesta.',assetGroup:'hotel',metaAsset:'meta-carrusel-04-1080x1350.png',metaAlt:'Pieza hotelera Marley Coffee reutilizada para eventos.',fallback:'Sin pieza específica de eventos: usa la pieza de hotel por afinidad con salones y servicios.'},
+        conveniencia:{label:'conveniencia',slug:'conveniencia',h1:'Café para tu local de conveniencia, con cuentas claras.',copy:'Estima el consumo por jornada y cuéntanos cómo atiendes tu local. Las condiciones se confirman en tu propuesta.',assetGroup:'cafeteria',metaAsset:'meta-carrusel-02-1080x1350.png',metaAlt:'Pieza de cafetería Marley Coffee reutilizada para conveniencia.',fallback:'Sin pieza específica de conveniencia: usa la pieza de cafetería por afinidad con servicio de café.'},
+        panaderia:{label:'panadería',slug:'panaderias',h1:'Café para acompañar la atención de tu panadería.',copy:'Estima tazas por día y cuéntanos cómo atiendes tu negocio. Las condiciones se confirman en tu propuesta.',assetGroup:'cafeteria',metaAsset:'meta-carrusel-02-1080x1350.png',metaAlt:'Pieza de cafetería Marley Coffee reutilizada para panadería.',fallback:'Sin pieza específica de panadería: usa la pieza de cafetería por afinidad con servicio de café.'}
+      };
+      const requested=params.get('perfil')||'restaurante';
+      const profile=profiles[requested]||profiles.restaurante;
+      const linkedinAsset='linkedin-imagen-1200x1200.png';
+      const source='evidencia/export/';
+      const imageFile=red==='meta'?profile.metaAsset:linkedinAsset;
+      const image=document.getElementById('ad-image');
+      image.src=source+imageFile;
+      image.alt=red==='meta'?profile.metaAlt:'Pieza Marley Coffee con una propuesta y una máquina de espresso.';
+      if(red==='linkedin')image.classList.add('is-square');
+      document.body.dataset.red=red;
+      document.body.dataset.perfil=requested in profiles?requested:'restaurante';
+      document.documentElement.dataset.ready='1';
+      document.getElementById('ad-copy').textContent=profile.copy;
+      document.getElementById('ad-context').textContent='Café para '+profile.label;
+      document.getElementById('ad-cta-context').textContent=profile.h1;
+      document.getElementById('ad-cta').textContent=red==='linkedin'?'Solicitar propuesta':'Más información';
+      const destination=new URL('../landing/'+profile.slug+'.html',location.href);
+      destination.searchParams.set('utm_source',red);
+      destination.searchParams.set('utm_medium','paid_social');
+      destination.searchParams.set('utm_campaign','horeca_captacion');
+      destination.searchParams.set('utm_content','feed_'+red+'_'+requested+'_v01');
+      for(const key of ['test','mc_session','journey','journey_started_at','camino']){
+        params.getAll(key).forEach(value=>destination.searchParams.append(key,value));
+      }
+      const link=document.getElementById('ad-link');
+      link.href=destination.href;
+      link.setAttribute('aria-label',(red==='linkedin'?'Solicitar propuesta':'Más información')+' para '+profile.label);
+      const neutralBefore=[
+        ['Notas del día','Una pausa corta puede ordenar una agenda cargada.','one'],
+        ['Comunidad','Un espacio claro ayuda a comenzar una tarea.','two'],
+        ['Ideas útiles','Una lista breve deja más tiempo para avanzar.','three'],
+        ['Lecturas de la semana','Los pequeños hábitos hacen más llevadera la jornada.','four']
+      ];
+      const neutralAfter=[
+        ['Comunidad','Una mesa ordenada invita a compartir.','three'],
+        ['Notas del día','La luz de la mañana cambia el ambiente.','one'],
+        ['Ideas útiles','Planificar la semana puede empezar con una nota.','two']
+      ];
+      const renderPosts=(items)=>items.map(([author,copy,art],i)=>'<article class="feed-post neutral-post"><header class="post-head"><span class="avatar avatar--'+(i+1)+'" aria-hidden="true"></span><span class="post-author"><strong>'+author+'</strong><small>Actualización · hace un momento</small></span><span class="post-menu" aria-hidden="true">···</span></header><p class="post-copy">'+copy+'</p><div class="neutral-art neutral-art--'+art+'" aria-hidden="true"><span class="shape-a"></span><span class="shape-b"></span><span class="shape-c"></span></div><footer class="post-actions"><span class="post-action-group"><span>Me gusta</span><span>Comentar</span></span><span>Compartir</span></footer></article>').join('');
+      document.getElementById('posts-before').innerHTML=renderPosts(neutralBefore);
+      document.getElementById('posts-after').innerHTML=renderPosts(neutralAfter);
+    })();
+  </script>
+</body>
+</html>

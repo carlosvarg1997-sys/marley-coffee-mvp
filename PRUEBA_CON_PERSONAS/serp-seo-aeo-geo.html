@@ -14,6 +14,19 @@
     .results{max-width:780px}.query-label{color:var(--muted);font-size:13px;padding:8px 0 12px;border-bottom:1px solid var(--line)}.serp-list{display:flex;flex-direction:column}.result{padding:17px 0;border-bottom:1px solid #eceff1}.source{font-size:12px;color:#3c4043;margin-bottom:2px}.title{display:inline-block;color:var(--blue);font-size:20px;line-height:1.3;text-decoration:none}.title:hover,.sitelinks a:hover,.citation a:hover{text-decoration:underline}.description{max-width:700px;color:#4d5156;margin:5px 0 0}.sitelinks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;margin-top:12px}.sitelinks a,.citation a{color:var(--blue);text-decoration:none;font-size:14px}.answer,.ai,.blog{background:var(--soft);border:1px solid #e4e6e8;border-radius:12px;padding:18px;margin:18px 0}.answer p,.ai p,.blog p{margin:6px 0}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#5f6368;font-weight:700;margin-bottom:6px}.citation{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px}.citation a{font-size:12px}.disclosure{font-size:12px;color:var(--muted);border-top:1px solid #e0e2e5;margin-top:12px;padding-top:9px}.blog section{margin-top:16px}.blog h3{font-size:15px}.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}.secondary{border:1px solid #c7c9cc;border-radius:999px;padding:10px 15px;color:#333;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;min-height:44px}.moderator{margin-top:30px;border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:12px}.moderator summary{cursor:pointer;font-weight:700}.moderator button{margin-top:10px;background:#f1f3f4;min-height:38px;padding:8px 12px}
     [hidden]{display:none!important}@media(max-width:560px){header{padding-block:14px}.test-label{max-width:120px;text-align:right}main{width:100%;min-width:0}.intro,.results{width:100%;max-width:100%;min-width:0}form{flex-direction:column;width:100%;max-width:100%;min-width:0}form input,form button{width:100%;min-width:0}.notice,.task-context{width:100%;overflow-wrap:anywhere}.sitelinks{grid-template-columns:1fr;gap:8px}.title{font-size:18px}.result{padding:15px 0}.actions{align-items:stretch}.actions a{width:100%}}
   </style>
+  <style>
+    .serp-favicon{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;margin-right:6px;border-radius:50%;background:#171717;color:#f3c900;font-weight:800}
+    .ai-overview{padding:16px 18px;margin:12px 0 18px;border-color:#e4e7eb;background:#f8f9fa}
+    .ai-overview h2{font-size:18px;margin:0 0 7px}.ai-overview .eyebrow{color:#5f6368}
+    .ai-overview .citation a{padding:5px 9px;border:1px solid #dadce0;border-radius:999px;background:#fff}
+    .also-ask{margin:22px 0;padding:0 0 14px;border-bottom:1px solid var(--line)}
+    .also-ask h2{font-size:18px;margin:0 0 8px}.also-ask details{border-top:1px solid var(--line);padding:12px 0}
+    .also-ask summary{font-weight:700;cursor:pointer;list-style:none;padding-right:25px;position:relative}
+    .also-ask summary::-webkit-details-marker{display:none}.also-ask summary:after{content:'+';position:absolute;right:3px;top:-2px;color:#5f6368;font-size:22px;font-weight:400}
+    .also-ask details[open] summary:after{content:'−'}.also-ask details p{margin:9px 0 4px}
+    .faq-link{display:inline-block;margin-top:4px;color:var(--blue);font-size:13px;text-decoration:none}
+    @media(max-width:560px){.ai-overview{padding:14px}.ai-overview .citation{display:grid;gap:8px}.ai-overview .citation a{width:100%;padding:8px 10px}.also-ask{margin-top:18px}}
+  </style>
 </head>
 <body>
   <header aria-label="Google · simulación de búsqueda"><span class="google-wordmark" aria-hidden="true"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span></span><span class="test-label">Simulación</span></header>
@@ -27,78 +40,71 @@
         <input id="query" name="q" type="search" autocomplete="off" placeholder="Buscar en la web" aria-label="Buscar en la web" required>
         <button type="submit">Buscar</button>
       </form>
-      <div class="notice">Simulación controlada de Google: los resultados no son en vivo y no representan posiciones reales. Tu consulta se guarda solo en esta pestaña.</div>
+      <div class="notice">Búsqueda simulada para evaluar el recorrido: no consulta Google en vivo ni predice posiciones o citas reales. Tu consulta se guarda solo en esta pestaña.</div>
     </section>
     <section class="results" id="results" aria-live="polite" hidden>
       <div class="query-label" id="query-label"></div>
+      <section class="ai ai-overview" id="ai-overview" aria-labelledby="ai-title" hidden>
+        <div class="eyebrow">Resumen con IA · respuesta y fuentes simuladas</div>
+        <h2 id="ai-title">Qué revisar antes de cotizar café para un negocio</h2>
+        <p id="ai-copy">Compara cómo se prepara y sirve el café, los momentos de mayor demanda, las bebidas y los productos que requiere la operación. Si ya conoces el equipo, puedes indicarlo; si no, el diagnóstico orienta la recomendación.</p>
+        <div class="citation" id="sources">
+          <a href="https://www.marleycoffee.cl/cotizaconmarleycoffee" target="_blank" rel="noopener noreferrer" data-surface="fuente-cotizacion">Cotización para empresas · Marley Coffee</a>
+          <a href="https://www.marleycoffee.cl/cafe" target="_blank" rel="noopener noreferrer" data-surface="fuente-catalogo">Catálogo de café · Marley Coffee</a>
+        </div>
+        <div class="disclosure">Texto y enlaces preparados para este test. No son una respuesta generada ni citas reales de Google u otra IA.</div>
+      </section>
       <div class="serp-list" id="serp-list">
+        <article class="result" id="sponsored-result" data-result="sponsored" hidden>
+          <div class="source"><strong>Patrocinado</strong> · Marley Coffee Empresas · anuncio simulado</div>
+          <a class="title" id="sponsored-title" data-surface="resultado-anuncio" data-paid="true" data-handoff="../captacion/landing/restaurantes.html" href="../captacion/landing/restaurantes.html">Café para tu negocio con cuentas claras</a>
+          <p class="description">Máquina en comodato, café y productos para tu negocio. Conoce cómo funciona y solicita una propuesta.</p>
+        </article>
         <article class="result" id="brand-result" data-result="marley">
-          <div class="source">marleycoffee.cl › empresas · ejemplo simulado</div>
-          <a class="title" id="organic-title" data-surface="resultado-organico" data-prototype data-screen="C02" href="../index.html#C02" target="_blank" rel="noopener"></a>
+          <div class="source"><span class="serp-favicon" aria-hidden="true">M</span><span>Marley Coffee Empresas</span><span> · marleycoffee.cl › empresas</span></div>
+          <a class="title" id="organic-title" data-surface="resultado-organico" data-handoff="../captacion/soluciones/restaurantes.html" href="../captacion/soluciones/restaurantes.html" target="_blank" rel="noopener"></a>
           <p class="description" id="organic-description"></p>
-          <nav class="sitelinks" aria-label="Accesos directos propuestos">
-            <a href="#machine" data-surface="acceso-maquinas">Máquinas</a>
-            <a href="#packs" data-surface="acceso-packs">Productos y packs</a>
-            <a href="#how" data-surface="acceso-como-funciona">Cómo funciona</a>
-            <a href="#faq" data-surface="acceso-preguntas">Preguntas</a>
+          <nav class="sitelinks" aria-label="Accesos directos">
+            <a href="../captacion/soluciones/restaurantes.html" data-prototype="1" data-surface="acceso-cotizar" data-dest="solution">Iniciar cotización</a>
+            <a href="../index.html#C10" data-prototype="1" data-surface="acceso-packs" data-dest="portal-products" data-screen="C10">Productos y packs</a>
+            <a href="../index.html#C11" data-prototype="1" data-surface="acceso-maquinas" data-dest="portal-machines" data-screen="C11">Máquinas y comodato</a>
+            <a href="../captacion/contenidos/comodato-maquina-de-cafe.html" data-prototype="1" data-surface="acceso-servicio" data-dest="guide-comodato">Cómo funciona el servicio</a>
           </nav>
         </article>
         <article class="result" id="guide-result" data-result="guide">
-          <div class="source">Guía práctica · resultado simulado</div>
-          <a class="title" href="../guia-servicio-cafe.html" data-surface="resultado-guia" data-handoff="../guia-servicio-cafe.html" target="_blank" rel="noopener">Planificar el servicio de café de un negocio</a>
+          <div class="source">Guía para negocios · Marley Coffee Empresas</div>
+          <a class="title" href="../captacion/contenidos/cuanto-cafe-necesita-mi-negocio.html" data-surface="resultado-guia" data-handoff="../captacion/contenidos/cuanto-cafe-necesita-mi-negocio.html" target="_blank" rel="noopener">Planificar el servicio de café de un negocio</a>
           <p class="description">Una guía general para ordenar quién prepara, cuándo se sirve y qué productos conviene revisar.</p>
         </article>
         <article class="result" id="content-result" data-result="content">
-          <div class="source">Contenido para negocios · resultado simulado</div>
-          <a class="title" href="../blog-empresas.html" data-surface="resultado-contenido" data-handoff="../blog-empresas.html" target="_blank" rel="noopener">Ideas prácticas para organizar café en tu negocio</a>
+          <div class="source">Blog para negocios · Marley Coffee Empresas</div>
+          <a class="title" href="../captacion/contenidos/index.html" data-surface="resultado-contenido" data-handoff="../captacion/contenidos/index.html" target="_blank" rel="noopener">Ideas prácticas para organizar café en tu negocio</a>
           <p class="description">Guías breves para oficinas, hoteles y restaurantes, desde la operación diaria hasta la reposición de productos.</p>
         </article>
         <article class="result" id="compare-result" data-result="compare">
-          <div class="source">Comparación general · resultado simulado</div>
-          <a class="title" href="#machine" data-surface="resultado-comparacion">Criterios para comparar un servicio de café</a>
-          <p class="description">Revisa modalidad de atención, ritmo de servicio, abastecimiento y puntos pendientes de confirmar.</p>
+          <div class="source">Preguntas frecuentes · Marley Coffee Empresas</div>
+          <a class="title" href="#faq" data-surface="resultado-preguntas">Cómo elegir una máquina y organizar el servicio de café</a>
+          <p class="description">Respuestas breves sobre elección de equipo, productos, packs y cotización para negocios.</p>
         </article>
       </div>
-      <section class="answer" id="faq" aria-labelledby="faq-title">
-        <div class="eyebrow">Respuesta directa · propuesta AEO</div>
-        <h2 id="faq-title">¿Cómo elegir una máquina para un negocio?</h2>
-        <p>Parte por cómo se prepara y sirve el café, los momentos de mayor demanda, las bebidas y los productos de reposición. Si aún no conoces la máquina, el diagnóstico orienta la recomendación; si ya tienes una preferencia, puedes conservarla y avanzar desde los productos.</p>
-        <a href="../index.html#C02" class="secondary" data-surface="respuesta-directa" data-prototype data-screen="C02" target="_blank" rel="noopener">Ver mi solución</a>
-      </section>
-      <section class="answer" id="machine" aria-labelledby="machine-title">
-        <div class="eyebrow">Acceso directo · máquinas</div>
-        <h2 id="machine-title">La alternativa depende de la operación</h2>
-        <p>Describe el servicio, el volumen aproximado y las bebidas. La compatibilidad de equipos y productos se confirma con el equipo antes de una propuesta final.</p>
-        <a href="../index.html#C11" class="secondary" data-surface="maquinas-cta" data-prototype data-screen="C11" target="_blank" rel="noopener">Explorar opciones</a>
-      </section>
-      <section class="answer" id="packs" aria-labelledby="packs-title">
-        <div class="eyebrow">Acceso directo · productos</div>
-        <h2 id="packs-title">Empieza por una selección y ajústala</h2>
-        <p>Un pack puede servir como referencia inicial. Revisa sus productos y cantidades, cambia lo que necesites o elige cada producto por separado.</p>
-        <a href="../index.html#C10" class="secondary" data-surface="packs-cta" data-prototype data-screen="C10" target="_blank" rel="noopener">Ver productos y packs</a>
-      </section>
-      <section class="ai" id="ai-overview" aria-labelledby="ai-title">
-        <div class="eyebrow">Resumen de IA · concepto GEO para evaluar</div>
-        <h2 id="ai-title">Qué considerar antes de cotizar café para un negocio</h2>
-        <p>Define la forma de atención, las bebidas y el consumo que esperas. Una propuesta puede orientar el equipo y los productos, pero las cantidades, la compatibilidad y las condiciones deben validarse antes de avanzar.</p>
-        <div class="citation" id="sources">
-          <a href="../index.html#C02" data-surface="fuente-solucion" data-prototype target="_blank" rel="noopener">Soluciones para negocios</a>
-          <a href="#faq" data-surface="fuente-preguntas">Respuesta frecuente</a>
-          <a href="../guia-servicio-cafe.html" data-surface="fuente-guia" data-handoff="../guia-servicio-cafe.html" target="_blank" rel="noopener">Guía práctica</a>
-        </div>
-        <div class="disclosure">Estas fuentes son destinos propuestos para el test. No son citas emitidas por Google, ChatGPT ni otra herramienta de IA.</div>
+      <section class="also-ask" id="faq" aria-labelledby="faq-title">
+        <div class="eyebrow">Otras preguntas</div>
+        <h2 id="faq-title">Respuestas sobre el servicio de café para negocios</h2>
+        <details><summary>¿Cómo elijo una máquina para mi negocio?</summary><p>Compara el tipo de servicio, el volumen aproximado y las bebidas. Si ya sabes qué equipo buscas, puedes indicarlo; si no, el diagnóstico ayuda a recomendar una alternativa y el equipo valida compatibilidad y condiciones.</p><a href="../captacion/soluciones/restaurantes.html" class="faq-link" data-prototype="1" data-surface="faq-maquinas" data-dest="solution">Ver máquinas y condiciones</a></details>
+        <details><summary>¿Tengo que saber qué máquina necesito?</summary><p>No. Puedes contar cómo funciona tu negocio para recibir orientación. Si ya tienes una preferencia, puedes avanzar directamente y revisar productos y packs.</p><a href="../captacion/soluciones/restaurantes.html" class="faq-link" data-prototype="1" data-surface="faq-diagnostico" data-dest="solution">Empezar cotización</a></details>
+        <details><summary>¿Tengo que elegir un pack?</summary><p>No. Un pack puede servir como punto de partida; puedes revisar sus productos, ajustar cantidades o escoger cada producto por separado.</p><a href="../captacion/contenidos/cuanto-cafe-necesita-mi-negocio.html" class="faq-link" data-prototype="1" data-surface="faq-packs" data-dest="guide-cantidad">Ver productos y packs</a></details>
+        <div class="disclosure">Preguntas y respuestas visibles en esta simulación. Su presencia no garantiza resultados enriquecidos en Google.</div>
       </section>
       <article class="blog" id="blog" aria-labelledby="blog-title">
-        <div class="eyebrow">Contenido útil · propuesta editorial</div>
-        <h2 id="blog-title">¿Quieres comparar ideas para tu operación?</h2>
-        <p>Consulta guías breves para oficinas, hoteles y restaurantes, y luego continúa por la ruta que prefieras.</p>
-        <div class="actions"><a href="../blog-empresas.html" class="primary" data-surface="hub-contenido" data-handoff="../blog-empresas.html" target="_blank" rel="noopener">Ver guías para negocios</a><a href="../index.html#C02" class="secondary" data-surface="articulo-cta" data-prototype data-screen="C02" target="_blank" rel="noopener">Abrir Marley Coffee Empresas</a></div>
-        <div class="disclosure">Contenido propuesto para probar la experiencia. La SERP, la respuesta directa y las fuentes GEO son simuladas.</div>
+        <div class="eyebrow">Contenido útil · blog</div>
+        <h2 id="blog-title">Ideas prácticas para organizar café en tu negocio</h2>
+        <p>Guías breves para hoteles, oficinas y restaurantes: operación diaria, elección de equipo y reposición de productos.</p>
+        <div class="actions"><a href="../captacion/contenidos/index.html" class="primary" data-surface="hub-contenido" data-handoff="../captacion/contenidos/index.html" target="_blank" rel="noopener">Ver guías para negocios</a><a href="../captacion/soluciones/restaurantes.html" class="secondary" data-prototype="1" data-surface="articulo-cta" data-dest="solution" target="_blank" rel="noopener">Abrir Marley Coffee Empresas</a></div>
+        <div class="disclosure">Artículo del prototipo para probar el recorrido desde búsqueda hasta contenido útil.</div>
       </article>
       <section class="actions" id="how">
-        <a href="../index.html#C02" class="primary" data-surface="resultado-cta" data-prototype data-screen="C02" target="_blank" rel="noopener">Abrir Marley Coffee Empresas</a>
-        <a href="#machine" class="secondary" data-surface="ver-maquinas">Ver máquinas</a>
-        <a href="#packs" class="secondary" data-surface="ver-packs">Ver productos y packs</a>
+        <a href="../captacion/soluciones/restaurantes.html" class="primary" data-prototype="1" data-surface="resultado-cta" data-dest="solution" target="_blank" rel="noopener">Explorar soluciones para mi negocio</a>
+        <a href="../captacion/contenidos/cuanto-cafe-necesita-mi-negocio.html" class="secondary" data-prototype="1" data-surface="ver-packs" data-dest="guide-cantidad">Ver productos y packs</a>
       </section>
       <details class="moderator">
         <summary>Registro local para quien modera</summary>
@@ -113,8 +119,17 @@
       const phase=['title','description'].includes(params.get('phase'))?params.get('phase'):'title';
       const pid=params.get('pid')||'';
       const integratedJourney=params.get('journey')==='full';
-      const taskScenarios={hotel:'Tienes un hotel y quieres cambiar el café del desayuno.',restaurante:'Tienes un restaurante y quieres cambiar el café de la carta.',cafeteria:'Tienes una cafetería y quieres cambiar el café que sirves.',eventos:'Organizas eventos o catering y quieres café para tus servicios.'};
+      const taskScenarios={hotel:'Tienes un hotel y quieres cambiar el café del desayuno.',restaurante:'Tienes un restaurante y quieres cambiar el café de la carta.',cafeteria:'Tienes una cafetería y quieres cambiar el café que sirves.',eventos:'Organizas eventos o catering y quieres café para tus servicios.',oficina:'Gestionas una oficina y quieres organizar el café para el equipo.',conveniencia:'Tienes un negocio de conveniencia y quieres ampliar las opciones de café.',panaderia:'Tienes una panadería y quieres ofrecer café junto a tus productos.'};
       const scenario=params.get('scenario')||'';
+      const landingByScenario={restaurante:'restaurantes',hotel:'hoteles',cafeteria:'cafeterias',oficina:'oficinas',eventos:'eventos-catering',conveniencia:'conveniencia',panaderia:'panaderias'};
+      const campaignAudience={restaurante:'RESTAURANTES',hotel:'HOTELES',cafeteria:'CAFETERIAS',oficina:'OFICINAS',eventos:'EVENTOS',conveniencia:'CONVENIENCIA',panaderia:'PANADERIAS'};
+      const solutionForScenario={restaurante:'restaurantes',hotel:'hoteles',cafeteria:'cafeterias',oficina:'oficinas',eventos:'eventos-catering',conveniencia:'conveniencia',panaderia:'panaderias'};
+      const sponsoredResult=document.getElementById('sponsored-result');
+      const sponsoredTitle=document.getElementById('sponsored-title');
+      if(sponsoredResult&&sponsoredTitle&&landingByScenario[scenario]){
+        sponsoredTitle.dataset.handoff='../captacion/landing/'+landingByScenario[scenario]+'.html';
+        sponsoredResult.hidden=false;
+      }
       const taskText=taskScenarios[scenario]||'';
       const taskContext=document.getElementById('task-context');
       if(taskText){document.getElementById('task-text').textContent=taskText;taskContext.hidden=false;}
@@ -147,15 +162,25 @@
         assignments[orderKey]=o+1;
         write(localStorage,'marley-serp-assignments-v1',assignments);
       }
-      const titleVariants={A:'Café para empresas | Marley Coffee',B:'Servicio de café para hoteles, oficinas y restaurantes | Marley Coffee'};
-      const descriptionVariants={A:'Cuéntanos cómo funciona tu negocio y recibe orientación para explorar máquina y productos de café.',B:'Explora opciones de café para tu negocio. El equipo orienta la elección de máquina y productos según tu operación.'};
+      const titleVariants={A:'Café para empresas | Marley Coffee',B:'Servicio de café para negocios | Marley Coffee'};
+      const descriptionVariants={A:'Café en grano, máquinas en comodato y packs para hoteles, oficinas y restaurantes. Cuéntanos de tu negocio y recibe orientación para cotizar.',B:'¿Ya sabes qué equipo necesitas? Revisa productos y packs o recibe orientación para elegir una máquina según tu operación.'};
       const session=saved?.phase===phase?saved:{schema:2,sessionId,participant:pid||sessionId,phase,variant,assignment,order,openedAt:new Date().toISOString(),queries:[],currentQueryIndex:-1};
-      const form=document.getElementById('search'),input=document.getElementById('query'),results=document.getElementById('results'),list=document.getElementById('serp-list');
+      const form=document.getElementById('search'),input=document.getElementById('query'),results=document.getElementById('results'),list=document.getElementById('serp-list'),ai=document.getElementById('ai-overview'),faq=document.getElementById('faq');
       const brand=document.getElementById('brand-result'),guide=document.getElementById('guide-result'),compare=document.getElementById('compare-result'),content=document.getElementById('content-result');
       const save=()=>write(sessionStorage,sessionKey,session);
       const current=()=>session.queries[session.currentQueryIndex]||null;
+      const normalizeQuery=(value)=>String(value||'').toLocaleLowerCase('es-CL').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      const renderAnswer=(value)=>{
+        const q=normalizeQuery(value),machine=/maquina|equipo|elegir|comodato|automatic|espresso|barista/.test(q),packs=/pack|producto|abastec|insumo|catalogo/.test(q),business=/cafe|coffee|empresa|negocio|hotel|oficina|restaurante|evento|cotiz|servicio/.test(q);
+        ai.hidden=!business;faq.hidden=!business;
+        if(machine){document.getElementById('ai-title').textContent='Cómo elegir una máquina para tu negocio';document.getElementById('ai-copy').textContent='Compara el tipo de servicio, el volumen aproximado y las bebidas. Si ya sabes qué equipo buscas, puedes indicarlo; si no, el diagnóstico orienta una recomendación y el equipo valida compatibilidad y condiciones.';}
+        else if(packs){document.getElementById('ai-title').textContent='Cómo organizar los productos de café para tu negocio';document.getElementById('ai-copy').textContent='Un pack puede ser un punto de partida, pero no es obligatorio: revisa sus productos, ajusta cantidades o elige cada producto por separado según tu operación.';}
+        else{document.getElementById('ai-title').textContent='Qué revisar antes de cotizar café para un negocio';document.getElementById('ai-copy').textContent='Compara cómo se prepara y sirve el café, los momentos de mayor demanda, las bebidas y los productos que requiere la operación. Si ya conoces el equipo, puedes indicarlo; si no, el diagnóstico orienta la recomendación.';}
+        const questions=[...faq.querySelectorAll('details')];questions.forEach((item)=>{item.open=false;});
+        if(business&&questions.length){questions[machine?0:packs?2:1].open=true;}
+      };
       const renderLinks=(query)=>{
-        const linkQuery=new URLSearchParams({utm_source:'marley-serp-lab',utm_medium:'research',utm_campaign:'seo_'+phase+'_'+variant,utm_content:order,mc_source:'serp_lab',mc_session:session.sessionId,mc_phase:phase,mc_variant:variant,mc_assignment:assignment,mc_order:order,mc_query_id:String(query.index)});
+        const linkQuery=new URLSearchParams({utm_source:'google',utm_medium:'organic',utm_campaign:'horeca_captacion',utm_content:'resultado_'+phase,mc_source:'serp_lab',mc_session:session.sessionId,mc_phase:phase,mc_variant:variant,mc_assignment:assignment,mc_order:order,mc_query_id:String(query.index)});
         if(integratedJourney){
           linkQuery.set('test','sitio');linkQuery.set('qa','1');linkQuery.set('journey','resume');
           linkQuery.set('journey_started_at',journeyStartedAt||query.startedAt);
@@ -165,13 +190,32 @@
         }
         document.querySelectorAll('[data-prototype],[data-handoff]').forEach(el=>{
           const q=new URLSearchParams(linkQuery);q.set('mc_surface',el.dataset.surface||'sin-superficie');
-          const target=el.dataset.handoff||'../'+returnFile;const screen=el.dataset.screen?'#'+el.dataset.screen:'';
+          let target=el.dataset.handoff||'';
+          if(!el.dataset.paid){
+            const slug=solutionForScenario[scenario]||'restaurantes';
+            const guide={ 'guide-cantidad':'cuanto-cafe-necesita-mi-negocio.html', 'guide-maquina':'como-elegir-maquina-cafe.html', 'guide-comodato':'comodato-maquina-de-cafe.html' }[el.dataset.dest];
+            if(guide)target='../captacion/contenidos/'+guide;
+            else if(el.dataset.dest==='portal-products'||el.dataset.dest==='portal-machines')target='../index.html';
+            else if(el.dataset.dest==='solution'||el.id==='organic-title')target='../captacion/soluciones/'+slug+'.html';
+            else if(el.dataset.surface==='resultado-guia')target=el.dataset.handoff||'../captacion/contenidos/cuanto-cafe-necesita-mi-negocio.html';
+            else if(el.dataset.surface==='resultado-contenido')target=el.dataset.handoff||'../captacion/contenidos/index.html';
+            else if(el.dataset.surface==='hub-contenido')target='../captacion/contenidos/index.html';
+          }
+          if(el.dataset.paid==='true'){
+            const slug=landingByScenario[scenario]||'restaurantes';
+            q.set('utm_source','google');q.set('utm_medium','cpc');
+            q.set('utm_campaign',`CL_GOOGLE_SEARCH_${campaignAudience[scenario]||'RESTAURANTES'}_COTIZA_202612_V01`);
+            q.set('utm_content','anuncio_simulado');q.set('utm_id','mc_hor_001');
+            target='../captacion/landing/'+slug+'.html';
+          }
+          const screen=el.dataset.screen?'#'+el.dataset.screen:'';
           el.href=target+'?'+q.toString()+screen;el.target=integratedJourney?'_self':'_blank';
           if(integratedJourney)el.removeAttribute('rel');
         });
         document.getElementById('organic-title').textContent=phase==='title'?titleVariants[variant]:titleVariants.A;
         document.getElementById('organic-description').textContent=phase==='description'?descriptionVariants[variant]:descriptionVariants.A;
         document.getElementById('query-label').textContent='Búsqueda registrada: '+query.query;
+        renderAnswer(query.query);
       };
       const showCurrent=()=>{
         const query=current();if(!query)return;
@@ -189,7 +233,7 @@
         const at=Date.now(),click={surface:el.dataset.surface,at:new Date(at).toISOString(),elapsedMs:Math.max(0,at-Date.parse(query.startedAt))};
         if(!query.firstClickMs){query.firstClickMs=String(click.elapsedMs);query.firstClickSurface=click.surface;}
         query.clicks.push(click);save();
-        if(el.matches('[data-prototype],[data-handoff]'))renderLinks(query);
+        if(el.matches('[data-prototype],[data-handoff],[data-dest]'))renderLinks(query);
       });
       const csvCell=value=>{let text=String(value??'');if(/^[\s]*[=+@\-]/.test(text))text="'"+text;return '"'+text.replaceAll('"','""')+'"'};
       document.getElementById('download').addEventListener('click',()=>{

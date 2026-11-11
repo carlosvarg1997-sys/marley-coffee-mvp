@@ -1,0 +1,15 @@
+/* Verifica responsive y metadatos de la ficha SEO visible del prototipo. */
+const {chromium}=require('../../qa/playwright-system-chrome.cjs');
+const path=require('path');const fs=require('fs');const assert=require('assert');
+(async()=>{
+ const base=process.argv[2];assert(base&&/^https?:\/\//.test(base),'Uso: node captacion/seo/comprobar.cjs http://127.0.0.1:8890/captacion/seo/');
+ const evidence=path.join(__dirname,'evidencia');fs.mkdirSync(evidence,{recursive:true});const browser=await chromium.launch({headless:true});const output=[];
+ for(const width of [320,390,1440]){
+  const context=await browser.newContext({viewport:{width,height:width<500?844:900},locale:'es-CL',isMobile:width<500,hasTouch:width<500});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(new URL('index.html',base).href,{waitUntil:'networkidle'});
+  const state=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth,bodyWidth:document.body.scrollWidth,containers:[...document.querySelectorAll('.ct-barra .nm-wrap,.seo-main,.seo-table-wrap')].map(e=>{const r=e.getBoundingClientRect();return {cls:e.className,width:r.width,left:r.left,right:r.right,scroll:e.scrollWidth}}),h1:document.querySelectorAll('h1').length,title:document.title,description:document.querySelector('meta[name="description"]')?.content,robots:document.querySelector('meta[name="robots"]')?.content,canonical:document.querySelector('link[rel="canonical"]')?.href,ld:[...document.querySelectorAll('script[type="application/ld+json"]')].map(s=>JSON.parse(s.textContent)),tables:document.querySelectorAll('.seo-table').length,outside:[...document.querySelectorAll('body *')].filter(e=>!e.closest('.seo-table-wrap')).map(e=>{const r=e.getBoundingClientRect();return {tag:e.tagName,cls:e.className?.baseVal||e.className,left:r.left,right:r.right,text:(e.textContent||'').trim().slice(0,40)}}).filter(x=>x.right>innerWidth+1&&x.left<innerWidth)}));
+  assert.equal(state.width,width,`layout viewport changed: ${JSON.stringify(state.containers)} ${JSON.stringify(state.outside)}`);assert(state.scroll<=width,`SEO index overflow at ${width}: ${state.scroll}; ${JSON.stringify(state.outside)}`);assert.equal(state.h1,1);assert(state.title.length<=60);assert(state.description.length<=155);assert(state.robots?.replace(/\s/g,'').toLowerCase()==='noindex,nofollow');assert(state.canonical.startsWith('https://empresas.marleycoffee.cl/'));assert.equal(state.tables,2);assert.equal(state.ld.length,2);assert.deepEqual(errors,[]);
+  await page.screenshot({path:path.join(evidence,`seo-index-r3-${width}.png`),fullPage:true});await page.screenshot({path:path.join(evidence,`seo-index-header-r3-${width}.png`),fullPage:false});output.push({width,scroll:state.scroll,title:state.title.length,description:state.description.length});await context.close();
+ }
+ await browser.close();console.log(JSON.stringify({ok:true,output,evidence},null,2));
+})().catch(e=>{console.error(e);process.exit(1)});

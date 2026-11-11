@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0B0B0C">
+  <link rel="icon" type="image/webp" href="../../recursos/marca/logo.webp">
+  <title>Registro de experimentos | Marley Coffee Empresas</title>
+  <meta name="description" content="Registro interno de hipótesis y pruebas de captación para Marley Coffee Empresas.">
+  <link rel="stylesheet" href="../marca/negro-marley.css">
+  <style>
+    .exp-portada{padding-block:clamp(48px,8vw,104px) 40px}
+    .exp-portada .nm-h1{max-width:12ch}
+    .exp-portada .nm-lead{max-width:62ch;margin-top:18px}
+    .exp-estado{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+    .exp-etiqueta{display:inline-flex;align-items:center;min-height:36px;padding:8px 12px;border:1px solid var(--nm-linea-2);border-radius:999px;color:var(--nm-hueso);font:500 .74rem/1.2 var(--nm-label);letter-spacing:.08em;text-transform:uppercase}
+    .exp-aviso{margin-top:24px;padding:18px 20px;border-left:3px solid var(--nm-oro);background:var(--nm-carbon);color:var(--nm-hueso)}
+    .exp-aviso p{margin:0;max-width:78ch}
+    .exp-scroll{margin-top:28px}
+    .exp-tabla{width:100%;border-collapse:collapse;table-layout:fixed}
+    .exp-tabla th,.exp-tabla td{padding:16px 14px;border-bottom:1px solid var(--nm-linea);text-align:left;vertical-align:top;overflow-wrap:anywhere}
+    .exp-tabla thead th{color:var(--nm-humo);font:500 .72rem/1.35 var(--nm-label);letter-spacing:.08em;text-transform:uppercase}
+    .exp-tabla tbody th{color:var(--nm-hueso);font:500 .92rem/1.4 var(--nm-label)}
+    .exp-tabla td{color:var(--nm-hueso);font-size:.9rem;line-height:1.5}
+    .exp-tabla td p{margin:0 0 8px}
+    .exp-tabla td p:last-child{margin-bottom:0}
+    .exp-codigo{display:block;margin-bottom:6px;color:var(--nm-oro);font:500 .72rem/1.2 var(--nm-label);letter-spacing:.1em;text-transform:uppercase}
+    .exp-links{display:grid;gap:8px}
+    .exp-links a{display:inline-flex;align-items:center;width:fit-content;max-width:100%;min-height:44px;padding-block:8px;color:var(--nm-oro);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;overflow-wrap:anywhere}
+    .exp-links a:hover{color:var(--nm-hueso)}
+    .exp-muted{color:var(--nm-humo)!important}
+    .exp-badge{display:inline-flex;align-items:center;min-height:30px;padding:6px 10px;border:1px solid var(--nm-linea-2);border-radius:999px;color:var(--nm-humo);font:500 .7rem/1 var(--nm-label);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+    .exp-seccion{padding-block:36px}
+    .exp-seccion h2{max-width:22ch}
+    .exp-seccion p,.exp-seccion li{max-width:78ch;color:var(--nm-humo);line-height:1.6}
+    .exp-seccion ul{padding-left:1.2rem}
+    .exp-pie{padding:28px 0 48px;border-top:1px solid var(--nm-linea);color:var(--nm-humo);font-size:.82rem}
+    @media(max-width:760px){
+      .exp-portada .nm-h1{max-width:14ch}
+      .exp-aviso{padding:15px 16px}
+      .exp-tabla,.exp-tabla tbody,.exp-tabla tr,.exp-tabla th,.exp-tabla td{display:block;width:100%}
+      .exp-tabla thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+      .exp-tabla tbody tr{padding:16px 0;border-bottom:1px solid var(--nm-linea)}
+      .exp-tabla tbody th,.exp-tabla tbody td{display:grid;grid-template-columns:minmax(7.5rem,.38fr) minmax(0,1fr);gap:12px;padding:9px 0;border:0}
+      .exp-tabla tbody th{font-size:.95rem}
+      .exp-tabla tbody th::before,.exp-tabla tbody td::before{content:attr(data-label);color:var(--nm-humo);font:500 .67rem/1.45 var(--nm-label);letter-spacing:.06em;text-transform:uppercase}
+      .exp-tabla tbody th::before{content:attr(data-label)}
+      .exp-badge{width:max-content}
+    }
+    @media(max-width:359px){.exp-tabla tbody th,.exp-tabla tbody td{grid-template-columns:1fr;gap:5px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body class="nm">
+  <a class="nm-skip" href="#contenido">Saltar al contenido</a>
+  <main id="contenido">
+    <header class="exp-portada nm-seccion">
+      <div class="nm-wrap">
+        <p class="nm-eyebrow">Marley Coffee Empresas · uso de equipo</p>
+        <h1 class="nm-h1">Registro de experimentos</h1>
+        <p class="nm-lead">Hipótesis, controles y criterios para aprender de las landings. Todas las pruebas están <strong>no iniciadas</strong>; este prototipo no activa campañas ni transmite datos.</p>
+        <div class="exp-estado" aria-label="Estado del registro">
+          <span class="exp-etiqueta">Sin resultados de campaña</span>
+          <span class="exp-etiqueta">No iniciado</span>
+          <span class="exp-etiqueta">Una variable por prueba</span>
+        </div>
+        <div class="exp-aviso"><p>Antes de exponer tráfico real, definir una línea base, el cambio mínimo relevante, el tamaño de muestra y los límites de cada resguardo. La muestra de cinco personas de usabilidad es exploratoria y no determina el tamaño de un A/B.</p></div>
+      </div>
+    </header>
+
+    <section class="nm-seccion" aria-labelledby="tabla-titulo">
+      <div class="nm-wrap">
+        <p class="nm-eyebrow">Sección 14 del plan · manual de medios pagados</p>
+        <h2 class="nm-h2" id="tabla-titulo">Pruebas propuestas</h2>
+        <div class="exp-scroll">
+          <table class="exp-tabla">
+            <thead><tr><th scope="col">Experimento</th><th scope="col">Hipótesis</th><th scope="col">Interruptor</th><th scope="col">Indicador y resguardo</th><th scope="col">Muestra y regla</th><th scope="col">Estado</th></tr></thead>
+            <tbody>
+              <tr id="ubicacion">
+                <th scope="row" data-label="Experimento"><span class="exp-codigo">L01 · plan</span>Formulario al inicio</th>
+                <td data-label="Hipótesis">Si el primer paso del formulario aparece en el bloque inicial, aumentarán los leads calificados por sesión frente a un CTA hacia el formulario.</td>
+                <td data-label="Interruptor"><div class="exp-links"><a href="../landing/restaurantes.html?f=inicio">Formulario al inicio</a><a href="../landing/restaurantes.html?f=despues">Formulario después</a></div></td>
+                <td data-label="Indicador y resguardo"><p>Principal: leads calificados / sesiones relevantes, desde CRM.</p><p>Resguardo: abandono y señales de desconfianza. En esta simulación solo se observa `lead_created`; no hay SQL conectado.</p></td>
+                <td data-label="Muestra y regla"><p class="exp-muted">Sin baseline ni tráfico de campaña. Calcular N antes del lanzamiento con la línea base y el cambio mínimo relevante.</p><p>Elegir solo si mejora el indicador y respeta el resguardo; si no alcanza muestra, reportar inconcluso.</p></td>
+                <td data-label="Estado"><span class="exp-badge">No iniciado</span></td>
+              </tr>
+              <tr id="formulario">
+                <th scope="row" data-label="Experimento"><span class="exp-codigo">L02 · P12</span>Progresivo vs. directo</th>
+                <td data-label="Hipótesis">Mostrar menos campos al comienzo mediante captura progresiva puede aumentar SQL por sesión sin empeorar la proporción de SQL por lead ni los falsos positivos.</td>
+                <td data-label="Interruptor"><div class="exp-links"><a href="../landing/restaurantes.html?form=progresivo">Formulario progresivo</a><a href="../landing/restaurantes.html?form=directo">Formulario directo</a></div><p class="exp-muted">Mismos cuatro campos y permisos; cambia si se presentan en dos pasos o en uno.</p></td>
+                <td data-label="Indicador y resguardo"><p>Principal: SQL / sesión relevante.</p><p>Resguardo: proporción SQL / lead, falsos positivos y tiempo de completado. P12 del manual.</p></td>
+                <td data-label="Muestra y regla"><p class="exp-muted">No hay baseline de SQL ni estimación de N. Definirlo antes de exponer tráfico.</p><p>Adoptar solo con efecto relevante y calidad dentro de límites predefinidos; si no, inconcluso.</p></td>
+                <td data-label="Estado"><span class="exp-badge">No iniciado</span></td>
+              </tr>
+              <tr id="navegacion">
+                <th scope="row" data-label="Experimento"><span class="exp-codigo">L03 · plan</span>Navegación mínima vs. contexto</th>
+                <td data-label="Hipótesis">Los enlaces de contexto pueden resolver dudas y elevar leads calificados frente a una landing sin enlaces de salida.</td>
+                <td data-label="Interruptor"><div class="exp-links"><a href="../landing/restaurantes.html?nav=min">Navegación mínima</a><a href="../landing/restaurantes.html?nav=contexto">Enlaces de contexto</a></div></td>
+                <td data-label="Indicador y resguardo"><p>Principal: leads calificados / sesiones relevantes.</p><p>Resguardo: clics de salida, información faltante y abandono.</p></td>
+                <td data-label="Muestra y regla"><p class="exp-muted">Sin baseline por variante; fijar N y cambio mínimo antes del lanzamiento.</p><p>Si la muestra no permite distinguir una diferencia útil, dejar inconcluso.</p></td>
+                <td data-label="Estado"><span class="exp-badge">No iniciado</span></td>
+              </tr>
+              <tr id="visual">
+                <th scope="row" data-label="Experimento"><span class="exp-codigo">L04 · plan</span>Video vs. imagen</th>
+                <td data-label="Hipótesis">Una demostración visual puede ayudar a entender el servicio frente a una imagen fija y texto.</td>
+                <td data-label="Interruptor"><div class="exp-links"><a href="../landing/restaurantes.html">Video actual</a><a href="../landing/restaurantes.html?media=static">Imagen fija</a></div></td>
+                <td data-label="Indicador y resguardo"><p>Principal: solicitudes calificadas.</p><p>Resguardo: carga, accesibilidad, distracción y abandono. El video actual es provisional.</p></td>
+                <td data-label="Muestra y regla"><p class="exp-muted">No hay baseline de solicitudes. Fijar N antes de exponer tráfico.</p><p>No adoptar una variante si empeora un resguardo relevante; sin evidencia suficiente, inconcluso.</p></td>
+                <td data-label="Estado"><span class="exp-badge">No iniciado</span></td>
+              </tr>
+              <tr id="continuidad">
+                <th scope="row" data-label="Experimento"><span class="exp-codigo">L05 · P01</span>Mensaje de continuidad</th>
+                <td data-label="Hipótesis">Un mensaje de continuidad operativa puede atraer mejores leads HORECA que el mensaje base.</td>
+                <td data-label="Interruptor"><div class="exp-links"><a href="../landing/restaurantes.html">Mensaje base</a><a href="../landing/restaurantes.html?m=continuidad">Continuidad</a></div></td>
+                <td data-label="Indicador y resguardo"><p>Principal: CPQL y SQL / lead.</p><p>Resguardo: rechazo de usuarios aptos, margen esperado y volumen suficiente. P01 del manual.</p></td>
+                <td data-label="Muestra y regla"><p class="exp-muted">No hay CPQL por variante. Fijar N, margen mínimo y regla de SQL antes del test.</p><p>Evaluar dentro del mismo comprador y canal; si hay poco volumen, inconcluso.</p></td>
+                <td data-label="Estado"><span class="exp-badge">No iniciado</span></td>
+              </tr>
+              <tr id="buyer">
+                <th scope="row" data-label="Experimento"><span class="exp-codigo">L06 · P02</span>Landing por comprador</th>
+                <td data-label="Hipótesis">Una landing específica por comprador puede superar una landing generalista en SQL por sesión relevante.</td>
+                <td data-label="Interruptor"><div class="exp-links"><a href="../landing/restaurantes.html">Landing por comprador · restaurantes</a><a href="../landing/empresas.html">Control genérico B2B</a></div><p class="exp-muted">Este control se reserva para P02; no enlazarlo desde anuncios.</p></td>
+                <td data-label="Indicador y resguardo"><p>Principal: SQL / sesión relevante.</p><p>Resguardo: rechazo de usuarios aptos, tiempo de respuesta y reclamaciones. P02 del manual.</p></td>
+                <td data-label="Muestra y regla"><p class="exp-muted">No iniciado hasta fijar baseline real, comprador elegible, periodo, tamaño de muestra y regla de decisión.</p><p>Comparar el mismo canal y comprador; si falta señal suficiente, declarar el resultado inconcluso.</p></td>
+                <td data-label="Estado"><span class="exp-badge">No iniciado</span></td>
+              </tr>
+              <tr id="p11">
+                <th scope="row" data-label="Experimento"><span class="exp-codigo">L07 · P11</span>Tutorial vs. imagen</th>
+                <td data-label="Hipótesis">Un tutorial que responde una objeción técnica puede generar más SQL por mil impresiones que una imagen.</td>
+                <td data-label="Interruptor"><div class="exp-links"><a href="../landing/restaurantes.html">Ver material actual</a><a href="../landing/restaurantes.html?media=static">Ver imagen fija</a></div><p class="exp-muted">El video actual no es un tutorial sobre una objeción técnica; el interruptor disponible no ejecuta P11.</p></td>
+                <td data-label="Indicador y resguardo"><p>Principal: SQL / 1.000 impresiones.</p><p>Resguardo: costo de producción. P11 del manual.</p></td>
+                <td data-label="Muestra y regla"><p class="exp-muted">Requiere un tutorial real, una imagen de control y pauta medible. No iniciar con el video provisional.</p><p>Predefinir N y costo aceptable; si no hay señal suficiente, inconcluso.</p></td>
+                <td data-label="Estado"><span class="exp-badge">No iniciado</span></td>
+              </tr>
+              <tr id="remarketing">
+                <th scope="row" data-label="Experimento"><span class="exp-codigo">L08 · plan</span>Remarketing</th>
+                <td data-label="Hipótesis">Un grupo de comparación puede mostrar si el remarketing aporta oportunidades incrementales.</td>
+                <td data-label="Interruptor"><div class="exp-links"><a href="#dependencias">Sin interruptor local · revisar dependencias</a></div></td>
+                <td data-label="Indicador y resguardo"><p>Principal: oportunidades incrementales.</p><p>Resguardo: frecuencia, costo, elegibilidad de audiencia y permisos.</p></td>
+                <td data-label="Muestra y regla"><p class="exp-muted">Requiere audiencia suficiente, grupo de comparación y aprobación de campaña. No hay muestra local.</p><p>Iniciar solo cuando esos requisitos y una regla de decisión estén definidos.</p></td>
+                <td data-label="Estado"><span class="exp-badge">No iniciado</span></td>
+              </tr>
+              <tr id="consistencia">
+                <th scope="row" data-label="Experimento"><span class="exp-codigo">L09 · plan</span>Consistencia creativa</th>
+                <td data-label="Hipótesis">Una línea creativa consistente puede favorecer el reconocimiento frente a un control distinto.</td>
+                <td data-label="Interruptor"><div class="exp-links"><a href="#dependencias">Sin interruptor local · revisar dependencias</a></div></td>
+                <td data-label="Indicador y resguardo"><p>Principal: reconocimiento y resultados posteriores.</p><p>Resguardo: desgaste y exposición comparable entre grupos.</p></td>
+                <td data-label="Muestra y regla"><p class="exp-muted">Requiere línea creativa, control y medición de reconocimiento. No existe control local.</p><p>Fijar muestra y regla antes de campaña; no atribuir resultados a una sola impresión.</p></td>
+                <td data-label="Estado"><span class="exp-badge">No iniciado</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="nm-seccion exp-seccion" id="combinaciones" aria-labelledby="combina-titulo">
+      <div class="nm-wrap">
+        <p class="nm-eyebrow">Control de interferencias</p>
+        <h2 class="nm-h2" id="combina-titulo">Qué no correr a la vez</h2>
+        <ul>
+          <li>Para probar ubicación, mantener fijo `?form`; para probar formulario, mantener fijo `?f`. No combinar ambos cambios en una misma comparación.</li>
+          <li>Para comparar mensajes, mantener un comprador y canal; no mezclar `?m` con la prueba de landing generalista P02.</li>
+          <li>Para comparar video e imagen, no combinar `?media=static` con `?motion=off`: ambas variantes quedan estáticas y no se mide el efecto del video.</li>
+          <li>Durante una prueba, dejar fijos `?nav`, `?media`, `?motion` y `?qa` salvo el interruptor asignado.</li>
+          <li>Remarketing y consistencia creativa necesitan controles de campaña propios; no atribuirles cambios simultáneos en una landing.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="nm-seccion exp-seccion" id="dependencias" aria-labelledby="dep-titulo">
+      <div class="nm-wrap">
+        <p class="nm-eyebrow">Alcance del manual</p>
+        <h2 class="nm-h2" id="dep-titulo">Hipótesis fuera de esta matriz</h2>
+        <p>P03–P10 no se incluyen como interruptores de landing: requieren evidencia real de procesos, comparación de audiencias, anuncios servidos, grupo de control orgánico, keywords y negativos de Search, conversiones offline, o datos de clientes nuevos y existentes. Esos controles dependen de campañas, CRM e integración de medición y no están disponibles en este prototipo.</p>
+          <p id="p02-control-pendiente">P02 tiene un control genérico local, reservado a esta prueba; sigue sin iniciar hasta fijar baseline, muestra y regla de decisión. P11 permanece sin iniciar hasta contar con un tutorial real sobre una objeción técnica. El control actual de imagen fija sirve para la prueba visual general, no prueba esas hipótesis específicas.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="exp-pie"><div class="nm-wrap">Registro local del prototipo académico de Duoc UC (TMA1103). No hay campañas activas ni resultados medidos.</div></footer>
+</body>
+</html>

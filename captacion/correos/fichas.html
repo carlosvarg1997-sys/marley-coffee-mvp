@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230B0B0C'/%3E%3Cpath fill='%23F3C900' d='M12 16h40v32H12z'/%3E%3C/svg%3E">
+  <title>Fichas de correo · Marley Coffee Empresas</title>
+  <link rel="stylesheet" href="../marca/negro-marley.css">
+  <style>
+    .fichas{padding:26px 0 56px}
+    .fichas__header{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+    .fichas__header img{width:64px;height:64px;object-fit:contain}
+    .fichas__header p{margin:0 0 6px;color:var(--nm-oro);font:500 .8rem/1.3 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+    .fichas__header h1{margin:0;color:#FFFFFF;font-family:Festivo,'Arial Narrow','Helvetica Neue',Arial,sans-serif;font-size:48px;font-stretch:condensed;font-weight:700;line-height:.95;text-transform:uppercase;overflow-wrap:anywhere}
+    .fichas__notice{margin:0 0 20px;padding:14px 16px;border-left:4px solid #F3C900;background:#FFFFFF;color:#171717;line-height:1.5}
+    .ficha-list{display:grid;gap:18px}
+    .ficha-card{scroll-margin-top:16px;padding:24px;background:#FFFFFF;color:#171717;border:1px solid #E2E2E2;border-radius:8px;overflow-wrap:anywhere}
+    .ficha-card__head p{margin:0 0 8px;color:#4A4A4A;font:500 .78rem/1.3 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+    .ficha-card h2{margin:0 0 18px;color:#171717;font:500 1.6rem/1.1 Festivo,'Arial Narrow',Impact,sans-serif;text-transform:uppercase}
+    .ficha-card dl{display:grid;gap:10px;margin:0}
+    .ficha-card dl div{display:grid;grid-template-columns:minmax(150px,190px) minmax(0,1fr);gap:12px;padding-top:10px;border-top:1px solid #E2E2E2}
+    .ficha-card dt{color:#4A4A4A;font:500 .75rem/1.35 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase}
+    .ficha-card dd{margin:0;color:#171717;line-height:1.5}
+    .ficha-facts{width:100%;margin:18px 0;border-collapse:collapse;table-layout:fixed}
+    .ficha-facts thead th{padding:10px 0;text-align:left;color:#4A4A4A;font:500 .72rem/1.3 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.15em;text-transform:uppercase;border-top:1px solid #D8D8D8}
+    .ficha-facts tbody th{width:43%;padding:9px 8px 9px 0;text-align:left;color:#4A4A4A;font:500 .65rem/1.4 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px dotted #9A9A9A;overflow-wrap:anywhere}
+    .ficha-facts tbody td{width:57%;padding:9px 0;text-align:right;color:#171717;font:600 .84rem/1.4 Arial,Helvetica,sans-serif;border-bottom:1px dotted #9A9A9A;overflow-wrap:anywhere}
+    .ficha-card code{font-family:Consolas,'Courier New',monospace;font-size:.88em;overflow-wrap:anywhere}
+    .ficha-card__why{margin:18px 0;color:#4A4A4A;font-size:.92rem;line-height:1.5}
+    .ficha-back{display:inline-flex;min-height:44px;align-items:center;color:#171717;text-decoration:underline;font-weight:600}
+    @media(max-width:620px){.fichas{padding-top:18px}.fichas__header h1{font-size:36px}.ficha-card{padding:17px}.ficha-card dl div{grid-template-columns:1fr;gap:3px}.ficha-facts tbody th{font-size:.59rem}.ficha-facts tbody td{font-size:.76rem}}
+  </style>
+</head>
+<body class="nm">
+  <main class="nm-wrap fichas">
+    <header class="fichas__header"><img src="recursos/marley-email-blanco.png" width="64" height="64" alt="Marley Coffee"><div><p>Marley Coffee · Empresas</p><h1>Fichas de correo</h1></div></header>
+    <p class="fichas__notice">E03, E11 y E12: propuesta inicial, a validar con Ventas. Son reglas internas de envío, no promesas al cliente.</p>
+    <p class="fichas__notice">E10 no incluye un tiempo estimado: no hay una duración definida en el CRM ni en el formulario del portal.</p>
+    <div class="ficha-list"><article class="ficha-card" id="E01">
+  <header class="ficha-card__head"><p>E01 · Interacción</p><h2>Recibimos tu solicitud</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Guardamos tu avance · N.º {{numero}}</dd></div>
+    <div><dt>Texto previo</dt><dd>Con tu número retomas donde quedaste.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Tu solicitud</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Guardamos tu avance</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>avance</dd></div>
+    <div><dt>Disparador</dt><dd>lead_created</dd></div>
+    <div><dt>Segmento</dt><dd>Lead nuevo con solicitud confirmada.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{numero}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Seguimiento de la solicitud. Seguimiento de la solicitud enviada; no habilita marketing.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Clientes activos fuera de la captación; contactos sin solicitud confirmada y personas con oposición o baja.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Avance a revisión de la solicitud en el portal; atribución por UTM, sin píxel.</dd></div>
+    <div><dt>CTA</dt><dd>Seguir con el diagnóstico</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../../index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E01&amp;utm_content=seguir_con_el_diagnostico#C04</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">N.º de seguimiento</th><td>{{numero}}</td></tr><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Siguiente paso</th><td>Completar los 3 pasos</td></tr><tr><th scope="row">Condiciones</th><td>Se confirman en tu propuesta</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes este correo porque enviaste una solicitud en el portal de Marley Coffee Empresas.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E02">
+  <header class="ficha-card__head"><p>E02 · Interacción</p><h2>Tu propuesta está lista</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Tu propuesta está lista</dd></div>
+    <div><dt>Texto previo</dt><dd>Ya puedes revisar lo preparado para tu negocio.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Propuesta enviada</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Tu propuesta está lista</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>propuesta</dd></div>
+    <div><dt>Disparador</dt><dd>quote_sent</dd></div>
+    <div><dt>Segmento</dt><dd>Contacto con propuesta enviada.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{quote_id}}</code>, <code>{{quote_version}}</code>, <code>{{producto}}</code>, <code>{{cantidad_sugerida}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Seguimiento de la solicitud. Seguimiento de la propuesta que la persona pidió.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Clientes activos fuera de la captación; contactos sin propuesta enviada y personas con oposición o baja.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Revisión de propuesta y avance a contract_signed.</dd></div>
+    <div><dt>CTA</dt><dd>Revisar propuesta</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../../index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E02&amp;utm_content=revisar_propuesta#C05</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Propuesta</th><td>{{quote_id}} · v{{quote_version}}</td></tr><tr><th scope="row">Producto / cantidad</th><td>{{producto}} · {{cantidad_sugerida}}</td></tr><tr><th scope="row">Condiciones</th><td>Se confirman en tu propuesta</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes este correo porque pediste una propuesta y se registró su envío.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E03">
+  <header class="ficha-card__head"><p>E03 · Interacción</p><h2>Recordatorio de tu propuesta</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Tu propuesta te espera</dd></div>
+    <div><dt>Texto previo</dt><dd>Un acceso directo a la propuesta que solicitaste.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Recordatorio</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Tu propuesta te espera</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>espera</dd></div>
+    <div><dt>Disparador</dt><dd>propuesta inicial, a validar con Ventas: 3 días hábiles sin respuesta a la propuesta; un solo recordatorio.</dd></div>
+    <div><dt>Segmento</dt><dd>Lead con propuesta enviada y sin respuesta registrada.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{quote_id}}</code>, <code>{{quote_version}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Seguimiento de la solicitud. Seguimiento de la propuesta que la persona pidió.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Clientes activos fuera de la captación; excluir cuando haya respuesta, oposición o baja.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Propuesta revisada después del correo; atribución por UTM, sin píxel.</dd></div>
+    <div><dt>CTA</dt><dd>Volver a la propuesta</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../../index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E03&amp;utm_content=volver_propuesta#C05</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Propuesta</th><td>{{quote_id}} · v{{quote_version}}</td></tr><tr><th scope="row">Respuesta registrada</th><td>Pendiente</td></tr><tr><th scope="row">Condiciones</th><td>Se confirman en tu propuesta</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes este recordatorio porque pediste una propuesta y todavía no se registra una respuesta.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E04">
+  <header class="ficha-card__head"><p>E04 · Interacción</p><h2>Retoma tu solicitud</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Tu avance te espera</dd></div>
+    <div><dt>Texto previo</dt><dd>Puedes retomar el formulario que enviaste parcialmente.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Formulario iniciado</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Retoma tu solicitud</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>solicitud</dd></div>
+    <div><dt>Disparador</dt><dd>Paso 1 enviado y paso 2 pendiente</dd></div>
+    <div><dt>Segmento</dt><dd>Contacto parcial que envió el paso 1 y aceptó recordatorios.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Permiso de recordatorios (marketing). Permiso de recordatorios de marketing afirmativo y vigente; el envío del paso 1 no basta por sí solo.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Sin permiso vigente: excluir. Clientes activos fuera de la captación. Excluir tras baja u oposición.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Continuación a lead_created después del recordatorio.</dd></div>
+    <div><dt>CTA</dt><dd>Continuar solicitud</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../../index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E04&amp;utm_content=continuar_solicitud#C03</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Comprador</th><td>{{comprador}}</td></tr><tr><th scope="row">Paso 1</th><td>Enviado</td></tr><tr><th scope="row">Siguiente paso</th><td>Completar el paso 2</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes este correo porque enviaste el primer paso y aceptaste recibir recordatorios para continuar la solicitud.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E05">
+  <header class="ficha-card__head"><p>E05 · Interacción</p><h2>Guía «Cuentas claras»</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Cuentas claras para decidir</dd></div>
+    <div><dt>Texto previo</dt><dd>Una guía breve para ordenar las preguntas antes de elegir.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Guía para decidir</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Cuentas claras</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>claras</dd></div>
+    <div><dt>Disparador</dt><dd>Lead sin avance</dd></div>
+    <div><dt>Segmento</dt><dd>Lead sin avance, sin contrato activo y con permiso de marketing vigente.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{producto}}</code>, <code>{{cantidad_sugerida}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Permiso de marketing. Permiso de marketing afirmativo y vigente.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Clientes activos fuera de la captación; excluir sin permiso, tras baja u oposición.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Visitas a la guía atribuibles a E05 mediante UTM; sin píxel.</dd></div>
+    <div><dt>CTA</dt><dd>Leer guía Cuentas claras</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../contenidos/index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E05&amp;utm_content=leer_guia_cuentas_claras</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Producto</th><td>{{producto}}</td></tr><tr><th scope="row">Cantidad sugerida</th><td>{{cantidad_sugerida}}</td></tr><tr><th scope="row">Condiciones</th><td>Se confirman en tu propuesta</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes esta guía porque aceptaste comunicaciones de marketing de Marley Coffee Empresas.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E06">
+  <header class="ficha-card__head"><p>E06 · Alta</p><h2>Bienvenida y próximos pasos</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Bienvenida y próximos pasos</dd></div>
+    <div><dt>Texto previo</dt><dd>Lo esencial para comenzar la relación de servicio.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Relación contractual</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Bienvenida</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>Bienvenida</dd></div>
+    <div><dt>Disparador</dt><dd>contract_signed</dd></div>
+    <div><dt>Segmento</dt><dd>Cuenta con contrato registrado.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{contract_id}}</code>, <code>{{account_id}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Relación contractual. Relación contractual; comunicación necesaria para orientar los próximos pasos.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Excluir de captación general. Mantener solo comunicaciones contractuales/de servicio; nada promocional sin permiso de marketing.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Primer pedido confirmado (order_confirmed).</dd></div>
+    <div><dt>CTA</dt><dd>Revisar mi cuenta</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../../index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E06&amp;utm_content=revisar_cuenta#C09</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Contrato</th><td>{{contract_id}}</td></tr><tr><th scope="row">Cuenta</th><td>{{account_id}}</td></tr><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Estado</th><td>Contrato firmado</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes este correo como parte de la relación contractual de Marley Coffee Empresas con {{negocio}}.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E07">
+  <header class="ficha-card__head"><p>E07 · Alta</p><h2>Tu primera semana (por rol)</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Tu primera semana, paso a paso</dd></div>
+    <div><dt>Texto previo</dt><dd>Una guía para revisar lo que corresponde a tu rol.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Una guía para tu rol</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Tu primera semana</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>semana</dd></div>
+    <div><dt>Disparador</dt><dd>Días después del alta</dd></div>
+    <div><dt>Segmento</dt><dd>Cuenta recién dada de alta; contenido ajustado al rol comprador.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{contract_id}}</code>, <code>{{account_id}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Relación contractual. Relación contractual; guía de incorporación del servicio.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Excluir de captación general. Mantener solo comunicaciones contractuales/de servicio; nada promocional sin permiso de marketing.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Visita a los próximos pasos desde E07, atribuida por UTM; sin píxel.</dd></div>
+    <div><dt>CTA</dt><dd>Ver próximos pasos</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../../index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E07&amp;utm_content=ver_proximos_pasos#C09</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Contrato</th><td>{{contract_id}}</td></tr><tr><th scope="row">Cuenta</th><td>{{account_id}}</td></tr><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Rol</th><td>{{comprador}}</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes este correo porque {{negocio}} está en la etapa inicial de su relación contractual con Marley Coffee Empresas.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E08">
+  <header class="ficha-card__head"><p>E08 · Deleite</p><h2>Aviso de reposición</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Aviso de reposición para tu negocio</dd></div>
+    <div><dt>Texto previo</dt><dd>Revisa la cadencia o el consumo estimado de tu cuenta.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Aviso de servicio</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Aviso de reposición</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>reposición</dd></div>
+    <div><dt>Disparador</dt><dd>Cadencia o consumo estimado</dd></div>
+    <div><dt>Segmento</dt><dd>Cuenta activa con cadencia o consumo estimado para revisar.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{producto}}</code>, <code>{{cantidad_sugerida}}</code>, <code>{{cadencia}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Servicio. Servicio asociado a la cuenta; no es una campaña promocional.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Excluir de captación general. Mantener solo avisos de servicio; pausar si existe una incidencia abierta.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Pedido repetido confirmado (repeat_order_confirmed).</dd></div>
+    <div><dt>CTA</dt><dd>Revisar reposición</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../../index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E08&amp;utm_content=revisar_reposicion#C09</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Producto</th><td>{{producto}}</td></tr><tr><th scope="row">Cantidad sugerida</th><td>{{cantidad_sugerida}}</td></tr><tr><th scope="row">Cadencia</th><td>{{cadencia}}</td></tr><tr><th scope="row">Cómo pedir</th><td>Desde tu cuenta, en 2 toques</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes este aviso de servicio según la cadencia o el consumo estimado asociado a tu cuenta.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E09">
+  <header class="ficha-card__head"><p>E09 · Deleite</p><h2>Novedades para tu negocio</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Novedades para tu negocio</dd></div>
+    <div><dt>Texto previo</dt><dd>Información de Marley Coffee Empresas para revisar cuando te sirva.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Contenido para empresas</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Novedades</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>Novedades</dd></div>
+    <div><dt>Disparador</dt><dd>Calendario editorial</dd></div>
+    <div><dt>Segmento</dt><dd>Comprador con permiso de marketing vigente; contenido por tipo de negocio.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{producto}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Permiso de marketing. Permiso de marketing afirmativo y vigente.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Clientes activos excluidos de captación general; excluir sin permiso, tras baja u oposición. La comunicación sigue siendo promocional.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Visitas al contenido atribuibles a E09 mediante UTM; sin píxel.</dd></div>
+    <div><dt>CTA</dt><dd>Ver novedades</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../contenidos/index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E09&amp;utm_content=ver_novedades</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Comprador</th><td>{{comprador}}</td></tr><tr><th scope="row">Producto</th><td>{{producto}}</td></tr><tr><th scope="row">Tema</th><td>Café para empresas</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes estas novedades porque aceptaste comunicaciones de marketing de Marley Coffee Empresas.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E10">
+  <header class="ficha-card__head"><p>E10 · Deleite</p><h2>¿Cómo lo estamos haciendo?</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>¿Cómo lo estamos haciendo?</dd></div>
+    <div><dt>Texto previo</dt><dd>Queremos conocer tu experiencia tras la entrega o el caso.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Después de una entrega o caso</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Tu experiencia</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>experiencia</dd></div>
+    <div><dt>Disparador</dt><dd>Después de una entrega o de un caso</dd></div>
+    <div><dt>Segmento</dt><dd>Cuenta que registró una entrega o un caso de servicio.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{case_id}}</code>, <code>{{tipo}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Servicio. Servicio y evaluación de la experiencia asociada a una entrega o caso.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Excluir de captación general. Mantener la solicitud de opinión como servicio; no usar la respuesta para promocionar sin permiso.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Encuestas respondidas (csat_submitted).</dd></div>
+    <div><dt>CTA</dt><dd>Contar mi experiencia</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../../index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E10&amp;utm_content=contar_experiencia#C09</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Caso</th><td>{{case_id}}</td></tr><tr><th scope="row">Tipo</th><td>{{tipo}}</td></tr><tr><th scope="row">Qué evaluamos</th><td>Atención · escala de 1 a 5</td></tr><tr><th scope="row">Cuánto toma</th><td>No hay tiempo estimado</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes este correo después de una entrega o de un caso de servicio asociado a {{negocio}}.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E11">
+  <header class="ficha-card__head"><p>E11 · Deleite</p><h2>Recomienda a otro negocio</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Recomienda a otro negocio</dd></div>
+    <div><dt>Texto previo</dt><dd>Comparte esta información si crees que puede servir.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Invitación a compartir</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Recomienda</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>Recomienda</dd></div>
+    <div><dt>Disparador</dt><dd>propuesta inicial, a validar con Ventas: ofrecer recomendación solo con 9 o 10 en la pregunta de 0 a 10 (definición estándar de promotor).</dd></div>
+    <div><dt>Segmento</dt><dd>Cliente con respuesta 9 o 10 en la pregunta de 0 a 10 y permiso de marketing vigente.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Permiso de marketing. Permiso de marketing afirmativo y vigente, además de una respuesta 9 o 10 en la pregunta de 0 a 10.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Excluir clientes activos de campañas de captación general, sin perjuicio de esta invitación. Excluir sin permiso, tras baja u oposición.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Referidos enviados (referral_sent), solo si la acción se instrumenta y confirma.</dd></div>
+    <div><dt>CTA</dt><dd>Abrir página para compartir</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../soluciones/index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E11&amp;utm_content=abrir_pagina_para_compartir</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Comprador</th><td>{{comprador}}</td></tr><tr><th scope="row">Para compartir</th><td>Información de Marley Coffee Empresas</td></tr><tr><th scope="row">Recompensa</th><td>No hay recompensa definida</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes esta invitación porque compartiste una experiencia favorable y aceptaste comunicaciones de marketing.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article><article class="ficha-card" id="E12">
+  <header class="ficha-card__head"><p>E12 · Reactivación</p><h2>Te echamos de menos</h2></header>
+  <dl>
+    <div><dt>Asunto</dt><dd>Si quieres, revisamos tu cuenta</dd></div>
+    <div><dt>Texto previo</dt><dd>Puedes volver a conversar cuando te haga sentido.</dd></div>
+    <div><dt>Gancho visual</dt><dd>Volver a conversar</dd></div>
+    <div><dt>Titular del héroe</dt><dd>Revisar tu cuenta</dd></div>
+    <div><dt>Palabra resaltada</dt><dd>cuenta</dd></div>
+    <div><dt>Disparador</dt><dd>propuesta inicial, a validar con Ventas: sin pedidos durante el doble de la cadencia habitual de reposición de la cuenta.</dd></div>
+    <div><dt>Segmento</dt><dd>Cuenta sin pedidos durante el doble de su cadencia habitual de reposición.</dd></div>
+    <div><dt>Campos personalizables</dt><dd><code>{{nombre}}</code>, <code>{{negocio}}</code>, <code>{{comprador}}</code>, <code>{{producto}}</code>, <code>{{cadencia}}</code>.</dd></div>
+    <div><dt>Base de permiso</dt><dd>Permiso de marketing. Permiso de marketing afirmativo y vigente.</dd></div>
+    <div><dt>Exclusiones</dt><dd>Excluir cuentas activas y clientes que ya retomaron pedidos; excluir sin permiso, tras baja u oposición.</dd></div>
+    <div><dt>Indicador principal</dt><dd>Pedidos repetidos confirmados después de E12 (repeat_order_confirmed).</dd></div>
+    <div><dt>CTA</dt><dd>Revisar mi cuenta</dd></div>
+    <div><dt>UTM del CTA</dt><dd><code>../../index.html?utm_source=email&amp;utm_medium=email&amp;utm_campaign=E12&amp;utm_content=revisar_cuenta#C09</code></dd></div>
+  </dl>
+  <table class="ficha-facts" aria-label="Ficha Cuentas claras"><thead><tr><th colspan="2">Cuentas claras</th></tr></thead><tbody><tr><th scope="row">Negocio</th><td>{{negocio}}</td></tr><tr><th scope="row">Producto</th><td>{{producto}}</td></tr><tr><th scope="row">Cadencia habitual</th><td>{{cadencia}}</td></tr><tr><th scope="row">Siguiente paso</th><td>Pedir una conversación</td></tr></tbody></table>
+  <p class="ficha-card__why">Recibes este correo porque el período configurado para reactivación no registra pedidos de {{negocio}}.</p>
+  <a class="ficha-back" href="bandeja.html">Volver a la bandeja</a>
+</article></div>
+  </main>
+</body>
+</html>

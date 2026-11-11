@@ -1,0 +1,639 @@
+{
+  "method": "Chrome aislado por CDP; 390x844; prueba local file://; navegación y scroll automatizados",
+  "results": {
+    "heroInitial": {
+      "title": "Café para empresas que mueve tu negocio.",
+      "width": 390,
+      "height": 844,
+      "heroPoster": {
+        "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/escenas/hero/poster_m.webp",
+        "complete": true,
+        "naturalWidth": 720
+      },
+      "video": {
+        "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/escenas/hero/video_m.mp4",
+        "readyState": 4,
+        "videoWidth": 720,
+        "videoHeight": 1280,
+        "currentTime": 0,
+        "duration": 8.041667,
+        "paused": true,
+        "hostReady": true,
+        "loading": false
+      },
+      "box": {
+        "width": 390,
+        "height": 745
+      }
+    },
+    "heroSeekSequence": [
+      {
+        "progress": 0.2,
+        "scrollY": 184,
+        "readyState": 4,
+        "currentTime": 1.59,
+        "duration": 8.04,
+        "seeking": false,
+        "ready": true
+      },
+      {
+        "progress": 0.55,
+        "scrollY": 420,
+        "readyState": 4,
+        "currentTime": 4.38,
+        "duration": 8.04,
+        "seeking": false,
+        "ready": true
+      },
+      {
+        "progress": 0.901,
+        "scrollY": 657,
+        "readyState": 4,
+        "currentTime": 7.19,
+        "duration": 8.04,
+        "seeking": false,
+        "ready": true
+      },
+      {
+        "progress": 0.2,
+        "scrollY": 184,
+        "readyState": 4,
+        "currentTime": 1.6,
+        "duration": 8.04,
+        "seeking": false,
+        "ready": true
+      }
+    ],
+    "scrollForward": {
+      "progress": 0.901,
+      "scrollY": 657,
+      "readyState": 4,
+      "currentTime": 7.19,
+      "duration": 8.04,
+      "seeking": false,
+      "ready": true
+    },
+    "scrollReverse": {
+      "progress": 0.2,
+      "scrollY": 184,
+      "readyState": 4,
+      "currentTime": 1.6,
+      "duration": 8.04,
+      "seeking": false,
+      "ready": true
+    },
+    "mediaAfterScroll": {
+      "imageCount": 10,
+      "loadedImages": 4,
+      "broken": [],
+      "pending": [
+        {
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/escenas/evento/fin.webp",
+          "top": -391,
+          "bottom": -201,
+          "display": "block",
+          "visibility": "visible",
+          "opacity": "1",
+          "loading": "lazy",
+          "hiddenAncestor": true,
+          "ancestors": [
+            {
+              "tag": "IMG",
+              "id": "",
+              "className": "",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "BUTTON",
+              "id": "",
+              "className": "m5-svc m5-svc--a is-in",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "flex",
+              "visibility": "visible",
+              "opacity": "0"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "m5-bento",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "grid",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DETAILS",
+              "id": "",
+              "className": "m5-more",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "ux-wrap",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            }
+          ]
+        },
+        {
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/fondos/catering_960.webp",
+          "top": -189,
+          "bottom": 1,
+          "display": "block",
+          "visibility": "visible",
+          "opacity": "1",
+          "loading": "lazy",
+          "hiddenAncestor": true,
+          "ancestors": [
+            {
+              "tag": "IMG",
+              "id": "",
+              "className": "",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "BUTTON",
+              "id": "",
+              "className": "m5-svc m5-svc--b is-in",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "flex",
+              "visibility": "visible",
+              "opacity": "0"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "m5-bento",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "grid",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DETAILS",
+              "id": "",
+              "className": "m5-more",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "ux-wrap",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            }
+          ]
+        },
+        {
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/fondos/pop_960.webp",
+          "top": 13,
+          "bottom": 203,
+          "display": "block",
+          "visibility": "visible",
+          "opacity": "1",
+          "loading": "lazy",
+          "hiddenAncestor": true,
+          "ancestors": [
+            {
+              "tag": "IMG",
+              "id": "",
+              "className": "",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "BUTTON",
+              "id": "",
+              "className": "m5-svc m5-svc--b is-in",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "flex",
+              "visibility": "visible",
+              "opacity": "0"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "m5-bento",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "grid",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DETAILS",
+              "id": "",
+              "className": "m5-more",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "ux-wrap",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            }
+          ]
+        },
+        {
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/fondos/activacion_960.webp",
+          "top": 215,
+          "bottom": 405,
+          "display": "block",
+          "visibility": "visible",
+          "opacity": "1",
+          "loading": "lazy",
+          "hiddenAncestor": true,
+          "ancestors": [
+            {
+              "tag": "IMG",
+              "id": "",
+              "className": "",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "BUTTON",
+              "id": "",
+              "className": "m5-svc m5-svc--c is-in",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "flex",
+              "visibility": "visible",
+              "opacity": "0"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "m5-bento",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "grid",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DETAILS",
+              "id": "",
+              "className": "m5-more",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "ux-wrap",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            }
+          ]
+        },
+        {
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/fondos/capacitacion_960.webp",
+          "top": 417,
+          "bottom": 607,
+          "display": "block",
+          "visibility": "visible",
+          "opacity": "1",
+          "loading": "lazy",
+          "hiddenAncestor": true,
+          "ancestors": [
+            {
+              "tag": "IMG",
+              "id": "",
+              "className": "",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "BUTTON",
+              "id": "",
+              "className": "m5-svc m5-svc--c is-in",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "flex",
+              "visibility": "visible",
+              "opacity": "0"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "m5-bento",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "grid",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DETAILS",
+              "id": "",
+              "className": "m5-more",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "ux-wrap",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            }
+          ]
+        },
+        {
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/escenas/oficina/fin.webp",
+          "top": 619,
+          "bottom": 809,
+          "display": "block",
+          "visibility": "visible",
+          "opacity": "1",
+          "loading": "lazy",
+          "hiddenAncestor": true,
+          "ancestors": [
+            {
+              "tag": "IMG",
+              "id": "",
+              "className": "",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "BUTTON",
+              "id": "",
+              "className": "m5-svc m5-svc--c is-in",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "flex",
+              "visibility": "visible",
+              "opacity": "0"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "m5-bento",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "grid",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DETAILS",
+              "id": "",
+              "className": "m5-more",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "className": "ux-wrap",
+              "hidden": false,
+              "ariaHidden": null,
+              "display": "block",
+              "visibility": "visible",
+              "opacity": "1"
+            }
+          ]
+        }
+      ],
+      "visiblePending": [],
+      "films": [
+        {
+          "scene": "hero",
+          "mode": "scroll",
+          "poster": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/escenas/hero/poster_m.webp",
+          "posterLoaded": true,
+          "video": true,
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/escenas/hero/video_m.mp4",
+          "readyState": 4,
+          "width": 720,
+          "height": 1280,
+          "time": 7.967785,
+          "ready": true,
+          "loading": false
+        }
+      ],
+      "mp4": []
+    },
+    "serpInitial": {
+      "queryEmpty": true,
+      "resultsHidden": true,
+      "overflow": false,
+      "phase": "description"
+    },
+    "serpAfterSearch": {
+      "query": "máquina de café para hotel",
+      "resultsHidden": false,
+      "aiHidden": false,
+      "aiTitle": "Cómo elegir una máquina para tu negocio",
+      "aiCopy": "Compara el tipo de servicio, el volumen aproximado y las bebidas. Si ya sabes qué equipo buscas, puedes indicarlo; si no, el diagnóstico orienta una recomendación y el equipo valida compatibilidad y condiciones.",
+      "description": "Café en grano, máquinas en comodato y packs para hoteles, oficinas y restaurantes. Cuéntanos de tu negocio y recibe orientación para cotizar.",
+      "faqHidden": false,
+      "openFaq": "¿Cómo elijo una máquina para mi negocio?",
+      "citationLinks": [
+        "https://www.marleycoffee.cl/cotizaconmarleycoffee",
+        "https://www.marleycoffee.cl/cafe"
+      ],
+      "overflow": false,
+      "brandLink": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html?utm_source=marley-serp-lab&utm_medium=research&utm_campaign=seo_description_A&utm_content=marley-primero&mc_source=serp_lab&mc_session=SERP-mwa2a5uk-tgh8q&mc_phase=description&mc_variant=A&mc_assignment=alternada&mc_order=marley-primero&mc_query_id=1&test=sitio&qa=1&journey=resume&journey_started_at=2026-11-10T02%3A19%3A00.444Z&return=index.html&mc_surface=resultado-organico#C02"
+    },
+    "catalogInitial": {
+      "hash": "#C10",
+      "h1": "Elige lo que vas a servir.",
+      "products": [
+        {
+          "name": "Café orgánico en grano",
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/grano.webp",
+          "loaded": false,
+          "width": 0,
+          "loading": "lazy"
+        },
+        {
+          "name": "Leche Get Together",
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/milk.webp",
+          "loaded": false,
+          "width": 0,
+          "loading": "lazy"
+        },
+        {
+          "name": "Chocolate Get Together",
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/chocolate.webp",
+          "loaded": false,
+          "width": 0,
+          "loading": "lazy"
+        },
+        {
+          "name": "Vainilla Get Together",
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/vanilla.webp",
+          "loaded": false,
+          "width": 0,
+          "loading": "lazy"
+        },
+        {
+          "name": "Vasos, tapas y consumibles",
+          "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/consumibles.webp",
+          "loaded": false,
+          "width": 0,
+          "loading": "lazy"
+        }
+      ],
+      "categoryControls": [
+        {
+          "text": "Café e insumos",
+          "action": null,
+          "value": null,
+          "selected": null
+        },
+        {
+          "text": "Amplía tu carta",
+          "action": null,
+          "value": null,
+          "selected": null
+        },
+        {
+          "text": "Experiencia de marca",
+          "action": null,
+          "value": null,
+          "selected": null
+        }
+      ],
+      "overflow": false
+    },
+    "catalogAfterScroll": [
+      {
+        "name": "Café orgánico en grano",
+        "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/grano.webp",
+        "loaded": true,
+        "width": 720
+      },
+      {
+        "name": "Leche Get Together",
+        "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/milk.webp",
+        "loaded": true,
+        "width": 720
+      },
+      {
+        "name": "Chocolate Get Together",
+        "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/chocolate.webp",
+        "loaded": true,
+        "width": 720
+      },
+      {
+        "name": "Vainilla Get Together",
+        "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/vanilla.webp",
+        "loaded": true,
+        "width": 720
+      },
+      {
+        "name": "Vasos, tapas y consumibles",
+        "src": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/productos/catalog/consumibles.webp",
+        "loaded": true,
+        "width": 720
+      }
+    ],
+    "heroDesktopInitial": {
+      "width": 1440,
+      "height": 900,
+      "h1": "Café para empresas que mueve tu negocio.",
+      "poster": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/escenas/hero/poster.webp",
+      "posterLoaded": true,
+      "videoSrc": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/recursos/escenas/hero/video_d.mp4",
+      "videoWidth": 1440,
+      "videoHeight": 804,
+      "readyState": 4,
+      "duration": 8.041667,
+      "seeking": false,
+      "ready": true
+    },
+    "heroDesktopSeek": [
+      {
+        "progress": 0.25,
+        "scrollY": 242,
+        "currentTime": 1.99,
+        "readyState": 4,
+        "seeking": false,
+        "ready": true
+      },
+      {
+        "progress": 0.7,
+        "scrollY": 566,
+        "currentTime": 5.58,
+        "readyState": 4,
+        "seeking": false,
+        "ready": true
+      },
+      {
+        "progress": 0.2,
+        "scrollY": 206,
+        "currentTime": 1.6,
+        "readyState": 4,
+        "seeking": false,
+        "ready": true
+      }
+    ]
+  }
+}

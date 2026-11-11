@@ -1,0 +1,2641 @@
+{
+  "metadata": {
+    "name": "CRM Marley Coffee Empresas · modelo por comprador",
+    "version": "2026-11-10",
+    "scope": "Propuesta académica y contenido local; sin conexiones, comunicaciones ni cuentas reales.",
+    "data_status": "No contiene clientes ni resultados comerciales reales. Toda cifra ilustrativa se rotula como ejemplo.",
+    "source_of_truth": "captacion/_coordinacion/MAPA.md para códigos, slugs, eventos y correos."
+  },
+  "policy": {
+    "lead_creation": "Crear lead solo tras envío válido y confirmación del servidor.",
+    "permission_separation": "Permiso para responder, permiso de recordatorio y permiso de marketing se guardan por separado.",
+    "anonymous_recovery": "Una visita anónima no autoriza correo individual. Remarketing solo con audiencia elegible y permisos/condiciones aplicables.",
+    "data_minimization": "No guardar datos que la persona no envió. No pasar la consulta exacta de búsqueda al CRM.",
+    "human_control": "Los asistentes preparan borradores; una persona revisa, decide y ejecuta."
+  },
+  "event_catalog": {
+    "web": [
+      "landing_viewed",
+      "form_start",
+      "form_step_completed",
+      "lead_created",
+      "quote_requested",
+      "calculator_used",
+      "cta_click",
+      "form_error",
+      "form_resumed",
+      "context_link_click"
+    ],
+    "crm": [
+      "lead_qualified",
+      "quote_sent",
+      "contract_signed",
+      "order_confirmed",
+      "repeat_order_confirmed",
+      "support_case_opened",
+      "csat_submitted",
+      "referral_sent",
+      "referral_lead_created"
+    ],
+    "constraints": [
+      "Usar solo estos nombres de MAPA.md.",
+      "MQL y SQL se distinguen mediante qualification_status en lead_qualified; SQL requiere aceptación humana de Ventas.",
+      "Alta y en_riesgo no tienen evento dedicado en MAPA.md: registrar estado interno y evidencia, sin inventar eventos."
+    ]
+  },
+  "funnel": [
+    {
+      "stage": "lead",
+      "entry": "Solicitud enviada y confirmada; lead_id único. Una visita o paso no enviado no ingresa.",
+      "exit": "Hay información declarada suficiente para revisión.",
+      "events": [
+        "lead_created"
+      ]
+    },
+    {
+      "stage": "MQL",
+      "entry": "Una persona marca calificación con evidencia explícita de necesidad y ajuste; no crear umbral nuevo de puntaje.",
+      "exit": "Ventas acepta como SQL o devuelve con motivo.",
+      "events": [
+        "lead_qualified"
+      ],
+      "event_properties": {
+        "qualification_status": "MQL",
+        "human_actor_required": true
+      }
+    },
+    {
+      "stage": "SQL",
+      "entry": "Ventas acepta explícitamente; queda responsable y motivo.",
+      "exit": "Se solicita/prepara propuesta o se devuelve/cierra con motivo.",
+      "events": [
+        "lead_qualified",
+        "quote_requested"
+      ],
+      "event_properties": {
+        "qualification_status": "SQL",
+        "accepted_by_role": "Ventas"
+      }
+    },
+    {
+      "stage": "propuesta",
+      "entry": "Solicitud revisada y propuesta asociada a identificador/versión.",
+      "exit": "Existe decisión comercial o se firma acuerdo.",
+      "events": [
+        "quote_requested",
+        "quote_sent"
+      ]
+    },
+    {
+      "stage": "cierre",
+      "entry": "Propuesta enviada y decisión explícita registrada.",
+      "exit": "Contrato firmado o cierre sin venta con motivo interno.",
+      "events": [
+        "quote_sent",
+        "contract_signed"
+      ]
+    },
+    {
+      "stage": "alta",
+      "entry": "Contrato firmado e inicio de configuración de cuenta.",
+      "exit": "Cuenta y tareas iniciales verificadas por una persona.",
+      "events": [
+        "contract_signed"
+      ]
+    },
+    {
+      "stage": "activa",
+      "entry": "Alta confirmada y existe operación/pedido confirmado.",
+      "exit": "Solicita reposición, aparece riesgo verificable o se abre soporte.",
+      "events": [
+        "order_confirmed",
+        "support_case_opened"
+      ]
+    },
+    {
+      "stage": "reposición",
+      "entry": "Necesidad confirmada con pedidos/consumo observados; cadencia sin intervalo fijo.",
+      "exit": "Pedido repetido confirmado, pausa o revisión humana.",
+      "events": [
+        "repeat_order_confirmed"
+      ]
+    },
+    {
+      "stage": "en_riesgo",
+      "entry": "Sale de su cadencia observada o tiene caso crítico; ventana operativa a definir con Marley.",
+      "exit": "Se confirma actividad, se resuelve caso o se acuerda siguiente paso.",
+      "events": [
+        "repeat_order_confirmed",
+        "support_case_opened",
+        "csat_submitted"
+      ]
+    },
+    {
+      "stage": "reactivación",
+      "entry": "Cuenta antes inactiva vuelve a conversar o confirma pedido.",
+      "exit": "Vuelve a activa o cierra con motivo; no cuenta como nueva.",
+      "events": [
+        "order_confirmed",
+        "repeat_order_confirmed"
+      ]
+    },
+    {
+      "stage": "promotora",
+      "entry": "Cuenta activa comunica satisfacción y es elegible para invitación con permiso.",
+      "exit": "Invitación revisada/enviada; lead referido solo tras confirmación.",
+      "events": [
+        "csat_submitted",
+        "referral_sent",
+        "referral_lead_created"
+      ]
+    }
+  ],
+  "event_properties_guidance": {
+    "lead_qualified": [
+      "qualification_status: MQL o SQL",
+      "accepted_by_role: Ventas para SQL",
+      "actor y fecha de revisión según sistema; sin PII en analítica"
+    ],
+    "quote_sent": [
+      "quote_id y quote_version; solo cuando la propuesta se envíe realmente"
+    ],
+    "contract_signed": [
+      "contract_id asociado a quote_id/version"
+    ],
+    "order_confirmed": [
+      "order_id, account_id y buyer"
+    ],
+    "repeat_order_confirmed": [
+      "order_id, account_id, buyer y canal"
+    ],
+    "support_case_opened": [
+      "case_id, tipo y severidad declarados; responsable/plazo solo desde fuente aprobada"
+    ],
+    "csat_submitted": [
+      "respuesta ligada a entrega/caso; no convertir automáticamente a NPS"
+    ],
+    "referral_sent": [
+      "solo tras envío real y permiso verificado"
+    ],
+    "referral_lead_created": [
+      "nuevo lead_id y origen referido tras confirmación"
+    ]
+  },
+  "recovery_scenarios": [
+    {
+      "id": "R1",
+      "stage": "visitó_sin_iniciar",
+      "signal": "landing_viewed sin form_start; puede ser sesión anónima.",
+      "piece": {
+        "type": "anuncio",
+        "references": [
+          "Meta Ads",
+          "Google Ads; Display solo si la audiencia alcanza el mínimo"
+        ],
+        "email_ids": []
+      },
+      "permission_base": "Audiencia elegible y permisos/condiciones aplicables, verificados antes de activar.",
+      "guardrail": "No identificar a la persona ni enviar correo; no repetir indefinidamente la pieza."
+    },
+    {
+      "id": "R2",
+      "stage": "inició_y_abandonó",
+      "signal": "form_start sin lead_created; el evento no identifica a la persona.",
+      "piece": {
+        "type": "anuncio_o_tarea",
+        "references": [
+          "Remarketing si la audiencia es elegible",
+          "E04 solo si el paso 1 fue enviado y existe permiso explícito de recordatorios"
+        ],
+        "email_ids": [
+          "E04"
+        ]
+      },
+      "permission_base": "Para correo: contacto parcial enviado válidamente y permiso explícito de recordatorios. Para anuncio: elegibilidad y permisos aplicables.",
+      "guardrail": "Escribir un correo en un campo que no se envió no autoriza seguimiento individual."
+    },
+    {
+      "id": "R3",
+      "stage": "envió_sin_avance",
+      "signal": "lead_created sin avance comercial registrado.",
+      "piece": {
+        "type": "correo_o_tarea",
+        "references": [
+          "E05 guía Cuentas claras con permiso de marketing",
+          "Tarea humana para solicitud vigente"
+        ],
+        "email_ids": [
+          "E05"
+        ]
+      },
+      "permission_base": "E05 requiere permiso de marketing. Una tarea humana solo responde al propósito registrado.",
+      "guardrail": "No automatizar correo promocional sin permiso."
+    },
+    {
+      "id": "R4",
+      "stage": "propuesta_sin_contrato",
+      "signal": "quote_sent sin contract_signed.",
+      "piece": {
+        "type": "correo_o_tarea",
+        "references": [
+          "E03 recordatorio de propuesta",
+          "Revisión de objeción y siguiente paso por Ventas"
+        ],
+        "email_ids": [
+          "E02",
+          "E03"
+        ]
+      },
+      "permission_base": "Seguimiento de solicitud/propuesta; plazo de E03 a definir con Marley.",
+      "guardrail": "Seguimiento personalizado, sin insistencia ni promesas nuevas."
+    },
+    {
+      "id": "R5",
+      "stage": "cliente_activo",
+      "signal": "contract_signed y alta/operación activa.",
+      "piece": {
+        "type": "tarea_o_correo",
+        "references": [
+          "Soporte, reposición y expansión",
+          "E08 servicio",
+          "E10 encuesta",
+          "E11 referido solo con permiso"
+        ],
+        "email_ids": [
+          "E06",
+          "E07",
+          "E08",
+          "E09",
+          "E10",
+          "E11"
+        ]
+      },
+      "permission_base": "E06/E07 relación contractual; E08 servicio; E09/E11 marketing con permiso. Excluir de captación general cuando corresponda.",
+      "guardrail": "La recompra de una cuenta existente es retención/reactivación, no cuenta nueva."
+    }
+  ],
+  "assistant_flows": [
+    {
+      "id": "bienvenida",
+      "signal": "lead_created confirmado y canal/origen disponible.",
+      "draft": "Hola. Recibimos tu solicitud. Revisaremos lo que compartiste para orientar el siguiente paso. ¿Qué parte de tu operación quieres priorizar?",
+      "human_review": "Confirmar que responde a la solicitud, respeta el canal y no vuelve a pedir datos ya enviados.",
+      "consequence": "Prepara una respuesta/tarea local; no se envía automáticamente."
+    },
+    {
+      "id": "calificación",
+      "signal": "Datos declarados de negocio, necesidad, volumen o servicio; faltantes visibles.",
+      "draft": "Con la información que enviaste, puedo dejar una recomendación preliminar para revisión. ¿Qué dato de tu operación falta considerar?",
+      "human_review": "Ventas revisa evidencia y ajuste; conserva pesos actuales. Solo Ventas acepta SQL.",
+      "consequence": "Actualiza MQL/SQL con motivo; lead_qualified se registra tras revisión humana."
+    },
+    {
+      "id": "propuesta",
+      "signal": "SQL aceptado y quote_requested con diagnóstico explícito.",
+      "draft": "Preparé este borrador con lo declarado. Precio, disponibilidad, condiciones y cobertura quedan por confirmar con el equipo antes de compartirlo.",
+      "human_review": "Validar producto, stock, precio, cobertura, condiciones y versión antes de enviar.",
+      "consequence": "quote_sent solo tras envío confirmado; borrador no equivale a propuesta enviada."
+    },
+    {
+      "id": "reposición",
+      "signal": "Historial de pedidos confirmados o necesidad declarada por la cuenta.",
+      "draft": "Veo un pedido previo, pero la fecha y cantidad deben confirmarse. ¿Quieres revisar una reposición?",
+      "human_review": "Confirmar cuenta, cantidades, compatibilidad y necesidad. Cadencia basada en historial observado y validada.",
+      "consequence": "No crea pedido; repeat_order_confirmed solo tras confirmación."
+    },
+    {
+      "id": "postventa",
+      "signal": "support_case_opened o entrega/incidencia declarada.",
+      "draft": "Registré lo que comentaste. El equipo debe revisar el caso y confirmar el siguiente paso; el plazo está a definir con Marley.",
+      "human_review": "Validar severidad, fuente operativa, responsable y plazo aprobado; pausar venta cruzada ante incidencia crítica.",
+      "consequence": "El caso queda en revisión; no abre ticket externo ni promete SLA por sí solo."
+    },
+    {
+      "id": "referidos",
+      "signal": "csat_submitted positivo, cuenta elegible y permiso comprobado.",
+      "draft": "Si tu experiencia fue positiva y quieres compartirla, podemos preparar una invitación para que la revises. No se enviará sin tu autorización.",
+      "human_review": "Confirmar elegibilidad, ausencia de bloqueo, permiso y beneficio aprobado por Marley.",
+      "consequence": "referral_sent solo si se envía; referral_lead_created solo cuando el referido confirma."
+    }
+  ],
+  "indicator_definitions": [
+    {
+      "id": "lead_count",
+      "name": "Leads confirmados",
+      "formula": "Conteo de lead_id únicos tras lead_created.",
+      "events": [
+        "lead_created"
+      ],
+      "sample_value": "4 leads (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "mql_rate",
+      "name": "Tasa lead → MQL",
+      "formula": "MQL / leads confirmados.",
+      "events": [
+        "lead_created",
+        "lead_qualified"
+      ],
+      "sample_value": "1 / 4 = 25% (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "sql_acceptance",
+      "name": "Aceptación MQL → SQL",
+      "formula": "SQL aceptados por Ventas / MQL revisados.",
+      "events": [
+        "lead_qualified"
+      ],
+      "sample_value": "1 / 2 = 50% (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "quote_rate",
+      "name": "SQL con propuesta enviada",
+      "formula": "quote_sent / SQL aceptados.",
+      "events": [
+        "lead_qualified",
+        "quote_sent"
+      ],
+      "sample_value": "2 / 4 = 50% (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "close_rate",
+      "name": "Cierre de propuesta",
+      "formula": "contract_signed / quote_sent, por versión/cohorte.",
+      "events": [
+        "quote_sent",
+        "contract_signed"
+      ],
+      "sample_value": "1 / 2 = 50% (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "activation_rate",
+      "name": "Alta completada",
+      "formula": "Cuentas con alta verificada / contratos firmados.",
+      "events": [
+        "contract_signed",
+        "order_confirmed"
+      ],
+      "sample_value": "1 / 1 = 100% (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "digital_reorder_share",
+      "name": "Participación de reposición digital",
+      "formula": "Reposiciones confirmadas digitalmente / reposiciones confirmadas.",
+      "events": [
+        "repeat_order_confirmed"
+      ],
+      "sample_value": "1 / 2 = 50% (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "at_risk_accounts",
+      "name": "Cuentas en riesgo",
+      "formula": "Cuentas fuera de cadencia observada o con incidencia crítica / cuentas activas evaluables. Ventana a definir con Marley.",
+      "events": [
+        "repeat_order_confirmed",
+        "support_case_opened"
+      ],
+      "sample_value": "1 / 4 = 25% (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "reactivation_rate",
+      "name": "Reactivación",
+      "formula": "Cuentas reactivadas / cuentas elegibles. Ventana a definir con Marley.",
+      "events": [
+        "order_confirmed",
+        "repeat_order_confirmed"
+      ],
+      "sample_value": "1 / 4 = 25% (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "referral_conversion",
+      "name": "Referidos que llegan a solicitud",
+      "formula": "referral_lead_created / referral_sent.",
+      "events": [
+        "referral_sent",
+        "referral_lead_created"
+      ],
+      "sample_value": "1 / 2 = 50% (ejemplo didáctico; no es dato Marley)."
+    },
+    {
+      "id": "first_response_time",
+      "name": "Tiempo hasta primera respuesta humana",
+      "formula": "Hora de primera respuesta humana − lead_created.",
+      "events": [
+        "lead_created"
+      ],
+      "sample_value": "Objetivo a definir con Marley; sin SLA confirmado."
+    }
+  ],
+  "resource_catalog": [
+    {
+      "id": "sol_restaurantes",
+      "type": "Solución",
+      "title": "Restaurantes",
+      "path": "captacion/soluciones/restaurantes.html",
+      "owner": "A2",
+      "status": "Ruta fijada por MAPA.md; confirmar entrega final de A2."
+    },
+    {
+      "id": "sol_hoteles",
+      "type": "Solución",
+      "title": "Hoteles",
+      "path": "captacion/soluciones/hoteles.html",
+      "owner": "A2",
+      "status": "Ruta fijada por MAPA.md; confirmar entrega final de A2."
+    },
+    {
+      "id": "sol_cafeterias",
+      "type": "Solución",
+      "title": "Cafeterías",
+      "path": "captacion/soluciones/cafeterias.html",
+      "owner": "A2",
+      "status": "Ruta fijada por MAPA.md; confirmar entrega final de A2."
+    },
+    {
+      "id": "sol_oficinas",
+      "type": "Solución",
+      "title": "Oficinas",
+      "path": "captacion/soluciones/oficinas.html",
+      "owner": "A2",
+      "status": "Ruta fijada por MAPA.md; confirmar entrega final de A2."
+    },
+    {
+      "id": "sol_eventos",
+      "type": "Solución",
+      "title": "Eventos y catering",
+      "path": "captacion/soluciones/eventos-catering.html",
+      "owner": "A2",
+      "status": "Ruta fijada por MAPA.md; confirmar entrega final de A2."
+    },
+    {
+      "id": "sol_conveniencia",
+      "type": "Solución",
+      "title": "Conveniencia",
+      "path": "captacion/soluciones/conveniencia.html",
+      "owner": "A2",
+      "status": "Ruta fijada por MAPA.md; confirmar entrega final de A2."
+    },
+    {
+      "id": "sol_panaderias",
+      "type": "Solución",
+      "title": "Panaderías",
+      "path": "captacion/soluciones/panaderias.html",
+      "owner": "A2",
+      "status": "Ruta fijada por MAPA.md; confirmar entrega final de A2."
+    },
+    {
+      "id": "guia_cantidad",
+      "type": "Guía",
+      "title": "Cuánto café necesita mi negocio",
+      "path": "captacion/contenidos/cuanto-cafe-necesita-mi-negocio.html",
+      "owner": "A2",
+      "status": "Archivo local; revisar versión final antes de integrar."
+    },
+    {
+      "id": "guia_comodato",
+      "type": "Guía",
+      "title": "Comodato de máquina de café",
+      "path": "captacion/contenidos/comodato-maquina-de-cafe.html",
+      "owner": "A2",
+      "status": "Archivo local; revisar versión final antes de integrar."
+    },
+    {
+      "id": "guia_comparar",
+      "type": "Guía",
+      "title": "Comprar, arrendar o comodato",
+      "path": "captacion/contenidos/comprar-arrendar-o-comodato.html",
+      "owner": "A2",
+      "status": "Archivo local; revisar versión final antes de integrar."
+    },
+    {
+      "id": "guia_maquina",
+      "type": "Guía",
+      "title": "Cómo elegir máquina de café",
+      "path": "captacion/contenidos/como-elegir-maquina-cafe.html",
+      "owner": "A2",
+      "status": "Archivo local; revisar versión final antes de integrar."
+    },
+    {
+      "id": "guia_hotel",
+      "type": "Guía",
+      "title": "Café para el desayuno de un hotel",
+      "path": "captacion/contenidos/cafe-desayuno-hotel.html",
+      "owner": "A2",
+      "status": "Archivo local; revisar versión final antes de integrar."
+    },
+    {
+      "id": "guia_reposicion",
+      "type": "Guía",
+      "title": "Cómo evitar quedarse sin café",
+      "path": "captacion/contenidos/como-evitar-quedarse-sin-cafe.html",
+      "owner": "A2",
+      "status": "Archivo local; revisar versión final antes de integrar."
+    }
+  ],
+  "email_catalog": [
+    {
+      "id": "E01",
+      "name": "Recibimos tu solicitud",
+      "stage": "Interacción",
+      "permission": "Seguimiento de la solicitud",
+      "trigger": "lead_created"
+    },
+    {
+      "id": "E02",
+      "name": "Tu propuesta está lista",
+      "stage": "Interacción",
+      "permission": "Seguimiento de la solicitud",
+      "trigger": "quote_sent"
+    },
+    {
+      "id": "E03",
+      "name": "Recordatorio de tu propuesta",
+      "stage": "Interacción",
+      "permission": "Seguimiento de la solicitud; plazo a definir con Marley",
+      "trigger": "Propuesta sin respuesta"
+    },
+    {
+      "id": "E04",
+      "name": "Retoma tu solicitud",
+      "stage": "Interacción",
+      "permission": "Permiso explícito de recordatorios/marketing",
+      "trigger": "Paso 1 enviado y paso 2 pendiente"
+    },
+    {
+      "id": "E05",
+      "name": "Guía Cuentas claras",
+      "stage": "Interacción",
+      "permission": "Permiso de marketing",
+      "trigger": "Lead sin avance"
+    },
+    {
+      "id": "E06",
+      "name": "Bienvenida y próximos pasos",
+      "stage": "Alta",
+      "permission": "Relación contractual",
+      "trigger": "contract_signed"
+    },
+    {
+      "id": "E07",
+      "name": "Tu primera semana por rol",
+      "stage": "Alta",
+      "permission": "Relación contractual; días a definir con Marley",
+      "trigger": "Días después del alta"
+    },
+    {
+      "id": "E08",
+      "name": "Aviso de reposición",
+      "stage": "Deleite",
+      "permission": "Servicio; cadencia supuesto por validar",
+      "trigger": "Cadencia o consumo estimado"
+    },
+    {
+      "id": "E09",
+      "name": "Novedades para tu negocio",
+      "stage": "Deleite",
+      "permission": "Permiso de marketing",
+      "trigger": "Calendario editorial"
+    },
+    {
+      "id": "E10",
+      "name": "Cómo lo estamos haciendo",
+      "stage": "Deleite",
+      "permission": "Servicio",
+      "trigger": "Después de una entrega o caso"
+    },
+    {
+      "id": "E11",
+      "name": "Recomienda a otro negocio",
+      "stage": "Deleite",
+      "permission": "Permiso de marketing",
+      "trigger": "Respuesta alta en E10; elegibilidad revisada"
+    },
+    {
+      "id": "E12",
+      "name": "Te echamos de menos",
+      "stage": "Reactivación",
+      "permission": "Permiso de marketing; ventana a definir con Marley",
+      "trigger": "Sin pedidos en período definido"
+    }
+  ],
+  "source_catalog": [
+    {
+      "id": "CTX_ROLES",
+      "title": "Contexto vigente Marley Coffee §5: compradores y roles",
+      "file": "investigacion_08nov/CONTEXTO_VIGENTE_MARLEY_08NOV.md#5",
+      "date": "2026-11-08",
+      "url": null,
+      "scope": "Taxonomía general de usuario/influenciador/comprador/aprobador; no verifica contactos individuales."
+    },
+    {
+      "id": "LI_ROLES",
+      "title": "Lecturas de LinkedIn rehecho: cargos de compra y operaciones",
+      "file": "investigacion_09nov/LECTURAS_LINKEDIN_REHECHO_09NOV.md",
+      "date": "2026-11-09",
+      "url": null,
+      "scope": "Lectura de audiencia; no es organigrama Marley ni resultado de campaña."
+    },
+    {
+      "id": "MAPA",
+      "title": "Mapa de compradores, eventos, slugs y correos",
+      "file": "captacion/_coordinacion/MAPA.md",
+      "date": "2026-11-10",
+      "url": null,
+      "scope": "Fuente canónica de esta tanda."
+    },
+    {
+      "id": "PLAN_TEST",
+      "title": "Plan de captación, secciones 7 y 8",
+      "file": "../ecosistema_captacion_10nov/PLAN_ECOSISTEMA_CAPTACION_MARLEY_10NOV.md#7-8",
+      "date": "2026-11-10",
+      "url": null,
+      "scope": "Tareas E0–E9, umbrales y modelo CRM."
+    },
+    {
+      "id": "SL_SUMMARY",
+      "title": "Resumen de escucha social, 127 filas",
+      "file": "investigacion_07nov/social_listening/RESUMEN_SOCIAL_LISTENING.md",
+      "date": "2026-11-07",
+      "url": null,
+      "scope": "Muestra manual, pequeña y no representativa; comprador probable, no confirmado."
+    },
+    {
+      "id": "SL-015",
+      "title": "Costos al abrir cafetería",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-015",
+      "date": "2026-11-07",
+      "url": "https://www.youtube.com/watch?v=41kypn9T5Zs",
+      "scope": "Señal de emprendedores; no es presupuesto Marley."
+    },
+    {
+      "id": "SL-021",
+      "title": "Repuestos y reparación",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-021",
+      "date": "2026-11-07",
+      "url": "https://www.youtube.com/watch?v=b57-MWC-WdU",
+      "scope": "HORECA o usuario del equipo; comprador probable."
+    },
+    {
+      "id": "SL-025",
+      "title": "Riesgos de inversión en vending",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-025",
+      "date": "2026-11-07",
+      "url": "https://www.youtube.com/watch?v=RHJlM5wjTbU",
+      "scope": "Audiencia de video; país de cada comentarista no verificado."
+    },
+    {
+      "id": "SL-026",
+      "title": "Ubicación y canibalización en vending",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-026",
+      "date": "2026-11-07",
+      "url": "https://www.youtube.com/watch?v=RHJlM5wjTbU",
+      "scope": "Caso individual; no extrapolar."
+    },
+    {
+      "id": "SL-027",
+      "title": "Falla de vasos atascados",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-027",
+      "date": "2026-11-07",
+      "url": "https://www.youtube.com/watch?v=RHJlM5wjTbU",
+      "scope": "Operador/a de vending; país no verificado."
+    },
+    {
+      "id": "SL-030",
+      "title": "Escala y rentabilidad de vending",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-030",
+      "date": "2026-11-07",
+      "url": "https://www.youtube.com/watch?v=RHJlM5wjTbU",
+      "scope": "Pregunta pública; no es dato financiero Marley."
+    },
+    {
+      "id": "SL-034",
+      "title": "Reclamo histórico sobre condiciones de máquina Marley",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-034",
+      "date": "2026-11-07",
+      "url": "https://www.reclamos.cl/reclamo/2021/jul/marley_coffee_comercial_dicalla_sa_no_comprar_sus_maquinas",
+      "scope": "Reclamo individual de cafetería de 2021; no confirma condiciones actuales."
+    },
+    {
+      "id": "SL-035",
+      "title": "Medida servida y boleta en panadería",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-035",
+      "date": "2026-11-07",
+      "url": "https://www.reclamos.cl/reclamo/2026/jul/panader-casta-o-caf-no-fu-hasta-la-medida-del-vaso-mediano",
+      "scope": "Un reclamo; no generalizable a panaderías."
+    },
+    {
+      "id": "SL-054",
+      "title": "Arriendo de máquina y término",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-054",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Nolichile/@-37.0608324,-88.1804,4z/data=!4m10!1m2!2m1!1sCafeteros+Chile+comodato+oficinas!3m6!1m2!2m1!1sCafeteros+Chile+comodato+oficinas!3m6!1s0x9662cffe57e6dc8f:0x3119ef214302a618",
+      "scope": "Reseña individual sobre otro proveedor."
+    },
+    {
+      "id": "SL-058",
+      "title": "Compatibilidad entre vaso y máquina",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-058",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Nolichile/@-37.0608324,-88.1804,4z/data!4m10!1m2!2m1!1sCafeteros+Chile+comodato+oficinas!3m6!1s0x9662cffe57e6dc8f:0x3119ef214302a618",
+      "scope": "Caso de compatibilidad HORECA; no buyer específico."
+    },
+    {
+      "id": "SL-060",
+      "title": "Servicio técnico a domicilio",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-060",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Caf%C3%A9+Catunamb%C3%BA/@-33.4319209,-70.6413487,17z/data=!3m1!4b1!4m6!3m5!1s0x9662cf6f45a7a4d1:0xd3f43ee620b94290",
+      "scope": "Reseña individual de servicio de otro proveedor."
+    },
+    {
+      "id": "SL-064",
+      "title": "Desayuno de hotel",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-064",
+      "date": "2026-11-07",
+      "url": "https://www.tripadvisor.cl/Hotel_Review-g294305-d301847-Reviews-Four_Points_by_Sheraton_Santiago-Santiago_Santiago_Metropolitan_Region.html",
+      "scope": "Opinión de huésped, no decisor ni evaluación específica de café."
+    },
+    {
+      "id": "SL-091",
+      "title": "Insumos compatibles para vending",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-091",
+      "date": "2026-11-07",
+      "url": "https://www.youtube.com/watch?v=PKnx4vRwTMA",
+      "scope": "Pregunta de operador/a; país no verificado."
+    },
+    {
+      "id": "SL-092",
+      "title": "Variación de cobro en visita técnica",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-092",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Maquinas+de+Caf%C3%A9+-+Eurovending/@-33.4004197,-70.6661413,13z",
+      "scope": "Reseña individual de otro proveedor."
+    },
+    {
+      "id": "SL-095",
+      "title": "Despacho a oficina",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-095",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Maquinas+de+Caf%C3%A9+-+Eurovending/@-33.4004197,-70.6661413,13z",
+      "scope": "Compra empresarial reseñada para otro proveedor."
+    },
+    {
+      "id": "SL-096",
+      "title": "Continuidad y compra por mayor",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-096",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Maquinas+de+Caf%C3%A9+-+Eurovending/@-33.4004197,-70.6661413,13z",
+      "scope": "Experiencia de otro proveedor."
+    },
+    {
+      "id": "SL-097",
+      "title": "Atención en terreno en eventos",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-097",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Coffee+Break+Santiago/@-33.4105636,-70.6182053,13z",
+      "scope": "Reseña positiva individual de otro proveedor."
+    },
+    {
+      "id": "SL-100",
+      "title": "Precio/calidad de coffee break institucional",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-100",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Coffee+Break+Santiago/@-33.4105636,-70.6182053,13z",
+      "scope": "Reseña positiva individual; no oferta Marley."
+    },
+    {
+      "id": "SL-101",
+      "title": "Montaje y presentación en evento",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-101",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Coffee+Break+Santiago/@-33.4105636,-70.6182053,13z",
+      "scope": "Reseña positiva individual de otro proveedor."
+    },
+    {
+      "id": "SL-107",
+      "title": "Soporte técnico rápido",
+      "file": "investigacion_07nov/social_listening/social_listening.csv#SL-107",
+      "date": "2026-11-07",
+      "url": "https://www.google.com/maps/place/Cafexpress/@-33.3960824,-70.6656938,13z",
+      "scope": "Reseña positiva individual; no promesa de servicio Marley."
+    }
+  ],
+  "buyers": [
+    {
+      "code": "restaurante",
+      "slug": "restaurantes",
+      "label": "Restaurante",
+      "priority_rank": 1,
+      "priority_note": "HORECA prioritario; secuencia de trabajo según plan.",
+      "role_source_ids": [
+        "CTX_ROLES",
+        "LI_ROLES"
+      ],
+      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles": [
+        {
+          "role": "usuario",
+          "titles": [
+            "Barista",
+            "Operador/a de barra o máquina"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "influenciador",
+          "titles": [
+            "Jefe/a de cocina",
+            "Chef",
+            "Jefe/a de operaciones"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "comprador",
+          "titles": [
+            "Encargado/a de compras",
+            "Comprador/a",
+            "Administrador/a"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "aprobador",
+          "titles": [
+            "Propietario/a de restaurante",
+            "Dueño/a",
+            "Gerente de operaciones"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        }
+      ],
+      "pain_points": [
+        {
+          "title": "Compatibilidad de equipo e insumos",
+          "detail": "Una compra HORECA archivada tuvo incompatibilidad entre vaso y máquina; validar compatibilidad antes de proponer.",
+          "source_ids": [
+            "SL-058"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Caso individual; no específico de restaurante.",
+          "question_to_validate": "¿Qué equipo e insumos usas hoy?"
+        },
+        {
+          "title": "Condiciones de contrato",
+          "detail": "Un reclamo público de una cafetería describió exclusividad y dificultad para terminar un contrato; es histórico y no confirma condiciones actuales.",
+          "source_ids": [
+            "SL-034"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Reclamo de 2021; no afirmar que esas condiciones sigan vigentes.",
+          "question_to_validate": "¿Qué condiciones necesitas aclarar antes de evaluar una alternativa?"
+        },
+        {
+          "title": "Servicio técnico",
+          "detail": "En fuentes HORECA aparecen fallas y dudas de reparación en equipos de otros proveedores.",
+          "source_ids": [
+            "SL-021",
+            "SL-054",
+            "SL-060"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Muestra pequeña; proveedor y caso varían.",
+          "question_to_validate": "¿Qué harías hoy si el equipo deja de funcionar?"
+        }
+      ],
+      "objections": [
+        {
+          "text": "¿Qué incluye el acuerdo, qué insumos exige y cómo se termina?",
+          "source_ids": [
+            "SL-034"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "Reclamo histórico; verificar oferta vigente con Marley."
+        },
+        {
+          "text": "¿Cómo se valida que máquina, vaso e insumos sean compatibles?",
+          "source_ids": [
+            "SL-058"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "Caso individual de compra HORECA; no extrapolar."
+        }
+      ],
+      "first_contact_script": "Hola. Para entender cómo encaja el café en tu restaurante, ¿cómo lo preparan y sirven hoy?",
+      "qualification_questions": [
+        "¿Qué quieres mejorar del servicio de café?",
+        "¿Cuántas tazas preparan en un día típico y en uno de mayor demanda?",
+        "¿Qué equipo e insumos usan actualmente?",
+        "¿Qué condición debe quedar clara antes de comparar alternativas?",
+        "¿Quiénes participan en recomendación, compra y aprobación?"
+      ],
+      "content_by_stage": {
+        "lead": {
+          "resource_ids": [
+            "sol_restaurantes",
+            "guia_cantidad",
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E01"
+          ],
+          "condition": "E01 responde una solicitud confirmada."
+        },
+        "MQL": {
+          "resource_ids": [
+            "guia_cantidad",
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E05"
+          ],
+          "condition": "E05 requiere permiso de marketing."
+        },
+        "SQL": {
+          "resource_ids": [
+            "guia_comodato",
+            "guia_comparar"
+          ],
+          "email_ids": [],
+          "condition": "Revisión humana de Ventas."
+        },
+        "propuesta": {
+          "resource_ids": [
+            "guia_comodato",
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E02",
+            "E03"
+          ],
+          "condition": "E02 tras quote_sent; E03 en plazo a definir con Marley."
+        },
+        "cierre": {
+          "resource_ids": [
+            "sol_restaurantes"
+          ],
+          "email_ids": [],
+          "condition": "Registrar decisión; sin promoción por defecto."
+        },
+        "alta": {
+          "resource_ids": [
+            "sol_restaurantes"
+          ],
+          "email_ids": [
+            "E06",
+            "E07"
+          ],
+          "condition": "Relación contractual; los días de E07 se definen con Marley."
+        },
+        "activa": {
+          "resource_ids": [
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E08",
+            "E09",
+            "E10"
+          ],
+          "condition": "E08/E10 de servicio; E09 requiere permiso de marketing."
+        },
+        "reposición": {
+          "resource_ids": [
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E08"
+          ],
+          "condition": "Cadencia es supuesto; validar con historial y Marley."
+        },
+        "en_riesgo": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "E12 requiere marketing; umbral de inactividad a definir."
+        },
+        "reactivación": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "Permiso de marketing y ventana a definir."
+        },
+        "promotora": {
+          "resource_ids": [
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E10",
+            "E11"
+          ],
+          "condition": "E11 requiere permiso y elegibilidad revisada."
+        }
+      },
+      "next_best_action_by_state": {
+        "lead": "Confirmar envío válido, conservar primer/último origen y asignar revisión; no activar marketing.",
+        "MQL": "Validar formato de servicio, volumen y equipo; usar guías como contexto, sin sugerir condiciones Marley.",
+        "SQL": "Ventas acepta o devuelve con motivo y responsable; la aceptación siempre es humana.",
+        "propuesta": "Preparar versión con lo declarado; validar producto, stock, precio, cobertura y condiciones antes de enviar.",
+        "cierre": "Registrar decisión y motivo; marcar como ganado solo con contrato firmado.",
+        "alta": "Completar tareas de cuenta con responsables y permisos comprobados; plazos a definir con Marley.",
+        "activa": "Atender uso y soporte; medir actividad con pedidos confirmados, no con telemetría.",
+        "reposición": "Consultar pedidos y consumo declarados; confirmar cantidades antes de preparar pedido.",
+        "en_riesgo": "Revisar cadencia observada y casos abiertos; resolver incidentes críticos antes de vender.",
+        "reactivación": "Crear tarea de revisión; contactar solo con base válida. No contar como cuenta nueva.",
+        "promotora": "Revisar satisfacción y elegibilidad; invitar solo con permiso y aprobación humana."
+      },
+      "replenishment_cadence": {
+        "status": "supuesto_por_validar",
+        "interval_days": null,
+        "basis": "Estimar solo desde consumo declarado y pedidos confirmados; confirmar con Marley antes de sugerir fechas. No existe cadencia universal verificada."
+      },
+      "risk_signals": [
+        "Cobertura por comuna no confirmada.",
+        "Compatibilidad de equipo e insumos no validada.",
+        "Incidencia técnica o condición contractual sin fuente vigente.",
+        "Sin permiso de marketing: detener E05/E09/E11/E12."
+      ],
+      "indicator_ids": [
+        "lead_count",
+        "mql_rate",
+        "sql_acceptance",
+        "quote_rate",
+        "close_rate",
+        "activation_rate",
+        "digital_reorder_share",
+        "at_risk_accounts",
+        "reactivation_rate",
+        "referral_conversion"
+      ]
+    },
+    {
+      "code": "hotel",
+      "slug": "hoteles",
+      "label": "Hotel",
+      "priority_rank": 2,
+      "priority_note": "HORECA prioritario; secuencia de trabajo según plan.",
+      "role_source_ids": [
+        "CTX_ROLES",
+        "LI_ROLES"
+      ],
+      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles": [
+        {
+          "role": "usuario",
+          "titles": [
+            "Encargado/a de desayuno",
+            "Barista",
+            "Operador/a del punto de café"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "influenciador",
+          "titles": [
+            "Jefe/a de alimentos y bebidas",
+            "Jefe/a de cocina",
+            "Jefe/a de operaciones"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "comprador",
+          "titles": [
+            "Jefe/a de compras",
+            "Comprador/a",
+            "Administrador/a de hotel"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "aprobador",
+          "titles": [
+            "Gerente de hotel",
+            "Gerente general",
+            "Propietario/a"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        }
+      ],
+      "pain_points": [
+        {
+          "title": "Experiencia de desayuno",
+          "detail": "Una reseña de huésped menciona el desayuno; es señal de experiencia, no necesidad declarada por compradores ni evaluación específica del café.",
+          "source_ids": [
+            "SL-064"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Muestra mínima y no decisora.",
+          "question_to_validate": "¿Qué parte del servicio de desayuno quieres mejorar?"
+        },
+        {
+          "title": "Operación del punto",
+          "detail": "Horarios, picos y cantidad por servicio deben levantarse por hotel; no hay capacidad ni SLA Marley confirmados.",
+          "source_ids": [
+            "PLAN_TEST"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Pregunta operativa, no hallazgo cuantitativo.",
+          "question_to_validate": "¿En qué momentos se concentra la preparación de café?"
+        }
+      ],
+      "objections": [
+        {
+          "text": "¿La propuesta contempla los horarios y picos del desayuno?",
+          "source_ids": [
+            "SL-064"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "Hipótesis desde reseña de huésped; validar con quien opera el desayuno."
+        },
+        {
+          "text": "¿Qué cobertura y soporte están disponibles para este hotel?",
+          "source_ids": [
+            "SL-021"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "Cobertura y soporte Marley se confirman en la propuesta."
+        }
+      ],
+      "first_contact_script": "Hola. Para entender el servicio de desayuno de tu hotel, ¿qué necesitas resolver en el punto de café?",
+      "qualification_questions": [
+        "¿En qué momentos del día se sirve café?",
+        "¿Cuántas tazas se preparan en un día típico y en uno de mayor ocupación?",
+        "¿Qué equipos y puntos de servicio participan?",
+        "¿Qué fechas o eventos debemos considerar?",
+        "¿Quiénes revisan compras, operación y aprobación?"
+      ],
+      "content_by_stage": {
+        "lead": {
+          "resource_ids": [
+            "sol_hoteles",
+            "guia_hotel",
+            "guia_cantidad"
+          ],
+          "email_ids": [
+            "E01"
+          ],
+          "condition": "E01 responde una solicitud confirmada."
+        },
+        "MQL": {
+          "resource_ids": [
+            "guia_hotel",
+            "guia_cantidad"
+          ],
+          "email_ids": [
+            "E05"
+          ],
+          "condition": "E05 requiere permiso de marketing."
+        },
+        "SQL": {
+          "resource_ids": [
+            "guia_cantidad",
+            "guia_comodato"
+          ],
+          "email_ids": [],
+          "condition": "Revisión humana de Ventas."
+        },
+        "propuesta": {
+          "resource_ids": [
+            "guia_cantidad",
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E02",
+            "E03"
+          ],
+          "condition": "E02 tras quote_sent; E03 en plazo a definir con Marley."
+        },
+        "cierre": {
+          "resource_ids": [
+            "sol_hoteles"
+          ],
+          "email_ids": [],
+          "condition": "Registrar decisión; sin promoción por defecto."
+        },
+        "alta": {
+          "resource_ids": [
+            "sol_hoteles"
+          ],
+          "email_ids": [
+            "E06",
+            "E07"
+          ],
+          "condition": "Relación contractual; los días de E07 se definen con Marley."
+        },
+        "activa": {
+          "resource_ids": [
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E08",
+            "E09",
+            "E10"
+          ],
+          "condition": "E08/E10 de servicio; E09 requiere permiso de marketing."
+        },
+        "reposición": {
+          "resource_ids": [
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E08"
+          ],
+          "condition": "Cadencia es supuesto; validar con historial y Marley."
+        },
+        "en_riesgo": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "E12 requiere marketing; umbral de inactividad a definir."
+        },
+        "reactivación": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "Permiso de marketing y ventana a definir."
+        },
+        "promotora": {
+          "resource_ids": [
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E10",
+            "E11"
+          ],
+          "condition": "E11 requiere permiso y elegibilidad revisada."
+        }
+      },
+      "next_best_action_by_state": {
+        "lead": "Confirmar envío válido, conservar primer/último origen y asignar revisión; no activar marketing.",
+        "MQL": "Aclarar momentos de servicio y volumen; no inferir capacidad por número de huéspedes.",
+        "SQL": "Ventas acepta o devuelve con motivo y responsable; la aceptación siempre es humana.",
+        "propuesta": "Preparar versión con lo declarado; validar producto, stock, precio, cobertura y condiciones antes de enviar.",
+        "cierre": "Registrar decisión y motivo; marcar como ganado solo con contrato firmado.",
+        "alta": "Completar tareas de cuenta con responsables y permisos comprobados; plazos a definir con Marley.",
+        "activa": "Atender uso y soporte; medir actividad con pedidos confirmados, no con telemetría.",
+        "reposición": "Consultar pedidos y consumo declarados; confirmar cantidades antes de preparar pedido.",
+        "en_riesgo": "Revisar cadencia observada y casos abiertos; resolver incidentes críticos antes de vender.",
+        "reactivación": "Crear tarea de revisión; contactar solo con base válida. No contar como cuenta nueva.",
+        "promotora": "Revisar satisfacción y elegibilidad; invitar solo con permiso y aprobación humana."
+      },
+      "replenishment_cadence": {
+        "status": "supuesto_por_validar",
+        "interval_days": null,
+        "basis": "Estimar solo desde consumo declarado y pedidos confirmados; confirmar con Marley antes de sugerir fechas. No existe cadencia universal verificada."
+      },
+      "risk_signals": [
+        "Cobertura por zona no confirmada.",
+        "Demanda estacional sin dato observado.",
+        "Equipo o flujo de desayuno no documentado.",
+        "Incidencia crítica abierta: pausar venta cruzada."
+      ],
+      "indicator_ids": [
+        "lead_count",
+        "mql_rate",
+        "sql_acceptance",
+        "quote_rate",
+        "close_rate",
+        "activation_rate",
+        "digital_reorder_share",
+        "at_risk_accounts",
+        "referral_conversion"
+      ]
+    },
+    {
+      "code": "cafeteria",
+      "slug": "cafeterias",
+      "label": "Cafetería",
+      "priority_rank": 3,
+      "priority_note": "HORECA prioritario; secuencia de trabajo según plan.",
+      "role_source_ids": [
+        "CTX_ROLES",
+        "LI_ROLES"
+      ],
+      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles": [
+        {
+          "role": "usuario",
+          "titles": [
+            "Barista",
+            "Barista jefe/a"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "influenciador",
+          "titles": [
+            "Jefe/a de barra",
+            "Barista jefe/a",
+            "Chef"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "comprador",
+          "titles": [
+            "Dueño/a",
+            "Administrador/a",
+            "Encargado/a de compras"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "aprobador",
+          "titles": [
+            "Propietario/a",
+            "Socio/a",
+            "Gerente general"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        }
+      ],
+      "pain_points": [
+        {
+          "title": "Costos previos a abrir",
+          "detail": "En comentarios de apertura se piden costos de local, adecuación, personal y servicios; señal de emprendedores, no presupuesto Marley.",
+          "source_ids": [
+            "SL-015"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "No usar como cifra de inversión.",
+          "question_to_validate": "¿Qué costos o condiciones necesitas entender antes de abrir o cambiar?"
+        },
+        {
+          "title": "Exclusividad y término",
+          "detail": "Un reclamo histórico de cafetería menciona exclusividad de insumos y salida de contrato; no acredita condiciones vigentes.",
+          "source_ids": [
+            "SL-034"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Reclamo individual de 2021; verificar reglas actuales.",
+          "question_to_validate": "¿Qué necesitas saber sobre compra de insumos y término del acuerdo?"
+        },
+        {
+          "title": "Compatibilidad y mantención",
+          "detail": "En reseñas HORECA aparecen dudas de repuestos, compatibilidad y visita técnica.",
+          "source_ids": [
+            "SL-021",
+            "SL-058",
+            "SL-060"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Casos de equipos/proveedores distintos; no equivalen a Marley.",
+          "question_to_validate": "¿Qué soporte y compatibilidad has necesitado hasta ahora?"
+        }
+      ],
+      "objections": [
+        {
+          "text": "¿Qué costos, condiciones y compromisos debo revisar antes de firmar?",
+          "source_ids": [
+            "SL-015",
+            "SL-034"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "No publicar costos ni términos; se confirman en propuesta."
+        },
+        {
+          "text": "¿Qué pasa si necesito reparar o cambiar equipo?",
+          "source_ids": [
+            "SL-021",
+            "SL-060"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "No hay cobertura ni tiempo de respuesta confirmados."
+        }
+      ],
+      "first_contact_script": "Hola. Para conocer la operación de tu cafetería, ¿qué te gustaría mejorar primero?",
+      "qualification_questions": [
+        "¿Qué preparaciones son centrales para tu carta?",
+        "¿Cuántas bebidas preparan en un día típico y en punta?",
+        "¿Qué máquina, molino y formatos de insumo ocupan?",
+        "¿Qué condiciones quieres comparar antes de decidir?",
+        "¿Quién recomienda, compra y aprueba?"
+      ],
+      "content_by_stage": {
+        "lead": {
+          "resource_ids": [
+            "sol_cafeterias",
+            "guia_cantidad",
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E01"
+          ],
+          "condition": "E01 responde una solicitud confirmada."
+        },
+        "MQL": {
+          "resource_ids": [
+            "guia_cantidad",
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E05"
+          ],
+          "condition": "E05 requiere permiso de marketing."
+        },
+        "SQL": {
+          "resource_ids": [
+            "guia_comodato",
+            "guia_comparar"
+          ],
+          "email_ids": [],
+          "condition": "Revisión humana de Ventas."
+        },
+        "propuesta": {
+          "resource_ids": [
+            "guia_comodato",
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E02",
+            "E03"
+          ],
+          "condition": "E02 tras quote_sent; E03 en plazo a definir con Marley."
+        },
+        "cierre": {
+          "resource_ids": [
+            "sol_cafeterias"
+          ],
+          "email_ids": [],
+          "condition": "Registrar decisión; sin promoción por defecto."
+        },
+        "alta": {
+          "resource_ids": [
+            "sol_cafeterias"
+          ],
+          "email_ids": [
+            "E06",
+            "E07"
+          ],
+          "condition": "Relación contractual; los días de E07 se definen con Marley."
+        },
+        "activa": {
+          "resource_ids": [
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E08",
+            "E09",
+            "E10"
+          ],
+          "condition": "E08/E10 de servicio; E09 requiere permiso de marketing."
+        },
+        "reposición": {
+          "resource_ids": [
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E08"
+          ],
+          "condition": "Cadencia es supuesto; validar con historial y Marley."
+        },
+        "en_riesgo": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "E12 requiere marketing; umbral de inactividad a definir."
+        },
+        "reactivación": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "Permiso de marketing y ventana a definir."
+        },
+        "promotora": {
+          "resource_ids": [
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E10",
+            "E11"
+          ],
+          "condition": "E11 requiere permiso y elegibilidad revisada."
+        }
+      },
+      "next_best_action_by_state": {
+        "lead": "Confirmar envío válido, conservar primer/último origen y asignar revisión; no activar marketing.",
+        "MQL": "Validar preparaciones, equipo y necesidad de reposición; separar dato observado de condición a cotizar.",
+        "SQL": "Ventas acepta o devuelve con motivo y responsable; la aceptación siempre es humana.",
+        "propuesta": "Preparar versión con lo declarado; validar producto, stock, precio, cobertura y condiciones antes de enviar.",
+        "cierre": "Registrar decisión y motivo; marcar como ganado solo con contrato firmado.",
+        "alta": "Completar tareas de cuenta con responsables y permisos comprobados; plazos a definir con Marley.",
+        "activa": "Atender uso y soporte; medir actividad con pedidos confirmados, no con telemetría.",
+        "reposición": "Consultar pedidos y consumo declarados; confirmar cantidades antes de preparar pedido.",
+        "en_riesgo": "Revisar cadencia observada y casos abiertos; resolver incidentes críticos antes de vender.",
+        "reactivación": "Crear tarea de revisión; contactar solo con base válida. No contar como cuenta nueva.",
+        "promotora": "Revisar satisfacción y elegibilidad; invitar solo con permiso y aprobación humana."
+      },
+      "replenishment_cadence": {
+        "status": "supuesto_por_validar",
+        "interval_days": null,
+        "basis": "Estimar solo desde consumo declarado y pedidos confirmados; confirmar con Marley antes de sugerir fechas. No existe cadencia universal verificada."
+      },
+      "risk_signals": [
+        "Equipo y compatibilidad sin confirmar.",
+        "Condiciones de exclusividad, mantención o término sin fuente vigente.",
+        "Costos de apertura no son cotización Marley.",
+        "Sin datos reales de consumo ni margen por cuenta."
+      ],
+      "indicator_ids": [
+        "lead_count",
+        "mql_rate",
+        "sql_acceptance",
+        "quote_rate",
+        "close_rate",
+        "activation_rate",
+        "digital_reorder_share",
+        "at_risk_accounts",
+        "reactivation_rate",
+        "referral_conversion"
+      ]
+    },
+    {
+      "code": "oficina",
+      "slug": "oficinas",
+      "label": "Oficina (OCS)",
+      "priority_rank": 4,
+      "priority_note": "Segmento de expansión; cobertura y condiciones a confirmar.",
+      "role_source_ids": [
+        "CTX_ROLES",
+        "LI_ROLES"
+      ],
+      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles": [
+        {
+          "role": "usuario",
+          "titles": [
+            "Colaborador/a usuario/a del punto",
+            "Operador/a del punto de café"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "influenciador",
+          "titles": [
+            "Administrador/a de oficina",
+            "Jefe/a de operaciones",
+            "Encargado/a de servicios generales"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "comprador",
+          "titles": [
+            "Comprador/a",
+            "Especialista en compras",
+            "Administrador/a"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "aprobador",
+          "titles": [
+            "Gerente de administración",
+            "Gerente de operaciones",
+            "Gerente general"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        }
+      ],
+      "pain_points": [
+        {
+          "title": "Entrega al lugar de trabajo",
+          "detail": "Una reseña de compra de empresa valora el despacho a oficina y la resolución de una entrega.",
+          "source_ids": [
+            "SL-095"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Reseña de otro proveedor; no confirma cobertura Marley.",
+          "question_to_validate": "¿Dónde debe recibirse el pedido y qué restricciones hay?"
+        },
+        {
+          "title": "Transparencia de servicio técnico",
+          "detail": "Una reseña describe cambios en el valor comunicado para visita técnica.",
+          "source_ids": [
+            "SL-092"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Caso individual de otro proveedor; no atribuir a Marley.",
+          "question_to_validate": "¿Qué costos deben confirmarse antes de coordinar servicio?"
+        },
+        {
+          "title": "Continuidad y compra por mayor",
+          "detail": "Una reseña de cliente de largo plazo valora continuidad y compras por mayor.",
+          "source_ids": [
+            "SL-096"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Experiencia de otro proveedor; no es promesa Marley.",
+          "question_to_validate": "¿Qué necesitas para mantener abastecido el punto?"
+        }
+      ],
+      "objections": [
+        {
+          "text": "¿El despacho cubre la oficina y su lugar de recepción?",
+          "source_ids": [
+            "SL-095"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "Cobertura se confirma en propuesta."
+        },
+        {
+          "text": "¿El costo de visita queda claro antes de coordinar?",
+          "source_ids": [
+            "SL-092"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "No hay tarifa Marley confirmada."
+        }
+      ],
+      "first_contact_script": "Hola. Para entender el servicio de café de tu oficina, ¿qué te gustaría resolver primero?",
+      "qualification_questions": [
+        "¿Cuántos puntos de café tiene la oficina?",
+        "¿Cuántas tazas se preparan en un día típico?",
+        "¿Quién repone y quién recibe los pedidos?",
+        "¿Qué requisitos de factura, despacho o administración deben considerarse?",
+        "¿Quién revisa compras y quién aprueba?"
+      ],
+      "content_by_stage": {
+        "lead": {
+          "resource_ids": [
+            "sol_oficinas",
+            "guia_cantidad",
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E01"
+          ],
+          "condition": "E01 responde una solicitud confirmada."
+        },
+        "MQL": {
+          "resource_ids": [
+            "guia_cantidad",
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E05"
+          ],
+          "condition": "E05 requiere permiso de marketing."
+        },
+        "SQL": {
+          "resource_ids": [
+            "guia_maquina",
+            "guia_comodato"
+          ],
+          "email_ids": [],
+          "condition": "Revisión humana de Ventas."
+        },
+        "propuesta": {
+          "resource_ids": [
+            "guia_maquina",
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E02",
+            "E03"
+          ],
+          "condition": "E02 tras quote_sent; E03 en plazo a definir con Marley."
+        },
+        "cierre": {
+          "resource_ids": [
+            "sol_oficinas"
+          ],
+          "email_ids": [],
+          "condition": "Registrar decisión; sin promoción por defecto."
+        },
+        "alta": {
+          "resource_ids": [
+            "sol_oficinas"
+          ],
+          "email_ids": [
+            "E06",
+            "E07"
+          ],
+          "condition": "Relación contractual; los días de E07 se definen con Marley."
+        },
+        "activa": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E08",
+            "E09",
+            "E10"
+          ],
+          "condition": "E08/E10 de servicio; E09 requiere permiso de marketing."
+        },
+        "reposición": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E08"
+          ],
+          "condition": "Cadencia es supuesto; validar con historial y Marley."
+        },
+        "en_riesgo": {
+          "resource_ids": [
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "E12 requiere marketing; umbral de inactividad a definir."
+        },
+        "reactivación": {
+          "resource_ids": [
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "Permiso de marketing y ventana a definir."
+        },
+        "promotora": {
+          "resource_ids": [
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E10",
+            "E11"
+          ],
+          "condition": "E11 requiere permiso y elegibilidad revisada."
+        }
+      },
+      "next_best_action_by_state": {
+        "lead": "Confirmar envío válido, conservar primer/último origen y asignar revisión; no activar marketing.",
+        "MQL": "Confirmar puntos de servicio, recepción y comuna; no afirmar cobertura ni frecuencia.",
+        "SQL": "Ventas acepta o devuelve con motivo y responsable; la aceptación siempre es humana.",
+        "propuesta": "Preparar versión con lo declarado; validar producto, stock, precio, cobertura y condiciones antes de enviar.",
+        "cierre": "Registrar decisión y motivo; marcar como ganado solo con contrato firmado.",
+        "alta": "Completar tareas de cuenta con responsables y permisos comprobados; plazos a definir con Marley.",
+        "activa": "Atender uso y soporte; medir actividad con pedidos confirmados, no con telemetría.",
+        "reposición": "Consultar pedidos y consumo declarados; confirmar cantidades antes de preparar pedido.",
+        "en_riesgo": "Revisar cadencia observada y casos abiertos; resolver incidentes críticos antes de vender.",
+        "reactivación": "Crear tarea de revisión; contactar solo con base válida. No contar como cuenta nueva.",
+        "promotora": "Revisar satisfacción y elegibilidad; invitar solo con permiso y aprobación humana."
+      },
+      "replenishment_cadence": {
+        "status": "supuesto_por_validar",
+        "interval_days": null,
+        "basis": "Estimar solo desde consumo declarado y pedidos confirmados; confirmar con Marley antes de sugerir fechas. No existe cadencia universal verificada."
+      },
+      "risk_signals": [
+        "Cobertura de despacho no confirmada.",
+        "Puntos de servicio y recepción incompletos.",
+        "Sin historial para estimar reposición.",
+        "Factura y condiciones administrativas a confirmar."
+      ],
+      "indicator_ids": [
+        "lead_count",
+        "mql_rate",
+        "sql_acceptance",
+        "quote_rate",
+        "close_rate",
+        "activation_rate",
+        "digital_reorder_share",
+        "at_risk_accounts",
+        "reactivation_rate",
+        "referral_conversion"
+      ]
+    },
+    {
+      "code": "eventos",
+      "slug": "eventos-catering",
+      "label": "Eventos y catering",
+      "priority_rank": 5,
+      "priority_note": "Segmento de expansión; cobertura y condiciones a confirmar.",
+      "role_source_ids": [
+        "CTX_ROLES",
+        "LI_ROLES"
+      ],
+      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles": [
+        {
+          "role": "usuario",
+          "titles": [
+            "Barista de eventos",
+            "Personal de servicio",
+            "Operador/a de montaje"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "influenciador",
+          "titles": [
+            "Productor/a de eventos",
+            "Jefe/a de cocina",
+            "Coordinador/a de catering"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "comprador",
+          "titles": [
+            "Coordinador/a de compras",
+            "Productor/a ejecutivo/a",
+            "Administrador/a"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "aprobador",
+          "titles": [
+            "Gerente de operaciones",
+            "Director/a de empresa",
+            "Propietario/a"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        }
+      ],
+      "pain_points": [
+        {
+          "title": "Atención en terreno",
+          "detail": "En reseñas de coffee break se valora el apoyo del personal durante eventos.",
+          "source_ids": [
+            "SL-097"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Reseña positiva individual de otro proveedor.",
+          "question_to_validate": "¿Qué apoyo necesitas durante el montaje y servicio?"
+        },
+        {
+          "title": "Presentación y montaje",
+          "detail": "Reseñas institucionales destacan presentación y relación precio-calidad.",
+          "source_ids": [
+            "SL-100",
+            "SL-101"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Señales positivas de otro proveedor; no son caso Marley.",
+          "question_to_validate": "¿Qué debe incluir la presentación para que funcione el servicio?"
+        }
+      ],
+      "objections": [
+        {
+          "text": "¿Qué incluye el montaje y quién acompaña el servicio?",
+          "source_ids": [
+            "SL-097",
+            "SL-101"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "Oferta real para eventos se confirma con Marley."
+        },
+        {
+          "text": "¿Cómo se cotiza según fecha, lugar y cantidad?",
+          "source_ids": [
+            "SL-100"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "No hay tarifa, mínimo ni cobertura confirmados."
+        }
+      ],
+      "first_contact_script": "Hola. Para entender el servicio que estás organizando, ¿qué tipo de evento necesitas atender?",
+      "qualification_questions": [
+        "¿Qué tipo de evento y servicio estás organizando?",
+        "¿Cuántas personas o servicios estimas atender?",
+        "¿En qué comuna y fecha se realizaría?",
+        "¿Qué montaje o apoyo en terreno necesitas?",
+        "¿Quién coordina, compra y aprueba?"
+      ],
+      "content_by_stage": {
+        "lead": {
+          "resource_ids": [
+            "sol_eventos",
+            "guia_cantidad",
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E01"
+          ],
+          "condition": "E01 responde una solicitud confirmada."
+        },
+        "MQL": {
+          "resource_ids": [
+            "guia_cantidad",
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E05"
+          ],
+          "condition": "E05 requiere permiso de marketing."
+        },
+        "SQL": {
+          "resource_ids": [
+            "guia_comparar",
+            "guia_comodato"
+          ],
+          "email_ids": [],
+          "condition": "Revisión humana de Ventas."
+        },
+        "propuesta": {
+          "resource_ids": [
+            "guia_comparar",
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E02",
+            "E03"
+          ],
+          "condition": "E02 tras quote_sent; E03 en plazo a definir con Marley."
+        },
+        "cierre": {
+          "resource_ids": [
+            "sol_eventos"
+          ],
+          "email_ids": [],
+          "condition": "Registrar decisión; sin promoción por defecto."
+        },
+        "alta": {
+          "resource_ids": [
+            "sol_eventos"
+          ],
+          "email_ids": [
+            "E06",
+            "E07"
+          ],
+          "condition": "Relación contractual; los días de E07 se definen con Marley."
+        },
+        "activa": {
+          "resource_ids": [
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E08",
+            "E09",
+            "E10"
+          ],
+          "condition": "E08/E10 de servicio; E09 requiere permiso de marketing."
+        },
+        "reposición": {
+          "resource_ids": [
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E08"
+          ],
+          "condition": "Cadencia es supuesto; validar con historial y Marley."
+        },
+        "en_riesgo": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "E12 requiere marketing; umbral de inactividad a definir."
+        },
+        "reactivación": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "Permiso de marketing y ventana a definir."
+        },
+        "promotora": {
+          "resource_ids": [
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E10",
+            "E11"
+          ],
+          "condition": "E11 requiere permiso y elegibilidad revisada."
+        }
+      },
+      "next_best_action_by_state": {
+        "lead": "Confirmar envío válido, conservar primer/último origen y asignar revisión; no activar marketing.",
+        "MQL": "Revisar necesidad y ajuste con datos declarados; puntaje vigente solo como apoyo, sin umbral nuevo.",
+        "SQL": "Ventas revisa fecha, lugar, cantidad y alcance; confirmar capacidad antes de cotizar.",
+        "propuesta": "Preparar versión con lo declarado; validar producto, stock, precio, cobertura y condiciones antes de enviar.",
+        "cierre": "Registrar decisión y motivo; marcar como ganado solo con contrato firmado.",
+        "alta": "Completar tareas de cuenta con responsables y permisos comprobados; plazos a definir con Marley.",
+        "activa": "Atender uso y soporte; medir actividad con pedidos confirmados, no con telemetría.",
+        "reposición": "Consultar pedidos y consumo declarados; confirmar cantidades antes de preparar pedido.",
+        "en_riesgo": "Revisar cadencia observada y casos abiertos; resolver incidentes críticos antes de vender.",
+        "reactivación": "Crear tarea de revisión; contactar solo con base válida. No contar como cuenta nueva.",
+        "promotora": "Revisar satisfacción y elegibilidad; invitar solo con permiso y aprobación humana."
+      },
+      "replenishment_cadence": {
+        "status": "supuesto_por_validar",
+        "interval_days": null,
+        "basis": "Estimar solo desde consumo declarado y pedidos confirmados; confirmar con Marley antes de sugerir fechas. No existe cadencia universal verificada."
+      },
+      "risk_signals": [
+        "Fecha o ubicación fuera de cobertura no confirmadas.",
+        "Cantidad, duración y montaje sin validar.",
+        "Equipo/personal sin fuente operativa.",
+        "No hay oferta ni mínimos de evento confirmados."
+      ],
+      "indicator_ids": [
+        "lead_count",
+        "mql_rate",
+        "sql_acceptance",
+        "quote_rate",
+        "close_rate",
+        "activation_rate",
+        "referral_conversion"
+      ]
+    },
+    {
+      "code": "conveniencia",
+      "slug": "conveniencia",
+      "label": "Conveniencia",
+      "priority_rank": 6,
+      "priority_note": "Segmento de expansión; cobertura y condiciones a confirmar.",
+      "role_source_ids": [
+        "CTX_ROLES",
+        "LI_ROLES"
+      ],
+      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles": [
+        {
+          "role": "usuario",
+          "titles": [
+            "Operador/a de vending",
+            "Cajero/a",
+            "Supervisor/a de local"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "influenciador",
+          "titles": [
+            "Jefe/a de operaciones",
+            "Jefe/a de categoría",
+            "Administrador/a de local"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "comprador",
+          "titles": [
+            "Comprador/a",
+            "Gerente de compras",
+            "Administrador/a"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "aprobador",
+          "titles": [
+            "Gerente de operaciones",
+            "Propietario/a",
+            "Gerente general"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        }
+      ],
+      "pain_points": [
+        {
+          "title": "Ubicación y riesgo de inversión",
+          "detail": "Comentarios sobre vending preguntan por ubicación, escala y riesgos antes de invertir.",
+          "source_ids": [
+            "SL-025",
+            "SL-026",
+            "SL-030"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Audiencia y país no verificados; no trasladar rentabilidad a Marley/Chile.",
+          "question_to_validate": "¿Qué ubicación y operación quieres evaluar?"
+        },
+        {
+          "title": "Fallas e insumos compatibles",
+          "detail": "Operadores preguntan por atascos y dónde conseguir insumos compatibles.",
+          "source_ids": [
+            "SL-027",
+            "SL-091"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Comentarios individuales; país de origen no verificado.",
+          "question_to_validate": "¿Qué máquina e insumos tienes hoy?"
+        },
+        {
+          "title": "Soporte",
+          "detail": "Una reseña de otro proveedor valora rapidez del soporte técnico.",
+          "source_ids": [
+            "SL-107"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "No es promesa de servicio Marley.",
+          "question_to_validate": "¿Cómo se atienden hoy las fallas?"
+        }
+      ],
+      "objections": [
+        {
+          "text": "¿El equipo es compatible con los insumos que uso?",
+          "source_ids": [
+            "SL-091"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "Compatibilidad y catálogo requieren confirmación."
+        },
+        {
+          "text": "¿Qué ubicación, soporte y costos debo evaluar?",
+          "source_ids": [
+            "SL-025",
+            "SL-026",
+            "SL-030"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "No hay rentabilidad, precio ni cobertura confirmados."
+        }
+      ],
+      "first_contact_script": "Hola. Para entender cómo se integra el café a tu local, ¿qué necesitas resolver primero?",
+      "qualification_questions": [
+        "¿Cuántos locales y puntos quieres evaluar?",
+        "¿Qué tipo de equipo opera hoy?",
+        "¿Cuántas preparaciones se hacen por punto en un día típico?",
+        "¿Quién repone y quién atiende fallas?",
+        "¿Qué criterios de ubicación, compra y aprobación aplican?"
+      ],
+      "content_by_stage": {
+        "lead": {
+          "resource_ids": [
+            "sol_conveniencia",
+            "guia_maquina",
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E01"
+          ],
+          "condition": "E01 responde una solicitud confirmada."
+        },
+        "MQL": {
+          "resource_ids": [
+            "guia_maquina",
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E05"
+          ],
+          "condition": "E05 requiere permiso de marketing."
+        },
+        "SQL": {
+          "resource_ids": [
+            "guia_reposicion",
+            "guia_cantidad"
+          ],
+          "email_ids": [],
+          "condition": "Revisión humana de Ventas."
+        },
+        "propuesta": {
+          "resource_ids": [
+            "guia_reposicion",
+            "guia_cantidad"
+          ],
+          "email_ids": [
+            "E02",
+            "E03"
+          ],
+          "condition": "E02 tras quote_sent; E03 en plazo a definir con Marley."
+        },
+        "cierre": {
+          "resource_ids": [
+            "sol_conveniencia"
+          ],
+          "email_ids": [],
+          "condition": "Registrar decisión; sin promoción por defecto."
+        },
+        "alta": {
+          "resource_ids": [
+            "sol_conveniencia"
+          ],
+          "email_ids": [
+            "E06",
+            "E07"
+          ],
+          "condition": "Relación contractual; los días de E07 se definen con Marley."
+        },
+        "activa": {
+          "resource_ids": [
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E08",
+            "E09",
+            "E10"
+          ],
+          "condition": "E08/E10 de servicio; E09 requiere permiso de marketing."
+        },
+        "reposición": {
+          "resource_ids": [
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E08"
+          ],
+          "condition": "Cadencia es supuesto; validar con historial y Marley."
+        },
+        "en_riesgo": {
+          "resource_ids": [
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "E12 requiere marketing; umbral de inactividad a definir."
+        },
+        "reactivación": {
+          "resource_ids": [
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "Permiso de marketing y ventana a definir."
+        },
+        "promotora": {
+          "resource_ids": [
+            "guia_cantidad"
+          ],
+          "email_ids": [
+            "E10",
+            "E11"
+          ],
+          "condition": "E11 requiere permiso y elegibilidad revisada."
+        }
+      },
+      "next_best_action_by_state": {
+        "lead": "Confirmar envío válido, conservar primer/último origen y asignar revisión; no activar marketing.",
+        "MQL": "Verificar modelo de máquina, ubicación y reposición; no calcular rentabilidad con muestras de otros países.",
+        "SQL": "Ventas acepta o devuelve con motivo y responsable; la aceptación siempre es humana.",
+        "propuesta": "Preparar versión con lo declarado; validar producto, stock, precio, cobertura y condiciones antes de enviar.",
+        "cierre": "Registrar decisión y motivo; marcar como ganado solo con contrato firmado.",
+        "alta": "Completar tareas de cuenta con responsables y permisos comprobados; plazos a definir con Marley.",
+        "activa": "Atender uso y soporte; medir actividad con pedidos confirmados, no con telemetría.",
+        "reposición": "Consultar pedidos y consumo declarados; confirmar cantidades antes de preparar pedido.",
+        "en_riesgo": "Revisar cadencia observada y casos abiertos; resolver incidentes críticos antes de vender.",
+        "reactivación": "Crear tarea de revisión; contactar solo con base válida. No contar como cuenta nueva.",
+        "promotora": "Revisar satisfacción y elegibilidad; invitar solo con permiso y aprobación humana."
+      },
+      "replenishment_cadence": {
+        "status": "supuesto_por_validar",
+        "interval_days": null,
+        "basis": "Estimar solo desde consumo declarado y pedidos confirmados; confirmar con Marley antes de sugerir fechas. No existe cadencia universal verificada."
+      },
+      "risk_signals": [
+        "Zona de cobertura no confirmada.",
+        "Compatibilidad de máquina e insumos sin revisar.",
+        "Ubicación y demanda sin ventas observadas.",
+        "Falla crítica abierta: pausar expansión y referidos."
+      ],
+      "indicator_ids": [
+        "lead_count",
+        "mql_rate",
+        "sql_acceptance",
+        "quote_rate",
+        "close_rate",
+        "activation_rate",
+        "digital_reorder_share",
+        "at_risk_accounts",
+        "reactivation_rate",
+        "referral_conversion"
+      ]
+    },
+    {
+      "code": "panaderia",
+      "slug": "panaderias",
+      "label": "Panadería",
+      "priority_rank": 7,
+      "priority_note": "Segmento de expansión; cobertura y condiciones a confirmar.",
+      "role_source_ids": [
+        "CTX_ROLES",
+        "LI_ROLES"
+      ],
+      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles": [
+        {
+          "role": "usuario",
+          "titles": [
+            "Panadero/a",
+            "Barista",
+            "Atendedor/a de mesón"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "influenciador",
+          "titles": [
+            "Jefe/a de producción",
+            "Jefe/a de cocina",
+            "Administrador/a de local"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "comprador",
+          "titles": [
+            "Comprador/a",
+            "Administrador/a",
+            "Encargado/a de compras"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        },
+        {
+          "role": "aprobador",
+          "titles": [
+            "Dueño/a",
+            "Propietario/a",
+            "Gerente general"
+          ],
+          "source_ids": [
+            "CTX_ROLES",
+            "LI_ROLES"
+          ]
+        }
+      ],
+      "pain_points": [
+        {
+          "title": "Porción y comprobante",
+          "detail": "Un reclamo de panadería menciona una preparación bajo la medida esperada y falta de boleta.",
+          "source_ids": [
+            "SL-035"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Un reclamo público; no generalizable a panaderías.",
+          "question_to_validate": "¿Qué estándar de preparación y comprobante necesita tu local?"
+        },
+        {
+          "title": "Flujo y compatibilidad",
+          "detail": "La muestra disponible no alcanza para afirmar un problema general propio de panaderías; levantar proceso y equipo caso a caso.",
+          "source_ids": [
+            "SL_SUMMARY"
+          ],
+          "evidence_level": "señal pública archivada; no representa resultado Marley",
+          "scope_warning": "Vacío de evidencia buyer-específica.",
+          "question_to_validate": "¿Qué equipo y formato de preparación usas hoy?"
+        }
+      ],
+      "objections": [
+        {
+          "text": "¿La preparación mantiene la medida esperada y el comprobante corresponde?",
+          "source_ids": [
+            "SL-035"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "Deriva de un caso aislado, no de un patrón de mercado."
+        },
+        {
+          "text": "¿La alternativa cabe en el flujo de producción del local?",
+          "source_ids": [
+            "SL_SUMMARY"
+          ],
+          "status": "hipótesis para calificación; no promesa ni condición comercial",
+          "caveat": "Pregunta de calificación; sin evidencia sectorial suficiente."
+        }
+      ],
+      "first_contact_script": "Hola. Para entender cómo preparan y ofrecen café en tu panadería, ¿qué te gustaría mejorar primero?",
+      "qualification_questions": [
+        "¿En qué momentos se ofrece café junto a pan o pastelería?",
+        "¿Cuántas preparaciones hacen en un día típico?",
+        "¿Qué equipo y formato ocupan?",
+        "¿Qué estándar de porción y comprobante necesitan?",
+        "¿Quién recomienda, compra y aprueba?"
+      ],
+      "content_by_stage": {
+        "lead": {
+          "resource_ids": [
+            "sol_panaderias",
+            "guia_cantidad",
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E01"
+          ],
+          "condition": "E01 responde una solicitud confirmada."
+        },
+        "MQL": {
+          "resource_ids": [
+            "guia_cantidad",
+            "guia_maquina"
+          ],
+          "email_ids": [
+            "E05"
+          ],
+          "condition": "E05 requiere permiso de marketing."
+        },
+        "SQL": {
+          "resource_ids": [
+            "guia_maquina",
+            "guia_reposicion"
+          ],
+          "email_ids": [],
+          "condition": "Revisión humana de Ventas."
+        },
+        "propuesta": {
+          "resource_ids": [
+            "guia_maquina",
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E02",
+            "E03"
+          ],
+          "condition": "E02 tras quote_sent; E03 en plazo a definir con Marley."
+        },
+        "cierre": {
+          "resource_ids": [
+            "sol_panaderias"
+          ],
+          "email_ids": [],
+          "condition": "Registrar decisión; sin promoción por defecto."
+        },
+        "alta": {
+          "resource_ids": [
+            "sol_panaderias"
+          ],
+          "email_ids": [
+            "E06",
+            "E07"
+          ],
+          "condition": "Relación contractual; los días de E07 se definen con Marley."
+        },
+        "activa": {
+          "resource_ids": [
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E08",
+            "E09",
+            "E10"
+          ],
+          "condition": "E08/E10 de servicio; E09 requiere permiso de marketing."
+        },
+        "reposición": {
+          "resource_ids": [
+            "guia_comodato"
+          ],
+          "email_ids": [
+            "E08"
+          ],
+          "condition": "Cadencia es supuesto; validar con historial y Marley."
+        },
+        "en_riesgo": {
+          "resource_ids": [
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "E12 requiere marketing; umbral de inactividad a definir."
+        },
+        "reactivación": {
+          "resource_ids": [
+            "guia_comparar"
+          ],
+          "email_ids": [
+            "E12"
+          ],
+          "condition": "Permiso de marketing y ventana a definir."
+        },
+        "promotora": {
+          "resource_ids": [
+            "guia_reposicion"
+          ],
+          "email_ids": [
+            "E10",
+            "E11"
+          ],
+          "condition": "E11 requiere permiso y elegibilidad revisada."
+        }
+      },
+      "next_best_action_by_state": {
+        "lead": "Confirmar envío válido, conservar primer/último origen y asignar revisión; no activar marketing.",
+        "MQL": "Levantar flujo, estándar de preparación y equipo; evidencia sectorial insuficiente para prescribir oferta.",
+        "SQL": "Ventas acepta o devuelve con motivo y responsable; la aceptación siempre es humana.",
+        "propuesta": "Preparar versión con lo declarado; validar producto, stock, precio, cobertura y condiciones antes de enviar.",
+        "cierre": "Registrar decisión y motivo; marcar como ganado solo con contrato firmado.",
+        "alta": "Completar tareas de cuenta con responsables y permisos comprobados; plazos a definir con Marley.",
+        "activa": "Atender uso y soporte; medir actividad con pedidos confirmados, no con telemetría.",
+        "reposición": "Consultar pedidos y consumo declarados; confirmar cantidades antes de preparar pedido.",
+        "en_riesgo": "Revisar cadencia observada y casos abiertos; resolver incidentes críticos antes de vender.",
+        "reactivación": "Crear tarea de revisión; contactar solo con base válida. No contar como cuenta nueva.",
+        "promotora": "Revisar satisfacción y elegibilidad; invitar solo con permiso y aprobación humana."
+      },
+      "replenishment_cadence": {
+        "status": "supuesto_por_validar",
+        "interval_days": null,
+        "basis": "Estimar solo desde consumo declarado y pedidos confirmados; confirmar con Marley antes de sugerir fechas. No existe cadencia universal verificada."
+      },
+      "risk_signals": [
+        "Evidencia buyer-específica limitada a un caso público.",
+        "Equipo, porción y compatibilidad no validados.",
+        "Cobertura y condiciones a confirmar con Marley.",
+        "No usar un reclamo aislado como mensaje general."
+      ],
+      "indicator_ids": [
+        "lead_count",
+        "mql_rate",
+        "sql_acceptance",
+        "quote_rate",
+        "close_rate",
+        "activation_rate",
+        "digital_reorder_share",
+        "at_risk_accounts",
+        "referral_conversion"
+      ]
+    }
+  ]
+}

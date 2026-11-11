@@ -1,0 +1,17 @@
+# Marley Coffee Empresas
+
+> Prototipo de hub B2B en español de Chile. Dominio propuesto: https://empresas.marleycoffee.cl/; subdominio de producción pendiente de confirmación. Todas las URLs listadas están en noindex en el prototipo.
+
+## Contenidos permanentes propuestos
+
+- [Hub de contenidos](https://empresas.marleycoffee.cl/captacion/contenidos/index.html): respuestas, guías, calculadoras y casos hipotéticos.
+- [Soluciones por tipo de negocio](https://empresas.marleycoffee.cl/captacion/soluciones/index.html): siete rutas para compradores.
+- [Portal B2B](https://empresas.marleycoffee.cl/index.html#C03): acceso al portal de orientación.
+
+## Criterios de lectura
+
+Las cifras de calculadoras son entradas de ejemplo y deben reemplazarse por datos propios. Las condiciones de equipos, productos, mantenimiento, soporte y contratación se confirman en una propuesta vigente. Las fuentes legales y técnicas se enlazan junto a la afirmación que respaldan. No hay precios ni reseñas estructuradas.
+
+## Publicación
+
+Este archivo es un borrador. Confirmar dominio y canonicals, revisar la política de rastreo y quitar noindex solo de URLs aprobadas antes de copiarlo a la raíz del host.

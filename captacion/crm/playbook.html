@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Guía interna del CRM por comprador, con criterios de etapa, permisos, fuentes y revisión humana.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0b0c'/%3E%3Ctext x='12' y='48' font-size='48' fill='%23f3c900'%3EM%3C/text%3E%3C/svg%3E">
+<title>Playbook CRM · Marley Coffee Empresas</title>
+<link rel="stylesheet" href="../marca/negro-marley.css">
+<style>
+:root{color-scheme:dark}
+body.nm{background:var(--nm-negro);color:var(--nm-hueso);font-size:16px}
+.page{width:min(100% - 40px,1240px);margin-inline:auto}
+.site-head{border-bottom:1px solid var(--nm-linea);padding:22px 0}
+.site-head .row{display:flex;justify-content:space-between;gap:18px;align-items:center}
+.brandline{font:500 .82rem/1.2 var(--nm-label);letter-spacing:.14em;text-transform:uppercase}
+.site-head a{color:var(--nm-hueso)}
+main{padding:28px 0 80px}
+.hero{padding:clamp(26px,5vw,60px);background:var(--nm-carbon);border:1px solid var(--nm-linea);border-radius:18px}
+h1,h2,h3{color:var(--nm-hueso)}
+.hero h1{font:500 clamp(2.35rem,5vw,4.7rem)/.98 var(--nm-display);text-transform:uppercase;max-width:15ch;margin:10px 0 18px}
+.hero p{max-width:68ch}
+.eyebrow{font:500 .77rem/1.3 var(--nm-label);letter-spacing:.14em;text-transform:uppercase;color:var(--nm-oro);margin:0 0 12px}
+.lead{font-size:1.08rem;line-height:1.55;max-width:68ch}
+.note{padding:14px 16px;background:var(--nm-grafito);border-left:3px solid var(--nm-oro);border-radius:6px;margin-top:20px;color:var(--nm-hueso)}
+.section{padding-top:48px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:18px}
+.section h2{font:500 clamp(1.75rem,3vw,2.7rem)/1 var(--nm-display);text-transform:uppercase;margin:0}
+.section-intro{color:var(--nm-humo);max-width:70ch;margin:8px 0 0}
+.nav-buyers{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.nav-buyers a,.chip{display:inline-flex;align-items:center;min-height:38px;padding:8px 12px;border:1px solid var(--nm-linea-2);border-radius:999px;color:var(--nm-hueso);text-decoration:none;font-size:.9rem}
+.nav-buyers a:hover{border-color:var(--nm-hueso)}
+.funnel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.funnel-item{padding:15px;background:var(--nm-carbon);border:1px solid var(--nm-linea);border-radius:12px;min-width:0}
+.funnel-item .num{display:block;color:var(--nm-oro);font:500 1.4rem/1 var(--nm-display);margin-bottom:9px}
+.funnel-item h3{font:500 .83rem/1.3 var(--nm-label);letter-spacing:.07em;text-transform:uppercase;margin:0 0 8px}
+.funnel-item p{font-size:.88rem;color:var(--nm-humo);margin:0;overflow-wrap:anywhere}
+.buyer-card{margin:14px 0;border:1px solid var(--nm-linea-2);border-radius:15px;background:var(--nm-carbon);overflow:hidden}
+.buyer-card>summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.buyer-card>summary::-webkit-details-marker{display:none}
+.buyer-card>summary h3{font:500 1.4rem/1.1 var(--nm-display);text-transform:uppercase;margin:0}
+.buyer-card>summary .sum-meta{display:block;color:var(--nm-humo);font-size:.9rem;margin-top:5px}
+.buyer-card>summary::after{content:"＋";font:500 1.5rem/1 var(--nm-label);color:var(--nm-oro);flex:none}
+.buyer-card[open]>summary::after{content:"−"}
+.buyer-body{padding:4px 20px 24px;border-top:1px solid var(--nm-linea)}
+.buyer-body h4{font:500 .79rem/1.3 var(--nm-label);letter-spacing:.12em;text-transform:uppercase;color:var(--nm-oro);margin:24px 0 10px}
+.grid-roles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.role-card,.signal-card,.agent-card,.metric-card{border:1px solid var(--nm-linea);background:var(--nm-grafito);border-radius:10px;padding:14px;min-width:0}
+.role-card b,.signal-card b,.agent-card b,.metric-card b{display:block;font:500 .75rem/1.35 var(--nm-label);letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px}
+.role-card p,.signal-card p,.agent-card p,.metric-card p{margin:0;color:var(--nm-humo);font-size:.93rem}
+.grid-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.signal-card{margin:0}
+.signal-card p+p{margin-top:9px}
+.citations{font:500 .76rem/1.5 var(--nm-label);color:var(--nm-hueso);margin-top:10px;overflow-wrap:anywhere}
+.citations a{color:var(--nm-hueso);text-decoration:underline;text-underline-offset:3px}
+.script{background:var(--nm-blanco);color:var(--nm-tinta);padding:18px;border-radius:10px;max-width:75ch}
+.script p{color:var(--nm-tinta);margin:0;font-size:1.03rem}
+.question-list{margin:0;padding-left:24px}
+.question-list li{padding:5px 0;color:var(--nm-hueso)}
+.table-scroll{max-width:100%;overflow-x:auto;border:1px solid var(--nm-linea);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:680px;background:var(--nm-grafito)}
+th,td{padding:12px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--nm-linea);overflow-wrap:anywhere}
+th{font:500 .75rem/1.3 var(--nm-label);letter-spacing:.08em;text-transform:uppercase;color:var(--nm-hueso);background:#111112}
+td{font-size:.9rem;color:var(--nm-humo)}
+td strong{color:var(--nm-hueso)}
+.small{font-size:.82rem;color:var(--nm-humo)}
+.email-list{display:flex;flex-wrap:wrap;gap:6px}
+.email-list .chip{font-size:.77rem;padding:5px 9px;min-height:30px}
+.agent-grid,.metric-grid,.recovery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.agent-card{background:var(--nm-blanco);color:var(--nm-tinta)}
+.agent-card b{color:var(--nm-tinta)}
+.agent-card p{color:#4a4a4a}
+.agent-card .draft{border-top:1px solid #ddd;padding-top:10px;margin-top:10px;color:var(--nm-tinta);font-size:.96rem}
+.agent-card .label{display:block;font:500 .875rem/1.4 var(--nm-label);text-transform:uppercase;letter-spacing:.08em;color:#555;margin:11px 0 4px}
+.metric-card .value{color:var(--nm-oro);font:500 1.1rem/1.2 var(--nm-display);margin:8px 0}
+.metric-card p{overflow-wrap:anywhere}
+.recovery-card{padding:16px;border:1px solid var(--nm-linea);border-radius:12px;background:var(--nm-carbon)}
+.recovery-card h3{font:500 1rem/1.3 var(--nm-label);text-transform:uppercase;margin:0 0 8px}
+.recovery-card p{font-size:.91rem;color:var(--nm-humo);margin:8px 0}
+.recovery-card strong{color:var(--nm-hueso)}
+.source-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.source-item{padding:13px;border:1px solid var(--nm-linea);border-radius:9px;background:var(--nm-carbon);overflow-wrap:anywhere}
+.source-item b{display:block;font-size:.92rem}
+.source-item p{margin:5px 0 0;color:var(--nm-humo);font-size:.82rem}
+.footer{border-top:1px solid var(--nm-linea);padding:22px 0;color:var(--nm-humo);font-size:.85rem}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--nm-oro);outline-offset:3px}
+a[href]{display:inline-flex;align-items:center;min-width:44px;min-height:44px;vertical-align:middle}
+@media(max-width:640px){
+ .table-scroll{overflow:visible;border:0}
+ .table-scroll table{min-width:0;width:100%;display:block}
+ .table-scroll thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+ .table-scroll tbody{display:block}
+ .table-scroll tbody tr{display:block;margin:0 0 10px;border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-grafito);overflow:hidden}
+ .table-scroll tbody th{display:block;padding:10px 12px;background:#111112}
+ .table-scroll tbody td{display:grid;grid-template-columns:minmax(102px,35%) minmax(0,1fr);gap:10px;min-width:0;padding:10px 12px;overflow-wrap:anywhere}
+ .table-scroll tbody td::before{content:attr(data-label);font:500 .875rem/1.35 var(--nm-label);letter-spacing:.04em;text-transform:uppercase;color:var(--nm-hueso)}
+ .table-scroll tbody td>*{min-width:0;overflow-wrap:anywhere}
+}
+@media(max-width:800px){
+ .funnel{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .grid-roles{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .agent-grid,.metric-grid,.recovery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .section-head{display:block}
+}
+@media(max-width:520px){
+ .page{width:min(100% - 32px,1240px)}
+ main{padding-top:16px}
+ .site-head .row{align-items:flex-start;flex-direction:column}
+ .hero{padding:23px 18px}
+ .funnel,.grid-roles,.grid-two,.agent-grid,.metric-grid,.recovery-grid,.source-list{grid-template-columns:1fr}
+ .buyer-card>summary{padding:16px}
+ .buyer-body{padding:0 15px 20px}
+ .section{padding-top:38px}
+ .nav-buyers{gap:6px}
+ .nav-buyers a{padding:7px 10px;font-size:.84rem}
+}
+@media print{
+ body.nm{background:#fff;color:#171717}
+ .site-head,.hero,.funnel-item,.buyer-card,.recovery-card,.source-item{background:#fff;color:#171717;border-color:#aaa}
+ h1,h2,h3,.hero p,.funnel-item p,.buyer-card>summary,.buyer-body,.section-intro,.role-card p,.signal-card p,.small,td,.footer{color:#171717}
+ .buyer-card:not([open])>.buyer-body{display:block}
+ .nav-buyers{display:none}
+ body.nm,body.nm *{color:#171717!important;background-color:#fff!important}
+ .buyer-card>summary::after{color:#171717!important}
+}
+</style>
+</head>
+<body class="nm">
+<a class="nm-skip" href="#main">Saltar al contenido</a>
+<header class="site-head"><div class="page row"><span class="brandline">Marley Coffee Empresas · RevOps</span><a href="HANDOFF_A1.md">Notas para integración A1</a></div></header>
+<main id="main" class="page">
+<section class="hero">
+<p class="eyebrow">Playbook · por comprador</p>
+<h1>Una cuenta, un siguiente paso claro</h1>
+<p class="lead">Una guía para Ventas, Marketing y Jefatura: qué se sabe, qué falta confirmar y quién decide el siguiente paso.</p>
+<div class="note"><strong>Estado del material:</strong> propuesta académica y CRM simulado. No contiene cuentas reales ni conexión operativa. Precios, stock, cobertura, condiciones, cadencia y SLA quedan a definir con Marley. Los valores numéricos se rotulan como ejemplo didáctico.</div>
+</section>
+
+<section class="section" aria-labelledby="funnel-title">
+<div class="section-head"><div><p class="eyebrow">01 · Flujo único</p><h2 id="funnel-title">De la solicitud a la recomendación</h2><p class="section-intro">SQL significa que Ventas acepta el MQL. El puntaje orienta, pero no reemplaza la decisión humana. Un lead existe solo después de envío válido y confirmación.</p></div></div>
+<div id="funnel" class="funnel" aria-live="polite"></div>
+<p class="small">Si un estado no tiene evento propio en MAPA.md, se conserva como estado interno con evidencia. No se agregan eventos.</p>
+</section>
+
+<section class="section" aria-labelledby="buyers-title">
+<div class="section-head"><div><p class="eyebrow">02 · Siete compradores</p><h2 id="buyers-title">El contexto cambia; el embudo no</h2><p class="section-intro">Cargos referenciales, no contactos verificados. Dolores y objeciones vienen de una muestra pública pequeña o se marcan como preguntas a validar.</p></div></div>
+<nav id="buyer-nav" class="nav-buyers" aria-label="Saltar a un comprador"></nav>
+<div id="buyers"></div>
+</section>
+
+<section class="section" aria-labelledby="recovery-title">
+<div class="section-head"><div><p class="eyebrow">03 · Recuperación</p><h2 id="recovery-title">La pieza depende del permiso</h2><p class="section-intro">Responder una solicitud no es lo mismo que enviar marketing. No se contacta individualmente a una visita anónima.</p></div></div>
+<div id="recovery" class="recovery-grid"></div>
+</section>
+
+<section class="section" aria-labelledby="assistants-title">
+<div class="section-head"><div><p class="eyebrow">04 · Asistentes supervisados</p><h2 id="assistants-title">Borrador, revisión, consecuencia</h2><p class="section-intro">Los ejemplos preparan trabajo; no envían mensajes, confirman disponibilidad ni crean pedidos.</p></div></div>
+<div id="assistants" class="agent-grid"></div>
+</section>
+
+<section class="section" aria-labelledby="metrics-title">
+<div class="section-head"><div><p class="eyebrow">05 · Indicadores</p><h2 id="metrics-title">Fórmula y muestra didáctica</h2><p class="section-intro">Las muestras no son resultados Marley. Baselines, metas comerciales y SLA quedan pendientes hasta contar con datos operativos.</p></div></div>
+<div id="metrics" class="metric-grid"></div>
+</section>
+
+<section class="section" aria-labelledby="permissions-title">
+<div class="section-head"><div><p class="eyebrow">06 · Reglas de operación</p><h2 id="permissions-title">Antes de crear una tarea</h2></div></div>
+<div id="policy" class="grid-two"></div>
+</section>
+
+<section class="section" aria-labelledby="sources-title">
+<div class="section-head"><div><p class="eyebrow">07 · Fuentes y límites</p><h2 id="sources-title">Cada señal tiene su alcance</h2><p class="section-intro">Las URLs se vinculan a la lectura archivada del 7-nov-2026. Las experiencias de otros proveedores no describen a Marley. Las búsquedas exactas no pasan a la ficha CRM.</p></div></div>
+<div id="sources" class="source-list"></div>
+</section>
+</main>
+<footer class="footer"><div class="page"><span>Material local · Sin envío, pauta ni conexión productiva.</span><span>Referencias de eventos y rutas: MAPA.md.</span></div></footer>
+
+<script>
+(async function(){
+  const esc=(v)=>String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  const data=await fetch("./compradores.json",{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("No se pudo leer compradores.json");return r.json();});
+  const sources=new Map(data.source_catalog.map(x=>[x.id,x]));
+  const resources=new Map(data.resource_catalog.map(x=>[x.id,x]));
+  const emails=new Map(data.email_catalog.map(x=>[x.id,x]));
+  const cite=(ids)=>ids.map(id=>{const s=sources.get(id);if(!s)return esc(id);return s.url?'<a href="'+esc(s.url)+'" target="_blank" rel="noopener noreferrer">'+esc(id)+'</a>':'<span>'+esc(id)+'</span>';}).join(" · ");
+  const resourceLink=(id)=>{const r=resources.get(id);if(!r)return esc(id);const href="../../"+r.path;return '<a href="'+esc(href)+'">'+esc(r.title)+'</a><span class="small"> · '+esc(r.status)+'</span>';};
+  const emailChips=(ids)=>ids.length?'<span class="email-list">'+ids.map(id=>{const e=emails.get(id);return '<span class="chip">'+esc(id)+(e?' · '+esc(e.name):'')+'</span>';}).join("")+'</span>':'<span class="small">Sin correo asignado</span>';
+
+  document.getElementById("funnel").innerHTML=data.funnel.map((x,i)=>'<article class="funnel-item"><span class="num">'+String(i+1).padStart(2,"0")+'</span><h3>'+esc(x.stage)+'</h3><p><strong>Entra:</strong> '+esc(x.entry)+'</p><p style="margin-top:8px"><strong>Sale:</strong> '+esc(x.exit)+'</p><p style="margin-top:8px"><strong>Evento:</strong> '+esc(x.events.join(", ")||"estado interno")+'</p></article>').join("");
+
+  const buyerNav=document.getElementById("buyer-nav");
+  buyerNav.innerHTML=data.buyers.map(b=>'<a href="#buyer-'+esc(b.code)+'">'+esc(b.label)+'</a>').join("");
+
+  document.getElementById("buyers").innerHTML=data.buyers.map((b,idx)=>{
+    const roleCards=b.roles.map(r=>'<div class="role-card"><b>'+esc(r.role)+'</b><p>'+r.titles.map(esc).join(" · ")+'</p><div class="citations">Fuente de cargos: '+cite(r.source_ids)+'</div></div>').join("");
+    const signals=b.pain_points.map(p=>'<article class="signal-card"><b>'+esc(p.title)+'</b><p>'+esc(p.detail)+'</p><p class="small"><strong>Límite:</strong> '+esc(p.scope_warning)+'</p><p class="small"><strong>Validar:</strong> '+esc(p.question_to_validate)+'</p><div class="citations">Fuente: '+cite(p.source_ids)+'</div></article>').join("");
+    const objections=b.objections.map(o=>'<article class="signal-card"><b>Objeción a validar</b><p>'+esc(o.text)+'</p><p class="small">'+esc(o.status)+' · '+esc(o.caveat)+'</p><div class="citations">Fuente: '+cite(o.source_ids)+'</div></article>').join("");
+    const contentRows=Object.entries(b.content_by_stage).map(([stage,c])=>'<tr><th scope="row">'+esc(stage)+'</th><td data-label="Guía o solución">'+c.resource_ids.map(resourceLink).join("<br>")+'</td><td data-label="Correo y condición">'+emailChips(c.email_ids)+'<br><span class="small">'+esc(c.condition)+'</span></td></tr>').join("");
+    const actionRows=Object.entries(b.next_best_action_by_state).map(([stage,action])=>'<tr><th scope="row">'+esc(stage)+'</th><td data-label="Acción recomendada">'+esc(action)+'</td></tr>').join("");
+    const metrics=b.indicator_ids.map(id=>{const m=data.indicator_definitions.find(x=>x.id===id);return m?'<div class="metric-card"><b>'+esc(m.name)+'</b><p>'+esc(m.formula)+'</p><p class="value">'+esc(m.sample_value)+'</p><p class="small">Eventos: '+esc(m.events.join(", "))+'</p></div>':'';}).join("");
+    return '<details id="buyer-'+esc(b.code)+'" class="buyer-card" '+(idx===0?'open':'')+'><summary><div><h3>'+esc(b.label)+'</h3><span class="sum-meta">'+esc(b.code)+' · '+esc(b.priority_note)+'</span></div></summary><div class="buyer-body">'+
+      '<h4>Roles de compra</h4><p class="small">'+esc(b.roles_note)+'</p><div class="grid-roles">'+roleCards+'</div>'+
+      '<h4>Dolores/objeciones: señales y preguntas, no promesas</h4><div class="grid-two">'+signals+objections+'</div>'+
+      '<h4>Primer contacto</h4><div class="script"><p>'+esc(b.first_contact_script)+'</p></div>'+
+      '<h4>Preguntas de calificación</h4><ol class="question-list">'+b.qualification_questions.map(q=>'<li>'+esc(q)+'</li>').join("")+'</ol><p class="small">Usar una pregunta por mensaje. No volver a pedir datos ya enviados.</p>'+
+      '<h4>Contenido por etapa</h4><div class="table-scroll"><table><thead><tr><th>Estado</th><th>Guía o solución</th><th>Correo/condición</th></tr></thead><tbody>'+contentRows+'</tbody></table></div>'+
+      '<h4>Siguiente mejor acción por estado</h4><div class="table-scroll"><table><thead><tr><th>Estado</th><th>Acción recomendada</th></tr></thead><tbody>'+actionRows+'</tbody></table></div>'+
+      '<h4>Reposición, riesgo e indicadores</h4><div class="note"><strong>Cadencia:</strong> '+esc(b.replenishment_cadence.status.replaceAll("_"," "))+'. '+esc(b.replenishment_cadence.basis)+'<br><strong>Riesgos:</strong> '+b.risk_signals.map(esc).join(" · ")+'</div><div class="metric-grid" style="margin-top:12px">'+metrics+'</div>'+
+      '</div></details>';
+  }).join("");
+
+  document.getElementById("recovery").innerHTML=data.recovery_scenarios.map(x=>'<article class="recovery-card"><h3>'+esc(x.id)+' · '+esc(x.stage.replaceAll("_"," "))+'</h3><p><strong>Señal:</strong> '+esc(x.signal)+'</p><p><strong>Pieza:</strong> '+esc(x.piece.references.join(" · "))+'</p><p><strong>Permiso:</strong> '+esc(x.permission_base)+'</p><p><strong>Control:</strong> '+esc(x.guardrail)+'</p><p><strong>IDs:</strong> '+(x.piece.email_ids.length?emailChips(x.piece.email_ids):"Sin correo individual")+'</p></article>').join("");
+
+  document.getElementById("assistants").innerHTML=data.assistant_flows.map(x=>'<article class="agent-card"><b>'+esc(x.id)+'</b><span class="label">Señal</span><p>'+esc(x.signal)+'</p><span class="label">Borrador</span><p class="draft">'+esc(x.draft)+'</p><span class="label">Revisión humana</span><p>'+esc(x.human_review)+'</p><span class="label">Consecuencia</span><p>'+esc(x.consequence)+'</p></article>').join("");
+
+  document.getElementById("metrics").innerHTML=data.indicator_definitions.map(x=>'<article class="metric-card"><b>'+esc(x.name)+'</b><p>'+esc(x.formula)+'</p><p class="value">'+esc(x.sample_value)+'</p><p class="small">Eventos: '+esc(x.events.join(", "))+'</p></article>').join("");
+
+  document.getElementById("policy").innerHTML=Object.entries(data.policy).map(([k,v])=>'<article class="signal-card"><b>'+esc(k.replaceAll("_"," "))+'</b><p>'+esc(v)+'</p></article>').join("");
+
+  document.getElementById("sources").innerHTML=data.source_catalog.map(s=>'<article class="source-item"><b>'+esc(s.id)+' · '+esc(s.title)+'</b><p>'+esc(s.file)+' · consulta/archivo '+esc(s.date)+'</p><p>'+esc(s.scope)+'</p>'+(s.url?'<p><a href="'+esc(s.url)+'" target="_blank" rel="noopener noreferrer">Abrir fuente</a></p>':'')+'</article>').join("");
+})().catch(error=>{document.body.insertAdjacentHTML("beforeend",'<p role="alert" style="padding:20px;color:#ff9485">Error al cargar el playbook. Revisa compradores.json y el servidor local.</p>');console.error(error);});
+</script>
+</body>
+</html>

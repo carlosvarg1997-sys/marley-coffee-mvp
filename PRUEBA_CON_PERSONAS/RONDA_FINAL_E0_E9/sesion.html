@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0B0B0C">
+  <title>Sesión de prueba · Marley Coffee Empresas</title>
+  <link rel="stylesheet" href="../../captacion/marca/negro-marley.css">
+  <link rel="stylesheet" href="cuestionarios.css">
+</head>
+<body class="mc">
+  <main class="mc-shell" id="app" aria-live="polite">
+    <div class="mc-brand"><span class="mc-mark" aria-hidden="true">M</span><span>Marley Coffee Empresas<small>Prueba académica · Duoc UC</small></span></div>
+    <div class="mc-tricolor" aria-hidden="true"></div>
+    <div id="screen"></div>
+  </main>
+  <script src="cuestionarios.js"></script>
+  <script>
+  (()=>{
+    const root=document.getElementById('screen');
+    const params=new URLSearchParams(location.search);
+    const phase=params.get('fase')||'inicial';
+    const sessionId=params.get('mc_session')||'';
+    const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
+    const getSession=()=>window.MCPrueba.readActive();
+    const getResponse=(moment,stage,qid)=>window.MCPrueba.readAnswers().find(row=>row.sesion_id===sessionId&&row.momento===moment&&row.etapa===(stage||'')&&row.pregunta_id===qid);
+    const showError=(message)=>{root.replaceChildren(el('p','mc-kicker','No pudimos abrir esta sesión'),el('h1','mc-h1','Vuelve al lanzador'),el('p','mc-lead',message));const a=el('a','mc-btn','Ir a la consola');a.href='inicio.html';root.append(a);};
+    const routeAllowed=(raw)=>{
+      let url;try{url=new URL(raw,location.href);}catch(_){return null;}
+      if(url.origin!==location.origin)return null;
+      const siteRoot=new URL('../../',location.href);
+      const path=url.pathname;
+      const exact=[new URL('index.html',siteRoot).pathname,new URL('captacion/anuncios/feed-simulado.html',siteRoot).pathname];
+      const landingBase=new URL('captacion/landing/',siteRoot).pathname;
+      const landing=path.startsWith(landingBase)&&/^[a-z0-9-]+\.html$/i.test(path.slice(landingBase.length));
+      const allowed=exact.includes(path)||landing;
+      return allowed?url:null;
+    };
+    let session=null,bank=null,questions=[],index=0,questionStartedAt=Date.now(),consentStartedAt=Date.now();
+    const internal=()=>['ventas','marketing','jefatura'].includes(session?.rol);
+    const phaseName=()=>({inicial:'Preguntas iniciales',pausa1:'Pausa 1 · llegada',pausa2:'Pausa 2 · contacto y propuesta',pausa_c:'Pausa C · lectura del origen',final:'Preguntas finales'})[phase]||'Preguntas';
+    const roleLabel=()=>({ventas:'Ventas',marketing:'Marketing',jefatura:'Jefatura'})[session?.rol]||'Participante externo';
+    const roleTaskList=()=>internal()?bank.etapas.internos[session.rol]||[]:bank.etapas.externos;
+    const countFor=(name)=>window.MCPrueba.phaseQuestions(bank,name,session).length;
+    const renderWelcome=()=>{
+      root.replaceChildren();
+      root.append(el('p','mc-kicker','Antes de comenzar'));
+      root.append(el('h1','mc-h1','Gracias por participar'));
+      root.append(el('p','mc-academic-note','Prototipo académico (Duoc UC). No es un sitio oficial de Marley Coffee.'));
+      root.append(el('p','mc-lead','Esta sesión registra respuestas con un código. No escribas nombres ni datos de contacto en las respuestas abiertas. Puedes omitir una pregunta o retirarte cuando quieras.'));
+      const card=el('section','mc-panel');card.setAttribute('aria-labelledby','welcome-title');
+      card.append(el('h2','',`Participante ${session.participante||'—'}`));
+      const steps=el('ol','mc-steps');
+      steps.append(el('li','',`Preguntas iniciales: ${countFor('inicial')} preguntas.`));
+      const tasks=roleTaskList();
+      const routeText=internal()?`Recorrido con el moderador: ${tasks.length} tareas.`:`Recorrido con el moderador: ${tasks.length} etapas.`;
+      const pauses=internal()?' Incluye una pausa corta de 3 preguntas despu?s de la primera tarea.':' Incluye dos pausas cortas de 4 preguntas.';
+      steps.append(el('li','',`${routeText}${pauses}`));
+      steps.append(el('li','',`Preguntas finales: ${countFor('final')} preguntas.`));
+      card.append(steps);
+      const consent=el('div','mc-consent');
+      consent.append(el('p','mc-note','Resumen del consentimiento: participación voluntaria, prototipo y acciones simuladas, uso de respuestas por código y sin envío a servicios externos. No ingreses datos reales. Puedes detenerte o no responder.'));
+      const consentLink=el('a','', 'Lee el consentimiento completo');consentLink.href='Consentimiento_informado.md';consentLink.target='_blank';consentLink.rel='noopener';consent.append(consentLink);
+      const label=el('label','mc-check');const check=el('input');check.type='checkbox';check.id='consent-accepted';check.required=true;
+      label.append(check,el('span','',bank.consentimiento.texto));consent.append(label);
+      const err=el('p','mc-note mc-note--error','Para continuar, marca «Acepto participar».');err.id='consent-error';err.hidden=true;consent.append(err);
+      const actions=el('div','mc-row');const start=el('button','mc-btn mc-btn--primary','Continuar a las preguntas iniciales');start.type='button';start.disabled=true;actions.append(start);consent.append(actions);
+      check.addEventListener('change',()=>{start.disabled=!check.checked;err.hidden=true;});
+      start.addEventListener('click',()=>{
+        if(!check.checked){err.hidden=false;return;}
+        const current=getSession();
+        if(!current||current.id!==sessionId){showError('La sesión ya no coincide con el código de esta pestaña.');return;}
+        window.MCPrueba.saveAnswer(current,{momento:'inicial',etapa:'',pregunta_id:bank.consentimiento.id,tipo:bank.consentimiento.tipo,respuesta:'Sí',respuesta_texto:bank.consentimiento.texto,omitida:false,ms_respuesta:Date.now()-consentStartedAt});
+        session=window.MCPrueba.updateActive({estado:'consentimiento_aceptado',consentimiento_en:new Date().toISOString()});
+        renderQuestions();
+      });
+      card.append(consent);root.append(card);
+    };
+    const answerValue=(row)=>row?.respuesta;
+    const renderQuestionInput=(q,fieldset,row)=>{
+      const skipValue=bank.meta.skip_label;
+      const selected=answerValue(row);
+      const selectedValues=Array.isArray(selected)?selected:(typeof selected==='string'&&selected.startsWith('[')?(()=>{try{return JSON.parse(selected)}catch(_){return [selected]}})():selected?[String(selected)]:[]);
+      const makeOther=()=>{
+        const other=el('div','mc-other');other.hidden=true;
+        const label=el('label','mc-field','Otra, ¿cuál?');const input=el('input','mc-input');input.type='text';input.maxLength=bank.meta.open_max_chars;input.autocomplete='off';input.dataset.other='1';
+        const previous=row?.otra_texto||'';input.value=previous;
+        label.append(input);other.append(label);return other;
+      };
+      const otherControl=makeOther();
+      const syncOther=()=>{const hasOther=[...fieldset.querySelectorAll('input[type=radio]:checked,input[type=checkbox]:checked')].some(input=>input.dataset.other==='1');otherControl.hidden=!hasOther;};
+      const items=(q.tipo==='agreement'||q.tipo==='frequency')?(q.tipo==='agreement'?bank.meta.scale_agreement:bank.meta.scale_frequency).map((label,i)=>({texto:label,value:String(i+1)})):(q.tipo==='single'||q.tipo==='multi'||q.tipo==='yes_no_partly')?(q.opciones||[]).map(option=>typeof option==='string'?{texto:option}:option):[];
+      if(q.tipo==='open'){
+        const label=el('label','mc-field');label.append(el('span','',q.texto));
+        const textarea=el('textarea','mc-textarea');textarea.maxLength=bank.meta.open_max_chars;textarea.value=typeof selected==='string'?selected:(row?.respuesta_texto||'');textarea.setAttribute('aria-label',q.texto);label.append(textarea,el('small','',`${bank.meta.open_notice} Máximo ${bank.meta.open_max_chars} caracteres.`));fieldset.append(label);
+      }else{
+        const wrap=el('div',q.tipo==='agreement'||q.tipo==='frequency'?'mc-options mc-options--scale':'mc-options');
+        const inputType=q.tipo==='multi'?'checkbox':'radio';
+        for(const item of items){
+          const label=el('label',q.tipo==='agreement'||q.tipo==='frequency'?'mc-option mc-option--scale':'mc-option');
+          const input=el('input');input.type=inputType;input.name=`q-${q.id}`;input.value=item.value||item.texto;
+          if(item.otra)input.dataset.other='1';if(item.excluyente)input.dataset.exclusive='1';
+          if(selectedValues.includes(input.value))input.checked=true;
+          const text=el('span','',item.texto);label.append(input);
+          if(q.tipo==='agreement'||q.tipo==='frequency')label.append(el('b','',input.value),text);else label.append(text);
+          wrap.append(label);
+        }
+        fieldset.append(wrap);
+        if(items.some(item=>item.otra))fieldset.append(otherControl);
+        if(q.tipo==='multi'){
+          wrap.addEventListener('change',event=>{
+            const input=event.target;if(input.type!=='checkbox')return;
+            if(input.dataset.exclusive==='1'&&input.checked)wrap.querySelectorAll('input[type=checkbox]').forEach(other=>{if(other!==input)other.checked=false;});
+            else if(input.checked)wrap.querySelectorAll('input[data-exclusive="1"]').forEach(other=>other.checked=false);
+            syncOther();saveCurrent(false);
+          });
+        }else wrap.addEventListener('change',()=>{syncOther();saveCurrent(false);});
+      }
+      if(q.tipo==='open')fieldset.querySelector('textarea').addEventListener('input',()=>saveCurrent(false));
+      if(otherControl&&!otherControl.hidden){const input=otherControl.querySelector('input');input?.addEventListener('input',()=>saveCurrent(false));}
+      if(q.tipo==='single'||q.tipo==='multi'||q.tipo==='yes_no_partly'||q.tipo==='agreement'||q.tipo==='frequency'){
+        const otherInput=otherControl.querySelector('input');otherInput?.addEventListener('input',()=>saveCurrent(false));
+      }
+      syncOther();
+    };
+    let currentQuestion=null,currentMoment='',currentStage='';
+    const collectAnswer=()=>{
+      const fieldset=document.getElementById('question-fields');if(!fieldset||!currentQuestion)return null;
+      const q=currentQuestion;
+      let response='',responseText='',otherText='',isEmpty=false;
+      const other=fieldset.querySelector('[data-other="1"]:not([type=checkbox]):not([type=radio])');otherText=other?.value?.trim()||'';
+      if(q.tipo==='open'){
+        response=fieldset.querySelector('textarea')?.value||'';responseText=response;isEmpty=!response.trim();
+      }else{
+        const checked=[...fieldset.querySelectorAll('input[type=radio]:checked,input[type=checkbox]:checked')];
+        const values=checked.map(input=>input.value);response=q.tipo==='multi'?values:(values[0]||'');
+        const labels=checked.map(input=>input.closest('label')?.innerText?.replace(/\s+/g,' ').trim()||input.value);
+        responseText=labels.join(' · ');isEmpty=!values.length;
+      }
+      return {respuesta:response,respuesta_texto:responseText,otra_texto:otherText,omitida:isEmpty,ms_respuesta:Date.now()-questionStartedAt};
+    };
+    const saveCurrent=(forceSkip)=>{
+      if(!currentQuestion)return;
+      const data=forceSkip?{respuesta:'',respuesta_texto:'',otra_texto:'',omitida:true,ms_respuesta:Date.now()-questionStartedAt}:collectAnswer();
+      if(!data)return;
+      const isBlank=data.omitida&&!forceSkip;
+      const response=forceSkip?data.respuesta:(Array.isArray(data.respuesta)?JSON.stringify(data.respuesta):data.respuesta);
+      const row=window.MCPrueba.saveAnswer(getSession(),{momento:currentMoment,etapa:currentStage,pregunta_id:currentQuestion.id,tipo:currentQuestion.tipo,respuesta:response,respuesta_texto:data.respuesta_texto,otra_texto:data.otra_texto,omitida:forceSkip?true:isBlank,ms_respuesta:data.ms_respuesta});
+      return row;
+    };
+    const validateQuestion=()=>{
+      const answer=collectAnswer();if(!answer)return false;
+      const blank=answer.omitida;
+      if(blank&&!currentQuestion.opcional){const status=document.getElementById('question-status');status.hidden=false;status.textContent='Elige una respuesta o selecciona «Prefiero no responder».';return false;}
+      return true;
+    };
+    const finishPhase=()=>{
+      if(phase==='inicial'){
+        session=window.MCPrueba.updateActive({estado:'inicial_completo',cuestionario_inicial_cerrado_en:new Date().toISOString()});
+        root.replaceChildren(el('p','mc-kicker','Preguntas iniciales listas'),el('h1','mc-h1','Comenzar recorrido'));
+        root.append(el('p','mc-lead','Vuelve a la consola cuando termines cada etapa. El moderador abrirá las pausas y el cierre en una pestaña aparte.'));
+        const btn=el('button','mc-btn mc-btn--primary','Comenzar recorrido');btn.type='button';root.append(btn);
+        btn.addEventListener('click',()=>{
+          const url=routeAllowed(session.destino);
+          if(!url){showError('El destino guardado no pertenece a una ruta permitida de este prototipo.');return;}
+          window.MCPrueba.updateActive({estado:'en_recorrido',recorrido_iniciado_en:new Date().toISOString()});
+          location.assign(url.href);
+        });
+      }else if(phase==='pausa1'||phase==='pausa2'||phase==='pausa_c'){
+        session=window.MCPrueba.updateActive({estado:'en_recorrido',ultima_pausa:phase,ultima_pausa_en:new Date().toISOString()});
+        root.replaceChildren(el('p','mc-kicker','Pausa registrada'),el('h1','mc-h1','Listo, vuelve a tu recorrido'),el('p','mc-lead','Tus respuestas quedaron guardadas en este navegador. Cierra esta pestaña para volver a la consola y al recorrido.'));
+        const close=el('button','mc-btn mc-btn--primary','Cerrar esta pestaña');close.type='button';root.append(close);close.addEventListener('click',()=>window.close());
+        if(window.opener)setTimeout(()=>window.close(),1600);
+      }else if(phase==='final'){
+        session=window.MCPrueba.finishSession(getSession());
+        root.replaceChildren(el('p','mc-kicker','Sesión cerrada'),el('h1','mc-h1','Gracias por participar'));
+        root.append(el('p','mc-lead',session.sus_completo?`Tu resultado de usabilidad es ${session.sus_score} de 100.`:'No pudimos calcular el resultado de usabilidad porque falt? al menos una respuesta.'));
+        root.append(el('p','mc-note',`Código de participante: ${session.participante}. Siguiente código sugerido: ${window.MCPrueba.nextParticipant(session.participante)}.`));
+        root.append(el('a','mc-btn','Volver a la consola'));root.lastElementChild.href='inicio.html';
+      }
+    };
+    const renderQuestions=()=>{
+      if(index>=questions.length){finishPhase();return;}
+      currentQuestion=questions[index];currentMoment=phase;currentStage='';questionStartedAt=Date.now();
+      const q=currentQuestion,row=getResponse(phase,'',q.id);
+      root.replaceChildren(el('p','mc-kicker',phaseName()));
+      const progress=el('div','mc-progress');const label=el('div','mc-row');label.append(el('span','',`Pregunta ${index+1} de ${questions.length}`),el('span','mc-muted',session.participante||''));
+      const track=el('div','mc-progress__track');track.setAttribute('role','progressbar');track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax',String(questions.length));track.setAttribute('aria-valuenow',String(index+1));
+      const bar=el('div','mc-progress__bar');bar.style.width=`${Math.round((index+1)/questions.length*100)}%`;track.append(bar);progress.append(label,track);root.append(progress);
+      const panel=el('section','mc-panel mc-question');const heading=el('h1','mc-question-heading',q.texto);heading.id=`question-title-${q.id}`;panel.append(heading);
+      const fieldset=el('fieldset');fieldset.id=`question-${q.id}`;fieldset.dataset.questionId=q.id;fieldset.setAttribute('aria-labelledby',heading.id);const legend=el('legend','mc-visually-hidden','Respuestas');fieldset.append(legend);
+      const fields=el('div');fields.id='question-fields';fieldset.append(fields);renderQuestionInput(q,fields,row);panel.append(fieldset);
+      const skip=el('button','mc-skip',bank.meta.skip_label);skip.type='button';skip.addEventListener('click',()=>{saveCurrent(true);index++;renderQuestions();});panel.append(skip);
+      if(q.opcional)panel.append(el('p','mc-muted','Esta pregunta es opcional. Puedes continuar sin escribir.'));
+      const status=el('p','mc-note mc-note--error','');status.id='question-status';status.hidden=true;panel.append(status);
+      const actions=el('div','mc-question-actions');const back=el('button','mc-btn','Volver');back.type='button';back.disabled=index===0;back.addEventListener('click',()=>{if(index>0){index--;renderQuestions();}});
+      const actionRight=el('div','mc-row');const next=el('button','mc-btn mc-btn--primary',index===questions.length-1?'Terminar bloque':'Continuar');next.type='button';next.addEventListener('click',()=>{if(!validateQuestion())return;saveCurrent(false);index++;renderQuestions();});actionRight.append(next);actions.append(back,actionRight);panel.append(actions);root.append(panel);window.scrollTo(0,0);
+      const handler=(event)=>{
+        if(event.key==='Enter'&&event.target?.tagName!=='TEXTAREA'&&!event.shiftKey){event.preventDefault();next.click();return;}
+        const target=event.target;
+        const isTextEntry=target?.tagName==='TEXTAREA'||(target?.tagName==='INPUT'&&!['radio','checkbox'].includes(target.type));
+        if(/^\d$/.test(event.key)&&!isTextEntry){
+          const n=Number(event.key);const choices=[...fields.querySelectorAll('input[type=radio]')];if(choices[n-1]){choices[n-1].checked=true;choices[n-1].dispatchEvent(new Event('change',{bubbles:true}));}
+        }
+      };
+      document.addEventListener('keydown',handler,{once:false});
+      const clearHandler=()=>document.removeEventListener('keydown',handler);
+      next.addEventListener('click',clearHandler,{once:true});back.addEventListener('click',clearHandler,{once:true});skip.addEventListener('click',clearHandler,{once:true});
+    };
+    const startPhase=()=>{
+      questions=window.MCPrueba.phaseQuestions(bank,phase,session);
+      if(!questions.length){showError(`No hay preguntas configuradas para ${phaseName().toLowerCase()}.`);return;}
+      if(phase==='inicial')renderWelcome();else renderQuestions();
+    };
+    window.MCPrueba.loadBank().then(data=>{
+      bank=data;session=getSession();
+      if(!session||session.id!==sessionId){showError('La consola no tiene una sesión activa con este código.');return;}
+      if(!['inicial','pausa1','pausa2','pausa_c','final'].includes(phase)){showError('La fase solicitada no existe.');return;}
+      if(phase==='inicial'&&session.estado!=='preparada'){showError('La bienvenida solo se abre para una sesión recién preparada.');return;}
+      startPhase();
+    }).catch(error=>showError(error.message));
+  })();
+  </script>
+</body>
+</html>

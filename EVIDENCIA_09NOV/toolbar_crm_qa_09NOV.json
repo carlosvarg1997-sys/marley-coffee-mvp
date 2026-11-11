@@ -1,0 +1,107 @@
+{
+  "sourceCommit": "local toolbar fix; pending publication",
+  "method": "isolated headless Chrome; CDP responsive emulation and local-only interaction",
+  "results": [
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html#C02",
+      "innerWidth": 320,
+      "docScrollWidth": 320,
+      "h1": "Café para empresas que mueve tu negocio.",
+      "dock": null,
+      "launcher": null,
+      "strip": null,
+      "launcherDisplay": "missing",
+      "demoText": false,
+      "contentTop": 55,
+      "appTop": null,
+      "route": "mobile_320",
+      "horizontalOverflow": false,
+      "status": "PASS: no moderator UI in customer route"
+    },
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html#C02",
+      "innerWidth": 390,
+      "docScrollWidth": 390,
+      "h1": "Café para empresas que mueve tu negocio.",
+      "dock": null,
+      "launcher": null,
+      "strip": null,
+      "launcherDisplay": "missing",
+      "demoText": false,
+      "contentTop": 55,
+      "appTop": null,
+      "route": "mobile_390",
+      "horizontalOverflow": false,
+      "status": "PASS: no moderator UI in customer route"
+    },
+    {
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html#C02",
+      "innerWidth": 1440,
+      "docScrollWidth": 1425,
+      "h1": "Café para empresas que mueve tu negocio.",
+      "dock": null,
+      "launcher": null,
+      "strip": null,
+      "launcherDisplay": "missing",
+      "demoText": false,
+      "contentTop": 62.1875,
+      "appTop": null,
+      "route": "desktop_1440",
+      "horizontalOverflow": false,
+      "status": "PASS: no moderator UI in customer route"
+    },
+    {
+      "route": "EXPLICIT_QA_MODE",
+      "controls": {
+        "dock": true,
+        "strip": true,
+        "label": "Revisión",
+        "hidden": true
+      },
+      "open": {
+        "open": true,
+        "stripMoved": true
+      },
+      "close": {
+        "open": false,
+        "focus": true
+      },
+      "status": "PASS"
+    },
+    {
+      "route": "CRM_LOGIN_MOBILE_390",
+      "login": {
+        "h1": "Ingreso de trabajadores",
+        "login": true,
+        "accounts": [
+          "VENTAS\nPaula Díaz · usuario paula.diaz\nDecide: A quién atender ahora y qué ofrecer\nMi día\nConversaciones y llamadas\nMis clientes\nCotizaciones\nAgenda\nConexiones y actividad\nINGRESAR COMO PAULA",
+          "MARKETING\nEquipo de marketing · usuario marketing\nDecide: Qué contenido y a quién\nFlywheel e indicadores\nLeads y puntajes\nContenido personalizado\nMapa\nReglas de puntaje\nConexiones y actividad\nINGRESAR COMO MARKETING",
+          "JEFATURA\nGerencia comercial · usuario jefatura\nDecide: Dónde poner recursos y qué aprobar\nPanel general\nZonas\nEquipo y tiempos\nOperación\nAgentes y aprobaciones\nConexiones y actividad\nINGRESAR COMO JEFATURA"
+        ],
+        "viewport": 390,
+        "overflow": false
+      },
+      "dashboard": {
+        "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html#R01",
+        "title": "CRM interno · Ventas · Mi día | Marley Coffee Empresas",
+        "h1": "Mi día, Paula",
+        "loginStillVisible": false,
+        "dock": false,
+        "strip": false,
+        "assistantOpen": true,
+        "assistantText": "Asistente de ventas\nApoyo IA · decisión humana\nSEÑAL QUE REVISA\n\nEjemplo listo: Elena, de Hotel Jardín Oriente, pregunta si la capacitación del barista está incluida.\n\nACCIÓN SUGERIDA\n\nEl asistente revisa la pregunta junto con la propuesta del hotel, señala lo que falta confirmar y prepara un borrador editable; no supone condiciones comerciales.\n\nDECISIÓN HUMANA\n\nPaula revisa la evidencia, confirma las condiciones con el equipo y decide si responde. La IA no envía mensajes ni promete servicios.\n\nVer conversación del ejemplo →\n\nEjemplo con datos ficticios del prototipo. La ayuda es interna; no aparece en la conversación del cliente.",
+        "overflow": false,
+        "mainText": "Asistente de ventas\nApoyo IA · decisión humana\nSEÑAL QUE REVISA\n\nEjemplo listo: Elena, de Hotel Jardín Oriente, pregunta si la capacitación del barista está incluida.\n\nACCIÓN SUGERIDA\n\nEl asistente revisa la pregunta junto con la propuesta del hotel, señala lo que falta confirmar y prepara un borrador editable; no supone condiciones comerciales.\n\nDECISIÓN HUMANA\n\nPaula revisa la evidencia, confirma las condiciones con el equipo y decide si responde. La IA no envía mensajes ni promete servicios.\n"
+      },
+      "status": "PASS: visible hotel case with human review"
+    },
+    {
+      "route": "CRM_TEST_ROUTE",
+      "href": "file:///C:/Users/HP/Documents/Codex/2026-11-04/hol/outputs/Marley-Coffee/prototipo_dual_entrada_07nov/index.html?test=crm#R00",
+      "dock": false,
+      "strip": false,
+      "h1": "Ingreso de trabajadores",
+      "status": "PASS"
+    }
+  ]
+}

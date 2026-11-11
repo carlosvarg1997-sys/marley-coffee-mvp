@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230B0B0C'/%3E%3Cpath fill='%23F3C900' d='M12 16h40v32H12z'/%3E%3C/svg%3E">
+  <title>Bandeja de correos · Marley Coffee Empresas</title>
+  <link rel="stylesheet" href="../marca/negro-marley.css">
+  <style>
+    .mailbox{padding:28px 0 56px}
+    .mailbox-header{display:flex;align-items:center;gap:18px;margin:0 0 26px}
+    .mailbox-header img{width:72px;height:72px;object-fit:contain}
+    .mailbox-header h1{margin:0;color:#FFFFFF;font-family:Festivo,'Arial Narrow','Helvetica Neue',Arial,sans-serif;font-size:52px;font-stretch:condensed;font-weight:700;line-height:.94;text-transform:uppercase;overflow-wrap:anywhere}
+    .mailbox-header p{margin:0 0 8px;color:var(--nm-oro);font:500 .8rem/1.3 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+    .mailbox-intro{max-width:760px;margin:0 0 22px;color:var(--nm-humo)}
+    .mailbox-intro p{margin:0 0 10px}
+    .mailbox-alert{margin:0 0 18px;padding:14px 16px;background:#FFFFFF;color:#171717;border-left:4px solid #F3C900;border-radius:4px}
+    .mailbox-alert[hidden]{display:none}
+    .mailbox-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:720px;padding:18px;background:var(--nm-carbon);border:1px solid var(--nm-linea);border-radius:8px}
+    .mailbox-filters label{display:grid;gap:7px;color:var(--nm-hueso);font:500 .78rem/1.3 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+    .mailbox-filters select{width:100%;min-height:48px;padding:10px 12px;border:1px solid #8F8B81;border-radius:5px;background:#FFFFFF;color:#171717;font:400 16px/1.3 Arial,Helvetica,sans-serif}
+    .mailbox-count{margin:16px 0 10px;color:#FFFFFF;font-weight:600}
+    .mail-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .mail-card{min-width:0;padding:20px;background:#FFFFFF;color:#171717;border:1px solid #E2E2E2;border-radius:8px;overflow-wrap:anywhere}
+    .mail-card[hidden]{display:none}
+    .mail-card__top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+    .mail-card__id{color:#171717;font:500 .85rem/1 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.1em}
+    .mail-card__stage{padding:5px 8px;border:1px solid #D0D0D0;border-radius:4px;color:#444;font:500 .72rem/1.2 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+    .mail-card h2{margin:0 0 12px;color:#171717;font-family:Festivo,'Arial Narrow','Helvetica Neue',Arial,sans-serif;font-size:27px;font-stretch:condensed;font-weight:700;line-height:.98;text-transform:uppercase;overflow-wrap:anywhere}
+    .mail-card__subject,.mail-card__preview{margin:0 0 8px;line-height:1.45}
+    .mail-card__preview{color:#4A4A4A}
+    .mail-card__meta{display:grid;gap:0;margin:16px 0}
+    .mail-card__meta div{display:grid;grid-template-columns:94px minmax(0,1fr);gap:8px;align-items:baseline;padding:8px 0;border-bottom:1px dotted #AFAFAF}
+    .mail-card__meta dt{color:#4A4A4A;font:500 .72rem/1.35 Pressura,'Trebuchet MS',Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase}
+    .mail-card__meta dd{margin:0;color:#171717;font-size:.9rem;line-height:1.4}
+    .mail-card__actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-top:10px;border-top:1px solid #E2E2E2}
+    .mail-card__actions .nm-btn{min-height:48px;padding:13px 17px;border:1px solid #171717;background:#FFFFFF;color:#171717;text-decoration:none}
+    .mail-card__actions .nm-btn:hover{background:#F5F5F5;border-color:#171717;color:#171717}
+    .mail-card__sheet{min-height:44px;display:inline-flex;align-items:center;color:#171717;text-decoration:underline;font-weight:600}
+    .mailbox-footer{max-width:780px;margin:28px 0 0;padding-top:18px;border-top:1px solid var(--nm-linea);color:var(--nm-humo);font-size:.9rem}
+    .mailbox-footer p{margin:0 0 10px}
+    @media (max-width:700px){
+      .mailbox{padding-top:20px}
+      .mailbox-header{align-items:flex-start;gap:12px}
+      .mailbox-header img{width:58px;height:58px}
+      .mailbox-header h1{font-size:38px}
+      .mailbox-filters,.mail-list{grid-template-columns:1fr}
+      .mailbox-filters{padding:14px}
+      .mail-card{padding:17px}
+      .mail-card__meta div{grid-template-columns:88px minmax(0,1fr);gap:6px}
+    }
+    @media (max-width:480px){.mailbox-header h1{font-size:36px}.mail-card h2{font-size:25px}.mail-card__meta dt{font-size:.66rem}.mail-card__meta dd{font-size:.84rem}}
+  </style>
+</head>
+<body class="nm">
+  <main class="nm-wrap mailbox">
+    <header class="mailbox-header">
+      <img src="recursos/marley-email-blanco.png" width="72" height="72" alt="Marley Coffee">
+      <div><p>Marley Coffee · Empresas</p><h1>Bandeja de correos</h1></div>
+    </header>
+    <section class="mailbox-intro" aria-label="Información de la bandeja">
+      <p>Doce mensajes de muestra del recorrido E01 a E12. Abre el correo o consulta su ficha de permiso, segmento y disparador.</p>
+      <p>E03, E11 y E12: propuesta inicial, a validar con Ventas. Son reglas internas de envío, no promesas al cliente.</p>
+      <p>Los filtros solo ordenan esta vista local; no guardan preferencias ni activan envíos.</p>
+    </section>
+    <p class="mailbox-alert" id="baja" role="status" hidden></p>
+    <form class="mailbox-filters" aria-label="Filtros de correos" onsubmit="return false">
+      <label for="filtro-etapa">Filtrar por etapa
+        <select id="filtro-etapa"><option value="">Todas las etapas</option><option value="interaccion">Interacción</option><option value="alta">Alta</option><option value="deleite">Deleite</option><option value="reactivacion">Reactivación</option></select>
+      </label>
+      <label for="filtro-base">Filtrar por base de permiso
+        <select id="filtro-base"><option value="">Todas las bases</option><option value="solicitud">Seguimiento de la solicitud</option><option value="recordatorios">Permiso de recordatorios</option><option value="marketing">Permiso de marketing</option><option value="contractual">Relación contractual</option><option value="servicio">Servicio</option></select>
+      </label>
+    </form>
+    <p class="mailbox-count" id="mailbox-count" aria-live="polite">12 correos visibles</p>
+    <section class="mail-list" id="mail-list" aria-label="Correos del recorrido">
+      <article class="mail-card" data-stage="interaccion" data-base="solicitud">
+  <div class="mail-card__top"><span class="mail-card__id">E01</span><span class="mail-card__stage">Interacción</span></div>
+  <h2>Recibimos tu solicitud</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Guardamos tu avance · N.º {{numero}}</p>
+  <p class="mail-card__preview">Con tu número retomas donde quedaste.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Seguimiento de la solicitud</dd></div><div><dt>Disparador</dt><dd>lead_created</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E01.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E01">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="interaccion" data-base="solicitud">
+  <div class="mail-card__top"><span class="mail-card__id">E02</span><span class="mail-card__stage">Interacción</span></div>
+  <h2>Tu propuesta está lista</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Tu propuesta está lista</p>
+  <p class="mail-card__preview">Ya puedes revisar lo preparado para tu negocio.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Seguimiento de la solicitud</dd></div><div><dt>Disparador</dt><dd>quote_sent</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E02.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E02">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="interaccion" data-base="solicitud">
+  <div class="mail-card__top"><span class="mail-card__id">E03</span><span class="mail-card__stage">Interacción</span></div>
+  <h2>Recordatorio de tu propuesta</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Tu propuesta te espera</p>
+  <p class="mail-card__preview">Un acceso directo a la propuesta que solicitaste.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Seguimiento de la solicitud</dd></div><div><dt>Disparador</dt><dd>propuesta inicial, a validar con Ventas: 3 días hábiles sin respuesta a la propuesta; un solo recordatorio.</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E03.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E03">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="interaccion" data-base="recordatorios">
+  <div class="mail-card__top"><span class="mail-card__id">E04</span><span class="mail-card__stage">Interacción</span></div>
+  <h2>Retoma tu solicitud</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Tu avance te espera</p>
+  <p class="mail-card__preview">Puedes retomar el formulario que enviaste parcialmente.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Permiso de recordatorios (marketing)</dd></div><div><dt>Disparador</dt><dd>Paso 1 enviado y paso 2 pendiente</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E04.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E04">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="interaccion" data-base="marketing">
+  <div class="mail-card__top"><span class="mail-card__id">E05</span><span class="mail-card__stage">Interacción</span></div>
+  <h2>Guía «Cuentas claras»</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Cuentas claras para decidir</p>
+  <p class="mail-card__preview">Una guía breve para ordenar las preguntas antes de elegir.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Permiso de marketing</dd></div><div><dt>Disparador</dt><dd>Lead sin avance</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E05.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E05">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="alta" data-base="contractual">
+  <div class="mail-card__top"><span class="mail-card__id">E06</span><span class="mail-card__stage">Alta</span></div>
+  <h2>Bienvenida y próximos pasos</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Bienvenida y próximos pasos</p>
+  <p class="mail-card__preview">Lo esencial para comenzar la relación de servicio.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Relación contractual</dd></div><div><dt>Disparador</dt><dd>contract_signed</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E06.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E06">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="alta" data-base="contractual">
+  <div class="mail-card__top"><span class="mail-card__id">E07</span><span class="mail-card__stage">Alta</span></div>
+  <h2>Tu primera semana (por rol)</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Tu primera semana, paso a paso</p>
+  <p class="mail-card__preview">Una guía para revisar lo que corresponde a tu rol.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Relación contractual</dd></div><div><dt>Disparador</dt><dd>Días después del alta</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E07.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E07">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="deleite" data-base="servicio">
+  <div class="mail-card__top"><span class="mail-card__id">E08</span><span class="mail-card__stage">Deleite</span></div>
+  <h2>Aviso de reposición</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Aviso de reposición para tu negocio</p>
+  <p class="mail-card__preview">Revisa la cadencia o el consumo estimado de tu cuenta.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Servicio</dd></div><div><dt>Disparador</dt><dd>Cadencia o consumo estimado</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E08.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E08">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="deleite" data-base="marketing">
+  <div class="mail-card__top"><span class="mail-card__id">E09</span><span class="mail-card__stage">Deleite</span></div>
+  <h2>Novedades para tu negocio</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Novedades para tu negocio</p>
+  <p class="mail-card__preview">Información de Marley Coffee Empresas para revisar cuando te sirva.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Permiso de marketing</dd></div><div><dt>Disparador</dt><dd>Calendario editorial</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E09.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E09">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="deleite" data-base="servicio">
+  <div class="mail-card__top"><span class="mail-card__id">E10</span><span class="mail-card__stage">Deleite</span></div>
+  <h2>¿Cómo lo estamos haciendo?</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> ¿Cómo lo estamos haciendo?</p>
+  <p class="mail-card__preview">Queremos conocer tu experiencia tras la entrega o el caso.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Servicio</dd></div><div><dt>Disparador</dt><dd>Después de una entrega o de un caso</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E10.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E10">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="deleite" data-base="marketing">
+  <div class="mail-card__top"><span class="mail-card__id">E11</span><span class="mail-card__stage">Deleite</span></div>
+  <h2>Recomienda a otro negocio</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Recomienda a otro negocio</p>
+  <p class="mail-card__preview">Comparte esta información si crees que puede servir.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Permiso de marketing</dd></div><div><dt>Disparador</dt><dd>propuesta inicial, a validar con Ventas: ofrecer recomendación solo con 9 o 10 en la pregunta de 0 a 10 (definición estándar de promotor).</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E11.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E11">Ver ficha</a></div>
+</article><article class="mail-card" data-stage="reactivacion" data-base="marketing">
+  <div class="mail-card__top"><span class="mail-card__id">E12</span><span class="mail-card__stage">Reactivación</span></div>
+  <h2>Te echamos de menos</h2>
+  <p class="mail-card__subject"><strong>Asunto:</strong> Si quieres, revisamos tu cuenta</p>
+  <p class="mail-card__preview">Puedes volver a conversar cuando te haga sentido.</p>
+  <dl class="mail-card__meta"><div><dt>Base</dt><dd>Permiso de marketing</dd></div><div><dt>Disparador</dt><dd>propuesta inicial, a validar con Ventas: sin pedidos durante el doble de la cadencia habitual de reposición de la cuenta.</dd></div></dl>
+  <div class="mail-card__actions"><a class="nm-btn" href="E12.html">Abrir correo</a><a class="mail-card__sheet" href="fichas.html#E12">Ver ficha</a></div>
+</article>
+    </section>
+    <footer class="mailbox-footer">
+      <p>Prototipo académico. No se envía ningún correo ni se guardan datos personales.</p>
+      <p>Antes de lanzar, verificar la fecha de entrada en vigor de la Ley 21.719 y la posible postergación.</p>
+      <p>La baja de promociones se representa solo en esta pantalla; no cambia una lista real.</p>
+    </footer>
+  </main>
+  <script>
+    (() => {
+      const stage = document.getElementById('filtro-etapa');
+      const base = document.getElementById('filtro-base');
+      const count = document.getElementById('mailbox-count');
+      const cards = [...document.querySelectorAll('.mail-card')];
+      const alert = document.getElementById('baja');
+      const unsubscribeId = new URLSearchParams(location.search).get('baja');
+      if (unsubscribeId) {
+        alert.hidden = false;
+        alert.textContent = `Baja simulada para ${unsubscribeId}. En este prototipo no se guarda ninguna preferencia.`;
+      }
+      const applyFilters = () => {
+        let visible = 0;
+        for (const card of cards) {
+          const show = (!stage.value || card.dataset.stage === stage.value) && (!base.value || card.dataset.base === base.value);
+          card.hidden = !show;
+          if (show) visible += 1;
+        }
+        count.textContent = `${visible} ${visible === 1 ? 'correo visible' : 'correos visibles'}`;
+      };
+      stage.addEventListener('change', applyFilters);
+      base.addEventListener('change', applyFilters);
+    })();
+  </script>
+</body>
+</html>
