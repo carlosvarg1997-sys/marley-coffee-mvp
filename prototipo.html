@@ -8114,7 +8114,7 @@ window.M4T = (() => {
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const isMobile = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (matchMedia('(pointer:coarse)').matches && innerWidth < 900);
   let server = false;
-  if (HTTP) fetch('/api/ping', { cache: 'no-store' }).then((r) => { server = r.ok; }).catch(() => {});
+  if (HTTP && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) fetch('/api/ping', { cache: 'no-store' }).then((r) => { server = r.ok; }).catch(() => {});
 
   // ---------- Tareas ----------
   // Un test = UNA tarea (decisión del 14-oct: seis tareas por participante era inviable), y la tarea sale del
