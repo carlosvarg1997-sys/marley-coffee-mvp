@@ -16,6 +16,7 @@ Recorrerás diez tareas sobre un prototipo: desde encontrar una alternativa para
 - El prototipo usa datos y acciones simuladas. No se enviarán solicitudes, pedidos, tickets, correos, anuncios ni invitaciones reales.
 - No se graba audio ni video. Una grabación de pantalla es opcional y requiere tu aceptación separada. Puedes pedir que se borre.
 - La planilla de resultados no incluye tu nombre ni datos de contacto.
+- Si participas desde un teléfono y un computador, tus respuestas se guardan en este teléfono. Al terminar podrás revisar el código y el número de respuestas y elegir si compartir el texto, copiarlo o descargar un archivo para entregárselo al moderador. No se envía automáticamente ni se incluyen nombres o datos de contacto.
 
 ## Participación voluntaria
 

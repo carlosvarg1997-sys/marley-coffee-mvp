@@ -1,3 +1,5 @@
+> **Desde el 11-nov la versión digital usa UMUX-Lite (2 afirmaciones, escala 1–5)** en lugar de este SUS. Si falla la vista digital, aplica solo estas dos: «Las funciones de este sistema cubren lo que necesito» y «Este sistema es fácil de usar». Este SUS queda como referencia.
+
 # Cuestionario SUS · escala de usabilidad del sistema
 
 Aplicar después de E0–E9. Leer los enunciados sin cambiar el orden. La persona marca una respuesta por fila:

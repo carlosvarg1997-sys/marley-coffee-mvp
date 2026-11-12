@@ -28,8 +28,21 @@
     </div></section>
     <dl class="mc-summary" id="response-totals"></dl>
     <section aria-labelledby="questions-title"><h2 id="questions-title" class="mc-console__subhead">Respuestas por pregunta</h2><div id="question-results" class="mc-grid"></div></section>
-    <section aria-labelledby="sus-title"><h2 id="sus-title" class="mc-console__subhead">SUS por persona</h2><p class="mc-muted">Fórmula estándar: suma de aportes impares (respuesta − 1) y pares (5 − respuesta), multiplicada por 2,5. Solo se calcula con los diez ítems respondidos.</p><div class="mc-table-wrap"><table class="mc-table"><thead><tr><th>Participante</th><th>Camino</th><th>Rol</th><th>SUS / 100</th><th>Estado</th></tr></thead><tbody id="sus-results"></tbody></table></div></section>
+    <section aria-labelledby="sus-title"><h2 id="sus-title" class="mc-console__subhead">Usabilidad por persona (UMUX-Lite)</h2><p class="mc-muted">Fórmula estándar: suma de aportes impares (respuesta − 1) y pares (5 − respuesta), multiplicada por 2,5. Solo se calcula con los diez ítems respondidos.</p><div class="mc-table-wrap"><table class="mc-table"><thead><tr><th>Participante</th><th>Camino</th><th>Rol</th><th>Usabilidad / 100</th><th>Estado</th></tr></thead><tbody id="sus-results"></tbody></table></div></section>
     <section aria-labelledby="stages-title"><h2 id="stages-title" class="mc-console__subhead">Resultados por etapa</h2><div class="mc-table-wrap"><table class="mc-table"><thead><tr><th>Camino</th><th>Etapa</th><th>SEQ medio</th><th>% logrado</th><th>Tiempo mediano</th><th>Registros</th></tr></thead><tbody id="stage-results"></tbody></table></div></section>
+
+    <section class="mc-import" aria-labelledby="import-title">
+      <h2 id="import-title" class="mc-console__subhead">Importar respuestas</h2>
+      <p class="mc-muted">Pega el texto de envío del teléfono o elige el archivo JSON. Se valida el banco y se fusiona sin duplicar respuestas; los datos se quedan en este navegador.</p>
+      <div class="mc-import__controls">
+        <label class="mc-field" for="import-text">Texto de envío<textarea class="mc-input mc-import__textarea" id="import-text" maxlength="1000000" spellcheck="false" placeholder="MC-PRUEBA v1&#10;..." aria-describedby="import-status"></textarea></label>
+        <div class="mc-import__row">
+          <label class="mc-field" for="import-file">O elige un archivo<input class="mc-input" id="import-file" type="file" accept=".json,.txt,application/json,text/plain"></label>
+          <button class="mc-btn mc-btn--primary" type="button" id="import-button">Importar respuestas</button>
+        </div>
+      </div>
+      <p class="mc-import__status" id="import-status" role="status" aria-live="polite"></p>
+    </section>
 
     <section aria-labelledby="export-title"><h2 id="export-title" class="mc-console__subhead">Exportar datos</h2><div class="mc-row">
       <button class="mc-btn mc-btn--primary" type="button" id="export-long">Exportar CSV (una fila por respuesta)</button>
@@ -82,7 +95,7 @@
     const renderTotals=rows=>{
       const sessions=filteredSessions();const el=$('#response-totals');
       const completed=rows.filter(row=>!row.omitida).length;const sus=sessions.map(session=>session.sus_score??M.susForSession(session.id)).filter(value=>value!==null);
-      el.innerHTML=[['Sesiones',sessions.length],['Respuestas',rows.length],['Respondidas',completed],['SUS medio',sus.length?`${mean(sus).toFixed(1)}/100`:'—']].map(([key,value])=>`<div><dt>${esc(key)}</dt><dd>${esc(value)}</dd></div>`).join('');
+      el.innerHTML=[['Sesiones',sessions.length],['Respuestas',rows.length],['Respondidas',completed],['Usabilidad media',sus.length?`${mean(sus).toFixed(1)}/100`:'—']].map(([key,value])=>`<div><dt>${esc(key)}</dt><dd>${esc(value)}</dd></div>`).join('');
     };
     const renderQuestions=rows=>{
       const holder=$('#question-results');holder.replaceChildren();
@@ -131,7 +144,7 @@
     };
     const render=()=>{const rows=filteredRows();renderPathSummaries();renderTotals(rows);renderQuestions(rows);renderSus();renderStages(rows);$('#dashboard-status').textContent=`Banco ${M.VERSION} · ${allSessions().length} sesiones locales · ${allRows().length} respuestas locales.`;};
     const exportLong=()=>M.download('respuestas_largo.csv',M.csvText(filteredRows()),'text/csv;charset=utf-8');
-    const exportSummary=()=>{const sessions=filteredSessions();M.download('resumen_por_persona.csv',M.csvText(M.summaryRows(sessions,filteredRows()),[...M.PLANILLA_COLUMNS,'etapas_completadas','SUS','estado']),'text/csv;charset=utf-8');};
+    const exportSummary=()=>{const sessions=filteredSessions();M.download('resumen_por_persona.csv',M.csvText(M.summaryRows(sessions,filteredRows()),[...M.PLANILLA_COLUMNS,'etapas_completadas','Usabilidad','estado']),'text/csv;charset=utf-8');};
     const exportJSON=()=>{const sessions=filteredSessions();const ids=new Set(sessions.map(session=>session.id));const data={version_banco:M.VERSION,sesiones:sessions,respuestas:filteredRows().filter(row=>ids.has(row.sesion_id))};M.download('respuestas_ronda_final.json','\uFEFF'+JSON.stringify(data,null,2),'application/json;charset=utf-8');};
     $('#export-long').addEventListener('click',exportLong);$('#export-summary').addEventListener('click',exportSummary);$('#export-json').addEventListener('click',exportJSON);
     $('#prepare-delete').addEventListener('click',()=>{$('#delete-panel').hidden=false;$('#delete-phrase').focus();});
@@ -142,6 +155,21 @@
       if(!window.confirm('Se eliminarán las respuestas, sesiones archivadas y sesión activa de investigación de este navegador. ¿Continuar?'))return;
       [M.KEY.answers,M.KEY.sessions,M.KEY.active].forEach(key=>localStorage.removeItem(key));
       $('#delete-phrase').value='';$('#delete-confirm').disabled=true;$('#delete-panel').hidden=true;refreshFilters();render();
+    });
+    $('#import-button').addEventListener('click',async()=>{
+      const status=$('#import-status');
+      try{
+        let source=$('#import-text').value.trim();
+        const file=$('#import-file').files?.[0];
+        if(!source&&file)source=await file.text();
+        if(!source)throw new Error('Pega el texto de envío o elige un archivo.');
+        const data=M.decodeRemoteText(source);
+        const result=M.mergeRemotePackage(data);
+        $('#import-text').value='';$('#import-file').value='';
+        const responseWord=result.respuestas===1?'respuesta':'respuestas';
+        status.textContent=`Importación lista: ${result.sesiones} sesión y ${result.respuestas} ${responseWord} recibidas; ${result.agregadas} nuevas, ${result.reemplazadas} actualizadas y ${result.conservadas} conservadas por fecha.`;
+        refreshFilters();render();
+      }catch(error){status.textContent=error.message||'No se pudieron importar las respuestas.';}
     });
     M.loadBank().then(data=>{bank=data;refreshFilters();render();document.querySelectorAll('.mc-filter select').forEach(select=>select.addEventListener('change',render));window.addEventListener('storage',event=>{if(event.key?.startsWith('mc_prueba_')){refreshFilters();render();}});window.addEventListener('mc-prueba-change',()=>{refreshFilters();render();});}).catch(error=>{$('#dashboard-status').textContent=error.message;});
   })();

@@ -2623,7 +2623,7 @@ body[data-artifact=wireframes] .m7o-bar,body[data-artifact=wireframes] .m7o-draw
 /* ===== Módulo de test de usabilidad (solo test_sitio.html y test_crm.html) ===== */
 body.m4t-on{padding-bottom:72px}
 body.m4t-search-entry{padding-bottom:0}
-body.m4t-search-entry{overflow:hidden}
+body.m4t-search-entry:not(.m4t-session-started){overflow:hidden}
 #m4t{font:15px/1.45 "Helvetica Neue",Helvetica,Arial,sans-serif;color:#171717}
 #m4t *{box-sizing:border-box}
 .m4t-modal{position:fixed;inset:0;z-index:200;background:rgba(23,23,23,.55);display:grid;place-items:center;padding:14px;overflow:auto}
@@ -3707,7 +3707,7 @@ window.M4D = (() => {
     evento: { t: 'Evento', base: 'escenas/evento/', alt: 'Barra Marley Coffee con barista en un evento de noche' },
     barras: { t: 'Las 4 máquinas', base: 'escenas/barras/', alt: 'Cuatro barras con las máquinas oficiales Marley Coffee que se encienden una a una' }
   };
-  Object.values(SCENES).forEach((s) => { s.poster = r(s.base + 'poster.webp'); s.posterM = r(s.base + 'poster_m.webp'); s.fin = r(s.base + 'fin.webp'); Object.defineProperties(s, { vd: { get() { return r(s.base + 'video_d.mp4'); }, enumerable: true, configurable: true }, vm: { get() { return r(s.base + 'video_m.mp4'); }, enumerable: true, configurable: true }, vs: { get() { return r(s.base + 'video_s.mp4'); }, enumerable: true, configurable: true } }); });
+  Object.values(SCENES).forEach((s) => { s.poster = r(s.base + 'poster.webp'); s.posterM = r(s.base + 'poster_m.webp'); s.fin = r(s.base + 'fin.webp'); Object.defineProperties(s, { vd: { get() { return r(s.base + 'video_d.mp4'); }, enumerable: true, configurable: true }, vm: { get() { return r(s.base + 'video_m.mp4'); }, enumerable: true, configurable: true }, vs: { get() { return r(s.base + (window.matchMedia && window.matchMedia('(max-width: 767px)').matches ? 'video_s_m.mp4' : 'video_s.mp4')); }, enumerable: true, configurable: true } }); });
   // Conveniencia y panadería no tienen video propio: usan su imagen conceptual (06-nov).
   SCENES.conveniencia = { t: 'Conveniencia', stillOnly: true, alt: 'Escena conceptual de un punto de café de autoservicio en una tienda; no corresponde a un cliente real' };
   SCENES.panaderia = { t: 'Panadería', stillOnly: true, alt: 'Escena conceptual de una barra de café en una panadería; no corresponde a un cliente real' };
@@ -5712,7 +5712,7 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
       : directMachine
       ? V.machineImg(directMachineKey, 'm10-contact-machine-image')
       : inicio
-      ? V.film(sceneOf(s), { mode: 'still', still: 'fin', label: 'Marley Coffee para ' + (biz ? article(biz) : 'empresas') })
+      ? V.film(sceneOf(s), { mode: 'loop', label: 'Marley Coffee para ' + (biz ? article(biz) : 'empresas') })
       : proposalMini(s);
     const h1 = creator ? 'Conversemos sobre una alianza' : inicio ? 'Guarda tu avance' : seguimiento ? 'Solicita seguimiento' : hablar ? 'Tu consulta, por correo' : 'Confirma tu propuesta';
     const cta = creator ? 'Guardar interés (demo)' : inicio ? 'Continuar' : seguimiento ? 'Solicitar seguimiento por correo' : hablar ? 'Enviar consulta por correo' : 'Confirmar propuesta';
@@ -10078,7 +10078,9 @@ window.M4Journey = (() => {
     const path = SLUG[c.buyer] || c.buyerSlug || 'restaurantes';
     const q = new URLSearchParams({ utm_source: 'referido', utm_medium: 'referral', utm_campaign: 'recomienda', utm_content: c.accountCode, mc_referral_account: c.accountId, mc_referral_code: c.accountCode });
     if (M.TEST === 'sitio') { q.set('test', 'sitio'); q.set('qa', '1'); q.set('journey', 'resume'); q.set('return', 'index.html'); }
-    return `${location.origin}/captacion/landing/${path}.html?${q.toString()}`;
+    const destination = new URL(`captacion/landing/${path}.html`, location.href);
+    destination.search = q.toString();
+    return destination.href;
   }
   function accountHTML(s = M.get()) {
     const c = cycle(s), order = c.orders[0], repeat = c.orders[1];
@@ -10623,10 +10625,177 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
   schedule();
 })();
 </script>
-<style id="kit-oculta-m4t">html.mc-kit-activa .m4t-pill,html.mc-kit-activa #m4tMenu,html.mc-kit-activa #a1-m4t-flow-wrapper{display:none!important}</style>
+<style id="kit-oculta-m4t">html.mc-kit-hide-m4t #m4t,html.mc-kit-hide-m4t .m4t-pill,html.mc-kit-hide-m4t #m4tMenu,html.mc-kit-hide-m4t #a1-m4t-flow-wrapper{display:none!important}</style>
 <script>
 /* Sesión del kit de prueba con personas: la consola del moderador hace los saltos y el cierre,
    así que el «⋯» del módulo de prueba se oculta para que la persona no abra el menú por error. */
-(()=>{const marcar=()=>{let activa=false;try{const s=JSON.parse(localStorage.getItem('mc_prueba_sesion_actual_v1')||'null');activa=Boolean(s&&s.id&&s.estado!=='cerrada');}catch(_){}document.documentElement.classList.toggle('mc-kit-activa',activa);};marcar();window.addEventListener('storage',(e)=>{if(e.key==='mc_prueba_sesion_actual_v1')marcar();});})();
+(()=>{const marcar=()=>{let modo='local';try{const s=JSON.parse(localStorage.getItem('mc_prueba_sesion_actual_v1')||'null');if(s&&s.id&&s.estado!=='cerrada')modo=s.modo||'local';}catch(_){}document.documentElement.classList.toggle('mc-kit-hide-m4t',modo==='remoto'||modo==='autoguiado');};marcar();window.addEventListener('storage',(e)=>{if(e.key==='mc_prueba_sesion_actual_v1')marcar();});})();
+</script>
+<style id="a1-r3-tarjetas-remotas">
+  #app > #a1-remote-cards{display:grid;gap:12px;width:100%;max-width:1120px;margin:0 auto;padding:16px clamp(16px,3vw,28px) 24px;box-sizing:border-box;color:#FFFFFF}
+  #a1-remote-cards .a1-remote-card{display:grid;gap:10px;margin:0;padding:18px 20px;border:1px solid #444444;border-radius:12px;background:#0B0B0C;color:#FFFFFF;overflow-wrap:anywhere}
+  #a1-remote-cards .a1-remote-card__eyebrow{margin:0;color:#D7D7D7;font:500 .82rem/1.35 var(--nm-label,Arial,sans-serif);letter-spacing:.08em;text-transform:uppercase}
+  #a1-remote-cards .a1-remote-card h2{margin:0;color:#FFFFFF;font:500 clamp(1.2rem,3vw,1.55rem)/1.15 var(--nm-display,Arial,sans-serif);text-transform:uppercase}
+  #a1-remote-cards .a1-remote-card p{max-width:66ch;margin:0;color:#FFFFFF;font:400 1rem/1.5 var(--nm-text,Arial,sans-serif)}
+  #a1-remote-cards .a1-remote-card__action{display:inline-flex;align-items:center;justify-content:center;width:max-content;max-width:100%;min-width:44px;min-height:44px;padding:10px 16px;border:1px solid #FFFFFF;border-radius:5px;background:#FFFFFF;color:#171717;text-align:center;text-decoration:none;font:500 .95rem/1.25 var(--nm-label,Arial,sans-serif);cursor:pointer}
+  #a1-remote-cards .a1-remote-card__action:hover{background:#E7E7E7;border-color:#E7E7E7}
+  #a1-remote-cards .a1-remote-card__action:focus-visible{outline:3px solid #F3C900;outline-offset:3px}
+  #a1-remote-cards [data-card-status]{margin:0;padding:12px 14px;border-left:4px solid #171717;border-radius:4px;background:#FFFFFF;color:#171717;font:500 .95rem/1.45 var(--nm-label,Arial,sans-serif)}
+  @media(max-width:1024px){#app #a1-remote-cards{padding-inline:16px}#a1-remote-cards .a1-remote-card{padding:16px}#a1-remote-cards .a1-remote-card__action{width:100%;min-height:44px}}
+</style>
+<script id="a1-r3-tarjetas-remotas">
+(()=>{
+  'use strict';
+  const SESSION_KEY='mc_prueba_sesion_actual_v1';
+  const KIT_PATH='PRUEBA_CON_PERSONAS/RONDA_FINAL_E0_E9/sesion.html';
+  const INTERNAL_ROLES=new Set(['ventas','marketing','jefatura']);
+  const app=()=>document.getElementById('app');
+  const currentRoute=()=>String((location.hash||'').slice(1).split('?')[0]||document.body?.dataset.current||'C01');
+  function readSession(){try{const value=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');return value&&value.id&&value.modo==='remoto'&&value.estado!=='cerrada'?value:null;}catch(_){return null;}}
+  function phaseDone(session,phase){
+    const done=Array.isArray(session?.fases_hechas)&&session.fases_hechas.some(item=>(typeof item==='string'?item:(item?.fase||item?.phase||item?.id))===phase);
+    return done||session?.ultima_pausa===phase||Boolean(session?.[`${phase}_hecha`]);
+  }
+  function escapeText(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+  function pauseURL(session,phase){const url=new URL(KIT_PATH,location.href);url.searchParams.set('fase',phase);url.searchParams.set('mc_session',session.id);url.searchParams.set('volver',location.href);return url.href;}
+  function card(session,id,title,copy,actionLabel,phase){
+    const action=phase
+      ? `<a class="a1-remote-card__action" data-a1-card-action href="${escapeText(pauseURL(session,phase))}">${escapeText(actionLabel)}</a>`
+      : `<button type="button" class="a1-remote-card__action" data-a1-remote-jump="${id==='salto-3'?'3':'30'}">${escapeText(actionLabel)}</button>`;
+    return `<section class="a1-remote-card" data-card-id="${id}" aria-labelledby="a1-remote-title-${id}"><p class="a1-remote-card__eyebrow">Cuando el moderador te lo indique</p><h2 id="a1-remote-title-${id}">${escapeText(title)}</h2><p>${escapeText(copy)}</p>${action}</section>`;
+  }
+  function status(id,text){return `<p data-card-status="${id}" role="status" aria-live="polite">${escapeText(text)}</p>`;}
+  function targetFor(root,route){
+    return root.querySelector('#m4-main,.portal-content,main.app-main')||root;
+  }
+  function cardsFor(session){
+    const route=currentRoute(), s=window.M4?.get?.()||{}, c=s.customerCycle||{}, internal=INTERNAL_ROLES.has(String(session.rol||'').toLowerCase()), cards=[];
+    if(internal){
+      if(route.startsWith('R')&&!phaseDone(session,'pausa_c'))cards.push(card(session,'pausa-c','Pausa C','Responde las preguntas y vuelve a tu tarea.','Responder preguntas','pausa_c'));
+      return cards;
+    }
+    const external=session.rol==='externo'||/^(A|B-)/.test(String(session.camino||''));
+    if(!external||!route.startsWith('C'))return cards;
+    const hasProposal=Boolean(s.proposal);
+    if(!phaseDone(session,'pausa1')&&!c.contractSignedAt&&['C03','C04','C05'].includes(route)){
+      cards.push(card(session,'pausa1','Pausa 1 · antes de seguir','Responde 4 preguntas antes de seguir.','Responder 4 preguntas','pausa1'));
+      return cards;
+    }
+    if(hasProposal&&!phaseDone(session,'pausa2')&&['C05','C06','C09'].includes(route)){
+      cards.push(card(session,'pausa2','Pausa 2','Responde las preguntas antes de avanzar.','Responder preguntas','pausa2'));
+      return cards;
+    }
+    const jumps=c.timeJumps||{};
+    if(jumps['3']&&!c.contractSignedAt&&['C05','C06'].includes(route))cards.push(status('salto-3','Ya pasaron 3 días en esta prueba.'));
+    if(jumps['30']&&['C06','C09'].includes(route))cards.push(status('salto-30','Ya pasó un mes en esta prueba. El aviso de reposición está en Mi cuenta.'));
+    if(phaseDone(session,'pausa2')&&hasProposal&&!c.contractSignedAt&&s.proposal?.status!=='aceptada'&&!jumps['3']&&['C05','C06'].includes(route)){
+      cards.push(card(session,'salto-3','Avanzar el tiempo · 3 días después','Tu negocio aún evalúa la propuesta. Continúa como lo harías normalmente antes de decidir.','Pasaron 3 días',null));
+      return cards;
+    }
+    if(c.contractSignedAt&&!jumps['30']&&['C06','C09'].includes(route)){
+      cards.push(card(session,'salto-30','Avanzar el tiempo · Un mes después','Desde el primer pedido del escenario, tu equipo necesita organizar el siguiente abastecimiento. Decide qué revisar antes.','Pasó un mes',null));
+      return cards;
+    }
+    const finalReady=c.npsScore!==null&&c.npsScore!==undefined||(jumps['30']&&c.supportCase&&c.csat);
+    if(finalReady&&['C09','C15'].includes(route)&&!phaseDone(session,'final'))cards.push(card(session,'final','Preguntas finales','Responde las preguntas finales sobre el recorrido.','Responder preguntas finales','final'));
+    return cards;
+  }
+  function refresh(){
+    const root=app();if(!root)return;
+    const existing=root.querySelector('#a1-remote-cards');
+    const session=readSession();
+    const markup=session?cardsFor(session):[];
+    const content=markup.join('');
+    if(!content){existing?.remove();return;}
+    const placement=targetFor(root,currentRoute());
+    const target=placement;
+    if(existing?.dataset.signature===content&&existing.parentElement===target)return;
+    existing?.remove();
+    const wrapper=document.createElement('div');wrapper.id='a1-remote-cards';wrapper.dataset.signature=content;wrapper.innerHTML=content;
+    if(content.includes('data-card-id="pausa1"')||content.includes('data-card-id="pausa-c"'))target.prepend(wrapper);else target.append(wrapper);
+  }
+  let scheduled=false;
+  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;refresh();});}
+  document.addEventListener('click',event=>{
+    const button=event.target.closest('[data-a1-remote-jump]');if(!button)return;
+    event.preventDefault();
+    const session=readSession(),days=Number(button.dataset.a1RemoteJump),s=window.M4?.get?.()||{},c=s.customerCycle||{};
+    if(!session||!window.M4Journey?.enabled?.()||![3,30].includes(days))return;
+    if(days===3&&(!phaseDone(session,'pausa2')||!s.proposal||c.contractSignedAt||s.proposal.status==='aceptada'))return;
+    if(days===30&&!c.contractSignedAt)return;
+    if(window.M4Journey.jumpDays(days)){window.MarleyApp?.render?.();schedule();}
+  },true);
+  const originalRender=window.MarleyApp?.render;
+  if(typeof originalRender==='function'&&!window.MarleyApp.__a1RemoteCardsWrapped){
+    window.MarleyApp.render=function(...args){const result=originalRender.apply(this,args);schedule();return result;};
+    window.MarleyApp.__a1RemoteCardsWrapped=true;
+  }
+  window.M4?.subscribe?.(schedule);
+  let observedRoot=null;
+  const watchApp=()=>{const root=app();if(root&&root!==observedRoot){observer.observe(root,{childList:true,subtree:true});observedRoot=root;}};
+  const observer=new MutationObserver(()=>{watchApp();schedule();});
+  watchApp();
+  window.addEventListener('hashchange',schedule);
+  window.addEventListener('resize',schedule,{passive:true});
+  window.addEventListener('pageshow',schedule);
+  window.addEventListener('storage',event=>{if(event.key===SESSION_KEY)schedule();});
+  window.addEventListener('mc-prueba-change',schedule);
+  document.addEventListener('DOMContentLoaded',schedule,{once:true});
+  schedule();
+})();
+</script>
+<style id="a1-r5-media-size">
+  .m5 .ux-hero-scroll .ux-hero-media>.m5-film{inset:2%!important;width:96%!important;height:96%!important;border-radius:10px!important;overflow:hidden}
+  .m5 .m5-split--start .m5-split-media>.m5-film{inset:2.25%!important;width:95.5%!important;height:95.5%!important;border-radius:10px!important;overflow:hidden}
+</style>
+<script id="a1-r5-kit-adapter">
+(()=>{
+  'use strict';
+  const SESSION_KEY='mc_prueba_sesion_actual_v1';
+  const readSession=()=>{try{const value=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');return value&&value.id&&value.estado!=='cerrada'?value:null;}catch(_){return null;}};
+  const valuesFrom=(session)=>{
+    const ficha=session?.ficha;
+    if(!ficha||typeof ficha!=='object')return null;
+    const sources=[ficha,ficha.contacto,ficha.datos,ficha.persona,ficha.lead].filter((item)=>item&&typeof item==='object');
+    const pick=(keys)=>{for(const source of sources){for(const key of keys){let value=source[key];if(value&&typeof value==='object')value=value.nombre??value.name??value.valor??value.value??'';if(value!==undefined&&value!==null&&String(value).trim())return String(value).trim();}}return '';};
+    return {name:pick(['nombre','nombreCompleto','name','fullName']),email:pick(['correo','correoElectronico','email','mail']),company:pick(['empresa','company','negocio','business','razonSocial','razon_social']),phone:pick(['telefono','teléfono','celular','phone','mobile'])};
+  };
+  const currentScreen=()=>String((location.hash||'').slice(1).split('?')[0]||document.body?.dataset.current||'C01');
+  window.MarleyPrueba=Object.freeze({version:1,estado(){
+    const state=window.M4?.get?.()||{},cycle=state.customerCycle||{},screen=currentScreen();
+    const leadIdentificado=Boolean(state.lead?.landing?.id||(state.lead?.email&&(state.events||[]).some((event)=>event.key==='form1')));
+    const proposalVisible=Boolean(state.proposal&&['C03','C05','C06','C07'].includes(screen));
+    return {pantalla:screen,leadIdentificado,propuestaVisible:proposalVisible,contratoFirmado:Boolean(cycle.contractSignedAt),saltos:{3:Boolean(cycle.timeJumps?.['3']),30:Boolean(cycle.timeJumps?.['30'])}};
+  }});
+
+  function prefillPortal(){
+    const session=readSession(),values=valuesFrom(session),form=document.getElementById('m4Contact');
+    if(!form||!values||form.dataset.mcFichaSession===String(session.id))return;
+    form.dataset.mcFichaSession=String(session.id);
+    const fields={name:['#m4FName','input[name="name"]','input[name="nombre"]'],email:['#m4FEmail','input[name="email"]','input[name="correo"]','input[type="email"]'],company:['input[name="company"]','input[name="empresa"]','input[name="business"]'],phone:['#m4FPhone','input[name="phone"]','input[name="telefono"]','input[type="tel"]']};
+    for(const [key,selectors] of Object.entries(fields)){
+      const input=selectors.map((selector)=>form.querySelector(selector)).find(Boolean),value=values[key];
+      if(!input||input.type==='checkbox'||!value||String(input.value||'').trim())continue;
+      input.value=value;
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+  }
+  function normalizeInternalTargets(){
+    const session=readSession();
+    if(!session||session.modo!=='autoguiado'||window===window.top)return;
+    document.querySelectorAll('a[target="_blank"]').forEach((anchor)=>{
+      try{if(new URL(anchor.href,location.href).origin===location.origin)anchor.target='_self';}catch(_){}
+    });
+  }
+  let pending=false;
+  const refresh=()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;prefillPortal();normalizeInternalTargets();});};
+  const root=document.getElementById('app')||document.body;
+  if(root)new MutationObserver(refresh).observe(root,{childList:true,subtree:true});
+  window.addEventListener('storage',(event)=>{if(event.key===SESSION_KEY)refresh();});
+  window.addEventListener('pageshow',refresh);
+  window.addEventListener('hashchange',refresh);
+  refresh();
+})();
 </script>
 </body></html>

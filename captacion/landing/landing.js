@@ -26,6 +26,53 @@
   const leer = (clave) => { try { return JSON.parse(localStorage.getItem(clave) || 'null'); } catch (_) { return null; } };
   const guardar = (clave, valor) => { try { const json = JSON.stringify(valor); localStorage.setItem(clave, json); return localStorage.getItem(clave) === json; } catch (_) { return false; } };
   const borrar = (clave) => { try { localStorage.removeItem(clave); } catch (_) { /* sin almacenamiento */ } };
+  const KIT_SESSION_KEY = 'mc_prueba_sesion_actual_v1';
+  const kitSession = () => { const session = leer(KIT_SESSION_KEY); return session && session.id && session.estado !== 'cerrada' ? session : null; };
+  function kitFichaValues(session) {
+    const ficha = session?.ficha;
+    if (!ficha || typeof ficha !== 'object') return null;
+    const sources = [ficha, ficha.contacto, ficha.datos, ficha.persona, ficha.lead].filter((item) => item && typeof item === 'object');
+    const pick = (keys) => {
+      for (const source of sources) for (const key of keys) {
+        let value = source[key];
+        if (value && typeof value === 'object') value = value.nombre ?? value.name ?? value.valor ?? value.value ?? '';
+        if (value !== undefined && value !== null && String(value).trim()) return String(value).trim();
+      }
+      return '';
+    };
+    return {
+      nombre: pick(['nombre', 'nombreCompleto', 'name', 'fullName']),
+      correo: pick(['correo', 'correoElectronico', 'email', 'mail']),
+      empresa: pick(['empresa', 'company', 'negocio', 'business', 'razonSocial', 'razon_social']),
+      telefono: pick(['telefono', 'teléfono', 'celular', 'phone', 'mobile']),
+    };
+  }
+  function prefillKitForm(form) {
+    const session = kitSession(), values = kitFichaValues(session);
+    if (!form || !session || !values) return false;
+    if (form.dataset.mcFichaSession !== String(session.id)) {
+      form.dataset.mcFichaSession = String(session.id);
+      const selectors = { nombre: '[name="nombre"]', correo: '[name="correo"]', empresa: '[name="empresa"]', telefono: '[name="telefono"]' };
+      for (const [key, selector] of Object.entries(selectors)) {
+        const input = form.querySelector(selector), value = values[key];
+        if (!input || input.type === 'checkbox' || !value || String(input.value || '').trim()) continue;
+        input.value = value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+    return true;
+  }
+  function normalizeKitTargets() {
+    const session = kitSession();
+    if (!session || session.modo !== 'autoguiado' || window === window.top) return;
+    document.querySelectorAll('a[target="_blank"]').forEach((anchor) => {
+      try { if (new URL(anchor.href, location.href).origin === location.origin) anchor.target = '_self'; } catch (_) { /* enlace inválido */ }
+    });
+  }
+  const normalizeTargetsObserver = new MutationObserver(normalizeKitTargets);
+  normalizeTargetsObserver.observe(document.documentElement, { childList: true, subtree: true });
+  normalizeKitTargets();
 
   const preferenciaMovimiento = matchMedia('(prefers-reduced-motion: reduce)');
   const movimientoForzadoOff = params.get('motion') === 'off';
@@ -292,6 +339,7 @@
 
   if (form) {
     form.dataset.form = variante.form;
+    const hasKitFicha = prefillKitForm(form);
     if (variante.form === 'directo') {
       form.dataset.paso = 'directo';
       $('#ld-paso-etiqueta').textContent = 'Un paso · tus datos y tu negocio';
@@ -321,7 +369,7 @@
 
     /* Estado B guardado antes: se retoma una solicitud que la persona sí envió. */
     const borrador = leer('mc_landing_draft_v1');
-    if (variante.form === 'progresivo' && borrador && borrador.landing === cfg.slug && !leer('mc_landing_lead_v1')) {
+    if (!hasKitFicha && variante.form === 'progresivo' && borrador && borrador.landing === cfg.slug && !leer('mc_landing_lead_v1')) {
       form.elements.nombre.value = borrador.name || '';
       form.elements.correo.value = borrador.email || '';
       form.elements.consent.checked = Boolean(borrador.consent);

@@ -1,0 +1,84 @@
+{
+  "version": "2026-11-11-v1",
+  "origen": "Fichas_datos_ficticios.html",
+  "ficticio": true,
+  "fichas": [
+    {
+      "codigo": "P1",
+      "perfil": "restaurante",
+      "nombre": "Camila Rojas",
+      "empresa": "Restaurante ficticio 01 · Patio del Sur",
+      "correo": "participante1@example.com",
+      "telefono": "+56 9 0000 0001",
+      "comuna": "Ñuñoa",
+      "tazas_al_dia": 80,
+      "ficticia": true
+    },
+    {
+      "codigo": "P2",
+      "perfil": "hotel",
+      "nombre": "Javier Soto",
+      "empresa": "Hotel ficticio 02 · Nube Austral",
+      "correo": "participante2@example.com",
+      "telefono": "+56 9 0000 0002",
+      "comuna": "Providencia",
+      "tazas_al_dia": 140,
+      "ficticia": true
+    },
+    {
+      "codigo": "P3",
+      "perfil": "cafeteria",
+      "nombre": "Antonia Vega",
+      "empresa": "Cafetería ficticia 03 · Taza Circular",
+      "correo": "participante3@example.com",
+      "telefono": "+56 9 0000 0003",
+      "comuna": "Santiago",
+      "tazas_al_dia": 95,
+      "ficticia": true
+    },
+    {
+      "codigo": "P4",
+      "perfil": "oficina",
+      "nombre": "Daniela Fuentes",
+      "empresa": "Oficina ficticia 04 · Norte Claro",
+      "correo": "participante4@example.com",
+      "telefono": "+56 9 0000 0004",
+      "comuna": "Las Condes",
+      "tazas_al_dia": 35,
+      "ficticia": true
+    },
+    {
+      "codigo": "P5",
+      "perfil": "eventos",
+      "nombre": "Fernanda Muñoz",
+      "empresa": "Eventos ficticios 05 · Mesa Vía",
+      "correo": "participante5@example.com",
+      "telefono": "+56 9 0000 0005",
+      "comuna": "Maipú",
+      "tazas_al_dia": 120,
+      "ficticia": true
+    },
+    {
+      "codigo": "P6",
+      "perfil": "panaderia",
+      "nombre": "Paula Mella",
+      "empresa": "Panadería ficticia 06 · Masa del Valle",
+      "correo": "participante6@example.com",
+      "telefono": "+56 9 0000 0006",
+      "comuna": "La Florida",
+      "tazas_al_dia": 55,
+      "ficticia": true
+    },
+    {
+      "codigo": "P7",
+      "perfil": "conveniencia",
+      "nombre": "Tomás Leiva",
+      "empresa": "Tienda de conveniencia ficticia 07 · Esquina Norte",
+      "correo": "participante7@example.com",
+      "telefono": "+56 9 0000 0007",
+      "comuna": "Macul",
+      "tazas_al_dia": 45,
+      "ficticia": true
+    }
+  ]
+}

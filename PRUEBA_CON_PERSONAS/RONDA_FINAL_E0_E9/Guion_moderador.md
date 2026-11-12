@@ -5,13 +5,25 @@ Cinco sesiones externas exploratorias (A o B) y hasta tres sesiones internas exp
 
 ## Preparación
 
-- Abre [`inicio.html`](inicio.html) desde `http://localhost` o `http://127.0.0.1`. Selecciona participante/perfil y camino. La consola limpia los datos del prototipo salvo `mc_prueba_*`, prepara la sesión y abre `sesion.html?fase=inicial` en otra pestaña. Registra la versión exacta antes de la sesión.
+- **Modo local:** abre [`inicio.html`](inicio.html) desde `http://localhost` o `http://127.0.0.1`. Selecciona participante/perfil y camino. La consola limpia los datos del prototipo salvo `mc_prueba_*`, prepara la sesión y abre `sesion.html?fase=inicial` en otra pestaña. Registra la versión exacta antes de la sesión.
 - En la pestaña de la persona, presenta la bienvenida y el consentimiento. La casilla «Acepto participar» es obligatoria. El cuestionario inicial se responde allí, una pregunta por pantalla; la consola permanece en la pestaña del moderador.
 - Verifica que formularios, correos, pedidos, tickets y referidos sean simulados y no hagan llamadas externas. Si aparece un envío real o se pide un dato personal real, detén esa pantalla.
 - No uses nombres, correos, teléfonos ni datos de clientes reales. En E3 usa solo la ficha ficticia del perfil correspondiente en [Fichas_datos_ficticios.html](Fichas_datos_ficticios.html). Si el formulario no es local/simulado o pide un dato fuera de la ficha, detén E3 y no improvises.
 - Prepara cronómetro, versión del CSV y tarjetas de salto. Comprueba el viewport/dispositivo real y anótalo. No presentes emulación como teléfono real. En E3 entrega la ficha ficticia; para C entrega solo la ficha de credenciales del rol.
 - Lee el consentimiento. Sin aceptación, no comienza la sesión. La bienvenida resume qué se hará y el número de preguntas iniciales, de pausa y finales.
 - No mostrar este guion al participante durante la tarea. Las tarjetas de tiempo se leen literalmente.
+
+## Modo remoto (sitio publicado)
+
+1. En el computador del moderador abre la versión publicada de [`inicio.html`](inicio.html). El host no local activa el modo remoto: no borra datos del computador. Selecciona participante, perfil y camino A/B o C por rol. C encadenada queda deshabilitado; solo funciona con las dos sesiones en el mismo equipo.
+2. Pulsa el camino para generar el enlace y el QR. Comparte el enlace por el canal acordado o deja que la persona escanee el QR. No uses una URL localhost para un teléfono separado del computador.
+3. La persona abre el enlace en su teléfono. Si viene de WhatsApp o Instagram, dile: **«Sigue en esta misma pestaña hasta el final; vuelve aquí después de cada tarjeta.»** Presenta el consentimiento y espera «Acepto participar». La persona responde el bloque inicial y toca «Comenzar recorrido».
+4. Mantén la consola en el computador y la persona en el teléfono. Registra etapas, tiempos, errores, resultado, nota y SEQ. No esperes que el teléfono aparezca como otra pestaña del computador: son dispositivos separados.
+5. En cada pausa, di: **«Cuando estés listo, toca la tarjeta de pausa que aparece en tu pantalla y responde las preguntas. Avísame al terminar.»** Luego pulsa «Marcar hecho» en la consola. Para los saltos, di: **«Toca la tarjeta que dice 3 días después en tu teléfono.»** y marca el salto como hecho. Antes de E7 repite con **«Un mes después»**. Lee «Decisión tomada» y «Caso resuelto» desde las tarjetas impresas; son recordatorios.
+6. Tras E9, di: **«Toca la tarjeta de preguntas finales en tu teléfono y responde el bloque.»** Cuando confirme que terminó, marca el cierre como hecho. A y B-Google tienen el menú «⋯» del portal solo como respaldo en modo local; en remoto usa las tarjetas de la persona y los botones de registro de esta consola.
+7. Al final, la persona verá su código y el número de respuestas; puede compartir el texto, copiarlo o descargar el archivo. En el computador abre [respuestas.html](respuestas.html), pega el texto o elige el archivo y pulsa «Importar respuestas». Comprueba que se hayan unido la sesión, las respuestas y las etapas que registraste.
+
+Si el portal todavía no muestra tarjetas remotas, abre directamente [`sesion.html`](sesion.html) desde el teléfono con la fase y un `volver` válido del mismo sitio. Anota la limitación y no completes tareas que la persona no pudo realizar.
 
 ## Cinco perfiles
 
@@ -91,10 +103,10 @@ La actividad interna se centra en prospectos de ejemplo con fuentes como búsque
 
 ## Pausas y cuestionarios
 
-- Externos: completa el cuestionario inicial (6 preguntas). Después de E2, abre `Pausa 1 · llegada` desde la consola (4 preguntas). Después de E4, abre `Pausa 2 · contacto y propuesta` (4 preguntas). Tras E9, abre el cuestionario final externo (17 preguntas, incluido SUS).
-- Internos: completa el cuestionario inicial (4 preguntas). Después de la primera tarea del rol, abre `Pausa C · origen del contacto` (3 preguntas). Tras la última tarea del rol, abre el cuestionario final interno (15 preguntas, incluido SUS).
-- En cada pausa, la persona responde en una pestaña nueva. Al terminar, vuelve a la consola y al recorrido. No muestres la consola ni este guion durante las tareas.
-- Los saltos de 3 días y un mes se hacen desde los botones de la consola, en las etapas indicadas abajo. Las tarjetas «Decisión tomada» y «Caso resuelto» son recordatorios impresos, sin botón de salto. Mientras la sesión del kit está activa, el portal oculta su botón «⋯», así que la persona no ve controles del moderador. Normalmente, el moderador abre el cierre común desde la consola después de E9. El SUS impreso de Cuestionario_SUS.md es respaldo si falla la vista digital.
+- Externos: completa el cuestionario inicial (6 preguntas). Después de E2, la persona responde `Pausa 1 · llegada` (4 preguntas); después de E4, responde `Pausa 2 · contacto y propuesta` (4 preguntas). En local, el moderador abre cada pausa desde la consola; en remoto, la persona toca la tarjeta correspondiente en su teléfono. Tras E9, responde el cuestionario final externo (9 preguntas, incluido SUS).
+- Internos: completa el cuestionario inicial (4 preguntas). Después de la primera tarea del rol, abre `Pausa C · origen del contacto` (3 preguntas). Tras la última tarea del rol, abre el cuestionario final interno (7 preguntas, incluido SUS).
+- En local, cada pausa abre en una pestaña nueva y la persona la cierra para volver al recorrido. En remoto, responde en la misma pestaña del teléfono y vuelve con el botón de pantalla. No muestres la consola ni este guion durante las tareas.
+- En local, los saltos de 3 días y un mes se hacen desde los botones de la consola. En remoto, primero la persona toca la tarjeta de salto en el teléfono y luego el moderador marca «Hecho» en la consola. Las tarjetas «Decisión tomada» y «Caso resuelto» son recordatorios impresos, sin botón de salto. Mientras la sesión del kit está activa, el portal oculta su botón «⋯»; en A y B-Google queda solo como respaldo local. El SUS impreso de Cuestionario_SUS.md es respaldo si falla la vista digital.
 - Las respuestas se guardan localmente al contestar cada pregunta. `omitida=true` significa que se eligió «Prefiero no responder» o que una abierta opcional se dejó en blanco. No vuelvas a preguntar una respuesta omitida.
 
 ## Secuencia de tareas
@@ -179,7 +191,7 @@ Lee la tarjeta 4 como recordatorio antes de E9. No hay botón de salto en la con
 1. Pregunta: **«¿Qué te dio confianza y qué no?»** Registra la respuesta literal sin nombre ni datos personales.
 2. Pregunta: **«¿Qué parte te resultó más difícil?»**
 3. Pregunta abierta: **«¿Qué cambiarías para que esta experiencia te resultara más clara?»**
-4. Desde la consola abre el cuestionario final y deja que la persona responda el SUS digital de diez ítems, sin explicar qué respuesta conviene. Si falla, usa el SUS impreso como respaldo y registra la incidencia.
+4. En local, desde la consola abre el cuestionario final; en remoto, pídele a la persona que toque la tarjeta final en su teléfono. Deja que responda el bloque digital, incluido el SUS de diez ítems, sin explicar qué respuesta conviene. Si falla, usa el SUS impreso como respaldo y registra la incidencia.
 5. Agradece y recuerda que puede pedir retirar sus datos de investigación o borrar una grabación opcional.
 6. Comprueba que no quedó una sesión con datos personales reales.
 

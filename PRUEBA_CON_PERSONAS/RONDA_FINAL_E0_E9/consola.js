@@ -18,13 +18,29 @@
   };
   const roles = { ventas: 'I1', marketing: 'I2', jefatura: 'I3' };
   let bank = null;
+  let fixtureData = null;
   let activeSession = null;
 
   const say = (message, kind = '') => { status.textContent = message; status.dataset.kind = kind; };
-  const isLocal = () => ['localhost', '127.0.0.1', '::1'].includes(location.hostname) || location.hostname.endsWith('.localhost');
+  const isLocal = () => { const host = location.hostname.replace(/^\[|\]$/g, '').toLowerCase(); return ['localhost', '127.0.0.1', '::1'].includes(host) || host.endsWith('.localhost'); };
+  const remoteMode = !isLocal();
   const externalPath = path => new URL(path, ROOT);
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const leadName = raw => { try { const state = JSON.parse(raw || 'null'); return state?.lead?.name?.trim() || ''; } catch (_) { return ''; } };
+  async function fixtureFor(participantCode) {
+    if (!fixtureData) {
+      const response = await fetch(new URL('fichas.json', location.href), { credentials: 'same-origin', cache: 'no-store' });
+      if (!response.ok) throw new Error('No se pudieron cargar las fichas ficticias de E3.');
+      fixtureData = await response.json();
+    }
+    const fixture = Array.isArray(fixtureData.fichas) ? fixtureData.fichas.find(item => item.codigo === participantCode) : null;
+    if (!fixture || !fixture.ficticia) throw new Error('No encontré una ficha ficticia para este participante.');
+    return {
+      nombre: fixture.nombre, correo: fixture.correo, empresa: fixture.empresa,
+      telefono: fixture.telefono, comuna: fixture.comuna, tazas_al_dia: fixture.tazas_al_dia,
+      ficticia: true
+    };
+  }
 
   function resetPrototypeData() {
     if (!isLocal()) throw new Error('Abre la consola desde localhost; el almacenamiento no se modificó.');
@@ -97,6 +113,18 @@
     return M.readAnswers().find(row => row.sesion_id === session?.id && row.momento === 'etapa' && row.pregunta_id === id && row.tipo === 'evento') || null;
   }
 
+  function eventRecorded(session, id) { return Boolean(jumpEvent(session, id)); }
+
+  function saveModeratorEvent(session, id, stage, text, payload = {}) {
+    const current = M.readActive();
+    if (!session || current?.id !== session.id) throw new Error('No hay una sesión activa para registrar este paso.');
+    const data = { ...payload, sesion_id: session.id, at: payload.at || Date.now(), nonce: payload.nonce || window.crypto?.randomUUID?.() || Math.random().toString(36).slice(2) };
+    const row = M.saveAnswer(current, { momento: 'etapa', etapa: stage, pregunta_id: id, tipo: 'evento', respuesta: JSON.stringify(data), respuesta_texto: text, otra_texto: '', omitida: false, ms_respuesta: 0 });
+    const phases = ['pausa1_hecha','pausa2_hecha','pausa_c_hecha','final_hecho'].includes(id) ? [...new Set([...(current.fases_hechas || []), id.replace('_hecha','')])] : current.fases_hechas || [];
+    if (phases.length || current.estado === 'preparada') M.updateActive({ estado: current.estado === 'preparada' ? 'en_recorrido' : current.estado, fases_hechas: phases });
+    return row;
+  }
+
   function phaseIsComplete(session, phase) {
     const questions = M.phaseQuestions(bank, phase, session);
     const rows = M.readAnswers();
@@ -105,10 +133,10 @@
 
   function timeJumpReady(session, id) {
     const current = M.readActive();
-    if (!isExternalSession(session) || current?.id !== session.id || session.estado !== 'en_recorrido') return false;
+    if (!isExternalSession(session) || current?.id !== session.id || (session.estado !== 'en_recorrido' && !(remoteMode && session.estado === 'preparada'))) return false;
     if (id === 'salto_3d') {
       const e4 = M.stagesFor(bank, session).find(stage => stage.id === 'E4');
-      return Boolean(e4 && stageIsComplete(session, e4) && phaseIsComplete(session, 'pausa2'));
+      return Boolean(e4 && stageIsComplete(session, e4) && (remoteMode ? eventRecorded(session, 'pausa2_hecha') : phaseIsComplete(session, 'pausa2')));
     }
     if (id === 'salto_30d') {
       const e6 = M.stagesFor(bank, session).find(stage => stage.id === 'E6');
@@ -120,11 +148,11 @@
   function jumpGateCopy(session, id) {
     if (!isExternalSession(session)) return 'Los saltos se usan solo en recorridos externos A o B.';
     if (session.estado === 'cerrada') return 'La sesión está cerrada. No se registran saltos.';
-    if (session.estado !== 'en_recorrido') return 'Vuelve al recorrido para habilitar el salto correspondiente.';
+    if (session.estado !== 'en_recorrido' && !(remoteMode && session.estado === 'preparada')) return 'Vuelve al recorrido para habilitar el salto correspondiente.';
     if (id === 'salto_3d') {
       const e4 = M.stagesFor(bank, session).find(stage => stage.id === 'E4');
       if (!e4 || !stageIsComplete(session, e4)) return 'Completa y registra E4 antes de este salto.';
-      if (!phaseIsComplete(session, 'pausa2')) return 'Abre y termina la pausa de propuesta antes de este salto.';
+      if (remoteMode ? !eventRecorded(session, 'pausa2_hecha') : !phaseIsComplete(session, 'pausa2')) return remoteMode ? 'Registra que la persona terminó la pausa 2 en su teléfono.' : 'Abre y termina la pausa de propuesta antes de este salto.';
       return 'Salto disponible.';
     }
     if (!jumpEvent(session, 'salto_3d')) return 'Primero registra el salto de tres días.';
@@ -153,6 +181,8 @@
   function showSession(session) {
     activeSession = session;
     panel.hidden = false;
+    const remoteShare = $('#remote-share');
+    if (remoteShare) remoteShare.hidden = !remoteMode || session.modo !== 'remoto';
     const internal = ['ventas', 'marketing', 'jefatura'].includes(session.rol);
     const stageList = M.stagesFor(bank, session);
     const pathText = session.camino === 'C-encadenada' ? 'C · encadenada' : session.camino;
@@ -161,7 +191,7 @@
       ['Participante', session.participante], ['Camino', pathText], ['Rol', roleLabels[session.rol] || 'Participante externo'],
       ['Perfil', profileLabels[session.perfil] || 'Sin perfil'], ['Inicio', session.inicio ? new Date(session.inicio).toLocaleString('es-CL') : '—'],
       ['Etapas', stageList.length + ' · ' + (internal ? 'tareas del rol' : 'recorrido externo')], ['Vínculo', session.sesion_origen ? 'Lead de sesión externa anterior' : 'Sin vínculo encadenado'],
-      ['SUS', session.sus_completo ? session.sus_score + '/100' : 'Pendiente']
+      ['Usabilidad', session.sus_completo ? session.sus_score + '/100' : 'Pendiente']
     ].map(([label, value]) => '<div><dt>' + escapeHtml(label) + '</dt><dd>' + escapeHtml(value) + '</dd></div>').join('');
     updateEmptyJumpNotice(session);
     renderConsoleActions(session, stageList);
@@ -234,7 +264,7 @@
     word.textContent = item.word;
     const instruction = document.createElement('p');
     instruction.className = 'mc-timejump-card__instruction';
-    instruction.textContent = item.instruction;
+    instruction.textContent = remoteMode && item.dias ? `Pídele que toque la tarjeta «${item.word.toLowerCase()}» en su pantalla. Después, marca el paso como hecho aquí.` : item.instruction;
     const note = document.createElement('p');
     note.className = 'mc-timejump-card__note';
     note.textContent = item.note;
@@ -252,7 +282,7 @@
       button.type = 'button';
       button.dataset.timejump = id;
       button.dataset.days = String(item.dias);
-      button.textContent = item.button;
+      button.textContent = remoteMode ? 'Marcar hecho · ' + item.button : item.button;
       button.setAttribute('aria-describedby', state.id);
       card.append(button);
     } else {
@@ -283,7 +313,7 @@
   function recordTimeJump(id) {
     const item = timeJumpCards[id];
     const current = M.readActive();
-    if (!item || !current || current.id !== activeSession?.id || !isExternalSession(current) || current.estado !== 'en_recorrido') {
+    if (!item || !current || current.id !== activeSession?.id || !isExternalSession(current) || (current.estado !== 'en_recorrido' && !(remoteMode && current.estado === 'preparada'))) {
       say('No hay una sesión externa activa para registrar este salto.', 'error');
       if (current) showSession(current);
       return;
@@ -299,20 +329,17 @@
       at: Date.now(),
       nonce: window.crypto?.randomUUID?.() || Date.now().toString(36) + '-' + Math.random().toString(36).slice(2)
     };
-    localStorage.setItem('mc_prueba_salto_v1', JSON.stringify(payload));
-    M.saveAnswer(current, {
-      momento: 'etapa',
-      etapa: item.etapa,
-      pregunta_id: id,
-      tipo: 'evento',
-      respuesta: JSON.stringify(payload),
-      respuesta_texto: item.dias === 3 ? 'Salto de tiempo: 3 días después' : 'Salto de tiempo: un mes después',
-      otra_texto: '',
-      omitida: false,
-      ms_respuesta: 0
-    });
+    if (remoteMode) saveModeratorEvent(current, id, item.etapa, item.dias === 3 ? 'La persona completó el salto de 3 días en su teléfono.' : 'La persona completó el salto de un mes en su teléfono.', payload);
+    else {
+      localStorage.setItem('mc_prueba_salto_v1', JSON.stringify(payload));
+      M.saveAnswer(current, {
+        momento: 'etapa', etapa: item.etapa, pregunta_id: id, tipo: 'evento', respuesta: JSON.stringify(payload),
+        respuesta_texto: item.dias === 3 ? 'Salto de tiempo: 3 días después' : 'Salto de tiempo: un mes después',
+        otra_texto: '', omitida: false, ms_respuesta: 0
+      });
+    }
     showSession(M.readActive());
-    say(item.dias === 3 ? 'Salto de 3 días enviado y registrado para esta sesión.' : 'Salto de un mes enviado y registrado para esta sesión.', 'ok');
+    say(remoteMode ? (item.dias === 3 ? 'Salto de 3 días marcado como hecho y registrado.' : 'Salto de un mes marcado como hecho y registrado.') : (item.dias === 3 ? 'Salto de 3 días enviado y registrado para esta sesión.' : 'Salto de un mes enviado y registrado para esta sesión.'), 'ok');
   }
   function renderStages(session, stages) {
     const holder = $('#console-stages');
@@ -345,6 +372,7 @@
       }
       startButton?.addEventListener('click', () => {
         record.empezo_en = new Date().toISOString();
+        if (remoteMode && M.readActive()?.estado === 'preparada') activeSession = M.updateActive({ estado: 'en_recorrido' });
         saveStage(activeSession, stage, record);
         renderStages(activeSession, stages);
         refreshStageSummary(activeSession);
@@ -383,9 +411,18 @@
     const card = document.createElement('section');
     card.className = 'mc-pause-card';
     const label = { pausa1: 'Pausa 1 · llegada', pausa2: 'Pausa 2 · contacto y propuesta', pausa_c: 'Pausa C · origen del contacto' }[phase];
+    const eventId = `${phase}_hecha`;
     card.dataset.stageAfter = stageId;
-    card.innerHTML = `<div><strong>${escapeHtml(label)}</strong><span>Después de ${escapeHtml(stageId)}</span></div><button class="btn" type="button" data-open-phase="${phase}" ${enabled ? '' : 'disabled'}>Abrir cuestionario</button>`;
-    $('[data-open-phase]', card).addEventListener('click', event => openPhase(event.currentTarget.dataset.openPhase, session));
+    if (remoteMode) {
+      card.innerHTML = `<div><strong>${escapeHtml(label)}</strong><span>Después de ${escapeHtml(stageId)}</span><p class="mc-note">Pídele que toque la tarjeta «${escapeHtml(label)}» en su teléfono y responda allí. Luego marca que terminó.</p></div><button class="btn" type="button" data-open-phase="${phase}" ${enabled && !eventRecorded(session,eventId) ? '' : 'disabled'}>${eventRecorded(session,eventId) ? 'Hecho' : 'Marcar hecho'}</button>`;
+      $('[data-open-phase]', card).addEventListener('click', () => {
+        try { saveModeratorEvent(session,eventId,stageId,`${label}: la persona terminó el cuestionario en su teléfono.`); showSession(M.readActive()); say(`${label} registrada como hecha.`, 'ok'); }
+        catch (error) { say(error.message, 'error'); }
+      });
+    } else {
+      card.innerHTML = `<div><strong>${escapeHtml(label)}</strong><span>Después de ${escapeHtml(stageId)}</span></div><button class="btn" type="button" data-open-phase="${phase}" ${enabled ? '' : 'disabled'}>Abrir cuestionario</button>`;
+      $('[data-open-phase]', card).addEventListener('click', event => openPhase(event.currentTarget.dataset.openPhase, session));
+    }
     return card;
   }
 
@@ -394,7 +431,7 @@
     $$('.mc-pause-card').forEach(card => {
       const stage = M.stagesFor(bank, session).find(item => item.id === card.dataset.stageAfter);
       const button = $('[data-open-phase]', card);
-      if (stage && button) button.disabled = !stageIsComplete(session, stage);
+      if (stage && button) button.disabled = !stageIsComplete(session, stage) || (remoteMode && eventRecorded(session,`${button.dataset.openPhase}_hecha`));
     });
   }
 
@@ -408,20 +445,36 @@
     if (session.estado === 'cerrada') {
       const thanks = document.createElement('p');
       thanks.className = 'mc-note mc-note--success';
-      thanks.textContent = `Sesión cerrada. Puntaje SUS: ${session.sus_completo ? `${session.sus_score}/100` : 'incompleto'}. Siguiente código sugerido: ${M.nextParticipant(session.participante)}.`;
+      thanks.textContent = `Sesión cerrada. Usabilidad (UMUX-Lite): ${session.sus_completo ? `${session.sus_score}/100` : 'incompleto'}. Siguiente código sugerido: ${M.nextParticipant(session.participante)}.`;
       holder.append(thanks); return;
     }
-    if (session.estado === 'preparada') {
+    if (session.estado === 'preparada' && !remoteMode) {
       const reopen = document.createElement('button');
       reopen.className = 'btn'; reopen.type = 'button'; reopen.textContent = 'Abrir bienvenida en otra pestaña';
       reopen.addEventListener('click', () => openPhase('inicial', session));
       action.append(reopen);
+    } else if (session.estado === 'preparada' && remoteMode) {
+      const waiting = document.createElement('p'); waiting.className = 'mc-note'; waiting.textContent = 'Sesión preparada. La persona debe abrir el enlace, aceptar el consentimiento y comenzar el recorrido.'; action.append(waiting);
     }
     if (complete) {
-      const final = document.createElement('button');
-      final.className = 'btn btn--primary'; final.type = 'button'; final.textContent = 'Abrir cuestionario final';
-      final.addEventListener('click', () => openPhase('final', session));
-      action.append(final);
+      if (remoteMode) {
+        const note = document.createElement('p'); note.className = 'mc-note'; note.textContent = isExternalSession(session) ? 'Pídele que toque la tarjeta de preguntas finales en su teléfono. Cuando termine, marca el paso como hecho.' : 'Al completar el CRM, la persona responde las preguntas finales en su teléfono. Cuando termine, marca el paso como hecho.'; action.append(note);
+        const final = document.createElement('button'); final.className = 'btn'; final.type = 'button'; final.textContent = eventRecorded(session,'final_hecho') ? 'Final hecho' : 'Marcar final como hecho'; final.disabled = eventRecorded(session,'final_hecho');
+        final.addEventListener('click',()=>{try{saveModeratorEvent(session,'final_hecho',stages.at(-1)?.id||'','La persona terminó el cuestionario final en su teléfono.');showSession(M.readActive());say('Cierre de la persona registrado. Importa sus respuestas cuando las envíe.','ok');}catch(error){say(error.message,'error');}});action.append(final);
+        if (!isExternalSession(session)) {
+          const shareFinal = document.createElement('button'); shareFinal.className = 'btn'; shareFinal.type = 'button'; shareFinal.textContent = 'Copiar enlace a preguntas finales';
+          shareFinal.addEventListener('click',async()=>{
+            const url = new URL('sesion.html',location.href);url.searchParams.set('fase','final');url.searchParams.set('mc_session',session.id);url.searchParams.set('volver',session.destino);
+            try { if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(url.href); else { const input=document.createElement('textarea');input.value=url.href;input.style.position='fixed';input.style.opacity='0';document.body.append(input);input.select();if(!document.execCommand('copy'))throw new Error('copy failed');input.remove(); } say('Enlace final copiado. La persona debe abrirlo en la misma pestaña del recorrido.','ok'); }
+            catch (_) { say(`Copia este enlace para la persona: ${url.href}`,'error'); }
+          });action.append(shareFinal);
+        }
+      } else {
+        const final = document.createElement('button');
+        final.className = 'btn btn--primary'; final.type = 'button'; final.textContent = 'Abrir cuestionario final';
+        final.addEventListener('click', () => openPhase('final', session));
+        action.append(final);
+      }
     } else {
       const remaining = stages.filter(stage => !stageIsComplete(session, stage)).length;
       const note = document.createElement('p'); note.className = 'mc-note'; note.textContent = `Quedan ${remaining} ${internal ? 'tareas' : 'etapas'} por registrar antes del cierre.`; action.append(note);
@@ -457,8 +510,25 @@
 
   function phaseName(phase) { return ({ inicial: 'inicial', pausa1: 'Pausa 1', pausa2: 'Pausa 2', pausa_c: 'Pausa C', final: 'final' })[phase] || phase; }
 
+  function renderRemoteLink(session) {
+    if (!remoteMode || session?.modo !== 'remoto') return;
+    const welcome = new URL('sesion.html', location.href);
+    welcome.searchParams.set('fase','inicial');
+    welcome.searchParams.set('modo','remoto');
+    welcome.searchParams.set('sid',session.id);
+    welcome.searchParams.set('participante',session.participante);
+    welcome.searchParams.set('camino',session.camino);
+    welcome.searchParams.set('perfil',session.perfil);
+    welcome.searchParams.set('rol',session.rol);
+    welcome.searchParams.set('destino',session.destino);
+    $('#remote-session-url').value = welcome.href;
+    const qr = $('#remote-qr');
+    qr.replaceChildren();
+    if (typeof window.QRCode !== 'function') throw new Error('No se pudo cargar el generador QR local del kit.');
+    new window.QRCode(qr,{text:welcome.href,width:220,height:220,colorDark:'#0B0B0C',colorLight:'#FFFFFF',correctLevel:window.QRCode.CorrectLevel.M});
+  }
+
   async function prepareSession(path, role) {
-    if (!isLocal()) throw new Error('Abre esta página desde localhost.');
     const external = path !== 'C';
     const profileValue = profile.value;
     if (external && !/^P[1-5]$/.test(participant.value)) throw new Error('Elige un participante externo P1–P5.');
@@ -466,7 +536,8 @@
       throw new Error(path === 'B-Meta' ? 'Meta admite restaurante, cafetería, panadería o conveniencia.' : 'LinkedIn admite hotel, oficina o eventos.');
     }
     const previous = M.readActive();
-    const chained = path === 'C' && relay.checked;
+    const chained = !remoteMode && path === 'C' && relay.checked;
+    if (remoteMode && path === 'C' && relay.checked) throw new Error('La prueba encadenada solo funciona con las dos sesiones en el mismo equipo.');
     let sourceId = '';
     let carried = '';
     if (chained) {
@@ -474,10 +545,11 @@
       sourceId = previous.id;
       carried = carryLead();
       if (!carried) return;
-    } else resetPrototypeData();
+    } else if (!remoteMode) resetPrototypeData();
 
     const camino = chained ? 'C-encadenada' : path;
     const roleCode = external ? participant.value : roles[role];
+    const ficha = external ? await fixtureFor(roleCode) : null;
     const id = `MC-${roleCode}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
     const startedAt = String(Date.now());
     const target = makeTarget(path, role, id, startedAt, camino);
@@ -486,9 +558,15 @@
       id, participante: roleCode, camino, rol: external ? 'externo' : role,
       perfil: external ? profileValue : 'interno', destino: target.href,
       inicio: new Date().toISOString(), estado: 'preparada', sesion_origen: sourceId,
-      version_banco: M.VERSION
+      version_banco: M.VERSION, ...(ficha ? { ficha } : {}), ...(remoteMode ? { modo: 'remoto', fases_hechas: [] } : {})
     };
     M.setActive(session);
+    if (remoteMode) {
+      renderRemoteLink(session);
+      showSession(session);
+      say(`Enlace remoto listo para ${path}. La consola no borró el almacenamiento de este equipo.`, 'ok');
+      return;
+    }
     const child = window.open('', '_blank');
     if (!child) {
       showSession(session);
@@ -503,6 +581,15 @@
   }
 
   participant.addEventListener('change', () => { if (assigned[participant.value]) profile.value = assigned[participant.value]; });
+  $('#remote-copy-link').addEventListener('click', async () => {
+    const input = $('#remote-session-url');
+    const status = $('#remote-copy-status');
+    try {
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(input.value);
+      else { input.focus(); input.select(); if (!document.execCommand('copy')) throw new Error('copy failed'); }
+      status.textContent = 'Enlace copiado. Envíalo a la persona por el canal acordado.';
+    } catch (_) { status.textContent = 'No se pudo copiar automáticamente. Selecciona y copia el enlace.'; input.focus(); input.select(); }
+  });
   $('#reset').addEventListener('click', () => {
     try {
       const cleared = resetPrototypeData();
@@ -525,8 +612,24 @@
 
   M.loadBank().then(data => {
     bank = data;
+    if (remoteMode) {
+      $('#remote-mode-note').hidden = false;
+      $('#remote-mode-note').textContent = 'Modo remoto: el moderador y la persona usan equipos distintos. Este equipo no limpia su almacenamiento. La prueba encadenada solo funciona con las dos sesiones en el mismo equipo.';
+      $('#reset').disabled = true;
+      $('#relay').disabled = true;
+      $('#relay').checked = false;
+      $('#relay-help').textContent = 'solo funciona con las dos sesiones en el mismo equipo';
+      $('#storage-note').textContent = 'Datos de ejemplo. Las pantallas del CRM contienen prospectos ficticios con orígenes simulados; no los reportes como leads reales ni como conversiones. En modo remoto, preparar una sesión no borra ni modifica datos ajenos al kit. La prueba encadenada solo funciona con las dos sesiones en el mismo equipo.';
+      $('#mode-foot').textContent = 'Las respuestas se quedan en el teléfono hasta que la persona decida enviarlas al moderador.';
+      document.querySelector('.intro').textContent = 'Selecciona participante, perfil y camino. Prepara una sesión para mostrar el enlace o QR en el teléfono de la persona; aquí registras cada etapa. Este equipo no borra datos.';
+    } else {
+      $('#mode-foot').textContent = 'Esta es una prueba local del prototipo. No se contacta a personas ni se envían anuncios, correos o propuestas.';
+    }
     const current = M.readActive();
-    if (current) showSession(current);
-    if (!isLocal()) say('Modo bloqueado: esta consola solo prepara sesiones y limpia datos desde localhost.', 'error');
+    if (current && (!remoteMode || current.modo === 'remoto')) {
+      showSession(current);
+      if (remoteMode) renderRemoteLink(current);
+    }
+    if (remoteMode) say('Modo remoto listo. Prepara una sesión para generar el enlace y el código QR.', '');
   }).catch(error => say(error.message, 'error'));
 })();

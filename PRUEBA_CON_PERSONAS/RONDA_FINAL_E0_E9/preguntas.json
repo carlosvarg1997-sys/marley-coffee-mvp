@@ -19,6 +19,8 @@
     "p2_pregunta":{"tipo":"open","texto":"¿Qué le preguntarías a Marley Coffee antes de aceptar?","opcional":true},
     "f_relacion":{"tipo":"agreement","texto":"Sabría qué hacer si se acaba el café o falla la máquina."},
     "f_recomendar_paso":{"tipo":"agreement","texto":"El paso para recomendar a otro negocio fue claro."},
+    "umux_1":{"tipo":"agreement","texto":"Las funciones de este sistema cubren lo que necesito."},
+    "umux_2":{"tipo":"agreement","texto":"Este sistema es fácil de usar."},
     "sus_1":{"tipo":"agreement","texto":"Creo que me gustaría usar este sistema con frecuencia."},
     "sus_2":{"tipo":"agreement","texto":"Encontré el sistema innecesariamente complejo."},
     "sus_3":{"tipo":"agreement","texto":"Me pareció fácil usar el sistema."},
@@ -52,7 +54,7 @@
     "pausa1":["p1_motivo","p1_entendi","p1_confianza","p1_duda"],
     "pausa2":["p2_datos","p2_propuesta","p2_falta","p2_pregunta"],
     "pausa_c":["pc_origen","pc_pista","pc_confianza"],
-    "final":{"externos":["f_relacion","f_recomendar_paso","sus_1","sus_2","sus_3","sus_4","sus_5","sus_6","sus_7","sus_8","sus_9","sus_10","f_confianza","f_accion","f_contacto","f_util","f_cambiar"],"internos":["sus_1","sus_2","sus_3","sus_4","sus_5","sus_6","sus_7","sus_8","sus_9","sus_10","fc_prioridad","fc_puntaje","fc_falta","fc_usaria","fc_cambiar"]}
+    "final":{"externos":["umux_1","umux_2","f_confianza","f_relacion","f_recomendar_paso","f_accion","f_contacto","f_util","f_cambiar"],"internos":["umux_1","umux_2","fc_prioridad","fc_puntaje","fc_falta","fc_usaria","fc_cambiar"]}
   },
   "etapas": {
     "externos":[{"id":"E0","titulo":"Búsqueda o entrada"},{"id":"E1","titulo":"Elección"},{"id":"E2","titulo":"Comprensión"},{"id":"E3","titulo":"Primer contacto"},{"id":"E4","titulo":"Diagnóstico y propuesta"},{"id":"E5","titulo":"Seguimiento"},{"id":"E6","titulo":"Alta"},{"id":"E7","titulo":"Reposición"},{"id":"E8","titulo":"Servicio"},{"id":"E9","titulo":"Recomendación"}],

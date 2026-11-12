@@ -92,6 +92,7 @@
       </label>
       <div class="reset-wrap"><button class="btn" type="button" id="reset">Reiniciar datos</button></div>
     </section>
+    <p class="notice" id="remote-mode-note" hidden></p>
 
     <div class="group-grid">
       <section class="path-card" aria-labelledby="path-a">
@@ -114,7 +115,7 @@
         <span class="path-tag">Camino C · equipo interno</span>
         <h2 id="path-c">CRM por rol</h2>
         <p>Abre el ingreso real de demostración del CRM en R00. Desde allí se entra al rol de la sesión.</p>
-        <label class="relay" for="relay"><input type="checkbox" id="relay"><span>Atender el lead de la persona anterior<small>No borra nada: el CRM muestra «En vivo» el lead que dejó la sesión A o B en este navegador, con su origen.</small></span></label>
+        <label class="relay" for="relay"><input type="checkbox" id="relay"><span>Atender el lead de la persona anterior<small id="relay-help">No borra nada: el CRM muestra «En vivo» el lead que dejó la sesión A o B en este navegador, con su origen.</small></span></label>
         <div class="path-actions">
           <button class="btn" type="button" data-route="C" data-role="ventas">C · Ventas</button>
           <button class="btn" type="button" data-route="C" data-role="marketing">C · Marketing</button>
@@ -123,7 +124,7 @@
       </section>
     </div>
 
-    <p class="notice"><strong>Datos de ejemplo.</strong> Las pantallas del CRM contienen prospectos ficticios con orígenes simulados; no los reportes como leads reales ni como conversiones de esta prueba. «Reiniciar datos» limpia los datos del prototipo y conserva las respuestas y sesiones de investigación. <strong>Prueba encadenada:</strong> con «Atender el lead de la persona anterior» marcado, C conserva el lead ficticio que acaba de dejar la persona externa en este navegador.</p>
+    <p class="notice" id="storage-note"><strong>Datos de ejemplo.</strong> Las pantallas del CRM contienen prospectos ficticios con orígenes simulados; no los reportes como leads reales ni como conversiones de esta prueba. «Reiniciar datos» limpia los datos del prototipo y conserva las respuestas y sesiones de investigación. <strong>Prueba encadenada:</strong> con «Atender el lead de la persona anterior» marcado, C conserva el lead ficticio que acaba de dejar la persona externa en este navegador.</p>
     <nav class="materials" aria-label="Material de moderación">
       <a href="Guion_moderador.md">Abrir guion del moderador</a>
       <a href="Fichas_datos_ficticios.html">Fichas externas E3</a>
@@ -145,14 +146,30 @@
         <span class="mc-chip" id="console-status">Preparando</span>
       </div>
       <dl class="mc-console__summary" id="console-summary"></dl>
+      <section class="mc-remote-share" id="remote-share" aria-labelledby="remote-share-title" hidden>
+        <div class="mc-remote-share__copy">
+          <p class="path-tag">Modo remoto · teléfono de la persona</p>
+          <h3 id="remote-share-title">Enlace para la persona</h3>
+          <p class="mc-muted">Compártelo por el canal acordado. Si abre el enlace desde WhatsApp o Instagram, debe seguir en esa misma pestaña.</p>
+          <label class="mc-field" for="remote-session-url">Enlace de sesión</label>
+          <input class="mc-input" id="remote-session-url" type="url" readonly aria-describedby="remote-copy-status">
+          <button class="mc-btn" type="button" id="remote-copy-link">Copiar enlace</button>
+          <p class="mc-note" id="remote-copy-status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="mc-remote-share__qr-wrap">
+          <div class="mc-remote-share__qr" id="remote-qr" role="img" aria-label="Código QR del enlace de sesión"></div>
+          <p class="mc-muted">Escanea el código con el teléfono de la persona.</p>
+        </div>
+      </section>
       <div class="mc-console__actions" id="console-actions"></div>
       <div class="mc-stage-list" id="console-stages"></div>
       <h3 class="mc-console__subhead">Resumen por etapa</h3>
       <div class="mc-table-wrap"><table class="mc-table"><thead><tr><th>Etapa</th><th>Resultado</th><th>Tiempo</th><th>Errores</th><th>SEQ</th><th>Nota</th></tr></thead><tbody id="console-stage-summary"></tbody></table></div>
     </section>
-    <p class="status" id="status" role="status" aria-live="polite">El lanzador solo inicia en localhost; fuera de ese entorno no borra almacenamiento.</p>
-    <p class="foot">Esta es una prueba local del prototipo. No se contacta a personas ni se envían anuncios, correos o propuestas.</p>
+    <p class="status" id="status" role="status" aria-live="polite">Preparando la consola de prueba.</p>
+    <p class="foot" id="mode-foot">Esta es una prueba local del prototipo. No se contacta a personas ni se envían anuncios, correos o propuestas.</p>
   </main>
+  <script src="qr.js"></script>
   <script src="cuestionarios.js"></script>
   <script src="consola.js"></script>
 </body>

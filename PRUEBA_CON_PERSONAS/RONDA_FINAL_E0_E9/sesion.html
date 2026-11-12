@@ -22,7 +22,10 @@
     const root=document.getElementById('screen');
     const params=new URLSearchParams(location.search);
     const phase=params.get('fase')||'inicial';
-    const sessionId=params.get('mc_session')||'';
+    let sessionId=params.get('mc_session')||params.get('sid')||'';
+    const isLocalHost=()=>{const host=location.hostname.replace(/^\[|\]$/g,'').toLowerCase();return ['localhost','127.0.0.1','::1'].includes(host)||host.endsWith('.localhost');};
+    const remoteHost=!isLocalHost();
+    const remoteStart=remoteHost&&phase==='inicial'&&params.get('modo')==='remoto';
     const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
     const getSession=()=>window.MCPrueba.readActive();
     const getResponse=(moment,stage,qid)=>window.MCPrueba.readAnswers().find(row=>row.sesion_id===sessionId&&row.momento===moment&&row.etapa===(stage||'')&&row.pregunta_id===qid);
@@ -38,6 +41,37 @@
       const allowed=exact.includes(path)||landing;
       return allowed?url:null;
     };
+    let remoteReturnUrl=null;
+    const prototypePrefixes=['marleyMVP:','m4test:','mc_landing_','mc_first_touch_','m4:','m4notes','marley-','marleyHorecaDemo:'];
+    const clearPrototypeStorage=()=>{
+      const keys=Object.keys(localStorage).filter(key=>prototypePrefixes.some(prefix=>key.startsWith(prefix)));
+      keys.forEach(key=>localStorage.removeItem(key));
+      sessionStorage.clear();
+    };
+    const remoteSessionFromLink=()=>{
+      const id=params.get('sid')||'',participant=params.get('participante')||'',path=params.get('camino')||'',profile=params.get('perfil')||'',role=params.get('rol')||'';
+      const idMatch=/^MC-(P[1-5]|I[1-3])-[a-z0-9-]{6,48}$/i.exec(id);
+      if(!idMatch||id!==`MC-${participant}-${id.split('-').slice(2).join('-')}`)throw new Error('El código del enlace no coincide con el participante.');
+      const externalPaths=['A','B-Meta','B-LinkedIn','B-Google'];
+      const externalProfiles=['restaurante','hotel','cafeteria','oficina','eventos','panaderia','conveniencia'];
+      if(externalPaths.includes(path)){
+        if(!/^P[1-5]$/.test(participant)||role!=='externo'||!externalProfiles.includes(profile))throw new Error('El perfil externo del enlace no es válido.');
+        if(path==='B-Meta'&&!['restaurante','cafeteria','panaderia','conveniencia'].includes(profile))throw new Error('El perfil no corresponde al camino de Meta.');
+        if(path==='B-LinkedIn'&&!['hotel','oficina','eventos'].includes(profile))throw new Error('El perfil no corresponde al camino de LinkedIn.');
+      }else if(path==='C'){
+        const expected={I1:'ventas',I2:'marketing',I3:'jefatura'}[participant];
+        if(!expected||role!==expected||profile!=='interno')throw new Error('El rol interno del enlace no es válido.');
+      }else throw new Error('El camino del enlace no está permitido.');
+      const destination=routeAllowed(params.get('destino'));
+      if(!destination)throw new Error('El destino debe pertenecer a este sitio y a una ruta permitida.');
+      const existing=getSession();
+      if(existing?.id===id&&existing.modo==='remoto'){
+        if(existing.participante!==participant||existing.camino!==path||existing.rol!==role||existing.perfil!==profile||existing.destino!==destination.href)throw new Error('El código ya está asociado a otra sesión.');
+        return existing;
+      }
+      clearPrototypeStorage();
+      return {id,participante:participant,camino:path,rol:role,perfil:profile,modo:'remoto',estado:'en_recorrido',fases_hechas:[],destino:destination.href,inicio:new Date().toISOString(),sesion_origen:'',version_banco:window.MCPrueba.VERSION};
+    };
     let session=null,bank=null,questions=[],index=0,questionStartedAt=Date.now(),consentStartedAt=Date.now();
     const internal=()=>['ventas','marketing','jefatura'].includes(session?.rol);
     const phaseName=()=>({inicial:'Preguntas iniciales',pausa1:'Pausa 1 · llegada',pausa2:'Pausa 2 · contacto y propuesta',pausa_c:'Pausa C · lectura del origen',final:'Preguntas finales'})[phase]||'Preguntas';
@@ -49,6 +83,7 @@
       root.append(el('p','mc-kicker','Antes de comenzar'));
       root.append(el('h1','mc-h1','Gracias por participar'));
       root.append(el('p','mc-academic-note','Prototipo académico (Duoc UC). No es un sitio oficial de Marley Coffee.'));
+      if(session.modo==='remoto')root.append(el('p','mc-note','Si abriste este enlace desde WhatsApp o Instagram, sigue en esta misma pestaña hasta el final.'));
       root.append(el('p','mc-lead','Esta sesión registra respuestas con un código. No escribas nombres ni datos de contacto en las respuestas abiertas. Puedes omitir una pregunta o retirarte cuando quieras.'));
       const card=el('section','mc-panel');card.setAttribute('aria-labelledby','welcome-title');
       card.append(el('h2','',`Participante ${session.participante||'—'}`));
@@ -61,8 +96,9 @@
       steps.append(el('li','',`Preguntas finales: ${countFor('final')} preguntas.`));
       card.append(steps);
       const consent=el('div','mc-consent');
-      consent.append(el('p','mc-note','Resumen del consentimiento: participación voluntaria, prototipo y acciones simuladas, uso de respuestas por código y sin envío a servicios externos. No ingreses datos reales. Puedes detenerte o no responder.'));
-      const consentLink=el('a','', 'Lee el consentimiento completo');consentLink.href='Consentimiento_informado.md';consentLink.target='_blank';consentLink.rel='noopener';consent.append(consentLink);
+      const consentSummary=session.modo==='remoto'?'Resumen del consentimiento: participación voluntaria, prototipo y acciones simuladas, respuestas guardadas en este teléfono y entrega manual al moderador solo cuando tú la elijas. No ingreses datos reales. Puedes detenerte o no responder.':'Resumen del consentimiento: participación voluntaria, prototipo y acciones simuladas, uso de respuestas por código y sin envío a servicios externos. No ingreses datos reales. Puedes detenerte o no responder.';
+      consent.append(el('p','mc-note',consentSummary));
+      const consentLink=el('a','', 'Lee el consentimiento completo');consentLink.href='Consentimiento_informado.md';consentLink.target=session.modo==='remoto'?'_self':'_blank';if(session.modo!=='remoto')consentLink.rel='noopener';consent.append(consentLink);
       const label=el('label','mc-check');const check=el('input');check.type='checkbox';check.id='consent-accepted';check.required=true;
       label.append(check,el('span','',bank.consentimiento.texto));consent.append(label);
       const err=el('p','mc-note mc-note--error','Para continuar, marca «Acepto participar».');err.id='consent-error';err.hidden=true;consent.append(err);
@@ -156,7 +192,55 @@
       if(blank&&!currentQuestion.opcional){const status=document.getElementById('question-status');status.hidden=false;status.textContent='Elige una respuesta o selecciona «Prefiero no responder».';return false;}
       return true;
     };
+    const renderRemoteTransfer=(finished)=>{
+      root.replaceChildren(el('p','mc-kicker','Sesión cerrada'),el('h1','mc-h1','Gracias por participar'));
+      root.append(el('p','mc-lead','Tus respuestas quedaron guardadas en este teléfono. Elige cómo entregarlas al moderador.'));
+      const data=window.MCPrueba.remotePackage(finished.id);
+      const text=window.MCPrueba.encodeRemoteText(data);
+      const card=el('section','mc-panel mc-transfer');card.setAttribute('aria-labelledby','transfer-title');
+      card.append(el('h2','', 'Enviar mis respuestas al moderador'));
+      const preview=el('dl','mc-transfer__preview');
+      preview.append(el('dt','', 'Código'),el('dd','',finished.participante),el('dt','', 'Respuestas'),el('dd','',String(data.respuestas.length)));card.append(preview);
+      const status=el('p','mc-note');status.id='transfer-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');card.append(status);
+      const actions=el('div','mc-row');
+      const share=el('button','mc-btn mc-btn--primary','Compartir con el moderador');share.type='button';
+      const copy=el('button','mc-btn','Copiar texto');copy.type='button';
+      const download=el('button','mc-btn','Descargar archivo');download.type='button';
+      if(typeof navigator.share==='function'){
+        actions.append(share);
+        share.addEventListener('click',async()=>{try{await navigator.share({title:'Respuestas de la prueba',text});status.textContent='Listo. Elegiste cómo compartir el texto.';}catch(error){status.textContent=error?.name==='AbortError'?'No se compartió. Puedes copiar o descargar el archivo.':'No se pudo abrir la opción de compartir. Puedes copiar o descargar el archivo.';}});
+      }else copy.classList.add('mc-btn--primary');
+      actions.append(copy,download);card.append(actions);root.append(card);
+      copy.addEventListener('click',async()=>{
+        try{
+          if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);
+          else{const field=document.createElement('textarea');field.value=text;field.setAttribute('readonly','');field.style.position='absolute';field.style.left='-9999px';document.body.append(field);field.select();const copied=document.execCommand('copy');field.remove();if(!copied)throw new Error('El navegador no permitió copiar.');}
+          status.textContent='Texto copiado. Pégalo en el canal acordado con el moderador.';
+        }catch(_){status.textContent='No se pudo copiar. Descarga el archivo para entregarlo al moderador.';}
+      });
+      download.addEventListener('click',()=>{window.MCPrueba.download(`respuestas-${finished.participante}.json`,'\uFEFF'+JSON.stringify(data),'application/json;charset=utf-8');status.textContent='Archivo descargado en este teléfono.';});
+    };
     const finishPhase=()=>{
+      if(session?.modo==='remoto'){
+        if(phase==='inicial'){
+          session=window.MCPrueba.updateActive({estado:'inicial_completo',cuestionario_inicial_cerrado_en:new Date().toISOString()});
+          root.replaceChildren(el('p','mc-kicker','Preguntas iniciales listas'),el('h1','mc-h1','Comenzar recorrido'));
+          root.append(el('p','mc-lead','Al comenzar, seguirás en esta misma pestaña. Vuelve a ella después de cada tarjeta.'));
+          const start=el('button','mc-btn mc-btn--primary','Comenzar recorrido');start.type='button';root.append(start);
+          start.addEventListener('click',()=>{const url=routeAllowed(session.destino);if(!url){showError('El destino guardado no pertenece a una ruta permitida de este prototipo.');return;}window.MCPrueba.updateActive({estado:'en_recorrido',recorrido_iniciado_en:new Date().toISOString()});location.assign(url.href);});
+        }else if(['pausa1','pausa2','pausa_c'].includes(phase)){
+          const phases=[...new Set([...(session.fases_hechas||[]),phase])];
+          session=window.MCPrueba.updateActive({estado:'en_recorrido',fases_hechas:phases,ultima_pausa:phase,ultima_pausa_en:new Date().toISOString()});
+          root.replaceChildren(el('p','mc-kicker','Pausa registrada'),el('h1','mc-h1','Listo, vuelve a tu recorrido'),el('p','mc-lead','Tus respuestas quedaron guardadas. Toca el botón cuando estés listo para volver en esta misma pestaña.'));
+          const back=el('button','mc-btn mc-btn--primary','Volver al recorrido');back.type='button';root.append(back);back.addEventListener('click',()=>location.assign(remoteReturnUrl.href));
+        }else if(phase==='final'){
+          const current=getSession();
+          const phases=[...new Set([...(current.fases_hechas||[]),'final'])];
+          const finished=window.MCPrueba.finishSession({...current,fases_hechas:phases});
+          session=finished;renderRemoteTransfer(finished);
+        }
+        return;
+      }
       if(phase==='inicial'){
         session=window.MCPrueba.updateActive({estado:'inicial_completo',cuestionario_inicial_cerrado_en:new Date().toISOString()});
         root.replaceChildren(el('p','mc-kicker','Preguntas iniciales listas'),el('h1','mc-h1','Comenzar recorrido'));
@@ -215,10 +299,27 @@
       if(phase==='inicial')renderWelcome();else renderQuestions();
     };
     window.MCPrueba.loadBank().then(data=>{
-      bank=data;session=getSession();
-      if(!session||session.id!==sessionId){showError('La consola no tiene una sesión activa con este código.');return;}
+      bank=data;
       if(!['inicial','pausa1','pausa2','pausa_c','final'].includes(phase)){showError('La fase solicitada no existe.');return;}
-      if(phase==='inicial'&&session.estado!=='preparada'){showError('La bienvenida solo se abre para una sesión recién preparada.');return;}
+      if(remoteHost){
+        if(phase==='inicial'){
+          if(!remoteStart){showError('Este enlace de sesión no tiene un modo válido. Vuelve a pedir el enlace al moderador.');return;}
+          session=remoteSessionFromLink();
+          sessionId=session.id;
+          window.MCPrueba.setActive(session);
+        }else{
+          session=getSession();
+          if(!session||session.modo!=='remoto'){showError('No encontramos la sesión remota en este teléfono. Vuelve al enlace de inicio que te compartió el moderador.');return;}
+          sessionId=session.id;
+          if(phase==='pausa1'&&session.rol!=='externo'||phase==='pausa2'&&session.rol!=='externo'||phase==='pausa_c'&&!internal()||phase==='final'&&!session.rol){showError('Esta pausa no corresponde al camino de la sesión.');return;}
+          remoteReturnUrl=routeAllowed(params.get('volver'));
+          if(!remoteReturnUrl){showError('El regreso debe ser una página permitida de este mismo sitio. Vuelve al recorrido y abre la tarjeta desde allí.');return;}
+        }
+      }else{
+        session=getSession();
+        if(!session||session.id!==sessionId){showError('La consola no tiene una sesión activa con este código.');return;}
+        if(phase==='inicial'&&session.estado!=='preparada'){showError('La bienvenida solo se abre para una sesión recién preparada.');return;}
+      }
       startPhase();
     }).catch(error=>showError(error.message));
   })();

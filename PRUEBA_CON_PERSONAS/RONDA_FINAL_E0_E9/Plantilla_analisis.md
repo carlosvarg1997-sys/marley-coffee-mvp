@@ -83,3 +83,8 @@ ______________________________________________________________________________
 - El panel SUS muestra el puntaje individual solo si existen los diez ítems válidos. El promedio se calcula entre puntajes completos, no contando omisiones como cero. Las sesiones externas e internas usan el mismo texto SUS.
 
 Los filtros de `respuestas.html` segmentan por camino, rol, momento y participante. Una diferencia entre rutas es descriptiva; con cinco participantes externos y hasta tres internos no permite generalizar ni atribuir causalidad.
+
+
+## Cambio del 11-nov (22:00): cuestionario final más corto
+
+Por pedido de Carlitos, el cuestionario final bajó a **9 preguntas para externos** y **7 para internos**. El SUS (10 afirmaciones) se reemplazó por **UMUX-Lite**, su versión validada de 2 afirmaciones («Las funciones de este sistema cubren lo que necesito» y «Este sistema es fácil de usar», escala 1–5). El puntaje va de 0 a 100: ((respuesta 1 − 1) + (respuesta 2 − 1)) / 8 × 100. Como referencia exploratoria, 70 o más se lee como comparable al umbral SUS de 68. En las exportaciones, la columna `sus_score` guarda este puntaje UMUX-Lite para las sesiones nuevas.
