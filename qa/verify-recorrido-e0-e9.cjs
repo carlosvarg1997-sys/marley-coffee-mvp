@@ -134,7 +134,7 @@ async function journey(browser, base, width) {
     await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C05');
     await page.locator('.m5-propsec').waitFor({ state: 'visible' });
     await page.screenshot({ path: evidencePrefix + '_E4_focus_C05.png', fullPage: true });
-    await page.getByRole('heading', { name: 'Bandeja de seguimiento' }).waitFor();
+    // Haiku P3: la bandeja de seguimiento pasó a C09 (<details> «Mensajes de seguimiento»); no se espera en C05.
     const inbox = await page.evaluate(() => M4.get().emails.filter((e) => e.journeyCode).map((e) => ({ code: e.journeyCode, href: e.href, subject: e.subject })));
     assert.ok(inbox.some((e) => e.code === 'E01'));
     assert.ok(inbox.some((e) => e.code === 'E02'));
@@ -149,7 +149,7 @@ async function journey(browser, base, width) {
     const e01 = inbox.find((item) => item.code === 'E01');
     const e01Title = fs.readFileSync(path.join(root, 'captacion/correos/E01.html'), 'utf8').match(/<title>([^<]+)<\/title>/i)?.[1];
     assert.equal(e01.subject, e01Title?.replace('{{numero}}', imported.lead.id), 'E01 inbox subject matches the final A3 page');
-    assert.equal(await page.locator('[aria-labelledby="m5-cycle-inbox-title"] a').first().getAttribute('href'), e01.href);
+    // Haiku P3: el enlace de E01 se revisa en C09, dentro de «Mensajes de seguimiento».
     assert.equal(await page.evaluate(() => M4.landingFocus('C05')), true);
     assert.equal(await page.locator('.m5-nav, .ux-mobile-nav').count(), 0);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
@@ -165,6 +165,7 @@ async function journey(browser, base, width) {
     await page.getByRole('link', { name: 'Ir a Mi cuenta' }).click();
     await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C09');
     await page.locator('.m5-cycle-head').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('[aria-labelledby="m5-cycle-inbox-title"] a').first().getAttribute('href'), e01.href);
     assert.equal(await page.locator('#m4tMore').count(), 1, 'la barra de moderación debe estar disponible en ?test=sitio');
 
     await page.locator('#m4tMore').click();
@@ -172,7 +173,9 @@ async function journey(browser, base, width) {
     await page.locator('#m4tMore').click();
     await page.getByRole('button', { name: 'Pasó un mes' }).click();
     await page.getByRole('button', { name: 'Confirmar pedido' }).click();
-    await page.getByRole('button', { name: 'Repetir pedido' }).click();
+    // Diseño ronda 3: cada fila del historial tiene «Repetir pedido»; el primero es el pedido más reciente y abre la confirmación.
+    await page.getByRole('button', { name: 'Repetir pedido' }).first().click();
+    await page.getByRole('button', { name: 'Confirmar pedido' }).click();
     const ordersBeforeReload = await page.evaluate(() => ({ orders: M4.get().customerCycle.orders, names: M4.get().events.filter((e) => ['order_confirmed','repeat_order_confirmed'].includes(e.eventName)).map((e) => e.eventName) }));
     assert.deepEqual(ordersBeforeReload.names, ['order_confirmed', 'repeat_order_confirmed']);
     assert.equal(ordersBeforeReload.orders.length, 2);
@@ -181,7 +184,8 @@ async function journey(browser, base, width) {
     assert.deepEqual(await page.evaluate(() => M4.get().customerCycle.orders.length), 2);
     assert.equal(await page.evaluate(() => M4.get().events.filter((e) => e.eventName === 'order_confirmed').length), 1);
     assert.equal(await page.evaluate(() => M4.get().events.filter((e) => e.eventName === 'repeat_order_confirmed').length), 1);
-    assert.ok((await page.locator('#app').innerText()).includes('E08'));
+    // Haiku P3: la línea de tiempo (con E08) está en un <details> cerrado; textContent la lee aunque esté plegada.
+    assert.ok((await page.locator('#app').textContent()).includes('E08'));
 
     const support = page.locator('form[data-cycle-form="support"]');
     await support.locator('[name="type"]').selectOption({ label: 'Producto o formato' });
@@ -197,6 +201,8 @@ async function journey(browser, base, width) {
     assert.equal(await page.evaluate(() => M4.get().events.filter((e) => e.eventName === 'csat_submitted').length), 1);
 
     await page.locator('[data-cycle-nps="10"]').click();
+    // Diseño ronda 3: la recomendación pide confirmar el permiso del otro negocio antes de preparar el enlace.
+    await page.getByLabel('Confirmo que el otro negocio me dio su permiso', { exact: false }).check();
     await page.getByRole('button', { name: 'Preparar recomendación' }).click();
     assert.equal(await page.evaluate(() => M4.get().events.filter((e) => e.eventName === 'referral_sent').length), 0, 'preparar el enlace no registra envío');
     await page.getByRole('button', { name: 'Registrar envío simulado' }).click();

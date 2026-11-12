@@ -102,8 +102,8 @@ SOLUTION_VISUALS = {
  'cafeterias':dict(h1='¿Qué máquina y café necesita una cafetería?',word='CAFETERÍAS',machine='bar.webp',machine_width=398,machine_height=450,photo='cafeteria/poster.webp',mobile='cafeteria/poster_m.webp',alt='Máquinas de café en una cafetería.'),
  'oficinas':dict(h1='¿Cómo elegir café y equipo para una oficina?',word='OFICINAS',machine='oficina.webp',machine_width=444,machine_height=442,photo='oficina/poster.webp',mobile='oficina/poster_m.webp',alt='Máquina y taza de café en un punto de oficina.'),
  'eventos-catering':dict(h1='¿Cómo planificar café para eventos y catering?',word='EVENTOS',machine='cafe_al_paso.webp',machine_width=395,machine_height=532,photo='evento/poster.webp',mobile='evento/poster_m.webp',alt='Entrega de café durante un servicio de evento.'),
- 'conveniencia':dict(h1='¿Cómo ofrecer café en una tienda de conveniencia?',word='CONVENIENCIA',machine='cafe_al_paso.webp',machine_width=395,machine_height=532,photo='conveniencia-autoatencion-concept.jpg',width=1536,height=1024,alt='Zona de autoservicio de café en una tienda de conveniencia.'),
- 'panaderias':dict(h1='¿Qué solución de café necesita una panadería?',word='PANADERÍAS',machine='bar.webp',machine_width=398,machine_height=450,photo='panaderia-barra-concept.jpg',width=1536,height=1024,alt='Barra de café dentro de una panadería.'),
+ 'conveniencia':dict(h1='¿Cómo ofrecer café en una tienda de conveniencia?',word='CONVENIENCIA',machine='cafe_al_paso.webp',machine_width=395,machine_height=532,photo='conveniencia-autoatencion-concept.webp',width=1536,height=1024,alt='Zona de autoservicio de café en una tienda de conveniencia.'),
+ 'panaderias':dict(h1='¿Qué solución de café necesita una panadería?',word='PANADERÍAS',machine='bar.webp',machine_width=398,machine_height=450,photo='panaderia-barra-concept.webp',width=1536,height=1024,alt='Barra de café dentro de una panadería.'),
 }
 INDEX_VISUAL=dict(h1='¿Qué solución de café necesita tu negocio?',word='NEGOCIOS',machine='oficina.webp',machine_width=444,machine_height=442,photo='hero/poster.webp',mobile='hero/poster_m.webp',alt='Máquina y taza de café en servicio.')
 

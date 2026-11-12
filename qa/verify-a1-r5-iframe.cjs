@@ -190,7 +190,7 @@ async function completeJourney(browser,base,pathway,participant) {
   await frame.locator('[data-a="next"]').click();
   await frame.waitForFunction(()=>String(location.hash).startsWith('#C05'),null,{timeout:10000});
   await frame.locator('.m5-propsec').waitFor({state:'visible'});
-  await frame.getByRole('heading',{name:'Bandeja de seguimiento'}).waitFor();
+  // Haiku P3: la bandeja de seguimiento pasó a C09 (<details> «Mensajes de seguimiento»); no se espera en C05.
   await frame.waitForFunction(()=>window.MarleyPrueba?.estado?.().propuestaVisible===true,null,{timeout:8000});
   await wheel(host,frame,`${pathway}/${participant}/C05 propuesta E4-E5 @390`);
   await capture(host,`A1_r5_E5_${pathway.replace(/[^A-Za-z0-9]/g,'_')}_390.png`);
@@ -218,7 +218,9 @@ async function completeJourney(browser,base,pathway,participant) {
   await frame.getByRole('button',{name:'Confirmar pedido'}).waitFor({state:'visible'});
   assert.equal(await frame.evaluate(()=>M4.get().emails.filter(item=>item.journeyCode==='E08').length),1,'one-month storage jump creates E08 once');
   await frame.getByRole('button',{name:'Confirmar pedido'}).click();
-  await frame.getByRole('button',{name:'Repetir pedido'}).click();
+  // Diseño ronda 3: «Repetir pedido» abre la confirmación con cantidades; el primero es el pedido más reciente.
+  await frame.getByRole('button',{name:'Repetir pedido'}).first().click();
+  await frame.getByRole('button',{name:'Confirmar pedido'}).click();
   await wheel(host,frame,`${pathway}/${participant}/C09 reposición E7 @390`);
   const support=frame.locator('form[data-cycle-form="support"]');
   await support.locator('[name="type"]').selectOption({label:'Producto o formato'});
@@ -230,6 +232,8 @@ async function completeJourney(browser,base,pathway,participant) {
   await csat.locator('button[type="submit"]').click();
   await frame.getByText('CSAT: 4/5',{exact:false}).waitFor();
   await frame.locator('[data-cycle-nps="10"]').click();
+  // Diseño ronda 3: confirmar el permiso del otro negocio antes de preparar el enlace.
+  await frame.getByLabel('Confirmo que el otro negocio me dio su permiso',{exact:false}).check();
   await frame.getByRole('button',{name:'Preparar recomendación'}).click();
   const referral=frame.getByRole('link',{name:'Abrir enlace con UTM de referido'});
   const referralURL=new URL(await referral.getAttribute('href'),frame.url());

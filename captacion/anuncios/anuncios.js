@@ -16,7 +16,7 @@
   const section = (title,tag,content,extra='') => `<section class="ad-section ${extra}"><div class="ad-section-head"><h2 class="nm-h2">${esc(title)}</h2>${tag?`<span class="ad-label">${esc(tag)}</span>`:''}</div>${content}</section>`;
   const pair = (label,value) => `<div class="ad-pair"><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`;
   const artSizes={feed:[1080,1350],reel:[1080,1920],square:[1200,1200],wide:[1280,720]};
-  const subjectAssets={bar:'assets/cutouts/bar.png',office:'assets/cutouts/office.png',pods:'assets/cutouts/pods.png',cafe:'assets/cutouts/cafe.png',mug:'assets/cutouts/mug.png'};
+  const subjectAssets={bar:'assets/cutouts/bar.webp',office:'assets/cutouts/office.webp',pods:'assets/cutouts/pods.webp',cafe:'assets/cutouts/cafe.webp',mug:'assets/cutouts/mug.webp'};
   const subjectSpecs={bar:{width:430,optico:0},office:{width:400,optico:0},pods:{width:420,optico:0},cafe:{width:350,optico:0},mug:{width:420,optico:.07}};
   const textLines=(value)=>esc(value).replace(/\\n/g,'<br>');
   const creativeFrame=({template,format='feed',series='CUENTAS CLARAS',number='01/01',exportId='',content='',cta='DESLIZA →',previewOnly=false})=>{

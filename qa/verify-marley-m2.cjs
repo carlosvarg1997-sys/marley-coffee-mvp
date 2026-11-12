@@ -162,6 +162,7 @@ function verifyBlackWhiteHome(html, file) {
   assert.match(html, /Ayúdame a elegir una máquina/i, `${file}: approved primary CTA copy remains`);
   assert.match(html, /Ya sé cuál me interesa/i, `${file}: approved direct-choice CTA copy remains`);
 
+  // 12-nov: sin excepciones. «Por revisar» en el CRM usa gris neutro con barra amarilla; el crema queda fuera de todo (Carlitos).
   const declarations = html.matchAll(/(?<![\w-])background(?:-color)?\s*:\s*[^;}]+/gi);
   for (const declaration of declarations) {
     for (const color of declaration[0].matchAll(/#([0-9a-f]{6})\b/gi)) {
@@ -498,7 +499,7 @@ function verifyBuyerLogic(ctx, file) {
   M.setRole('ventas');
   M.select(M.get().lead.id);
   const action = M.nextActionFor(M.get().answers);
-  assert.ok(ctx.M4C.SCREENS.C05().includes(action), `${file}: proposal shows buyer-specific action`);
+  // Haiku P3: en C05 queda un solo aviso (tope de alto de 2.500 px); la acción por comprador se muestra como «Próximo paso sugerido» en la ficha del CRM (línea siguiente).
   assert.ok(ctx.M4R.SCREENS.R04().includes(action), `${file}: CRM shows the same buyer-specific action`);
 }
 

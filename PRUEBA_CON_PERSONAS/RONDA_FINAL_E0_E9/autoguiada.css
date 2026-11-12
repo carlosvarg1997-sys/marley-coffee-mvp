@@ -175,3 +175,38 @@ h1,h2,h3 { overflow-wrap:anywhere; }
   body.autoguiada-body { background:#fff; color:#171717; }
   .ag-btn { color:#171717; }
 }
+
+/* ---------- Pantalla completa y preguntas al terminar (12-nov, Carlitos) ---------- */
+/* Mientras se hace la tarea: el sitio ocupa todo y abajo queda una franja delgada con la etapa, «Ver tarea» y «Terminé». */
+.ag-journey { grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr) auto; }
+.ag-taskbar { flex-direction:row; align-items:center; flex-wrap:nowrap; gap:12px; max-height:none; padding:8px 16px max(8px,env(safe-area-inset-bottom)); overflow:visible; border-left:0; border-top:1px solid #48484C; }
+.ag-strip-info { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
+.ag-strip-kicker { color:#F3C900; font:500 .74rem/1.2 "Pressura",ui-monospace,monospace; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ag-strip-title { margin:0; font:500 1.05rem/1.15 "Festivo",Impact,sans-serif; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ag-strip-actions { flex:0 0 auto; display:flex; gap:8px; }
+.ag-strip-actions .ag-btn { min-height:44px; padding:8px 16px; white-space:nowrap; }
+/* Al empezar (consigna), al terminar (preguntas) y en los saltos de tiempo: una tarjeta encima del sitio. */
+.ag-taskbar.is-modal { position:fixed; inset:0; z-index:40; display:grid; place-items:center; padding:16px; overflow:auto; border:0; background:rgba(8,8,9,.62); }
+.ag-modal { width:min(560px,100%); max-height:calc(100dvh - 32px); overflow:auto; display:grid; gap:14px; align-content:start; padding:22px; border:1px solid #48484C; border-radius:14px; background:var(--ag-bg); color:var(--ag-text); box-shadow:0 24px 60px rgba(0,0,0,.45); }
+.ag-modal .ag-taskbar-title { font-size:clamp(1.5rem,3vw,2rem); }
+.ag-modal-kicker { margin:0; color:#F3C900; font:500 .8rem/1.2 "Pressura",ui-monospace,monospace; letter-spacing:.1em; text-transform:uppercase; }
+.ag-modal-how { margin:0; color:var(--ag-muted); font-size:.95rem; }
+.ag-modal-actions { display:grid; gap:8px; }
+.ag-modal-actions .ag-btn { width:100%; min-height:48px; }
+.ag-agree-grid { display:grid; grid-template-columns:repeat(5,minmax(44px,1fr)); gap:6px; padding:2px; }
+.ag-agree-grid label { position:relative; min-height:44px; display:grid; place-items:center; border:1px solid #777; border-radius:5px; font:500 1rem/1 "Pressura",system-ui,sans-serif; cursor:pointer; }
+.ag-agree-grid input { position:absolute; opacity:0; }
+.ag-agree-grid label:has(input:checked),.ag-seq-grid label:has(input:checked) { border-color:#F3C900; background:#242427; }
+.ag-agree-grid label:has(input:focus-visible),.ag-seq-grid label:has(input:focus-visible) { outline:2px solid #F3C900; outline-offset:2px; }
+.ag-modal.ag-question-inbar .ag-question-title { font-size:clamp(1.35rem,2.4vw,1.8rem); }
+.ag-modal .ag-status:empty { display:none; }
+.ag-modal .ag-status { margin:0; }
+.ag-modal .ag-textarea { min-height:64px; }
+@media (max-width:900px) {
+  .ag-taskbar { gap:8px; padding:6px 10px max(6px,env(safe-area-inset-bottom)); }
+  .ag-strip-title { font-size:.92rem; }
+  .ag-strip-actions { gap:6px; }
+  .ag-strip-actions .ag-btn { padding:8px 11px; font-size:.86rem; }
+  .ag-taskbar.is-modal { place-items:end center; padding:0; }
+  .ag-modal { width:100%; max-height:94svh; gap:12px; border-radius:16px 16px 0 0; padding:18px 16px max(18px,env(safe-area-inset-bottom)); }
+}

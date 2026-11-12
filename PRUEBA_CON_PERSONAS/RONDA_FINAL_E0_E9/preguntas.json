@@ -1,68 +1,619 @@
 {
   "version": "2026-11-11-v1",
-  "meta": {"locale":"es-CL","scale_agreement":["Muy en desacuerdo","En desacuerdo","Ni de acuerdo ni en desacuerdo","De acuerdo","Muy de acuerdo"],"scale_frequency":["Nunca","Pocas veces","A veces","Seguido","Siempre"],"scale_seq":["Muy difícil","Difícil","Algo difícil","Ni fácil ni difícil","Algo fácil","Fácil","Muy fácil"],"skip_label":"Prefiero no responder","open_max_chars":500,"open_notice":"No escribas nombres ni datos de contacto."},
-  "consentimiento": {"id":"consentimiento","tipo":"consentimiento","texto":"Acepto participar","obligatoria":true},
+  "meta": {
+    "locale": "es-CL",
+    "scale_agreement": [
+      "Muy en desacuerdo",
+      "En desacuerdo",
+      "Ni de acuerdo ni en desacuerdo",
+      "De acuerdo",
+      "Muy de acuerdo"
+    ],
+    "scale_frequency": [
+      "Nunca",
+      "Pocas veces",
+      "A veces",
+      "Seguido",
+      "Siempre"
+    ],
+    "scale_seq": [
+      "Muy difícil",
+      "Difícil",
+      "Algo difícil",
+      "Ni fácil ni difícil",
+      "Algo fácil",
+      "Fácil",
+      "Muy fácil"
+    ],
+    "skip_label": "Prefiero no responder",
+    "open_max_chars": 500,
+    "open_notice": "No escribas nombres ni datos de contacto."
+  },
+  "consentimiento": {
+    "id": "consentimiento",
+    "tipo": "consentimiento",
+    "texto": "Acepto participar",
+    "obligatoria": true
+  },
   "preguntas": {
-    "i_rol":{"tipo":"single","texto":"¿Cuál describe mejor lo que haces hoy?","opciones":["Compras o abastecimiento","Dueña/o o socia/o de un negocio","Administración","Cocina o alimentos y bebidas","Eventos o banquetería",{"texto":"Otra (¿cuál?)","otra":true}]},
-    "i_decision":{"tipo":"single","texto":"¿Participas en la compra de insumos o servicios para un negocio?","opciones":["Sí, decido","Sí, comparo o recomiendo","No, pero conozco cómo se hace","No"]},
-    "i_canales":{"tipo":"multi","texto":"La última vez que buscaste un proveedor para un negocio, ¿por dónde partiste? Marca todas las que correspondan.","opciones":["Google u otro buscador","Instagram o Facebook","LinkedIn","Un asistente de IA (ChatGPT u otro)","Recomendación de otro negocio","Un vendedor me contactó","Ferias o eventos",{"texto":"Nunca he buscado uno","excluyente":true},{"texto":"Otra (¿cuál?)","otra":true}]},
-    "i_celular":{"tipo":"frequency","texto":"¿Qué tan seguido usas el celular para buscar proveedores o servicios para el trabajo?","opciones":["Nunca","Pocas veces","A veces","Seguido","Siempre"]},
-    "i_maquina":{"tipo":"single","texto":"¿El negocio donde trabajas tiene hoy una máquina de café?","opciones":["Sí, propia","Sí, del proveedor (préstamo o comodato)","No","No sé","No aplica"]},
-    "i_criterio":{"tipo":"open","texto":"La última vez que elegiste o cambiaste un proveedor, ¿qué te hizo decidir?"},
-    "p1_motivo":{"tipo":"single","texto":"¿Qué te hizo seguir desde el resultado o el anuncio hasta esta página?","opciones":["Respondía lo que buscaba","Las condiciones o el precio","La máquina o el equipo","El café","La marca","Las imágenes o el video","Seguí porque era parte de la prueba",{"texto":"Otra (¿cuál?)","otra":true}]},
-    "p1_entendi":{"tipo":"agreement","texto":"Entendí qué ofrece Marley Coffee a un negocio como el mío."},
-    "p1_confianza":{"tipo":"agreement","texto":"Lo que vi me dio confianza para seguir."},
-    "p1_duda":{"tipo":"open","texto":"¿Algo te hizo dudar? Cuéntalo con tus palabras.","opcional":true},
-    "p2_datos":{"tipo":"agreement","texto":"Me pareció razonable que me pidieran esos datos en ese momento."},
-    "p2_propuesta":{"tipo":"yes_no_partly","texto":"¿Entendiste qué incluye la propuesta?","opciones":["Sí","En parte","No"]},
-    "p2_falta":{"tipo":"multi","texto":"¿Qué te faltaría para decidir?","opciones":["El precio final","Las condiciones de la máquina","Los plazos de entrega","Probar el café","Hablar con una persona","Opiniones de otros negocios",{"texto":"Nada, decidiría con esto","excluyente":true},{"texto":"Otra (¿cuál?)","otra":true}]},
-    "p2_pregunta":{"tipo":"open","texto":"¿Qué le preguntarías a Marley Coffee antes de aceptar?","opcional":true},
-    "f_relacion":{"tipo":"agreement","texto":"Sabría qué hacer si se acaba el café o falla la máquina."},
-    "f_recomendar_paso":{"tipo":"agreement","texto":"El paso para recomendar a otro negocio fue claro."},
-    "umux_1":{"tipo":"agreement","texto":"Las funciones de este sistema cubren lo que necesito."},
-    "umux_2":{"tipo":"agreement","texto":"Este sistema es fácil de usar."},
-    "sus_1":{"tipo":"agreement","texto":"Creo que me gustaría usar este sistema con frecuencia."},
-    "sus_2":{"tipo":"agreement","texto":"Encontré el sistema innecesariamente complejo."},
-    "sus_3":{"tipo":"agreement","texto":"Me pareció fácil usar el sistema."},
-    "sus_4":{"tipo":"agreement","texto":"Creo que necesitaría ayuda de una persona técnica para usar este sistema."},
-    "sus_5":{"tipo":"agreement","texto":"Encontré que las distintas funciones del sistema estaban bien integradas."},
-    "sus_6":{"tipo":"agreement","texto":"Me pareció que había demasiada inconsistencia en el sistema."},
-    "sus_7":{"tipo":"agreement","texto":"Imagino que la mayoría aprendería a usar el sistema muy rápido."},
-    "sus_8":{"tipo":"agreement","texto":"Encontré el sistema muy incómodo de usar."},
-    "sus_9":{"tipo":"agreement","texto":"Me sentí muy seguro/a al usar el sistema."},
-    "sus_10":{"tipo":"agreement","texto":"Necesité aprender muchas cosas antes de poder comenzar a usar este sistema."},
-    "f_confianza":{"tipo":"agreement","texto":"Confiaría en este proveedor para un negocio como el mío."},
-    "f_accion":{"tipo":"single","texto":"Si esto fuera real, ¿qué harías ahora?","opciones":["Pediría la propuesta","Pediría que me llamen","Lo compararía con otras opciones","Lo dejaría para más adelante","No seguiría"]},
-    "f_contacto":{"tipo":"single","texto":"¿Cómo preferirías que te contacten?","opciones":["Correo","WhatsApp","Llamada","Visita","Prefiero escribir yo"]},
-    "f_util":{"tipo":"open","texto":"¿Qué fue lo más útil del recorrido?"},
-    "f_cambiar":{"tipo":"open","texto":"¿Qué cambiarías o qué te confundió?"},
-    "ci_area":{"tipo":"single","texto":"¿En qué área trabajas?","opciones":["Ventas","Marketing","Jefatura o gerencia","Atención a clientes",{"texto":"Otra (¿cuál?)","otra":true}]},
-    "ci_crm":{"tipo":"single","texto":"¿Con qué frecuencia usas un CRM?","opciones":["Todos los días","Algunas veces por semana","Rara vez","Nunca"]},
-    "ci_herramientas":{"tipo":"multi","texto":"¿Con qué haces hoy el seguimiento de clientes?","opciones":["Planilla","Un CRM","WhatsApp","Correo","Cuaderno o notas",{"texto":"Otra (¿cuál?)","otra":true}]},
-    "ci_tiempo":{"tipo":"open","texto":"¿Qué es lo que más tiempo te quita al hacer seguimiento a un cliente?"},
-    "pc_origen":{"tipo":"yes_no_partly","texto":"¿Pudiste reconocer de dónde llegó el contacto?","opciones":["Sí","No","No estoy seguro"]},
-    "pc_pista":{"tipo":"single","texto":"¿Qué te permitió reconocerlo?","opciones":["La columna de origen","El historial de actividad","La campaña o el anuncio","No lo reconocí",{"texto":"Otra (¿cuál?)","otra":true}]},
-    "pc_confianza":{"tipo":"agreement","texto":"Confío en ese dato para decidir a quién atender primero."},
-    "fc_prioridad":{"tipo":"agreement","texto":"Con estas pantallas sabría a quién atender primero."},
-    "fc_puntaje":{"tipo":"agreement","texto":"El puntaje de cada contacto me ayuda a priorizar."},
-    "fc_falta":{"tipo":"multi","texto":"¿Qué información te faltó?","opciones":["Historial de compras","Datos de contacto","Origen más detallado","Próximo paso sugerido","Permisos del cliente",{"texto":"Nada","excluyente":true},{"texto":"Otra (¿cuál?)","otra":true}]},
-    "fc_usaria":{"tipo":"single","texto":"¿Usarías algo así en tu trabajo?","opciones":["Sí, tal como está","Sí, con cambios","No estoy seguro","No"]},
-    "fc_cambiar":{"tipo":"open","texto":"¿Qué agregarías o quitarías?"}
-  },
-  "fases": {
-    "inicial":{"externos":["i_rol","i_decision","i_canales","i_celular","i_maquina","i_criterio"],"internos":["ci_area","ci_crm","ci_herramientas","ci_tiempo"]},
-    "pausa1":["p1_motivo","p1_entendi","p1_confianza","p1_duda"],
-    "pausa2":["p2_datos","p2_propuesta","p2_falta","p2_pregunta"],
-    "pausa_c":["pc_origen","pc_pista","pc_confianza"],
-    "final":{"externos":["umux_1","umux_2","f_confianza","f_relacion","f_recomendar_paso","f_accion","f_contacto","f_util","f_cambiar"],"internos":["umux_1","umux_2","fc_prioridad","fc_puntaje","fc_falta","fc_usaria","fc_cambiar"]}
-  },
-  "etapas": {
-    "externos":[{"id":"E0","titulo":"Búsqueda o entrada"},{"id":"E1","titulo":"Elección"},{"id":"E2","titulo":"Comprensión"},{"id":"E3","titulo":"Primer contacto"},{"id":"E4","titulo":"Diagnóstico y propuesta"},{"id":"E5","titulo":"Seguimiento"},{"id":"E6","titulo":"Alta"},{"id":"E7","titulo":"Reposición"},{"id":"E8","titulo":"Servicio"},{"id":"E9","titulo":"Recomendación"}],
-    "internos":{
-      "ventas":[{"id":"C-V1","titulo":"Origen orgánico","texto":"Encuentra un prospecto que haya llegado desde una búsqueda y explica qué información te permite reconocer su origen."},{"id":"C-V2","titulo":"Aceptación humana","texto":"Revisa un contacto que Marketing haya considerado calificado. Decide si ya lo tomarías como oportunidad de ventas; si la pantalla te permite registrar esa decisión, hazlo y cuéntame qué revisaste."},{"id":"C-V3","titulo":"Propuesta simulada","texto":"Prepara una propuesta de prueba para un negocio del listado. Deja identificados los datos que confirmarías antes de compartirla; no la envíes fuera del prototipo."},{"id":"C-V4","titulo":"Reposición","texto":"Busca una cuenta que pueda necesitar una reposición. Revisa qué confirmarías antes de dejar la gestión preparada."},{"id":"C-V5","titulo":"Cuenta en riesgo","texto":"Revisa una cuenta que haya reducido o pausado sus compras. Explica qué averiguarías antes de proponer un contacto."},{"id":"C-V6","titulo":"Referido","texto":"Revisa una recomendación de otro negocio. Decide qué dato y permiso confirmarías antes de continuar."}],
-      "marketing":[{"id":"C-M1","titulo":"Lead y origen","texto":"Encuentra un prospecto recién incorporado y explica cómo reconocerías de dónde llegó."},{"id":"C-M2","titulo":"Contenido y campaña","texto":"Revisa una pieza y un registro de campaña de ejemplo. Explica si puedes relacionar el contenido con el origen del contacto."},{"id":"C-M3","titulo":"Calificación MQL","texto":"Revisa un contacto y decide si hay información suficiente para considerarlo calificado por Marketing. Si la pantalla ofrece esa decisión, regístrala."},{"id":"C-M4","titulo":"Permisos y recuperación","texto":"Considera que un contacto pidió respuesta, pero no autorizó contenido promocional. Decide qué seguimiento sería apropiado y qué dejarías detenido."}],
-      "jefatura":[{"id":"C-J1","titulo":"Panel general","texto":"Revisa la vista general. Cuéntame qué decisión tomarías con la información disponible y qué dato te falta."},{"id":"C-J2","titulo":"Propuesta y aprobación","texto":"Revisa una propuesta pendiente. Decide qué se puede aprobar o qué información pedirías antes de hacerlo."},{"id":"C-J3","titulo":"Aprobación de referido","texto":"Revisa una recomendación de cliente. Explica qué debería revisar una persona antes de aceptarla."},{"id":"C-J4","titulo":"Recuperación y permisos","texto":"Revisa los seguimientos que el equipo dejó preparados. Decide qué acciones necesitan aprobación humana y cuáles deben respetar un permiso pendiente."}]
+    "i_rol": {
+      "tipo": "single",
+      "texto": "¿Cuál describe mejor lo que haces hoy?",
+      "opciones": [
+        "Compras o abastecimiento",
+        "Dueña/o o socia/o de un negocio",
+        "Administración",
+        "Cocina o alimentos y bebidas",
+        "Eventos o banquetería",
+        {
+          "texto": "Otra (¿cuál?)",
+          "otra": true
+        }
+      ]
+    },
+    "i_decision": {
+      "tipo": "single",
+      "texto": "¿Participas en la compra de insumos o servicios para un negocio?",
+      "opciones": [
+        "Sí, decido",
+        "Sí, comparo o recomiendo",
+        "No, pero conozco cómo se hace",
+        "No"
+      ]
+    },
+    "i_canales": {
+      "tipo": "multi",
+      "texto": "La última vez que buscaste un proveedor para un negocio, ¿por dónde partiste? Marca todas las que correspondan.",
+      "opciones": [
+        "Google u otro buscador",
+        "Instagram o Facebook",
+        "LinkedIn",
+        "Un asistente de IA (ChatGPT u otro)",
+        "Recomendación de otro negocio",
+        "Un vendedor me contactó",
+        "Ferias o eventos",
+        {
+          "texto": "Nunca he buscado uno",
+          "excluyente": true
+        },
+        {
+          "texto": "Otra (¿cuál?)",
+          "otra": true
+        }
+      ]
+    },
+    "i_celular": {
+      "tipo": "frequency",
+      "texto": "¿Qué tan seguido usas el celular para buscar proveedores o servicios para el trabajo?",
+      "opciones": [
+        "Nunca",
+        "Pocas veces",
+        "A veces",
+        "Seguido",
+        "Siempre"
+      ]
+    },
+    "i_maquina": {
+      "tipo": "single",
+      "texto": "¿El negocio donde trabajas tiene hoy una máquina de café?",
+      "opciones": [
+        "Sí, propia",
+        "Sí, del proveedor (préstamo o comodato)",
+        "No",
+        "No sé",
+        "No aplica"
+      ]
+    },
+    "i_criterio": {
+      "tipo": "open",
+      "texto": "La última vez que elegiste o cambiaste un proveedor, ¿qué te hizo decidir?"
+    },
+    "p1_motivo": {
+      "tipo": "single",
+      "texto": "¿Qué te hizo seguir desde el resultado o el anuncio hasta esta página?",
+      "opciones": [
+        "Respondía lo que buscaba",
+        "Las condiciones o el precio",
+        "La máquina o el equipo",
+        "El café",
+        "La marca",
+        "Las imágenes o el video",
+        "Seguí porque era parte de la prueba",
+        {
+          "texto": "Otra (¿cuál?)",
+          "otra": true
+        }
+      ]
+    },
+    "p1_entendi": {
+      "tipo": "agreement",
+      "texto": "Entendí qué ofrece Marley Coffee a un negocio como el mío."
+    },
+    "p1_confianza": {
+      "tipo": "agreement",
+      "texto": "Lo que vi me dio confianza para seguir."
+    },
+    "p1_duda": {
+      "tipo": "open",
+      "texto": "¿Algo te hizo dudar? Cuéntalo con tus palabras.",
+      "opcional": true
+    },
+    "p2_datos": {
+      "tipo": "agreement",
+      "texto": "Me pareció razonable que me pidieran esos datos en ese momento."
+    },
+    "p2_propuesta": {
+      "tipo": "yes_no_partly",
+      "texto": "¿Entendiste qué incluye la propuesta?",
+      "opciones": [
+        "Sí",
+        "En parte",
+        "No"
+      ]
+    },
+    "p2_falta": {
+      "tipo": "multi",
+      "texto": "¿Qué te faltaría para decidir?",
+      "opciones": [
+        "El precio final",
+        "Las condiciones de la máquina",
+        "Los plazos de entrega",
+        "Probar el café",
+        "Hablar con una persona",
+        "Opiniones de otros negocios",
+        {
+          "texto": "Nada, decidiría con esto",
+          "excluyente": true
+        },
+        {
+          "texto": "Otra (¿cuál?)",
+          "otra": true
+        }
+      ]
+    },
+    "p2_pregunta": {
+      "tipo": "open",
+      "texto": "¿Qué le preguntarías a Marley Coffee antes de aceptar?",
+      "opcional": true
+    },
+    "f_relacion": {
+      "tipo": "agreement",
+      "texto": "Sabría qué hacer si se acaba el café o falla la máquina."
+    },
+    "f_recomendar_paso": {
+      "tipo": "agreement",
+      "texto": "El paso para recomendar a otro negocio fue claro."
+    },
+    "umux_1": {
+      "tipo": "agreement",
+      "texto": "Las funciones de este sistema cubren lo que necesito."
+    },
+    "umux_2": {
+      "tipo": "agreement",
+      "texto": "Este sistema es fácil de usar."
+    },
+    "sus_1": {
+      "tipo": "agreement",
+      "texto": "Creo que me gustaría usar este sistema con frecuencia."
+    },
+    "sus_2": {
+      "tipo": "agreement",
+      "texto": "Encontré el sistema innecesariamente complejo."
+    },
+    "sus_3": {
+      "tipo": "agreement",
+      "texto": "Me pareció fácil usar el sistema."
+    },
+    "sus_4": {
+      "tipo": "agreement",
+      "texto": "Creo que necesitaría ayuda de una persona técnica para usar este sistema."
+    },
+    "sus_5": {
+      "tipo": "agreement",
+      "texto": "Encontré que las distintas funciones del sistema estaban bien integradas."
+    },
+    "sus_6": {
+      "tipo": "agreement",
+      "texto": "Me pareció que había demasiada inconsistencia en el sistema."
+    },
+    "sus_7": {
+      "tipo": "agreement",
+      "texto": "Imagino que la mayoría aprendería a usar el sistema muy rápido."
+    },
+    "sus_8": {
+      "tipo": "agreement",
+      "texto": "Encontré el sistema muy incómodo de usar."
+    },
+    "sus_9": {
+      "tipo": "agreement",
+      "texto": "Me sentí muy seguro/a al usar el sistema."
+    },
+    "sus_10": {
+      "tipo": "agreement",
+      "texto": "Necesité aprender muchas cosas antes de poder comenzar a usar este sistema."
+    },
+    "f_confianza": {
+      "tipo": "agreement",
+      "texto": "Confiaría en este proveedor para un negocio como el mío."
+    },
+    "f_accion": {
+      "tipo": "single",
+      "texto": "Si esto fuera real, ¿qué harías ahora?",
+      "opciones": [
+        "Pediría la propuesta",
+        "Pediría que me llamen",
+        "Lo compararía con otras opciones",
+        "Lo dejaría para más adelante",
+        "No seguiría"
+      ]
+    },
+    "f_contacto": {
+      "tipo": "single",
+      "texto": "¿Cómo preferirías que te contacten?",
+      "opciones": [
+        "Correo",
+        "WhatsApp",
+        "Llamada",
+        "Visita",
+        "Prefiero escribir yo"
+      ]
+    },
+    "f_util": {
+      "tipo": "open",
+      "texto": "¿Qué fue lo más útil del recorrido?"
+    },
+    "f_cambiar": {
+      "tipo": "open",
+      "texto": "¿Qué cambiarías o qué te confundió?"
+    },
+    "ci_area": {
+      "tipo": "single",
+      "texto": "¿En qué área trabajas?",
+      "opciones": [
+        "Ventas",
+        "Marketing",
+        "Jefatura o gerencia",
+        "Atención a clientes",
+        {
+          "texto": "Otra (¿cuál?)",
+          "otra": true
+        }
+      ]
+    },
+    "ci_crm": {
+      "tipo": "single",
+      "texto": "¿Con qué frecuencia usas un CRM?",
+      "opciones": [
+        "Todos los días",
+        "Algunas veces por semana",
+        "Rara vez",
+        "Nunca"
+      ]
+    },
+    "ci_herramientas": {
+      "tipo": "multi",
+      "texto": "¿Con qué haces hoy el seguimiento de clientes?",
+      "opciones": [
+        "Planilla",
+        "Un CRM",
+        "WhatsApp",
+        "Correo",
+        "Cuaderno o notas",
+        {
+          "texto": "Otra (¿cuál?)",
+          "otra": true
+        }
+      ]
+    },
+    "ci_tiempo": {
+      "tipo": "open",
+      "texto": "¿Qué es lo que más tiempo te quita al hacer seguimiento a un cliente?"
+    },
+    "pc_origen": {
+      "tipo": "yes_no_partly",
+      "texto": "¿Pudiste reconocer de dónde llegó el contacto?",
+      "opciones": [
+        "Sí",
+        "No",
+        "No estoy seguro"
+      ]
+    },
+    "pc_pista": {
+      "tipo": "single",
+      "texto": "¿Qué te permitió reconocerlo?",
+      "opciones": [
+        "La columna de origen",
+        "El historial de actividad",
+        "La campaña o el anuncio",
+        "No lo reconocí",
+        {
+          "texto": "Otra (¿cuál?)",
+          "otra": true
+        }
+      ]
+    },
+    "pc_confianza": {
+      "tipo": "agreement",
+      "texto": "Confío en ese dato para decidir a quién atender primero."
+    },
+    "fc_prioridad": {
+      "tipo": "agreement",
+      "texto": "Con estas pantallas sabría a quién atender primero."
+    },
+    "fc_puntaje": {
+      "tipo": "agreement",
+      "texto": "El puntaje de cada contacto me ayuda a priorizar."
+    },
+    "fc_falta": {
+      "tipo": "multi",
+      "texto": "¿Qué información te faltó?",
+      "opciones": [
+        "Historial de compras",
+        "Datos de contacto",
+        "Origen más detallado",
+        "Próximo paso sugerido",
+        "Permisos del cliente",
+        {
+          "texto": "Nada",
+          "excluyente": true
+        },
+        {
+          "texto": "Otra (¿cuál?)",
+          "otra": true
+        }
+      ]
+    },
+    "fc_usaria": {
+      "tipo": "single",
+      "texto": "¿Usarías algo así en tu trabajo?",
+      "opciones": [
+        "Sí, tal como está",
+        "Sí, con cambios",
+        "No estoy seguro",
+        "No"
+      ]
+    },
+    "fc_cambiar": {
+      "tipo": "open",
+      "texto": "¿Qué agregarías o quitarías?"
+    },
+    "e_aceptar_claro": {
+      "tipo": "agreement",
+      "texto": "Supe qué pasa después de confirmar."
     }
   },
-  "registro_etapa":{"pregunta_id":"registro_etapa","tipo":"etapa","respuesta_json":["empezo_en","termino_en","resultado","seq","errores","nota"]}
+  "fases": {
+    "inicial": {
+      "externos": [
+        "i_rol",
+        "i_decision",
+        "i_canales",
+        "i_celular",
+        "i_maquina",
+        "i_criterio"
+      ],
+      "internos": [
+        "ci_area",
+        "ci_crm",
+        "ci_herramientas",
+        "ci_tiempo"
+      ]
+    },
+    "pausa1": [
+      "p1_motivo",
+      "p1_entendi",
+      "p1_confianza",
+      "p1_duda"
+    ],
+    "pausa2": [
+      "p2_datos",
+      "p2_propuesta",
+      "p2_falta",
+      "p2_pregunta"
+    ],
+    "pausa_c": [
+      "pc_origen",
+      "pc_pista",
+      "pc_confianza"
+    ],
+    "final": {
+      "externos": [
+        "umux_1",
+        "umux_2",
+        "f_confianza",
+        "f_relacion",
+        "f_recomendar_paso",
+        "f_accion",
+        "f_contacto",
+        "f_util",
+        "f_cambiar"
+      ],
+      "internos": [
+        "umux_1",
+        "umux_2",
+        "fc_prioridad",
+        "fc_puntaje",
+        "fc_falta",
+        "fc_usaria",
+        "fc_cambiar"
+      ]
+    }
+  },
+  "etapas": {
+    "externos": [
+      {
+        "id": "E0",
+        "titulo": "Búsqueda o entrada"
+      },
+      {
+        "id": "E1",
+        "titulo": "Elección"
+      },
+      {
+        "id": "E2",
+        "titulo": "Comprensión"
+      },
+      {
+        "id": "E3",
+        "titulo": "Primer contacto"
+      },
+      {
+        "id": "E4",
+        "titulo": "Diagnóstico y propuesta"
+      },
+      {
+        "id": "E5",
+        "titulo": "Seguimiento"
+      },
+      {
+        "id": "E6",
+        "titulo": "Alta"
+      },
+      {
+        "id": "E7",
+        "titulo": "Reposición"
+      },
+      {
+        "id": "E8",
+        "titulo": "Servicio"
+      },
+      {
+        "id": "E9",
+        "titulo": "Recomendación"
+      }
+    ],
+    "internos": {
+      "ventas": [
+        {
+          "id": "C-V1",
+          "titulo": "Origen orgánico",
+          "texto": "Encuentra un prospecto que haya llegado desde una búsqueda y explica qué información te permite reconocer su origen."
+        },
+        {
+          "id": "C-V2",
+          "titulo": "Aceptación humana",
+          "texto": "Revisa un contacto que Marketing haya considerado calificado. Decide si ya lo tomarías como oportunidad de ventas; si la pantalla te permite registrar esa decisión, hazlo y cuéntame qué revisaste."
+        },
+        {
+          "id": "C-V3",
+          "titulo": "Propuesta simulada",
+          "texto": "Prepara una propuesta de prueba para un negocio del listado. Deja identificados los datos que confirmarías antes de compartirla; no la envíes fuera del prototipo."
+        },
+        {
+          "id": "C-V4",
+          "titulo": "Reposición",
+          "texto": "Busca una cuenta que pueda necesitar una reposición. Revisa qué confirmarías antes de dejar la gestión preparada."
+        },
+        {
+          "id": "C-V5",
+          "titulo": "Cuenta en riesgo",
+          "texto": "Revisa una cuenta que haya reducido o pausado sus compras. Explica qué averiguarías antes de proponer un contacto."
+        },
+        {
+          "id": "C-V6",
+          "titulo": "Referido",
+          "texto": "Revisa una recomendación de otro negocio. Decide qué dato y permiso confirmarías antes de continuar."
+        }
+      ],
+      "marketing": [
+        {
+          "id": "C-M1",
+          "titulo": "Lead y origen",
+          "texto": "Encuentra un prospecto recién incorporado y explica cómo reconocerías de dónde llegó."
+        },
+        {
+          "id": "C-M2",
+          "titulo": "Contenido y campaña",
+          "texto": "Revisa una pieza y un registro de campaña de ejemplo. Explica si puedes relacionar el contenido con el origen del contacto."
+        },
+        {
+          "id": "C-M3",
+          "titulo": "Calificación MQL",
+          "texto": "Revisa un contacto y decide si hay información suficiente para considerarlo calificado por Marketing. Si la pantalla ofrece esa decisión, regístrala."
+        },
+        {
+          "id": "C-M4",
+          "titulo": "Permisos y recuperación",
+          "texto": "Considera que un contacto pidió respuesta, pero no autorizó contenido promocional. Decide qué seguimiento sería apropiado y qué dejarías detenido."
+        }
+      ],
+      "jefatura": [
+        {
+          "id": "C-J1",
+          "titulo": "Panel general",
+          "texto": "Revisa la vista general. Cuéntame qué decisión tomarías con la información disponible y qué dato te falta."
+        },
+        {
+          "id": "C-J2",
+          "titulo": "Propuesta y aprobación",
+          "texto": "Revisa una propuesta pendiente. Decide qué se puede aprobar o qué información pedirías antes de hacerlo."
+        },
+        {
+          "id": "C-J3",
+          "titulo": "Aprobación de referido",
+          "texto": "Revisa una recomendación de cliente. Explica qué debería revisar una persona antes de aceptarla."
+        },
+        {
+          "id": "C-J4",
+          "titulo": "Recuperación y permisos",
+          "texto": "Revisa los seguimientos que el equipo dejó preparados. Decide qué acciones necesitan aprobación humana y cuáles deben respetar un permiso pendiente."
+        }
+      ]
+    }
+  },
+  "registro_etapa": {
+    "pregunta_id": "registro_etapa",
+    "tipo": "etapa",
+    "respuesta_json": [
+      "empezo_en",
+      "termino_en",
+      "resultado",
+      "seq",
+      "errores",
+      "nota"
+    ]
+  },
+  "fases_autoguiada": {
+    "nota": "Solo la prueba autoguiada (prueba.html), desde el 12-nov-2026: menos preguntas al inicio y al final; las pausas se reemplazan por preguntas por etapa al terminar cada tarea. El kit moderado sigue usando «fases».",
+    "inicial": {
+      "externos": [
+        "i_rol",
+        "i_decision",
+        "i_maquina"
+      ],
+      "internos": [
+        "ci_area",
+        "ci_crm"
+      ]
+    },
+    "final": {
+      "externos": [
+        "umux_1",
+        "umux_2",
+        "f_confianza",
+        "f_accion",
+        "f_cambiar"
+      ],
+      "internos": [
+        "umux_1",
+        "umux_2",
+        "fc_prioridad",
+        "fc_cambiar"
+      ]
+    }
+  },
+  "preguntas_etapa": {
+    "T1": [
+      "p1_entendi"
+    ],
+    "T2": [
+      "p2_propuesta"
+    ],
+    "T3": [
+      "e_aceptar_claro"
+    ],
+    "T6": [
+      "f_relacion"
+    ]
+  }
 }

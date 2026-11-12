@@ -28,26 +28,19 @@
     'C-M1':'Lead y origen','C-M2':'Contenido y campaña','C-M3':'Calificación','C-M4':'Permisos y seguimiento',
     'C-J1':'Vista general','C-J2':'Propuesta y aprobación','C-J3':'Aprobación de referido','C-J4':'Recuperación y permisos'
   };
-  const EXTERNAL_PROMPTS = {
-    E0:{
-      A:'Piensa en la situación de tu negocio. Empieza como lo harías normalmente para encontrar una alternativa.',
-      'B-Google':'Piensa en la situación de tu negocio. Empieza como lo harías normalmente para encontrar una alternativa.',
-      ad:'Explora las publicaciones como lo harías al buscar una alternativa para tu negocio.'
-    },
-    E1:{
-      A:'Continúa con la opción que elegirías y sigue hasta donde te resulte útil.',
-      'B-Google':'Continúa con la opción que elegirías y sigue hasta donde te resulte útil.',
-      ad:'Sigue con lo que elegirías normalmente hasta llegar a una página para conocer mejor la alternativa.'
-    },
-    E2:'Revisa esta información como lo harías antes de decidir. Fíjate en qué ofrece y qué te faltaría saber.',
-    E3:'Si decides pedir información para tu negocio, continúa con los datos ficticios preparados para esta prueba.',
-    E4:'Continúa revisando la alternativa para tu negocio. Decide qué entendiste y qué revisarías antes de avanzar.',
-    E5:'Retoma la situación desde donde quedaste. Haz lo que harías normalmente antes de decidir.',
-    E6:'Continúa como lo harías después de confirmar que tu negocio avanzará con esta alternativa.',
-    E7:'Ahora tu equipo necesita organizar el siguiente pedido. Revisa qué harías y qué confirmarías antes de dejarlo listo.',
-    E8:'El equipo dejó de funcionar como esperabas y necesitas ayuda. Busca cómo informar el problema y averigua qué pasa después.',
-    E9:'Una persona de otro negocio te pregunta por tu experiencia. Decide si quieres compartir algo y qué harías a continuación.'
-  };
+  const EXTERNAL_TASKS = [
+    { id:'T1', origen:['E0','E1'], titulo:'Encuentra una solución para tu negocio', consigna:{
+      busqueda:'Busca una alternativa para tu negocio como lo harías normalmente y llega a una página que te interese.',
+      ad:'Explora la publicación como lo harías al buscar una alternativa y llega a una página que te interese.' } },
+    { id:'T2', origen:['E2','E3','E4'], titulo:'Revisa tu propuesta', consigna:'Revisa tu propuesta y explica qué máquina, qué productos y cuánto pagas.' },
+    { id:'T3', origen:['E6'], titulo:'Confirma y cuenta qué pasa después', consigna:'Confirma si quieres avanzar y cuenta qué pasa después.' },
+    { id:'T4', origen:['E5'], titulo:'Retoma tu decisión', consigna:'Retoma tu decisión desde donde quedaste.' },
+    { id:'T5', origen:['E7'], titulo:'Repite tu pedido', consigna:'Repite tu pedido desde el historial.' },
+    { id:'T6', origen:['E8','E9'], titulo:'Pide ayuda o recomienda a otro negocio', consigna:'Pide ayuda por un problema y, si quieres, recomienda a otro negocio.' }
+  ];
+  // Etapas del recorrido (12-nov): las preguntas van por lo que se está haciendo, no por pantalla.
+  const STAGE_NAMES = { T1:'Buscar y considerar', T2:'Cotizar', T3:'Aceptar', T4:'Seguimiento', T5:'Recomprar', T6:'Ayuda y recomendación' };
+  const AG_VERSION = '2026-11-12-etapas';
   const MODES = ['inicial','pausa1','pausa2','pausa_c','final'];
 
   let bank = null;
@@ -172,20 +165,17 @@
   }
   function isInternal() { return state?.camino === 'C'; }
   function phaseQuestions(phase) {
-    const phaseList = bank?.fases?.[phase];
+    const phaseList = bank?.fases_autoguiada?.[phase] || bank?.fases?.[phase];
     const ids = Array.isArray(phaseList) ? phaseList : (phaseList?.[isInternal()?'internos':'externos'] || []);
     return ids.map(id => ({id,...(bank.preguntas[id] || {})})).filter(item => item.tipo);
   }
   function stages() {
-    return isInternal() ? (bank.etapas.internos?.[state.rol] || []) : (bank.etapas.externos || []);
+    return isInternal() ? (bank.etapas.internos?.[state.rol] || []) : EXTERNAL_TASKS;
   }
   function stagePrompt(stage) {
     if (isInternal()) return cleanText(stage.texto || stage.titulo || '');
-    if (stage.id === 'E0' || stage.id === 'E1') {
-      const prompt = EXTERNAL_PROMPTS[stage.id];
-      return state.camino === 'B-Meta' || state.camino === 'B-LinkedIn' ? prompt.ad : prompt[state.camino];
-    }
-    return cleanText(EXTERNAL_PROMPTS[stage.id] || stage.texto || stage.titulo || '');
+    if (stage.id === 'T1') return cleanText(stage.consigna[state.camino === 'B-Meta' || state.camino === 'B-LinkedIn' ? 'ad' : 'busqueda']);
+    return cleanText(stage.consigna || '');
   }
   function labelForStage(stage) { return TASK_TITLES[stage.id] || stage.titulo || 'Tarea'; }
   function makeSession(path, profile, role) {
@@ -230,7 +220,7 @@
       localStorage.setItem(ACTIVE_KEY,JSON.stringify(active));
     } catch (_) {}
   }
-  function saveQuestion(question, phase, draft) {
+  function saveQuestion(question, phase, draft, stageId) {
     const skipped = Boolean(draft?.skip);
     let value = draft?.value ?? '';
     let otherText = cleanText(draft?.other || '');
@@ -266,7 +256,7 @@
     const row = {
       sesion_id:state.session.id, sesion_origen:'', participante:state.session.id,
       camino:state.camino, rol:state.session.rol, perfil:state.session.perfil,
-      momento:phase, etapa:phase, pregunta_id:question.id, tipo:question.tipo,
+      momento:phase, etapa:stageId || phase, pregunta_id:question.id, tipo:question.tipo,
       respuesta:value, respuesta_texto:display, otra_texto:otherText,
       omitida:skipped || isOptionalBlank, ms_respuesta:Math.max(0,Date.now()-questionOpenedAt),
       guardado_en:isoNow(), version_banco:bank.version
@@ -322,7 +312,7 @@
       const otherField = option.other ? '<span class="ag-other-field" data-other-for="' + escapeHtml(raw) + '" data-visible="' + (selected?'true':'false') + '"><input class="ag-field" id="other-' + index + '" data-other-text="' + escapeHtml(raw) + '" type="text" maxlength="120" aria-label="¿Cuál otra?" placeholder="¿Cuál?"></span>' : '';
       const labelClass = 'ag-option' + (option.other?' ag-option-other':'');
       const checked = selected?' checked':'';
-      return '<label class="' + labelClass + '"><input type="' + inputType + '" name="q-answer" value="' + escapeHtml(raw) + '" data-excluyente="' + (option.exclusive?'true':'false') + '" data-otra="' + (option.other?'true':'false') + '"' + checked + '><span>' + escapeHtml(raw) + '</span>' + otherField + '</label>';
+      return '<label class="' + labelClass + '"><input type="' + inputType + '" name="q-answer" value="' + escapeHtml(raw) + '" data-excluyente="' + (option.exclusive?'true':'false') + '" data-otra="' + (option.other?'true':'false') + '"' + checked + '><span>' + escapeHtml((question.tipo==='agreement'||question.tipo==='frequency') && option.text ? raw + ' · ' + option.text : raw) + '</span>' + otherField + '</label>';
     }).join('');
     return '<div class="ag-option-list">' + choices + '</div>';
   }
@@ -334,14 +324,14 @@
     const draft = draftFor(question);
     questionOpenedAt = Date.now();
     const pct = Math.round(((index+1)/questions.length)*100);
-    const totalLabel = phase === 'final' ? (isInternal()?7:9) : phase === 'inicial' ? (isInternal()?4:6) : questions.length;
+    const totalLabel = questions.length;
     const blockLabel = PHASE_LABELS[phase] || 'Preguntas';
     const skipChecked = draft.skip?' checked':'';
     const backDisabled = index === 0;
     const embedded=Boolean(app.querySelector('.ag-journey')&&phase!=='inicial');
     const container=embedded?app.querySelector('.ag-taskbar'):app;
-    if(embedded)container.classList.remove('is-collapsed');
-    const questionOpen=embedded?'<div class="ag-question-inbar">':'<section class="ag-question-screen" aria-label="' + escapeHtml(blockLabel) + '">' + brandMarkup();
+    if(embedded){container.classList.remove('is-collapsed');container.classList.add('is-modal');}
+    const questionOpen=embedded?'<div class="ag-modal ag-question-inbar" role="dialog" aria-modal="true" aria-labelledby="question-title">':'<section class="ag-question-screen" aria-label="' + escapeHtml(blockLabel) + '">' + brandMarkup();
     const questionClose=embedded?'</div>':'</section>';
     container.innerHTML = questionOpen
       + '<p class="ag-step">' + escapeHtml(blockLabel) + ' · Pregunta ' + (index+1) + ' de ' + totalLabel + '</p>'
@@ -535,18 +525,18 @@
   }
   function beginJourney() {
     state.phase='journey';state.estado='en_recorrido';state.questionIndex=0;state.taskIndex=0;state.evaluating=false;
+    state.version_autoguiada=AG_VERSION;
     const list=stages();
-    state.tareas=list.map((stage,index)=>({etapa:stage.id,numero:index+1,titulo:labelForStage(stage),consigna:stagePrompt(stage),empezo_en:'',termino_en:'',duracion_ms:0,resultado:'',seq:'',comentario:'',pantallas:[]}));
+    state.tareas=list.map((stage,index)=>({etapa:stage.id,etapa_nombre:isInternal()?(ROLE_LABELS[state.rol]||'Equipo interno'):(STAGE_NAMES[stage.id]||''),intro_visto:false,numero:index+1,titulo:labelForStage(stage),consigna:stagePrompt(stage),empezo_en:'',termino_en:'',duracion_ms:0,resultado:'',seq:'',comentario:'',pantallas:[],origen_etapas:stage.origen||[]}));
     setPortalSession();
-    startCurrentTask();
     persist();
     renderJourney(true);
   }
   function finishPhase(phase) {
     updatePortalPhases(phase);
     if(phase==='inicial') { beginJourney();return; }
-    if(phase==='pausa1') { state.pausas.push({fase:phase,termino_en:isoNow()});state.phase='journey';state.taskIndex=3;state.evaluating=false;startCurrentTask();persist();renderJourney();return; }
-    if(phase==='pausa2') { state.pausas.push({fase:phase,termino_en:isoNow()});state.phase='jump3';persist();renderJourney();return; }
+    if(phase==='pausa1') { state.pausas.push({fase:phase,termino_en:isoNow()});state.phase='journey';state.evaluating=false;startCurrentTask();persist();renderJourney();return; }
+    if(phase==='pausa2') { state.pausas.push({fase:phase,termino_en:isoNow()});state.phase='journey';state.evaluating=false;startCurrentTask();persist();renderJourney();return; }
     if(phase==='pausa_c') { state.pausas.push({fase:phase,termino_en:isoNow()});state.phase='journey';state.taskIndex=1;state.evaluating=false;startCurrentTask();persist();renderJourney();return; }
     if(phase==='final') {
       state.finished_at=isoNow();state.phase='complete';state.evaluating=false;
@@ -585,24 +575,21 @@
     const result=form?.querySelector('input[name="task-result"]:checked')?.value;
     const seq=form?.querySelector('input[name="task-seq"]:checked')?.value;
     const comment=cleanText(document.getElementById('task-comment')?.value||'');
-    if(!result||!seq){status.textContent='Elige un resultado y una facilidad de 1 a 7 para continuar.';status.dataset.kind='error';return;}
     const task=state.tareas[state.taskIndex];
+    const stageAnswers=stageQuestionsFor(task).map(question=>({question,value:form?.querySelector('input[name="stage-' + question.id + '"]:checked')?.value}));
+    if(!result||!seq||stageAnswers.some(item=>!item.value)){status.textContent='Responde las preguntas para continuar. El comentario es opcional.';status.dataset.kind='error';return;}
     task.resultado=result;task.seq=Number(seq);task.comentario=comment;
+    task.preguntas_etapa={};
+    stageAnswers.forEach(({question,value})=>{saveQuestion(question,'etapa',{value},task.etapa);task.preguntas_etapa[question.id]=value;});
     state.evaluating=false;
     const completed=state.taskIndex;
     state.taskIndex+=1;
     if(!isInternal()) {
-      if(completed===2) {state.phase='pausa1';state.questionIndex=0;state.pausas.push({fase:'pausa1',empezo_en:isoNow()});persist();renderQuestion('pausa1');return;}
-      if(completed===4) {state.phase='pausa2';state.questionIndex=0;state.pausas.push({fase:'pausa2',empezo_en:isoNow()});persist();renderQuestion('pausa2');return;}
-      if(completed===5) {state.phase='reminder_decision';persist();renderJourney();return;}
-      if(completed===6) {state.phase='jump30';persist();renderJourney();return;}
-      if(completed===8) {state.phase='reminder_resolved';persist();renderJourney();return;}
-      if(completed>=9) {state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
-    } else {
-      if(completed===0) {state.phase='pausa_c';state.questionIndex=0;state.pausas.push({fase:'pausa_c',empezo_en:isoNow()});persist();renderQuestion('pausa_c');return;}
-      if(state.taskIndex>=state.tareas.length){state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
+      if(completed===2) {state.phase='jump3';persist();renderJourney();return;}
+      if(completed===3) {state.phase='jump30';persist();renderJourney();return;}
     }
-    state.phase='journey';startCurrentTask();persist();renderJourney();
+    if(state.taskIndex>=state.tareas.length){state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
+    state.phase='journey';persist();renderJourney();
   }
   function renderJourney(first=false) {
     if(jumpPoll){clearInterval(jumpPoll);jumpPoll=null;}
@@ -619,12 +606,9 @@
     } else iframeRef=app.querySelector('.ag-journey-frame');
     const bar=app.querySelector('.ag-taskbar');
     if(!bar)return;
-    bar.classList.toggle('is-collapsed',window.matchMedia('(max-width: 900px)').matches&&!state.task_details_open);
     if(state.phase==='journey') renderTaskbar(bar);
     else if(state.phase==='jump3') renderJumpCard(bar,3);
     else if(state.phase==='jump30') renderJumpCard(bar,30);
-    else if(state.phase==='reminder_decision') renderReminder(bar,'Decisión tomada','Sigue con la situación que ya revisaste y decide cómo avanzar.');
-    else if(state.phase==='reminder_resolved') renderReminder(bar,'Caso resuelto','Continúa cuando el problema ya fue atendido.');
     app.setAttribute('aria-busy','false');
   }
   function onFrameLoad() {
@@ -717,100 +701,182 @@
   function portalSignal() {
     try {
       const win=iframeRef?.contentWindow;
-      if(!win)return {proposal:false,signed:false,source:'sin recorrido'};
-      const active=parseStored(ACTIVE_KEY);
-      const pausa2=active?.id===state?.session?.id&&(active.fases_hechas||[]).includes('pausa2');
-      const api=win.MarleyPrueba?.estado?.();
-      if(api!==undefined&&api!==null) {
-        if(typeof api==='string') {
-          const value=api.toLocaleLowerCase('es-CL').replace(/[\s-]+/g,'_');
-          const appState=win.M4?.get?.();
-          const accepted=appState?.proposal?.status==='aceptada';
-          return {
-            proposal:(/propuesta|cotizacion/.test(value)||Boolean(appState?.proposal&&appState.proposal.status!=='aceptada'))&&!accepted,
-            signed:/contrato_firmado|firmado|contract_signed/.test(value)||Boolean(appState?.customerCycle?.contractSignedAt),
-            pausa2,
-            source:'MarleyPrueba'
-          };
-        }
-        const appState=win.M4?.get?.();
-        const accepted=appState?.proposal?.status==='aceptada';
-        const proposal=(Boolean(api.propuesta||api.proposal||api.propuestaSeleccionada||api.quote||api.propuestaVisible)||Boolean(appState?.proposal&&appState.proposal.status!=='aceptada'))&&!accepted;
-        const signed=Boolean(api.contratoFirmado||api.contractSigned||api.contract_signed||api.contractSignedAt||appState?.customerCycle?.contractSignedAt);
-        const status=String(api.estado||api.status||'').toLocaleLowerCase('es-CL');
-        return {proposal:(proposal||/propuesta/.test(status))&&!accepted,signed:signed||/firmado|contrato/.test(status),pausa2,source:'MarleyPrueba'};
-      }
+      if(!win)return {proposal:false,accepted:false,signed:false,source:'sin recorrido'};
       const appState=win.M4?.get?.();
       if(appState) {
-        const cycle=appState.customerCycle||{};
-        return {proposal:Boolean(appState.proposal)&&appState.proposal.status!=='aceptada',signed:Boolean(cycle.contractSignedAt),pausa2,source:'M4Journey/M4'};
+        const accepted=appState.proposal?.status==='aceptada';
+        return {
+          proposal:Boolean(appState.proposal)&&!accepted,
+          accepted,
+          signed:Boolean(appState.customerCycle?.contractSignedAt),
+          source:'M4Journey/M4'
+        };
       }
+      const api=win.MarleyPrueba?.estado?.();
+      if(api)return {proposal:false,accepted:false,signed:Boolean(api.contratoFirmado),source:'MarleyPrueba'};
     } catch (_) {}
-    return {proposal:false,signed:false,source:'sin señal'};
+    return {proposal:false,accepted:false,signed:false,source:'sin señal'};
   }
+  function pausa2Registrada() {
+    return Boolean(state?.pausas?.some(item=>item.fase==='pausa2'&&item.termino_en));
+  }
+  function tareaAnteriorTerminada() {
+    const previous=state?.tareas?.[state.taskIndex-1];
+    return Boolean(previous?.termino_en&&previous?.resultado);
+  }
+  function jumpReady(days) {
+    return tareaAnteriorTerminada();
+  }
+  function adaptarTareaTresDias(accepted) {
+    const task=state.tareas?.[state.taskIndex];
+    if(!task||task.etapa!=='T4')return;
+    task.propuesta_aceptada_al_saltar=Boolean(accepted);
+    task.titulo=accepted?'Revisa tu pedido en el portal':'Retoma tu decisión';
+    task.consigna=accepted?'Revisa en tu portal qué pasa con tu pedido.':'Retoma tu decisión.';
+  }
+  function stageKicker(task) {
+    return 'Etapa ' + (state.taskIndex+1) + ' de ' + state.tareas.length + (task?.etapa_nombre ? ' · ' + task.etapa_nombre : '');
+  }
+  function setBarMode(bar,modal) { bar.classList.toggle('is-modal',Boolean(modal)); bar.classList.remove('is-collapsed'); }
   function renderTaskbar(bar) {
-    startCurrentTask();
     const task=state.tareas[state.taskIndex];
     if(!task) {state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
     if(state.evaluating) {renderTaskEvaluation(bar);return;}
-    const mobile=window.matchMedia('(max-width: 900px)').matches;
-    bar.innerHTML='<div class="ag-taskbar-top"><h1 class="ag-taskbar-title">' + escapeHtml(task.titulo) + '</h1><span class="ag-task-progress">Tarea ' + (state.taskIndex+1) + ' de ' + state.tareas.length + '</span></div>'
-      + '<p class="ag-task-prompt">' + escapeHtml(task.consigna) + '</p>'
-      + '<div class="ag-task-extra"><p class="ag-help">Explora a tu ritmo. No hay respuestas correctas.</p></div>'
-      + '<div class="ag-task-controls"><div class="ag-task-line"><span class="ag-task-progress">Tarea ' + (state.taskIndex+1) + ' / ' + state.tareas.length + '</span>'
-      + '<button class="ag-btn ag-collapse-task" type="button" data-action="task-details">' + (state.task_details_open?'Ocultar':'Ver la tarea') + '</button>'
-      + '<button class="ag-btn ag-btn--primary" type="button" data-action="task-done">Terminé esta tarea</button>'
-      + '</div><button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div>';
-    if(mobile&&!state.task_details_open)bar.classList.add('is-collapsed');else bar.classList.remove('is-collapsed');
-    bar.querySelector('[data-action="task-details"]')?.addEventListener('click',()=>{
-      state.task_details_open=!state.task_details_open;persist();renderJourney();
-    });
+    if(!task.intro_visto||state.task_details_open) {renderTaskIntro(bar,task);return;}
+    setBarMode(bar,false);
+    bar.innerHTML='<div class="ag-strip-info"><span class="ag-strip-kicker">' + escapeHtml(stageKicker(task)) + '</span><h1 class="ag-strip-title">' + escapeHtml(task.titulo) + '</h1></div>'
+      + '<div class="ag-strip-actions"><button class="ag-btn" type="button" data-action="task-details">Ver tarea</button>'
+      + '<button class="ag-btn ag-btn--primary" type="button" data-action="task-done">Terminé</button></div>';
+    bar.querySelector('[data-action="task-details"]')?.addEventListener('click',()=>{state.task_details_open=true;persist();renderJourney();});
     bar.querySelector('[data-action="task-done"]')?.addEventListener('click',taskFinished);
+  }
+  function renderTaskIntro(bar,task) {
+    setBarMode(bar,true);
+    const again=Boolean(task.intro_visto);
+    bar.innerHTML='<div class="ag-modal" role="dialog" aria-modal="true" aria-labelledby="ag-intro-title"><p class="ag-modal-kicker">' + escapeHtml(stageKicker(task)) + '</p>'
+      + '<h1 class="ag-taskbar-title" id="ag-intro-title">' + escapeHtml(task.titulo) + '</h1>'
+      + '<p class="ag-task-prompt">' + escapeHtml(task.consigna) + '</p>'
+      + '<p class="ag-modal-how">Verás el sitio en pantalla completa. Cuando termines, toca «Terminé» abajo y te haremos unas pocas preguntas. No hay respuestas correctas.</p>'
+      + '<div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="button" data-action="task-start">' + (again?'Seguir con la tarea':'Empezar la tarea') + '</button>'
+      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div></div>';
+    bar.querySelector('[data-action="task-start"]')?.addEventListener('click',()=>{task.intro_visto=true;state.task_details_open=false;startCurrentTask();persist();renderJourney();});
     bar.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
+  }
+  function stageQuestionsFor(task) {
+    if(isInternal()||!task)return [];
+    const ids=bank?.preguntas_etapa?.[task.etapa]||[];
+    return ids.map(id=>({id,...(bank.preguntas[id]||{})})).filter(item=>item.tipo);
+  }
+  function stageQuestionHtml(question) {
+    const name='stage-' + question.id;
+    if(question.tipo==='agreement') {
+      const options=optionList(question).map(option=>'<label title="' + escapeHtml(option.text) + '"><input type="radio" name="' + name + '" value="' + option.value + '"><span>' + option.value + '</span></label>').join('');
+      return '<fieldset><legend>' + escapeHtml(question.texto) + '</legend><div class="ag-task-progress">1 = Muy en desacuerdo · 5 = Muy de acuerdo</div><div class="ag-agree-grid">' + options + '</div></fieldset>';
+    }
+    const options=optionList(question).map(option=>'<label><input type="radio" name="' + name + '" value="' + escapeHtml(option.text) + '"><span>' + escapeHtml(option.text) + '</span></label>').join('');
+    return '<fieldset><legend>' + escapeHtml(question.texto) + '</legend><div class="ag-result-options">' + options + '</div></fieldset>';
   }
   function renderTaskEvaluation(bar) {
     const task=state.tareas[state.taskIndex];
+    setBarMode(bar,true);
+    questionOpenedAt=Date.now();
     const seq=Array.from({length:7},(_,index)=>{
       const number=index+1;
       return '<label><input type="radio" name="task-seq" value="' + number + '"><span>' + number + '</span></label>';
     }).join('');
-    bar.classList.remove('is-collapsed');
-    bar.innerHTML='<div class="ag-taskbar-top"><h1 class="ag-taskbar-title">' + escapeHtml(task.titulo) + '</h1><span class="ag-task-progress">Tarea ' + (state.taskIndex+1) + ' de ' + state.tareas.length + '</span></div>'
+    bar.innerHTML='<div class="ag-modal" role="dialog" aria-modal="true" aria-labelledby="ag-eval-title"><p class="ag-modal-kicker">' + escapeHtml(stageKicker(task)) + '</p>'
+      + '<h1 class="ag-taskbar-title" id="ag-eval-title">¿Cómo te fue?</h1><p class="ag-modal-how">' + escapeHtml(task.titulo) + '</p>'
       + '<form class="ag-result-form" id="task-evaluation"><fieldset><legend>¿Lo lograste?</legend><div class="ag-result-options">'
       + '<label><input type="radio" name="task-result" value="Logrado"><span>Sí</span></label>'
       + '<label><input type="radio" name="task-result" value="Con ayuda"><span>En parte</span></label>'
       + '<label><input type="radio" name="task-result" value="No logrado"><span>No</span></label>'
-      + '</div></fieldset><fieldset><legend>¿Qué tan fácil o difícil fue esta tarea?</legend><div class="ag-task-progress">1 = Muy difícil · 7 = Muy fácil</div><div class="ag-seq-grid">' + seq + '</div></fieldset>'
-      + '<label for="task-comment">Comentario opcional</label><textarea id="task-comment" class="ag-textarea" maxlength="500" placeholder="Hasta 500 caracteres. No escribas nombres ni datos de contacto."></textarea>'
-      + '<p class="ag-status" id="task-evaluation-status" role="status"></p><div class="ag-task-controls"><button class="ag-btn ag-btn--primary" type="submit">Guardar y seguir</button><button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button></div></form>';
+      + '</div></fieldset><fieldset><legend>¿Qué tan fácil o difícil fue?</legend><div class="ag-task-progress">1 = Muy difícil · 7 = Muy fácil</div><div class="ag-seq-grid">' + seq + '</div></fieldset>'
+      + stageQuestionsFor(task).map(stageQuestionHtml).join('')
+      + '<label for="task-comment">¿Algo te confundió o te hizo dudar? <span class="ag-task-progress">Opcional</span></label><textarea id="task-comment" class="ag-textarea" maxlength="500" placeholder="Hasta 500 caracteres. No escribas nombres ni datos de contacto."></textarea>'
+      + '<p class="ag-status" id="task-evaluation-status" role="status"></p><div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="submit">Guardar y seguir</button><button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button></div></form></div>';
     document.getElementById('task-evaluation').addEventListener('submit',event=>{event.preventDefault();saveTaskEvaluation();});
     bar.querySelector('[data-action="return-task"]')?.addEventListener('click',()=>{state.evaluating=false;persist();renderJourney();});
   }
   function renderJumpCard(bar,days) {
     const gate=portalSignal();
-    const ready=days===3?gate.proposal&&!gate.signed&&gate.pausa2:gate.signed;
+    const ready=jumpReady(days);
     const title=days===3?'3 días después':'Un mes después';
-    const prompt=days===3?'Continúa cuando ya revisaste una propuesta para tu negocio.':'Continúa cuando el contrato simulado esté firmado.';
-    bar.classList.remove('is-collapsed');
-    bar.innerHTML='<p class="ag-kicker">Salto de tiempo</p><div class="ag-interstitial"><h1 class="ag-taskbar-title">' + title + '</h1><p>' + prompt + '</p>'
+    const prompt=days===3?'Pasaron tres días desde tu última tarea. Continúa cuando quieras retomar tu caso.':'Pasó un mes desde tu última tarea. Puedes avanzar aunque el contrato todavía no esté firmado.';
+    setBarMode(bar,true);
+    bar.innerHTML='<div class="ag-modal" role="dialog" aria-modal="true" aria-labelledby="ag-jump-title"><p class="ag-modal-kicker">Salto de tiempo</p><div class="ag-interstitial"><h1 class="ag-taskbar-title" id="ag-jump-title">' + title + '</h1><p>' + prompt + '</p>'
       + '<p class="' + (ready?'ag-jump-ready':'ag-jump-wait') + '" role="status">' + (ready?'El recorrido está listo para avanzar.':'Completa el paso correspondiente en la pantalla del recorrido para habilitar el avance.') + '</p>'
+      + (days===30&&!gate.signed?'<p class="ag-help" data-contract-simulation>Para seguir, simulamos que firmaste el contrato.</p>':'')
       + '<button class="ag-btn ag-btn--primary" type="button" data-action="jump" ' + (ready?'':'disabled') + '>Avanzar el tiempo</button>'
-      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div>';
+      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div></div>';
     bar.querySelector('[data-action="jump"]')?.addEventListener('click',()=>applyJump(days));
     bar.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
     jumpPoll=setInterval(()=>{
       if(!document.querySelector('.ag-taskbar')||!['jump3','jump30'].includes(state.phase)){clearInterval(jumpPoll);jumpPoll=null;return;}
-      const updated=portalSignal();
-      const nowReady=days===3?updated.proposal&&!updated.signed&&updated.pausa2:updated.signed;
+      const nowReady=jumpReady(days);
       const button=bar.querySelector('[data-action="jump"]');
       const status=bar.querySelector('[role="status"]');
-      if(button)button.disabled=!nowReady;
-      if(status){status.textContent=nowReady?'El recorrido está listo para avanzar.':'Completa el paso correspondiente en la pantalla del recorrido para habilitar el avance.';status.classList.toggle('ag-jump-ready',nowReady);status.classList.toggle('ag-jump-wait',!nowReady);}
+      if(button&&!simulandoFirma)button.disabled=!nowReady;
+      if(status&&!simulandoFirma){status.textContent=nowReady?'El recorrido está listo para avanzar.':'Completa el paso correspondiente en la pantalla del recorrido para habilitar el avance.';status.classList.toggle('ag-jump-ready',nowReady);status.classList.toggle('ag-jump-wait',!nowReady);}
     },700);
   }
-  function applyJump(days) {
+  function waitFor(predicate,timeout=2500) {
+    return new Promise(resolve=>{
+      const started=Date.now();
+      const poll=()=>{
+        let value=false;try{value=predicate();}catch(_){}
+        if(value){resolve(value);return;}
+        if(Date.now()-started>=timeout){resolve(false);return;}
+        setTimeout(poll,100);
+      };
+      poll();
+    });
+  }
+  async function simulateContractForMonth() {
+    let gate=portalSignal();
+    if(gate.signed)return {signed:true,accepted:false};
+    const win=iframeRef?.contentWindow;
+    if(!win)return {signed:false,accepted:false};
+    let accepted=false;
+    try {
+      const current=win.M4?.get?.();
+      if(current?.proposal&&current.proposal.status!=='aceptada') {
+        if(typeof win.M4?.acceptProposal!=='function')return {signed:false,accepted:false};
+        win.M4.acceptProposal();
+        accepted=true;
+        await waitFor(()=>win.M4?.get?.()?.proposal?.status==='aceptada');
+      }
+      if(win.location.hash!=='#C06'&&typeof win.MarleyApp?.go==='function')win.MarleyApp.go('C06');
+      const hasButton=await waitFor(()=>{
+        const button=win.document.querySelector('[data-cycle-action="sign-contract"]');
+        return button&&button.getClientRects().length?button:false;
+      });
+      if(!hasButton)return {signed:false,accepted};
+      hasButton.click();
+      const signed=await waitFor(()=>Boolean(win.M4?.get?.()?.customerCycle?.contractSignedAt));
+      gate=portalSignal();
+      return {signed:Boolean(signed||gate.signed),accepted};
+    } catch(_) { return {signed:false,accepted}; }
+  }
+  let simulandoFirma=false;
+  async function applyJump(days) {
+    if(simulandoFirma||!jumpReady(days))return;
     const gate=portalSignal();
-    if((days===3&&(!gate.proposal||gate.signed||!gate.pausa2))||(days===30&&!gate.signed))return;
+    let signature={signed:Boolean(gate.signed),accepted:false};
+    if(days===30&&!gate.signed) {
+      const status=app.querySelector('.ag-taskbar [role="status"]');
+      const button=app.querySelector('.ag-taskbar [data-action="jump"]');
+      if(status)status.textContent='Para seguir, simulamos que firmaste el contrato.';
+      if(button)button.disabled=true;
+      simulandoFirma=true;
+      try { signature=await simulateContractForMonth(); }
+      finally { simulandoFirma=false; if(button)button.disabled=false; }
+      if(!signature.signed) {
+        const failed=app.querySelector('.ag-taskbar [role="status"]');
+        if(failed){failed.textContent='No pudimos registrar la firma simulada en el recorrido. Vuelve al paso anterior e inténtalo de nuevo.';failed.dataset.kind='error';}
+        return;
+      }
+    }
+    if(days===3)adaptarTareaTresDias(gate.accepted);
     const payload={dias:days,sesion_id:state.session.id,at:Date.now(),nonce:randomNonce()};
     try { localStorage.setItem(JUMP_KEY,JSON.stringify(payload)); }
     catch (_) { const status=app.querySelector('.ag-taskbar [role="status"]');if(status)status.textContent='No se pudo guardar el avance del tiempo en este navegador.';return; }
@@ -823,27 +889,15 @@
       otra_texto:'',omitida:false,ms_respuesta:0,guardado_en:isoNow(),version_banco:bank.version
     };
     state.respuestas.push(row);
-    state.saltos.push({...payload,hecho_en:isoNow(),fuente:gate.source});
+    state.saltos.push({...payload,hecho_en:isoNow(),fuente:gate.source,contrato_simulado:days===30&&!gate.signed,propuesta_aceptada_al_saltar:Boolean(gate.accepted),propuesta_aceptada_para_firma:Boolean(signature.accepted)});
     state.phase='journey';state.evaluating=false;state.task_details_open=false;
     if(jumpPoll){clearInterval(jumpPoll);jumpPoll=null;}
-    startCurrentTask();persist();renderJourney();
-  }
-  function renderReminder(bar,title,copy) {
-    bar.classList.remove('is-collapsed');
-    bar.innerHTML='<p class="ag-kicker">Antes de seguir</p><div class="ag-interstitial"><h1 class="ag-taskbar-title">' + escapeHtml(title) + '</h1><p>' + escapeHtml(copy) + '</p>'
-      + '<button class="ag-btn ag-btn--primary" type="button" data-action="continue">Continuar</button>'
-      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div>';
-    bar.querySelector('[data-action="continue"]')?.addEventListener('click',()=>{
-      state.phase='journey';state.task_details_open=false;persist();renderJourney();
-    });
-    bar.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
+    persist();renderJourney();
   }
   function finishEarly() {
-    if(!window.confirm('¿Quieres terminar ahora? Se guardará lo que completaste y podrás descargar un informe parcial.'))return;
-    state.finished_at=isoNow();state.phase='complete';state.termino_anticipado=true;state.umux_score=null;
-    const active=parseStored(ACTIVE_KEY);
-    if(active?.id===state.session?.id){active.estado='cerrada';active.cerrada_en=state.finished_at;localStorage.setItem(ACTIVE_KEY,JSON.stringify(active));}
-    persist();renderResults();
+    if(!window.confirm('¿Quieres terminar el recorrido ahora? Después responderás las preguntas finales y podrás descargar el informe.'))return;
+    state.termino_anticipado=true;state.phase='final';state.questionIndex=0;state.evaluating=false;
+    persist();renderQuestion('final');
   }
 
   function answerText(row) {
@@ -869,6 +923,7 @@
   function reportData() {
     return {
       version_banco:bank.version,
+      version_autoguiada:state.version_autoguiada||AG_VERSION,
       sesion:reportSession(),
       respuestas:state.respuestas.map(row=>({...row,respuesta_texto:redacted(row.respuesta_texto),otra_texto:redacted(row.otra_texto),respuesta:typeof row.respuesta==='string'?redacted(row.respuesta):row.respuesta})),
       tareas:state.tareas.map(task=>({...task,comentario:redacted(task.comentario)})),
@@ -909,7 +964,7 @@
       + '<button id="new-test" class="ag-btn ag-btn--quiet" type="button"' + (pending?' disabled':'') + '>Hacer otra prueba</button></div>'
       + '<p class="ag-status" id="result-status" role="status">' + (pending?'El informe PDF todavía no se ha descargado.':'El PDF quedó descargado en este dispositivo.') + '</p>'
       + '<details class="ag-result-section"><summary>Resumen de tareas</summary><div class="ag-table-wrap"><table class="ag-table"><thead><tr><th>Tarea</th><th>Resultado</th><th>Tiempo</th><th>Facilidad</th></tr></thead><tbody>'
-      + tasks.map(task=>'<tr><td>' + escapeHtml(task.titulo) + '</td><td>' + escapeHtml(task.resultado||'No completada') + '</td><td>' + escapeHtml(formatDuration(task.duracion_ms)) + '</td><td>' + escapeHtml(task.seq||'—') + '</td></tr>').join('')
+      + tasks.map(task=>'<tr><td>' + escapeHtml((task.etapa_nombre?task.etapa_nombre+' · ':'')+task.titulo) + '</td><td>' + escapeHtml(task.resultado||'No completada') + '</td><td>' + escapeHtml(formatDuration(task.duracion_ms)) + '</td><td>' + escapeHtml(task.seq||'—') + '</td></tr>').join('')
       + '</tbody></table></div></details></div></section>';
     document.getElementById('download-pdf').addEventListener('click',downloadPdf);
     document.getElementById('download-json').addEventListener('click',downloadJson);
@@ -949,12 +1004,13 @@
     return '"' + text.replace(/"/g,'""').replace(/\r?\n/g,' ') + '"';
   }
   function downloadTasksCsv() {
-    const columns=['sesion_id','camino','rol','perfil','tarea','titulo','empezo_en','termino_en','duracion_ms','resultado','seq','comentario','pantallas'];
+    const columns=['sesion_id','camino','rol','perfil','tarea','titulo','empezo_en','termino_en','duracion_ms','resultado','seq','comentario','pantallas','etapa_nombre','preguntas_etapa'];
     const rows=state.tareas.map(task=>({
       sesion_id:state.session.id,camino:state.camino,rol:state.session.rol,perfil:state.session.perfil,
       tarea:task.etapa,titulo:task.titulo,empezo_en:task.empezo_en,termino_en:task.termino_en,
       duracion_ms:task.duracion_ms,resultado:task.resultado,seq:task.seq,
-      comentario:redacted(task.comentario),pantallas:task.pantallas
+      comentario:redacted(task.comentario),pantallas:task.pantallas,
+      etapa_nombre:task.etapa_nombre||'',preguntas_etapa:task.preguntas_etapa?JSON.stringify(task.preguntas_etapa):''
     }));
     const csv='\uFEFF'+[columns.map(csvCell).join(','),...rows.map(row=>columns.map(column=>csvCell(row[column])).join(','))].join('\r\n');
     downloadBlob('autoguiada_'+state.session.id+'_tareas.csv',new Blob([csv],{type:'text/csv;charset=utf-8'}));
@@ -977,8 +1033,10 @@
         return redacted(question)+' · '+redacted(answerText(row));
       });
     };
-    const taskLines=data.tareas.length?data.tareas.map((task,index)=>(index+1)+'. '+task.titulo+' | '+(task.resultado||'No completada')+' | '+formatDuration(task.duracion_ms)+' | Facilidad '+(task.seq||'—')+'/7'+(task.comentario?' | '+redacted(task.comentario):'')):['No se registraron tareas.'];
+    const taskLines=data.tareas.length?data.tareas.map((task,index)=>(index+1)+'. '+(task.etapa_nombre?task.etapa_nombre+' · ':'')+task.titulo+' | '+(task.resultado||'No completada')+' | '+formatDuration(task.duracion_ms)+' | Facilidad '+(task.seq||'—')+'/7'+(task.comentario?' | '+redacted(task.comentario):'')):['No se registraron tareas.'];
     const pauseLines=data.pausas.length?data.pausas.map(item=>PHASE_LABELS[item.fase]+' · '+formatDate(item.termino_en||item.empezo_en)):['Sin pausas registradas.'];
+    const stageRows=data.respuestas.filter(row=>row.momento==='etapa'&&row.tipo!=='evento');
+    const stageLines=stageRows.length?stageRows.map(row=>(STAGE_NAMES[row.etapa]||row.etapa)+' · '+redacted(bank.preguntas[row.pregunta_id]?.texto||row.pregunta_id)+' · '+redacted(answerText(row))):['Sin preguntas por etapa registradas.'];
     const jumpLines=data.saltos.length?data.saltos.map(item=>(item.dias===3?'3 días después':'Un mes después')+' · '+formatDate(item.hecho_en)+' · evento local registrado'):['Sin saltos registrados.'];
     const downloadLines=(data.descargas.disponibles||[]).length?data.descargas.disponibles.map(item=>item.label+' · '+item.url+' · '+((data.descargas.tocadas||[]).some(done=>done.url===item.url&&done.pantalla===item.pantalla)?'seleccionada':'no seleccionada')):['No se detectaron archivos descargables en las pantallas visitadas.'];
     const journeyLines=data.recorrido.length?data.recorrido.map(item=>formatDate(item.at)+' · '+item.tipo+' · '+item.url):['No se registraron pantallas del recorrido.'];
@@ -996,7 +1054,7 @@
       ]},
       {title:'Cuestionario inicial',lines:responseLines('inicial')},
       {title:'Tabla de tareas',lines:taskLines},
-      {title:'Pausas',lines:pauseLines.concat(['','Respuestas de las pausas:']).concat(['pausa1','pausa2','pausa_c'].flatMap(phase=>['','— '+(PHASE_LABELS[phase]||phase)].concat(responseLines(phase))))},
+      {title:'Preguntas por etapa',lines:stageLines.concat(data.pausas.length?['','Pausas de la versión anterior:'].concat(pauseLines).concat(['pausa1','pausa2','pausa_c'].flatMap(phase=>['','— '+(PHASE_LABELS[phase]||phase)].concat(responseLines(phase)))):[])},
       {title:'Saltos de tiempo',lines:jumpLines},
       {title:'Cuestionario final y UMUX-Lite',lines:responseLines('final').concat(['','Puntaje UMUX-Lite: '+(data.umux_score==null?'incompleto':String(data.umux_score).replace('.',',')+' / 100')])},
       {title:'Descargas disponibles y seleccionadas',lines:downloadLines},
@@ -1134,7 +1192,7 @@
     if(state.phase==='welcome')renderWelcome();
     else if(state.phase==='choice')renderChoice();
     else if(MODES.includes(state.phase))renderQuestion(state.phase);
-    else if(['journey','jump3','jump30','reminder_decision','reminder_resolved'].includes(state.phase))renderJourney();
+    else if(['journey','jump3','jump30'].includes(state.phase))renderJourney();
     else if(state.phase==='complete')renderResults();
     else {state=newDraft();prototypeReset();persist();renderWelcome();}
   }
