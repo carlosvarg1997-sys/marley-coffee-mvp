@@ -194,9 +194,10 @@ async function testExternalFlow(browser, base, flow, initialRoute, capture = fal
     await page.waitForFunction(() => window.M4.get().customerCycle?.timeJumps?.['30'] && window.M4.get().emails.some(mail => mail.journeyCode === 'E08'));
     await page.waitForFunction(() => Boolean(document.querySelector('#a1-remote-cards [data-card-status="salto-30"]')),{timeout:10000});
     assert.ok(await page.locator('#a1-remote-cards [data-card-status="salto-30"]').count(), 'No confirmó el salto de un mes en pantalla.');
-    await page.locator('form[data-cycle-form="support"] select[name="type"]').selectOption({ label: 'Pedido o reposición' });
-    await page.locator('form[data-cycle-form="support"] textarea[name="detail"]').fill('Consulta ficticia sobre la próxima reposición.');
-    await page.locator('form[data-cycle-form="support"] button[type="submit"]').click();
+    // Diseño R3 (13-nov): ayuda por tipo de problema; «Hablar con una persona» abre el caso.
+    await page.locator('[data-r3-support-type="Me faltan insumos o el pedido no llegó"]').click();
+    await page.locator('[data-r3-talk]').click();
+    await page.getByText(/Caso \S+ abierto/).first().waitFor({ timeout: 10000 });
     await page.locator('form[data-cycle-form="csat"] select[name="score"]').waitFor({ state: 'visible', timeout: 10000 });
     await page.locator('form[data-cycle-form="csat"] select[name="score"]').selectOption('5');
     await page.locator('form[data-cycle-form="csat"] textarea[name="comment"]').fill('Respuesta de prueba, clara y oportuna.');

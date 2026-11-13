@@ -682,7 +682,9 @@
   function onFrameClick(event) {
     const target=event.target?.nodeType===1?event.target:event.target?.parentElement;
     if(!target)return;
-    const interactive=target.closest('a,button,input,select,textarea,summary,[role="button"],[role="link"],[onclick],[tabindex]:not([tabindex="-1"])');
+    // 13-nov: el texto de una casilla u opción (<label>) también es interactivo: al tocarlo se marca su control.
+    // Antes esos clics se contaban como «sin respuesta» y la métrica salía inflada.
+    const interactive=target.closest('a,button,input,select,textarea,summary,label,[role="button"],[role="link"],[onclick],[tabindex]:not([tabindex="-1"])');
     const doc=event.currentTarget;
     const key=screenKey(doc);
     if(!state.clicksByScreen[key])state.clicksByScreen[key]={clics:0,interactivos:0,sin_respuesta:0};

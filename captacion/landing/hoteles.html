@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="../../recursos/escenas/hero/poster_m.webp" media="(max-width: 760px)">
 <link rel="preload" as="image" href="../../recursos/escenas/hero/poster.webp" media="(min-width: 761px)">
 <link rel="stylesheet" href="../marca/negro-marley.css">
-        <link rel="stylesheet" href="landing.css?v=20261112-corta">
+<link rel="stylesheet" href="landing.css?v=20261113-r3-corr3">
 </head>
 <body class="nm">
 <a class="nm-skip" href="#contenido">Saltar al contenido</a>
@@ -25,6 +25,8 @@
 </header>
 
 <main id="contenido">
+
+<nav class="ld-reading-guide nm-wrap" aria-label="En esta página"><strong>En esta página</strong><a href="#oferta">Oferta</a><a href="#calculo">Consumo</a><a href="#pasos">Pasos</a><a href="#contacto">Propuesta</a></nav>
 
   <section class="ld-hero" aria-labelledby="ld-h1">
     <div class="ld-hero__media">
@@ -41,6 +43,7 @@
         <p class="nm-lead" id="ld-lead">Una solución para cada punto de servicio: desayuno, lobby y salones. Máquina en comodato, productos y un equipo que responde. Todo queda por escrito antes de firmar.</p>
         <div class="ld-hero__accion" id="ld-hero-accion">
           <a class="nm-btn" href="#contacto" data-cta="hero">Ver mi solución <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          
           <button class="nm-btn nm-btn--linea ld-video-toggle" id="ld-video-toggle" type="button" aria-controls="ld-hero-video" aria-pressed="false" hidden>Reproducir video</button>
           <p class="ld-motion-status" id="ld-motion-status" role="status" hidden>Video detenido por tu preferencia de movimiento. Se mantiene la imagen fija.</p>
           <p class="nm-gano">Formulario corto y un diagnóstico de 3 pasos. Pedir tu propuesta no te obliga a nada.</p>
@@ -55,8 +58,38 @@
     </div>
   </section>
 
+<section class="nm-seccion ld-offer" id="oferta" data-offer-block aria-labelledby="oferta-hoteles">
+  <div class="nm-wrap">
+    <p class="nm-eyebrow">Tu oferta · Hoteles</p>
+    <h2 class="nm-h2 ld-offer__message" id="oferta-hoteles">A tu ritmo, del desayuno al evento.</h2>
+    <div class="ld-offer__grid">
+      <article class="ld-offer__machine" data-offer-machine="bar">
+        <img src="../../recursos/maquinas/bar.webp" width="398" height="450" alt="Máquina de café para Hoteles" loading="lazy" decoding="async">
+        <div><h3>Bar</h3><p class="ld-offer__machine-specs"><strong>Espresso profesional con molinillo</strong><br>100 a 400 tazas al día</p><p>En comodato: Marley presta la máquina y tú compras los insumos. Modelo, mínimo mensual y condiciones a confirmar con tu ejecutivo.</p></div>
+      </article>
+      <div class="ld-offer__products">
+        <h3>Productos del pack</h3>
+        <ul><li class="ld-offer-item" data-offer-line="cafe" data-price="447920"><img src="../../recursos/productos/catalog/grano.webp" width="720" height="720" alt="Café en grano orgánico" loading="lazy" decoding="async"><div><strong>Café en grano orgánico</strong><span>8 × 907 g</span><b>$447.920 neto</b></div></li><li class="ld-offer-item" data-offer-line="leche" data-price="185000"><img src="../../recursos/productos/catalog/milk.webp" width="720" height="720" alt="Leche" loading="lazy" decoding="async"><div><strong>Leche</strong><span>20 × 500 g</span><b>$185.000 neto</b></div></li><li class="ld-offer-item" data-offer-line="chocolate" data-price="169900"><img src="../../recursos/productos/catalog/chocolate.webp" width="720" height="720" alt="Chocolate" loading="lazy" decoding="async"><div><strong>Chocolate</strong><span>10 × 1 kg</span><b>$169.900 neto</b></div></li><li class="ld-offer-item" data-offer-line="azucar" data-price="58000"><img src="../../recursos/productos/catalog/consumibles.webp" width="720" height="720" alt="Azúcar y stevia en sobres" loading="lazy" decoding="async"><div><strong>Azúcar y stevia en sobres</strong><span>Formato a confirmar</span><b>$58.000 neto</b></div></li><li class="ld-offer-item" data-offer-line="revolvedores" data-price="32000"><img src="../../recursos/productos/catalog/consumibles.webp" width="720" height="720" alt="Revolvedores y servilletas" loading="lazy" decoding="async"><div><strong>Revolvedores y servilletas</strong><span>Formato a confirmar</span><b>$32.000 neto</b></div></li><li class="ld-offer-item" data-offer-line="vaso9" data-price="94000"><img src="../../recursos/productos/catalog/consumibles.webp" width="720" height="720" alt="Vaso 9 + tapa" loading="lazy" decoding="async"><div><strong>Vaso 9 + tapa</strong><span>500 de cada uno</span><b>$94.000 neto</b></div></li></ul>
+      </div>
+    </div>
+    <div class="ld-offer__total" data-offer-summary>
+      <div class="ld-offer__metric" data-offer-products-total="986820"><span>Productos del pack</span><strong>$986.820</strong></div>
+      <div class="ld-offer__metric" data-offer-kit-filter-total="160000"><span>Kit de instalación y filtro</span><strong>$160.000</strong></div>
+      <div class="ld-offer__metric" data-offer-total="1146820"><span>Total del pack de partida</span><strong>$1.146.820</strong></div>
+      <a class="nm-btn" href="../../index.html#C04" data-attribution-handoff data-screen="C04" data-surface="landing-hoteles">Arma tu propuesta</a>
+      <p class="ld-offer__reference">Referencia: la cotización completa de Marley del 19-oct-2026, con todas las líneas, suma $1.491.220 neto con kit y filtro.</p>
+    </div>
+    <p class="nm-nota ld-offer__note">Precios netos referenciales, de la cotización de Marley del 19-oct-2026. Los confirma tu ejecutivo.</p>
+  </div>
+</section>
+
+
+
   <section class="nm-seccion" id="calculo" aria-labelledby="calc-titulo">
-    <div class="nm-wrap ld-calc">
+    <div class="nm-wrap">
+      <details class="ld-disclosure">
+        <summary class="ld-disclosure__summary">Ver cálculo de consumo</summary>
+        <div class="ld-calc">
       <div class="nm-revela">
         <p class="nm-eyebrow">Parte por aquí</p>
         <h2 class="nm-h2" id="calc-titulo">¿Cuántas tazas sirves al día?</h2>
@@ -81,7 +114,7 @@
             </div>
             <div>
               <label class="nm-etiqueta" for="c-gramos">Gramos de café por taza</label>
-              <div class="ld-gramos"><input id="c-gramos" type="number" inputmode="decimal" min="5" max="25" step="0.5" value="9"><span>supuesto de ejemplo</span></div>
+              <div class="ld-gramos"><input id="c-gramos" type="number" inputmode="decimal" min="5" max="25" step="0.5" value="9"><span>referencial</span></div>
             </div>
           </div>
         </div>
@@ -92,56 +125,77 @@
         <ul class="ld-resultado__ficha" id="calc-ficha" aria-label="Detalle del cálculo">
           <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Tazas al día</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-base">150 tazas</output></li>
           <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Días de atención</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-dias">30 días</output></li>
-          <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Gramos por taza (ejemplo)</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-gramos">9 g</output></li>
+          <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Gramos por taza (referencial)</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-gramos">9 g</output></li>
           <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Tazas al mes</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-tazas">4.500 tazas</output></li>
           <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Café al mes</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-kg">40,5 kg</output></li>
         </ul>
         <p class="nm-nota">Fórmula: tazas al día × días de atención al mes × gramos por taza ÷ 1.000.</p>
-        <p class="nm-nota">Supuestos: Ajusta los días de operación y los gramos por taza; los valores iniciales son ejemplos.</p>
-        <p class="nm-nota">Es un cálculo orientativo. Los gramos por taza son un supuesto: cámbialos por tu receta. El consumo real se ajusta en tu propuesta.</p>
+        <p class="nm-nota">Supuestos: Ajusta los días de operación y los gramos por taza; los valores iniciales son referenciales.</p>
+        <details class="ld-calc-more"><summary>Alcance de este cálculo</summary><p class="nm-nota">Es un cálculo orientativo. Los gramos por taza son un supuesto: cámbialos por tu receta. El consumo real se ajusta en tu propuesta.</p></details>
         <a class="nm-btn nm-btn--ancho" href="#contacto" data-cta="calculo">Usar este cálculo en mi propuesta <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
+        </div>
+      </details>
     </div>
   </section>
 
-  <section class="nm-seccion nm-seccion--carbon ld-pasos" aria-labelledby="pasos-titulo">
+  <section class="nm-seccion nm-seccion--carbon ld-pasos" id="pasos" aria-labelledby="pasos-titulo">
     <div class="nm-wrap">
       <div class="ld-pasos__cabeza">
-        <div class="nm-revela">
+        <div>
           <p class="nm-eyebrow">Cómo funciona</p>
           <h2 class="nm-h2" id="pasos-titulo">De tus tazas a tu propuesta, en tres pasos.</h2>
         </div>
-        <img class="ld-pasos__maquina nm-revela" data-retraso="1" src="../../recursos/maquinas/oficina.webp" alt="Máquina automática de café" width="444" height="442" loading="lazy" decoding="async">
       </div>
       <ol class="ld-pasos__grilla">
         <li class="nm-card ld-paso nm-revela" data-retraso="0"><span class="nm-paso-num">01</span><h3 class="nm-h3">Cuéntanos de tu hotel</h3><p class="nm-p">Puntos de servicio, horarios y tazas al día.</p></li>
         <li class="nm-card ld-paso nm-revela" data-retraso="1"><span class="nm-paso-num">02</span><h3 class="nm-h3">Recibe tu recomendación</h3><p class="nm-p">Máquina y productos según tu servicio. Si ya sabes qué máquina quieres, partimos de ahí.</p></li>
         <li class="nm-card ld-paso nm-revela" data-retraso="2"><span class="nm-paso-num">03</span><h3 class="nm-h3">Instalación y reposición</h3><p class="nm-p">Coordinamos la puesta en marcha y la reposición de tus productos.</p></li>
       </ol>
-      <p class="nm-nota">Las condiciones del servicio se confirman por escrito en tu propuesta.</p>
-      <p class="ld-contexto">
-        <a href="../../guia-servicio-cafe.html" data-contexto="guia">Guía para planificar el café de tu negocio</a>
-        <a href="../../index.html" data-contexto="productos" data-pantalla="C10">Ver productos y packs</a>
-      </p>
     </div>
   </section>
 
-  <section class="nm-seccion" aria-labelledby="hoja-titulo">
-    <div class="nm-wrap">
-      <div class="nm-hoja nm-revela">
-        <div class="ld-hoja__cabeza">
-          <p class="nm-eyebrow">Cuentas claras</p>
-          <h2 class="nm-h2" id="hoja-titulo">Lo que queda por escrito antes de firmar.</h2>
-          <hr class="nm-firma">
-        </div>
-        <ul class="ld-hoja__grilla">
+  <section class="nm-seccion ld-secondary" aria-label="Detalles de la propuesta">
+    <div class="nm-wrap ld-secondary__items">
+      <details class="ld-disclosure">
+        <summary class="ld-disclosure__summary">Ver qué queda por escrito</summary>
+        <div class="ld-disclosure__body">
+          <div class="nm-hoja nm-revela">
+            <div class="ld-hoja__cabeza">
+              <p class="nm-eyebrow">Cuentas claras</p>
+              <h2 class="nm-h2" id="hoja-titulo">Lo que queda por escrito antes de firmar.</h2>
+              <hr class="nm-firma">
+            </div>
+            <ul class="ld-hoja__grilla">
           <li class="ld-hoja__item"><h3 class="nm-h3">Qué incluye</h3><span class="ld-hoja__guia" aria-hidden="true"></span><p>La máquina, los productos y los servicios de tu propuesta, uno por uno.</p></li>
           <li class="ld-hoja__item"><h3 class="nm-h3">Quién responde</h3><span class="ld-hoja__guia" aria-hidden="true"></span><p>A quién llamas si algo falla y por qué canal.</p></li>
           <li class="ld-hoja__item"><h3 class="nm-h3">Qué documento recibes</h3><span class="ld-hoja__guia" aria-hidden="true"></span><p>El documento y las condiciones se confirman en la propuesta.</p></li>
           <li class="ld-hoja__item"><h3 class="nm-h3">Cómo se termina</h3><span class="ld-hoja__guia" aria-hidden="true"></span><p>Las condiciones para cerrar el servicio, sin letra chica.</p></li>
-        </ul>
-        <p class="nm-nota">Las condiciones comerciales las confirma el equipo de Marley Coffee en tu propuesta.</p>
-      </div>
+            </ul>
+            <p class="nm-nota">Las condiciones comerciales las confirma el equipo de Marley Coffee en tu propuesta.</p>
+          </div>
+        </div>
+      </details>
+      <details class="ld-disclosure">
+        <summary class="ld-disclosure__summary">Condiciones a confirmar</summary>
+        <div class="ld-disclosure__body">
+          <ul class="ld-conditions-list">
+            <li>Compra mínima mensual: a confirmar.</li>
+            <li>Plazo de entrega: a confirmar.</li>
+            <li>Compatibilidad de insumos con la máquina: a confirmar.</li>
+          </ul>
+          <p class="nm-nota">Las condiciones del servicio se confirman por escrito en tu propuesta.</p>
+        </div>
+      </details>
+      <details class="ld-disclosure">
+        <summary class="ld-disclosure__summary">Recursos relacionados</summary>
+        <div class="ld-disclosure__body">
+          <p class="ld-contexto">
+            <a href="../../guia-servicio-cafe.html" data-contexto="guia">Guía para planificar el café de tu negocio</a>
+            <a href="../../index.html" data-contexto="productos" data-pantalla="C10">Ver productos y packs</a>
+          </p>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -203,6 +257,8 @@
 
 </main>
 
+<a class="nm-btn c3-floating-cta" data-c3-floating data-c3-hidden="true" aria-hidden="true" tabindex="-1" href="../../index.html#C04" data-attribution-handoff data-screen="C04" data-surface="landing-hoteles">Arma tu propuesta</a>
+
 <footer class="ld-pie">
   <div class="nm-wrap">
     <div class="ld-pie__marca"><span class="ld-logo" aria-hidden="true"></span><span>Marley Coffee Empresas</span></div>
@@ -213,6 +269,6 @@
 </footer>
 
 <script type="application/json" id="ld-config">{"buyer": "hotel", "slug": "hoteles", "portal": "../../index.html", "pantalla": "C04", "mensajeBase": "base", "mensajes": {"base": {"h1": "El café de tu hotel, del desayuno al evento.", "lead": "Una solución para cada punto de servicio: desayuno, lobby y salones. Máquina en comodato, productos y un equipo que responde. Todo queda por escrito antes de firmar."}, "continuidad": {"h1": "¿Cómo anticipar el café entre desayuno, lobby y salones?", "lead": "Suma los puntos de servicio y días de atención para conversar sobre consumo y reposición."}, "conveniencia": {"h1": "¿Cómo organizar el café entre desayuno, lobby y salones?", "lead": "Cuéntanos tus puntos de servicio y horarios para revisar cómo ordenar el consumo."}, "viabilidad": {"h1": "¿Cuánto café requiere cada punto de servicio?", "lead": "Estima tazas por día y comparte tus horarios. Precios y condiciones se confirman en tu propuesta."}, "confianza": {"h1": "Cada punto de servicio merece condiciones claras.", "lead": "Revisa qué queda por escrito sobre productos, condiciones y quién responde."}, "experiencia": {"h1": "El café de un hotel tiene más de un momento de servicio.", "lead": "Cuéntanos cómo atiendes desayuno, lobby y eventos para que la propuesta considere cada espacio."}}, "calc": {"mode": "tazas", "dias": 30, "eventosMes": 0, "gramos": 9, "porPersona": 1, "unidad": "tazas"}}</script>
-<script src="landing.js?v=20261111-a6-a8" defer></script>
+<script src="landing.js?v=20261113-r3-corr3" defer></script>
 </body>
 </html>

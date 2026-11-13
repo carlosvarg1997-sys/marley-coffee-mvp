@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<title>Referencia de composición · posts Marley Coffee Empresas</title>
+<link rel="stylesheet" href="../../marca/negro-marley.css">
+<style>
+  body{margin:0;background:#2a2a2a;display:grid;gap:40px;justify-content:center;padding:40px}
+  .slide{position:relative;width:1080px;height:1350px;overflow:hidden;background:#0B0B0C;color:#F4F1EA;font-family:var(--nm-text)}
+  /* Capas comunes de la plantilla */
+  .esquinas::before,.esquinas::after,.esquinas i::before,.esquinas i::after{content:"";position:absolute;width:30px;height:30px;border-color:rgba(244,241,234,.55);border-style:solid;border-width:0;z-index:6}
+  .esquinas::before{top:32px;left:32px;border-top-width:2px;border-left-width:2px}
+  .esquinas::after{top:32px;right:32px;border-top-width:2px;border-right-width:2px}
+  .esquinas i::before{bottom:32px;left:32px;border-bottom-width:2px;border-left-width:2px}
+  .esquinas i::after{bottom:32px;right:32px;border-bottom-width:2px;border-right-width:2px}
+  .marca{position:absolute;top:62px;left:76px;right:76px;display:flex;justify-content:space-between;font:500 22px/1 var(--nm-label);letter-spacing:.16em;text-transform:uppercase;color:rgba(244,241,234,.8);z-index:6}
+  .vertical{position:absolute;left:44px;top:675px;transform:translate(-50%,-50%) rotate(-90deg);font:500 18px/1 var(--nm-label);letter-spacing:.34em;text-transform:uppercase;color:rgba(244,241,234,.55);z-index:6}
+  .firma{position:absolute;left:76px;bottom:80px;width:108px;height:6px;background:linear-gradient(90deg,#376A3C 0 33.33%,#F3C900 33.33% 66.66%,#B33A2D 66.66%);z-index:6}
+  .desliza{position:absolute;right:76px;bottom:64px;padding:15px 24px;border:2px solid rgba(244,241,234,.75);font:500 22px/1 var(--nm-label);letter-spacing:.16em;text-transform:uppercase;z-index:6}
+  .grano{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+  .gancho{position:absolute;margin:0;font:800 46px/1.12 var(--nm-text);text-transform:uppercase;letter-spacing:.005em;z-index:4}
+  .gancho mark{background:#F3C900;color:#111;padding:0 .16em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+  .gigante{position:absolute;margin:0;font-family:var(--nm-display);font-weight:500;text-transform:uppercase;line-height:.8;letter-spacing:-.01em;white-space:nowrap;color:#F4F1EA;z-index:3}
+  .apoyo{position:absolute;margin:0;font:400 33px/1.32 var(--nm-text);color:#ECE8DF;z-index:4}
+  .centro{left:0;right:0;text-align:center}
+  /* T · producto */
+  .s-t{background:radial-gradient(ellipse 62% 42% at 50% 64%,rgba(255,206,110,.17) 0%,rgba(255,206,110,.06) 45%,transparent 72%),#0B0B0C}
+  .sujeto{position:absolute;z-index:5;filter:drop-shadow(0 30px 40px rgba(0,0,0,.65))}
+  .sombra{position:absolute;z-index:4;height:46px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.75),transparent)}
+  /* Z · escena */
+  .s-z .fondo{position:absolute;left:0;top:-430px;width:1080px;height:auto;z-index:1}
+  .s-z .velo{position:absolute;inset:0;z-index:2;background:
+    linear-gradient(180deg,rgba(11,11,12,.86) 0%,rgba(11,11,12,.25) 26%,rgba(11,11,12,.10) 46%,rgba(11,11,12,.72) 68%,rgba(11,11,12,.97) 84%)}
+  /* Dato */
+  .s-dato{background:radial-gradient(ellipse 55% 40% at 78% 30%,rgba(243,201,0,.10),transparent 70%),#0B0B0C}
+  .etiqueta{position:absolute;margin:0;font:500 34px/1.15 var(--nm-label);letter-spacing:.12em;text-transform:uppercase;color:#F4F1EA;z-index:4}
+  .ficha{position:absolute;margin:0;display:grid;gap:22px;z-index:4}
+  .ficha div{display:flex;align-items:baseline;gap:16px;font:500 30px/1.2 var(--nm-label);letter-spacing:.08em;text-transform:uppercase}
+  .ficha dt{white-space:nowrap}
+  .ficha div::after{content:"";order:1;flex:1;border-bottom:3px dotted rgba(244,241,234,.45);transform:translateY(-6px)}
+  .ficha dd{order:2;margin:0;white-space:nowrap;color:#F3C900}
+  .nota{position:absolute;margin:0;font:400 26px/1.35 var(--nm-text);color:#B5B1A6;z-index:4}
+</style>
+</head>
+<body class="nm">
+
+<!-- 1 · T · PRODUCTO (portada): gancho centrado → palabra gigante como barra de la T → taza en el eje montada sobre la palabra → apoyo → CTA -->
+<section class="slide s-t" id="ref-t">
+  <div class="esquinas"><i></i></div>
+  <div class="marca"><span>Marley Coffee · Empresas</span><span>Oficio a la vista · 01/06</span></div>
+  <div class="vertical">Empresas</div>
+  <p class="gancho centro" style="top:176px">Antes de elegir <mark>máquina</mark>,<br>cuenta tus</p>
+  <h2 class="gigante" data-ancho="944" data-centro="1" style="top:318px">Tazas</h2>
+  <div class="sombra" data-sombra-de="taza-t"></div>
+  <img class="sujeto" id="taza-t" data-monta="0.17" data-ancho-sujeto="580" data-optico="0.07" src="../../organico/assets/recortes/mug-clean.png" alt="Taza negra Marley Coffee">
+  <p class="apoyo centro" style="top:1120px">Con ese número se ordena todo:<br>máquina, café y reposición.</p>
+  <span class="firma"></span><span class="desliza">Desliza →</span>
+  <div class="grano"></div>
+</section>
+
+<!-- 2 · Z · ESCENA: gancho arriba a la izquierda → foto a sangre (foco en el vertido y la taza) → palabra gigante abajo a la izquierda → CTA abajo a la derecha -->
+<section class="slide s-z" id="ref-z">
+  <img class="fondo" src="../../../recursos/escenas/hero/poster_m.webp" alt="Espresso cayendo en una taza negra Marley Coffee">
+  <div class="velo"></div>
+  <div class="esquinas"><i></i></div>
+  <div class="marca"><span>Marley Coffee · Empresas</span><span>Oficio a la vista · 02/06</span></div>
+  <div class="vertical">Empresas</div>
+  <p class="gancho" style="top:176px;left:76px">El <mark>total</mark> del día<br>no muestra el</p>
+  <p class="apoyo" style="top:780px;left:76px;max-width:700px">Anota a qué horas se juntan las tazas:<br>ahí se decide la máquina.</p>
+  <h2 class="gigante" data-ancho="860" style="left:70px;top:900px">Ritmo</h2>
+  <span class="firma"></span><span class="desliza">Desliza →</span>
+  <div class="grano"></div>
+</section>
+
+<!-- 3 · DATO «CUENTAS CLARAS»: cifra gigante en amarillo → etiqueta → ficha con puntos guía → nota de ejemplo -->
+<section class="slide s-dato" id="ref-dato">
+  <div class="esquinas"><i></i></div>
+  <div class="marca"><span>Marley Coffee · Empresas</span><span>Cuentas claras · 03/06</span></div>
+  <div class="vertical">Empresas</div>
+  <p class="gancho" style="top:176px;left:76px"><mark>Ejemplo</mark> de un día<br>de servicio</p>
+  <h2 class="gigante" style="left:62px;top:330px;font-size:560px;color:#F3C900">80</h2>
+  <p class="etiqueta" style="left:612px;top:560px">Tazas<br>al día</p>
+  <dl class="ficha" style="left:76px;right:76px;top:870px">
+    <div><dt>Mañana</dt><dd>45 tazas</dd></div>
+    <div><dt>Tarde</dt><dd>35 tazas</dd></div>
+    <div><dt>Café al mes · 26 días · 9 g</dt><dd>18,7 kg</dd></div>
+  </dl>
+  <p class="nota" style="left:76px;top:1130px;max-width:760px">Valores de ejemplo. Tu consumo real se confirma en tu propuesta.</p>
+  <span class="firma"></span><span class="desliza">Desliza →</span>
+  <div class="grano"></div>
+</section>
+
+<script>
+/* Ajuste de la plantilla: la palabra gigante llena el ancho pedido y el sujeto la monta en la proporción indicada. */
+(async () => {
+  await document.fonts.ready;
+  document.querySelectorAll('.gigante[data-ancho]').forEach((h) => {
+    const meta = Number(h.dataset.ancho); let lo = 40, hi = 900;
+    for (let i = 0; i < 22; i++) { const m = (lo + hi) / 2; h.style.fontSize = m + 'px'; (h.scrollWidth > meta ? hi = m : lo = m); }
+    h.style.fontSize = lo + 'px';
+    if (h.dataset.centro) h.style.left = ((1080 - h.scrollWidth) / 2) + 'px';
+  });
+  document.querySelectorAll('.sujeto[data-monta]').forEach((img) => {
+    const slide = img.closest('.slide'), h = slide.querySelector('.gigante');
+    const ancho = Number(img.dataset.anchoSujeto); img.style.width = ancho + 'px';
+    const alto = ancho * img.naturalHeight / img.naturalWidth;
+    const fs = parseFloat(h.style.fontSize), base = h.offsetTop + h.offsetHeight;
+    const top = base - Number(img.dataset.monta) * fs;      // tapa ~17 % de la altura de las letras
+    // Centrado óptico: se centra el cuerpo del objeto, no la caja (el asa de la taza pesa a la izquierda).
+    const optico = Number(img.dataset.optico || 0) * ancho;
+    img.style.left = ((1080 - ancho) / 2 + optico) + 'px'; img.style.top = top + 'px';
+    const s = slide.querySelector('[data-sombra-de="' + img.id + '"]');
+    if (s) { s.style.width = (ancho * 0.7) + 'px'; s.style.left = ((1080 - ancho * 0.7) / 2 + optico * 1.6) + 'px'; s.style.top = (top + alto - 26) + 'px'; }
+  });
+  document.body.dataset.listo = '1';
+})();
+</script>
+</body>
+</html>

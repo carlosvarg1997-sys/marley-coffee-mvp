@@ -5,13 +5,97 @@ import csv
 import json
 import unicodedata
 from collections import Counter
+from PIL import Image
 
 HERE = Path(__file__).resolve().parent
+PROJECT_ROOT = HERE.parents[1]
 ORIGIN = 'https://empresas.marleycoffee.cl'
 BASE = ORIGIN + '/captacion/soluciones/'
 CONTENT = ORIGIN + '/captacion/contenidos/'
 DATE = '10 de noviembre de 2026'
 KEYWORD_FILE = HERE.parents[2] / 'ecosistema_captacion_10nov' / 'CLASIFICACION_FRASES_B2B_09NOV.csv'
+OFFER_SOURCE = PROJECT_ROOT / 'recursos' / 'datos' / 'oferta_por_buyer.json'
+PRICE_SOURCE = PROJECT_ROOT / 'recursos' / 'datos' / 'precios_cotizacion_19oct.json'
+ASSET_VERSION = '20261113-r3-corr3'
+OFFER_DATA = json.loads(OFFER_SOURCE.read_text(encoding='utf-8'))
+PRICE_DATA = json.loads(PRICE_SOURCE.read_text(encoding='utf-8'))
+BUYER_BY_LANDING = {buyer['landing']: buyer for buyer in OFFER_DATA['buyers']}
+PRICE_BY_KEY = {line['k']: line for line in PRICE_DATA['lineas']}
+
+def price_clp(value):
+    return '$' + f'{int(value):,}'.replace(',', '.')
+
+def asset_size(relative_path):
+    with Image.open(PROJECT_ROOT / relative_path) as image:
+        return image.size
+
+def render_reading_guide(items):
+    links = ''.join(f'<a href="{href}">{escape(label)}</a>' for label, href in items)
+    return f'<nav class="sol-reading-guide" aria-label="En esta página"><strong>En esta página</strong>{links}</nav>'
+
+def render_floating_cta(surface):
+    return (f'<a class="nm-btn sol-floating-cta" data-sol-floating data-sol-route href="../../index.html#C03" '
+            f'data-screen="C03" data-surface="{escape(surface, quote=True)}">'
+            'Arma tu propuesta</a>')
+
+def render_offer(slug):
+    buyer = BUYER_BY_LANDING.get(slug)
+    if not buyer:
+        return ''
+    machine = OFFER_DATA['maquinas'][buyer['maquina']]
+    machine_path = machine['foto']
+    machine_width, machine_height = asset_size(machine_path)
+    line_keys = buyer['lineas_clave']
+    if not 4 <= len(line_keys) <= 6:
+        raise ValueError(f'La oferta de {slug} debe incluir entre 4 y 6 productos; obtuvo {len(line_keys)}')
+    products = []
+    product_total = 0
+    for key in line_keys:
+        line = PRICE_BY_KEY.get(key)
+        if not line:
+            raise ValueError(f'Falta el producto {key} de la oferta {slug}')
+        image_path = line.get('foto', '')
+        if not image_path:
+            raise ValueError(f'Falta la foto del producto {key} de la oferta {slug}')
+        width, height = asset_size(image_path)
+        image = (f'<img src="../../{escape(image_path, quote=True)}" width="{width}" height="{height}" '
+                 f'alt="{escape(line["t"], quote=True)}" loading="lazy" decoding="async">')
+        price = line.get('precio')
+        if price is None:
+            raise ValueError(f'Falta el precio del producto {key} en la oferta {slug}')
+        product_total += int(price)
+        format_text = line.get('d') or 'Formato a confirmar'
+        products.append(
+            f'<li class="sol-offer-item" data-offer-line="{escape(key, quote=True)}" data-price="{int(price)}">'
+            f'{image}<div><strong>{escape(line["t"])}</strong><span>{escape(format_text)}</span>'
+            f'<b>{price_clp(price)} neto</b></div></li>'
+        )
+    kit_filter_total = int(PRICE_DATA['instalacion']['precio']) + int(PRICE_DATA['filtro']['precio'])
+    pack_total = product_total + kit_filter_total
+    reference_total = int(PRICE_DATA['totales']['antes_de_instalar'])
+    return f'''<section class="sol-offer" id="tu-oferta" data-offer-block aria-labelledby="sol-oferta-{escape(slug, quote=True)}">
+  <p class="nm-eyebrow">Tu oferta · {escape(buyer['etiqueta'])}</p>
+  <h2 class="nm-h2" id="sol-oferta-{escape(slug, quote=True)}">{escape(buyer['mensaje'])}</h2>
+  <div class="sol-offer-grid">
+    <article class="sol-offer-machine" data-offer-machine="{escape(buyer['maquina'], quote=True)}">
+      <img src="../../{escape(machine_path, quote=True)}" width="{machine_width}" height="{machine_height}" alt="Máquina de café para {escape(buyer['etiqueta'], quote=True)}" loading="lazy" decoding="async">
+      <div><h3>{escape(machine['nombre'])}</h3><p class="sol-offer-machine-specs"><strong>{escape(machine['tipo'])}</strong><br>{escape(machine['tazas'])}</p><p>{escape(OFFER_DATA['modalidad_maquina'])}</p></div>
+    </article>
+    <div class="sol-offer-products"><h3>Productos del pack</h3><ul>{''.join(products)}</ul></div>
+  </div>
+  <div class="sol-offer-total" data-offer-summary>
+    <div class="sol-offer-metric" data-offer-products-total="{product_total}"><span>Productos del pack</span><strong>{price_clp(product_total)}</strong></div>
+    <div class="sol-offer-metric" data-offer-kit-filter-total="{kit_filter_total}"><span>Kit de instalación y filtro</span><strong>{price_clp(kit_filter_total)}</strong></div>
+    <div class="sol-offer-metric" data-offer-total="{pack_total}"><span>Total del pack de partida</span><strong>{price_clp(pack_total)}</strong></div>
+    <a class="nm-btn" data-sol-route href="../../index.html#C03" data-screen="C03" data-surface="solucion-{escape(slug, quote=True)}">Arma tu propuesta</a>
+    <p class="sol-offer-reference">Referencia: la cotización completa de Marley del 19-oct-2026, con todas las líneas, suma {price_clp(reference_total)} neto con kit y filtro.</p>
+  </div>
+  <details class="sol-offer-conditions"><summary>Condiciones a confirmar</summary><ul>
+    <li>Compra mínima mensual: a confirmar.</li><li>Plazo de entrega: a confirmar.</li><li>Compatibilidad de insumos con la máquina: a confirmar.</li>
+  </ul></details>
+  <p class="sol-offer-note">{escape(PRICE_DATA['nota_cliente'])}</p>
+</section>'''
+
 
 def norm(value):
     return ''.join(c for c in unicodedata.normalize('NFKD',value.casefold().strip()) if not unicodedata.combining(c))
@@ -50,7 +134,7 @@ PAGES = [
       seo_title='Café para hoteles | Marley Coffee',
       description='Planifica el café de un hotel con ocupación, horarios de desayuno, consumo observado, reposición y necesidades del equipo.',
       answer='Para planificar el café de un hotel, estima cuántos huéspedes desayunan, en qué horario se concentra el servicio y qué consumo registras. Después revisa equipo, reposición, responsables y condiciones específicas en una propuesta escrita.',
-      how=[('1. Define los momentos de servicio','Distingue desayuno, reuniones y otros puntos donde se sirven bebidas.'),('2. Estima la demanda','Usa ocupación y consumo observado; no conviertas un ejemplo hipotético en una previsión.'),('3. Revisa operación e higiene','Confirma espacio, personal, limpieza, reposición e instrucciones del fabricante y reglas aplicables.')],
+      how=[('1. Define los momentos de servicio','Distingue desayuno, reuniones y otros puntos donde se sirven bebidas.'),('2. Estima la demanda','Usa ocupación y consumo observado; no conviertas un escenario hipotético en una previsión.'),('3. Revisa operación e higiene','Confirma espacio, personal, limpieza, reposición e instrucciones del fabricante y reglas aplicables.')],
       faqs=[('¿Cómo calculo el café para el desayuno de un hotel?','Multiplica huéspedes que desayunan por tazas estimadas por persona y contrasta con los registros reales del establecimiento.'),('¿La máquina puede atender una hora punta?','Pide la capacidad del modelo y compárala con tu volumen concentrado, la carta y el flujo del desayuno.'),('¿El servicio considera café para reuniones?','Detalla cada punto de servicio y su demanda; disponibilidad y condiciones se confirman en la propuesta.')],
       guides=['cafe-desayuno-hotel','como-evitar-quedarse-sin-cafe','como-elegir-maquina-cafe'],
       compare=[('Servicio','Desayuno, reuniones y puntos de autoservicio.'),('Demanda','Ocupación, horario punta y consumo observado.'),('Operación','Equipo, insumos, reposición, limpieza y responsables.')]),
@@ -113,7 +197,7 @@ def scene_photo(visual, slug):
     source=f'<source media="(max-width: 560px)" srcset="../../recursos/escenas/{mobile}">' if mobile else ''
     width=visual.get('width',1440)
     height=visual.get('height',804)
-    return f'''<figure class="ct-feature-bleed ct-scene-{slug}"><picture>{source}<img src="{photo}" width="{width}" height="{height}" alt="{escape(visual['alt'],quote=True)}" loading="lazy" decoding="async"></picture></figure>'''
+    return f'''<figure class="ct-feature-bleed ct-scene-{slug}"><picture>{source}<img src="{photo}" width="{width}" height="{height}" alt="{escape(visual['alt'],quote=True)}" loading="eager" decoding="async"></picture></figure>'''
 
 def fact_rows(rows):
     return ''.join(f'<tr><th scope="row">{escape(k)}</th><td class="ct-fact-leader" aria-hidden="true"><span></span></td><td class="ct-fact-value">{escape(v)}</td></tr>' for k,v in rows)
@@ -170,9 +254,9 @@ def schema(title, description, canonical, slug=None, faqs=None, schema_name=None
 
 def head(title, description, canonical, body_class, slug=None, faqs=None, schema_name=None):
     ld = schema(title,description,canonical,slug,faqs,schema_name)
-    return f'''<!doctype html><html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0B0B0C"><title>{escape(title)}</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{canonical}"><link rel="stylesheet" href="../marca/negro-marley.css"><link rel="stylesheet" href="../contenidos/contenidos.css"><link rel="stylesheet" href="soluciones.css">{ld}</head><body class="nm {body_class}" data-surface="{escape(body_class,quote=True)}"><a class="nm-skip" href="#contenido">Saltar al contenido</a><header class="ct-barra"><div class="nm-wrap"><a href="index.html" class="ct-brand"><span class="ld-logo" aria-hidden="true"></span><span>Empresas</span></a><nav aria-label="Navegación principal"><a class="ct-head-link" href="../contenidos/index.html">Contenidos</a><a class="ct-head-link" href="index.html">Soluciones</a></nav></div></header>'''
+    return f'''<!doctype html><html lang="es-CL"><head><meta charset="utf-8"><link rel="icon" type="image/webp" href="../../recursos/marca/logo.webp"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0B0B0C"><title>{escape(title)}</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{canonical}"><link rel="stylesheet" href="../marca/negro-marley.css"><link rel="stylesheet" href="../contenidos/contenidos.css"><link rel="stylesheet" href="soluciones.css?v={ASSET_VERSION}">{ld}</head><body class="nm {body_class}" data-surface="{escape(body_class,quote=True)}"><a class="nm-skip" href="#contenido">Saltar al contenido</a><header class="ct-barra"><div class="nm-wrap"><a href="index.html" class="ct-brand"><span class="ld-logo" aria-hidden="true"></span><span>Empresas</span></a><nav aria-label="Navegación principal"><a class="ct-head-link" href="../contenidos/index.html">Contenidos</a><a class="ct-head-link" href="index.html">Soluciones</a></nav></div></header>'''
 
-FOOTER = f'''<footer class="ct-footer"><div class="nm-wrap"><p>Marley Coffee Empresas · Contenido de orientación.</p><p>Dominio de producción pendiente de confirmación.</p></div></footer><script src="../contenidos/contenidos.js" defer></script></body></html>'''
+FOOTER = f'''<footer class="ct-footer"><div class="nm-wrap"><p>Marley Coffee Empresas · Contenido de orientación.</p></div></footer><script src="../contenidos/contenidos.js" defer></script><script src="soluciones.js?v={ASSET_VERSION}" defer></script></body></html>'''
 
 def render_page(p, groups):
     canonical = BASE+p['slug']+'.html'
@@ -184,9 +268,16 @@ def render_page(p, groups):
     legal_note = ('<p class="sol-source"><strong>Referencia legal:</strong> <a href="https://www.bcn.cl/leychile/navegar?idNorma=172986" target="_blank" rel="noopener noreferrer">Código Civil de Chile, artículo 2174</a> · consultado el '+DATE+'.</p>') if p['slug']=='oficinas' else ''
     cta = f'../../index.html?utm_source=solucion_organica&utm_medium=owned_content&utm_campaign=solucion_{p["slug"]}&utm_content=portal_cta#C03'
     photo=scene_photo(visual,p['slug'])
-    machine=f'<img class="sol-machine" src="../../recursos/maquinas/{visual["machine"]}" width="{visual["machine_width"]}" height="{visual["machine_height"]}" alt="" aria-hidden="true" fetchpriority="high">'
+    buyer = BUYER_BY_LANDING.get(p['slug'])
+    machine_path = OFFER_DATA['maquinas'][buyer['maquina']]['foto'] if buyer else 'recursos/maquinas/' + visual['machine']
+    machine_width, machine_height = asset_size(machine_path)
+    machine=f'<img class="sol-machine" src="../../{escape(machine_path, quote=True)}" width="{machine_width}" height="{machine_height}" alt="" aria-hidden="true" fetchpriority="high">'
+    offer = render_offer(p['slug'])
+    guide_items = [('Oferta', '#tu-oferta'), ('Pasos', '#como-funciona'), ('Propuesta', '#propuesta')]
+    guide = render_reading_guide(guide_items)
+    floating_cta = render_floating_cta('solucion-' + p['slug'])
     html = head(p['seo_title'],p['description'],canonical,'sol-'+p['slug'],p['slug'],p['faqs'],visual['h1'])
-    return html+f'''<main id="contenido" class="ct-article nm-wrap sol-page"><a class="ct-back" href="index.html">← Soluciones por negocio</a><article><header class="ct-editorial-head sol-hero"><p class="nm-eyebrow">Marley Coffee · Empresas · {escape(p['buyer'])}</p><span class="ct-display-word" aria-hidden="true">{escape(visual['word'])}</span>{machine}<h1 class="nm-h1">{escape(visual['h1'])}</h1></header><section class="ct-answer" aria-label="Respuesta directa"><span class="ct-kicker">En breve</span><p>{escape(p['answer'])}</p></section>{photo}<div class="ct-content"><section aria-labelledby="como-funciona"><h2 id="como-funciona">Cómo funciona la evaluación</h2><ol>{how}</ol><p>Compatibilidad, disponibilidad, servicios, soporte y condiciones comerciales se confirman para cada operación en una propuesta.</p></section><section aria-labelledby="puntos-comparar"><h2 id="puntos-comparar">Qué comparar</h2><div class="ct-table-wrap"><table class="ct-table ct-fact-table"><tbody>{table}</tbody></table></div></section><section class="ct-faqs" aria-labelledby="preguntas"><h2 id="preguntas">Preguntas habituales de compradores</h2>{faq}</section>{legal_note}<section class="ct-related" aria-labelledby="guias-rel"><h2 id="guias-rel">Guías relacionadas</h2><ul>{guides}</ul><p><a href="../contenidos/index.html">Ver las seis guías y calculadoras</a></p></section></div><aside class="ct-next"><h2>Revisa opciones para tu operación.</h2><p>Comparte tus necesidades en el portal; las condiciones se confirman en una propuesta.</p><a class="nm-btn" href="{cta}" data-attribution-handoff data-screen="C03" data-surface="solucion-{p['slug']}">Ir al portal <span aria-hidden="true">→</span></a></aside></article></main>'''+FOOTER
+    return html+f'''<main id="contenido" class="ct-article nm-wrap sol-page"><a class="ct-back" href="index.html">← Soluciones por negocio</a>{guide}<article><header class="ct-editorial-head sol-hero"><p class="nm-eyebrow">Marley Coffee · Empresas · {escape(p['buyer'])}</p><span class="ct-display-word" aria-hidden="true">{escape(visual['word'])}</span>{machine}<h1 class="nm-h1">{escape(visual['h1'])}</h1></header><section class="ct-answer" aria-label="Respuesta directa"><span class="ct-kicker">En breve</span><p>{escape(p['answer'])}</p></section>{offer}{photo}<div class="ct-content"><details class="sol-disclosure" id="como-funciona"><summary>Cómo funciona la evaluación</summary><section aria-labelledby="como-funciona-titulo"><h2 class="nm-sr" id="como-funciona-titulo">Cómo funciona la evaluación</h2><ol>{how}</ol><p>Compatibilidad, disponibilidad, servicios, soporte y condiciones comerciales se confirman para cada operación en una propuesta.</p></section></details><details class="sol-disclosure" id="puntos-comparar"><summary>Qué comparar</summary><section aria-labelledby="puntos-comparar-titulo"><h2 class="nm-sr" id="puntos-comparar-titulo">Qué comparar</h2><div class="ct-table-wrap"><table class="ct-table ct-fact-table"><tbody>{table}</tbody></table></div></section></details><details class="sol-disclosure sol-faq-disclosure" id="preguntas"><summary>Preguntas habituales de compradores</summary><section class="ct-faqs" aria-labelledby="preguntas-titulo"><h2 class="nm-sr" id="preguntas-titulo">Preguntas habituales de compradores</h2>{faq}</section></details><details class="sol-disclosure" id="guias-rel"><summary>Guías relacionadas</summary><section class="ct-related" aria-labelledby="guias-rel-titulo"><h2 class="nm-sr" id="guias-rel-titulo">Guías relacionadas</h2><ul>{guides}</ul><p><a href="../contenidos/index.html">Ver las seis guías y calculadoras</a></p>{legal_note}</section></details></div><aside class="ct-next" id="propuesta"><h2>Revisa opciones para tu operación.</h2><p>Comparte tus necesidades en el portal; las condiciones se confirman en una propuesta.</p><a class="nm-btn" href="{cta}" data-attribution-handoff data-screen="C03" data-surface="solucion-{p['slug']}">Ir al portal <span aria-hidden="true">→</span></a></aside></article></main>{floating_cta}'''+FOOTER
 
 CONTENT_GUIDES = [
  {'slug':'cuanto-cafe-necesita-mi-negocio','title':'¿Cuánto café necesita mi negocio al mes?'},
@@ -203,11 +294,16 @@ def render_index(keyword_map):
     canonical=BASE+'index.html'
     visual=INDEX_VISUAL
     cards=''.join(f'<a class="ct-card sol-card" href="{p["slug"]}.html"><span class="ct-card-kind">{escape(p["buyer"])}</span><h2>{escape(p["title"])}</h2><p>{escape(p["answer"].split(".")[0])}.</p><span class="ct-card-arrow">Explorar <span aria-hidden="true">→</span></span></a>' for p in PAGES)
+    routes=''.join(f'<a class="sol-buyer-route" href="../landing/{escape(b["landing"], quote=True)}.html#oferta">{escape(b["etiqueta"])}</a>' for b in OFFER_DATA["buyers"])
     group_total=sum(len(group['phrases']) for group in keyword_map['groups'].values())
     counts=keyword_map['counts']
-    note=f'<p class="sol-keyword-note">Mapa basado en <code>{escape(keyword_map["source"]["file"])}</code>, clasificación del 9 de noviembre de 2026: {group_total} frases coherentes en grupos exclusivos. Las clases investigar ({counts["investigar"]}) y revision ({counts["revision"]}) se documentan aparte; no se asignan a páginas comerciales.</p>'
+    note=f'<p class="sol-keyword-note-details">Mapa basado en <code>{escape(keyword_map["source"]["file"])}</code>, clasificación del 9 de noviembre de 2026: {group_total} frases coherentes en grupos exclusivos. Las clases investigar ({counts["investigar"]}) y revisión ({counts["revision"]}) se documentan aparte; no se asignan a páginas comerciales.</p>'
     machine=f'<img class="sol-machine sol-index-machine" src="../../recursos/maquinas/{visual["machine"]}" width="{visual["machine_width"]}" height="{visual["machine_height"]}" alt="" aria-hidden="true" fetchpriority="high">'
-    return head(title,description,canonical,'sol-index')+f'''<main id="contenido" class="sol-index-main"><section class="ct-hero sol-index-hero"><picture><source media="(max-width: 560px)" srcset="../../recursos/escenas/{visual['mobile']}"><img src="../../recursos/escenas/{visual['photo']}" width="1440" height="804" alt="" fetchpriority="high"></picture><div class="nm-wrap"><div class="ct-hero-copy"><p class="nm-eyebrow">Marley Coffee · Empresas</p><span class="ct-display-word" aria-hidden="true">{escape(visual['word'])}</span>{machine}<h1 class="nm-h1">{escape(visual['h1'])}</h1><p class="nm-lead">Revisa qué información conviene preparar para evaluar una propuesta acorde a tu operación.</p><a class="nm-btn" href="#soluciones">Explora tu rubro <span aria-hidden="true">→</span></a></div></div></section><section class="nm-wrap sol-index-answer"><div class="ct-answer" aria-label="Respuesta directa"><span class="ct-kicker">En breve</span><p>La mejor ruta depende de dónde servirás el café y cómo trabaja tu equipo. Elige tu tipo de negocio para revisar los datos que conviene preparar y comparar.</p></div></section><section class="nm-wrap" id="soluciones"><div class="sol-grid">{cards}</div>{note}<p><a class="nm-btn sol-hub-link" href="../contenidos/index.html">Ir al hub de contenidos <span aria-hidden="true">→</span></a></p></section></main>'''+FOOTER
+    guide=render_reading_guide([('En breve','#en-breve'),('Negocio','#soluciones'),('Guías de búsqueda','#guias')])
+    floating_cta=render_floating_cta('solucion-index')
+    return head(title,description,canonical,'sol-index')+f'''<main id="contenido" class="sol-index-main">{guide}<section class="ct-hero sol-index-hero"><picture><source media="(max-width: 560px)" srcset="../../recursos/escenas/{visual['mobile']}"><img src="../../recursos/escenas/{visual['photo']}" width="1440" height="804" alt="" fetchpriority="high"></picture><div class="nm-wrap"><div class="ct-hero-copy"><p class="nm-eyebrow">Marley Coffee · Empresas</p><span class="ct-display-word" aria-hidden="true">{escape(visual['word'])}</span>{machine}<h1 class="nm-h1">{escape(visual['h1'])}</h1><p class="nm-lead">Revisa qué información conviene preparar para evaluar una propuesta acorde a tu operación.</p><div class="sol-index-actions"><a class="nm-btn" href="#soluciones">Explora tu rubro <span aria-hidden="true">→</span></a><a class="nm-btn nm-btn--linea sol-index-proposal" data-sol-route href="../../index.html#C03" data-screen="C03" data-surface="solucion-index-hero">Arma tu propuesta</a></div></div></div></section><section class="nm-wrap sol-index-answer" id="en-breve"><div class="ct-answer" aria-label="Respuesta directa"><span class="ct-kicker">En breve</span><p>La mejor ruta depende de dónde servirás el café y cómo trabaja tu equipo. Elige tu tipo de negocio para revisar los datos que conviene preparar y comparar.</p></div><h2 class="nm-h2 sol-index-routes-title">¿Qué negocio tienes?</h2><nav class="sol-buyer-routes" id="soluciones" aria-label="Elige tu tipo de negocio">{routes}</nav></section><section class="nm-wrap sol-index-content"><details class="sol-index-secondary"><summary>Ver soluciones por rubro</summary><div class="sol-grid">{cards}</div></details><details class="sol-keywords" id="guias"><summary>Cómo se organizan las búsquedas <span class="sol-keyword-note">{escape(keyword_map['source']['file'])}</span></summary>{note}</details><p><a class="nm-btn sol-hub-link" href="../contenidos/index.html">Ir al hub de contenidos <span aria-hidden="true">→</span></a></p></section></main>{floating_cta}'''+FOOTER
+
+
 
 if __name__ == '__main__':
     HERE.mkdir(parents=True,exist_ok=True)

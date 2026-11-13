@@ -222,10 +222,10 @@ async function completeJourney(browser,base,pathway,participant) {
   await frame.getByRole('button',{name:'Repetir pedido'}).first().click();
   await frame.getByRole('button',{name:'Confirmar pedido'}).click();
   await wheel(host,frame,`${pathway}/${participant}/C09 reposición E7 @390`);
-  const support=frame.locator('form[data-cycle-form="support"]');
-  await support.locator('[name="type"]').selectOption({label:'Producto o formato'});
-  await support.locator('[name="detail"]').fill('Necesito revisar el formato para mi operación.');
-  await support.locator('button[type="submit"]').click();
+  // Diseño R3 (13-nov): ayuda por tipo de problema; «Hablar con una persona» abre el caso.
+  await frame.locator('[data-r3-support-type="El café no sale como antes"]').click();
+  await frame.locator('[data-r3-talk]').click();
+  await frame.getByText(/Caso \S+ abierto/).first().waitFor();
   const csat=frame.locator('form[data-cycle-form="csat"]');
   await csat.locator('[name="score"]').selectOption('4');
   await csat.locator('[name="comment"]').fill('La atención fue clara y pude dejar mi consulta.');

@@ -310,6 +310,52 @@
 
   /* ---------- CTA internos ---------- */
   $$('[data-cta]').forEach((el) => el.addEventListener('click', () => registrar('cta_click', { surface: 'landing-' + cfg.slug + '-' + el.dataset.cta })));
+  $$('[data-attribution-handoff]:not([data-c3-floating])').forEach((anchor) => {
+    anchor.href = urlConOrigen(anchor.getAttribute('href'), anchor.dataset.surface || 'landing-' + cfg.slug + '-offer', anchor.dataset.screen || 'C04');
+  });
+
+  /* ---------- CTA flotante R3: atribución y área segura ---------- */
+  const floatingCta = $('[data-c3-floating]');
+  if (floatingCta) {
+    floatingCta.href = urlConOrigen(floatingCta.getAttribute('href'), 'landing-' + cfg.slug + '-floating-cta', 'C04');
+    floatingCta.addEventListener('click', () => registrar('cta_click', { surface: 'landing-' + cfg.slug + '-floating-cta' }));
+    let floatingFrame = 0;
+    const setFloatingHidden = (hidden) => {
+      floatingCta.dataset.c3Hidden = String(hidden);
+      floatingCta.setAttribute('aria-hidden', String(hidden));
+      floatingCta.tabIndex = hidden ? -1 : 0;
+    };
+    const updateFloatingCta = () => {
+      floatingFrame = 0;
+      const button = floatingCta.getBoundingClientRect();
+      const sectionInView = $$('[data-offer-block], #contacto, #ld-form-caja').some((el) => {
+        const rect = el.getBoundingClientRect();
+        return rect.bottom > 0 && rect.top < window.innerHeight;
+      });
+      const overlapsAction = $$('a[href], button, input, select, textarea, summary, h1, h2, h3, p, li, label, output').some((el) => {
+        if (el === floatingCta || el.closest('[hidden], [inert]')) return false;
+        const style = getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden') return false;
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 && rect.right > button.left && rect.left < button.right
+          && rect.bottom > button.top && rect.top < button.bottom;
+      });
+      setFloatingHidden(sectionInView || overlapsAction);
+    };
+    const scheduleFloatingUpdate = () => {
+      if (!floatingFrame) floatingFrame = requestAnimationFrame(updateFloatingCta);
+    };
+    setFloatingHidden(true);
+    scheduleFloatingUpdate();
+    window.addEventListener('scroll', scheduleFloatingUpdate, { passive: true });
+    window.addEventListener('resize', scheduleFloatingUpdate, { passive: true });
+    window.addEventListener('orientationchange', scheduleFloatingUpdate, { passive: true });
+    document.addEventListener('visibilitychange', scheduleFloatingUpdate);
+    if ('ResizeObserver' in window) {
+      const floatingResizeObserver = new ResizeObserver(scheduleFloatingUpdate);
+      floatingResizeObserver.observe(document.body);
+    }
+  }
 
   /* ---------- Formulario progresivo: estados A, B y C ---------- */
   const form = $('#ld-form');

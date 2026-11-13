@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Cálculo de consumo de café | Marley Coffee Empresas</title>
-<meta name="description" content="Calcula un escenario mensual de café con los datos que ingreses. Los valores son ejemplos editables y las condiciones se confirman en tu propuesta.">
+<meta name="description" content="Calcula un escenario mensual de café con los datos que ingreses. Los valores son referenciales y editables y las condiciones se confirman en tu propuesta.">
 <meta name="theme-color" content="#0B0B0C">
 <link rel="icon" type="image/webp" href="../../recursos/marca/logo.webp">
 <link rel="preconnect" href="https://coffeemarleycl.vtexassets.com" crossorigin>
 <link rel="preload" as="image" href="../../recursos/escenas/hero/poster_m.webp" media="(max-width: 760px)">
 <link rel="preload" as="image" href="../../recursos/escenas/hero/poster.webp" media="(min-width: 761px)">
 <link rel="stylesheet" href="../marca/negro-marley.css">
-        <link rel="stylesheet" href="landing.css?v=20261112-corta">
+<link rel="stylesheet" href="landing.css?v=20261113-r3-corr3">
 </head>
 <body class="nm">
 <a class="nm-skip" href="#contenido">Saltar al contenido</a>
@@ -25,6 +25,8 @@
 </header>
 
 <main id="contenido">
+
+<nav class="ld-reading-guide nm-wrap" aria-label="En esta página"><strong>En esta página</strong><a href="#buyer-routes">Negocio</a><a href="#calculo">Consumo</a><a href="#pasos">Pasos</a><a href="#contacto">Propuesta</a></nav>
 
   <section class="ld-hero" aria-labelledby="ld-h1">
     <div class="ld-hero__media">
@@ -41,6 +43,7 @@
         <p class="nm-lead" id="ld-lead">Calcula un escenario mensual y cuéntanos cómo ofreces café. Los supuestos son editables y las condiciones se confirman en tu propuesta.</p>
         <div class="ld-hero__accion" id="ld-hero-accion">
           <a class="nm-btn" href="#contacto" data-cta="hero">Ver mi solución <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="nm-btn nm-btn--linea ld-generic-proposal" href="../../index.html#C04" data-attribution-handoff data-screen="C04" data-surface="landing-empresas">Arma tu propuesta</a>
           <button class="nm-btn nm-btn--linea ld-video-toggle" id="ld-video-toggle" type="button" aria-controls="ld-hero-video" aria-pressed="false" hidden>Reproducir video</button>
           <p class="ld-motion-status" id="ld-motion-status" role="status" hidden>Video detenido por tu preferencia de movimiento. Se mantiene la imagen fija.</p>
           <p class="nm-gano">Formulario corto y un diagnóstico de 3 pasos. Pedir tu propuesta no te obliga a nada.</p>
@@ -55,8 +58,15 @@
     </div>
   </section>
 
+
+
+<section class="nm-seccion ld-buyer-routes" id="buyer-routes" aria-labelledby="buyer-routes-title"><div class="nm-wrap"><h2 class="nm-h2" id="buyer-routes-title">¿Qué negocio tienes?</h2><nav class="ld-buyer-routes__grid" aria-label="Elige tu tipo de negocio"><a class="ld-buyer-route" href="oficinas.html#oferta">Oficinas</a><a class="ld-buyer-route" href="eventos-catering.html#oferta">Eventos o catering</a><a class="ld-buyer-route" href="restaurantes.html#oferta">Restaurantes</a><a class="ld-buyer-route" href="cafeterias.html#oferta">Cafeterías</a><a class="ld-buyer-route" href="hoteles.html#oferta">Hoteles</a><a class="ld-buyer-route" href="panaderias.html#oferta">Panaderías</a><a class="ld-buyer-route" href="conveniencia.html#oferta">Tiendas de conveniencia</a></nav></div></section>
+
   <section class="nm-seccion" id="calculo" aria-labelledby="calc-titulo">
-    <div class="nm-wrap ld-calc">
+    <div class="nm-wrap">
+      <details class="ld-disclosure">
+        <summary class="ld-disclosure__summary">Ver cálculo de consumo</summary>
+        <div class="ld-calc">
       <div class="nm-revela">
         <p class="nm-eyebrow">Parte por aquí</p>
         <h2 class="nm-h2" id="calc-titulo">¿Cuántas tazas se sirven al día?</h2>
@@ -81,7 +91,7 @@
             </div>
             <div>
               <label class="nm-etiqueta" for="c-gramos">Gramos de café por taza</label>
-              <div class="ld-gramos"><input id="c-gramos" type="number" inputmode="decimal" min="5" max="25" step="0.5" value="9"><span>supuesto de ejemplo</span></div>
+              <div class="ld-gramos"><input id="c-gramos" type="number" inputmode="decimal" min="5" max="25" step="0.5" value="9"><span>referencial</span></div>
             </div>
           </div>
         </div>
@@ -92,56 +102,77 @@
         <ul class="ld-resultado__ficha" id="calc-ficha" aria-label="Detalle del cálculo">
           <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Tazas al día</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-base">80 tazas</output></li>
           <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Días de atención</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-dias">26 días</output></li>
-          <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Gramos por taza (ejemplo)</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-gramos">9 g</output></li>
+          <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Gramos por taza (referencial)</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-gramos">9 g</output></li>
           <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Tazas al mes</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-tazas">2.080 tazas</output></li>
           <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Café al mes</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-kg">18,7 kg</output></li>
         </ul>
         <p class="nm-nota">Fórmula: tazas al día × días de atención al mes × gramos por taza ÷ 1.000.</p>
-        <p class="nm-nota">Supuestos: Los valores iniciales son ejemplos editables. Ajusta las tazas, los días de atención y los gramos por taza.</p>
-        <p class="nm-nota">Es un cálculo orientativo. Los gramos por taza son un supuesto: cámbialos por tu receta. El consumo real se ajusta en tu propuesta.</p>
+        <p class="nm-nota">Supuestos: Los valores iniciales son referenciales y editables. Ajusta las tazas, los días de atención y los gramos por taza.</p>
+        <details class="ld-calc-more"><summary>Alcance de este cálculo</summary><p class="nm-nota">Es un cálculo orientativo. Los gramos por taza son un supuesto: cámbialos por tu receta. El consumo real se ajusta en tu propuesta.</p></details>
         <a class="nm-btn nm-btn--ancho" href="#contacto" data-cta="calculo">Usar este cálculo en mi propuesta <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
+        </div>
+      </details>
     </div>
   </section>
 
-  <section class="nm-seccion nm-seccion--carbon ld-pasos" aria-labelledby="pasos-titulo">
+  <section class="nm-seccion nm-seccion--carbon ld-pasos" id="pasos" aria-labelledby="pasos-titulo">
     <div class="nm-wrap">
       <div class="ld-pasos__cabeza">
-        <div class="nm-revela">
+        <div>
           <p class="nm-eyebrow">Cómo funciona</p>
           <h2 class="nm-h2" id="pasos-titulo">De tus tazas a tu propuesta, en tres pasos.</h2>
         </div>
-        <img class="ld-pasos__maquina nm-revela" data-retraso="1" src="../../recursos/maquinas/oficina.webp" alt="Imagen referencial de una máquina automática de café" width="444" height="442" loading="lazy" decoding="async">
       </div>
       <ol class="ld-pasos__grilla">
         <li class="nm-card ld-paso nm-revela" data-retraso="0"><span class="nm-paso-num">01</span><h3 class="nm-h3">Cuéntanos sobre el servicio</h3><p class="nm-p">Tazas, días y cómo se ofrece el café.</p></li>
         <li class="nm-card ld-paso nm-revela" data-retraso="1"><span class="nm-paso-num">02</span><h3 class="nm-h3">Recibe tu recomendación</h3><p class="nm-p">Máquina y productos según tu servicio. Si ya sabes qué máquina quieres, partimos de ahí.</p></li>
         <li class="nm-card ld-paso nm-revela" data-retraso="2"><span class="nm-paso-num">03</span><h3 class="nm-h3">Instalación y reposición</h3><p class="nm-p">Coordinamos la puesta en marcha y la reposición de tus productos.</p></li>
       </ol>
-      <p class="nm-nota">Las condiciones del servicio se confirman por escrito en tu propuesta.</p>
-      <p class="ld-contexto">
-        <a href="../../guia-servicio-cafe.html" data-contexto="guia">Guía para planificar el café de tu negocio</a>
-        <a href="../../index.html" data-contexto="productos" data-pantalla="C10">Ver productos y packs</a>
-      </p>
     </div>
   </section>
 
-  <section class="nm-seccion" aria-labelledby="hoja-titulo">
-    <div class="nm-wrap">
-      <div class="nm-hoja nm-revela">
-        <div class="ld-hoja__cabeza">
-          <p class="nm-eyebrow">Cuentas claras</p>
-          <h2 class="nm-h2" id="hoja-titulo">Lo que queda por escrito antes de firmar.</h2>
-          <hr class="nm-firma">
-        </div>
-        <ul class="ld-hoja__grilla">
+  <section class="nm-seccion ld-secondary" aria-label="Detalles de la propuesta">
+    <div class="nm-wrap ld-secondary__items">
+      <details class="ld-disclosure">
+        <summary class="ld-disclosure__summary">Ver qué queda por escrito</summary>
+        <div class="ld-disclosure__body">
+          <div class="nm-hoja nm-revela">
+            <div class="ld-hoja__cabeza">
+              <p class="nm-eyebrow">Cuentas claras</p>
+              <h2 class="nm-h2" id="hoja-titulo">Lo que queda por escrito antes de firmar.</h2>
+              <hr class="nm-firma">
+            </div>
+            <ul class="ld-hoja__grilla">
           <li class="ld-hoja__item"><h3 class="nm-h3">Qué incluye</h3><span class="ld-hoja__guia" aria-hidden="true"></span><p>La máquina, los productos y los servicios de tu propuesta, uno por uno.</p></li>
           <li class="ld-hoja__item"><h3 class="nm-h3">Quién responde</h3><span class="ld-hoja__guia" aria-hidden="true"></span><p>A quién llamas si algo falla y por qué canal.</p></li>
           <li class="ld-hoja__item"><h3 class="nm-h3">Qué documento recibes</h3><span class="ld-hoja__guia" aria-hidden="true"></span><p>El documento y las condiciones se confirman en la propuesta.</p></li>
           <li class="ld-hoja__item"><h3 class="nm-h3">Cómo se termina</h3><span class="ld-hoja__guia" aria-hidden="true"></span><p>Las condiciones para cerrar el servicio, sin letra chica.</p></li>
-        </ul>
-        <p class="nm-nota">Las condiciones comerciales las confirma el equipo de Marley Coffee en tu propuesta.</p>
-      </div>
+            </ul>
+            <p class="nm-nota">Las condiciones comerciales las confirma el equipo de Marley Coffee en tu propuesta.</p>
+          </div>
+        </div>
+      </details>
+      <details class="ld-disclosure">
+        <summary class="ld-disclosure__summary">Condiciones a confirmar</summary>
+        <div class="ld-disclosure__body">
+          <ul class="ld-conditions-list">
+            <li>Compra mínima mensual: a confirmar.</li>
+            <li>Plazo de entrega: a confirmar.</li>
+            <li>Compatibilidad de insumos con la máquina: a confirmar.</li>
+          </ul>
+          <p class="nm-nota">Las condiciones del servicio se confirman por escrito en tu propuesta.</p>
+        </div>
+      </details>
+      <details class="ld-disclosure">
+        <summary class="ld-disclosure__summary">Recursos relacionados</summary>
+        <div class="ld-disclosure__body">
+          <p class="ld-contexto">
+            <a href="../../guia-servicio-cafe.html" data-contexto="guia">Guía para planificar el café de tu negocio</a>
+            <a href="../../index.html" data-contexto="productos" data-pantalla="C10">Ver productos y packs</a>
+          </p>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -203,6 +234,8 @@
 
 </main>
 
+<a class="nm-btn c3-floating-cta" data-c3-floating data-c3-hidden="true" aria-hidden="true" tabindex="-1" href="../../index.html#C04" data-attribution-handoff data-screen="C04" data-surface="landing-empresas">Arma tu propuesta</a>
+
 <footer class="ld-pie">
   <div class="nm-wrap">
     <div class="ld-pie__marca"><span class="ld-logo" aria-hidden="true"></span><span>Marley Coffee Empresas</span></div>
@@ -213,6 +246,6 @@
 </footer>
 
 <script type="application/json" id="ld-config">{"buyer": "general", "slug": "empresas", "portal": "../../index.html", "pantalla": "C04", "mensajeBase": "base", "mensajes": {"base": {"h1": "Una estimación de café hecha con tus datos.", "lead": "Calcula un escenario mensual y cuéntanos cómo ofreces café. Los supuestos son editables y las condiciones se confirman en tu propuesta."}, "continuidad": {"h1": "¿Cómo anticipar el consumo mensual de café?", "lead": "Ajusta tazas, días y receta para conversar sobre reposición según tu operación."}, "conveniencia": {"h1": "¿Cómo organizar el café en tu jornada?", "lead": "Revisa tazas al día y días de atención para describir cómo se sirve el café."}, "viabilidad": {"h1": "¿Qué consumo de café tiene sentido para tu operación?", "lead": "Prueba diferentes escenarios con tus datos. Precios y condiciones se confirman en tu propuesta."}, "confianza": {"h1": "Revisa las condiciones antes de decidir.", "lead": "Confirma qué se incluye, qué documento recibes y quién responde en la propuesta."}, "experiencia": {"h1": "¿Cómo quieres servir café?", "lead": "Cuéntanos qué preparaciones ofreces y cuándo se sirve café para revisar una propuesta adecuada."}}, "calc": {"mode": "tazas", "dias": 26, "eventosMes": 0, "gramos": 9, "porPersona": 1, "unidad": "tazas"}}</script>
-<script src="landing.js?v=20261111-a6-a8" defer></script>
+<script src="landing.js?v=20261113-r3-corr3" defer></script>
 </body>
 </html>

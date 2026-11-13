@@ -831,7 +831,7 @@
         "CTX_ROLES",
         "LI_ROLES"
       ],
-      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles_note": "Cargos que pueden participar; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
       "roles": [
         {
           "role": "usuario",
@@ -1095,7 +1095,7 @@
         "CTX_ROLES",
         "LI_ROLES"
       ],
-      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles_note": "Cargos que pueden participar; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
       "roles": [
         {
           "role": "usuario",
@@ -1347,7 +1347,7 @@
         "CTX_ROLES",
         "LI_ROLES"
       ],
-      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles_note": "Cargos que pueden participar; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
       "roles": [
         {
           "role": "usuario",
@@ -1613,7 +1613,7 @@
         "CTX_ROLES",
         "LI_ROLES"
       ],
-      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles_note": "Cargos que pueden participar; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
       "roles": [
         {
           "role": "usuario",
@@ -1875,7 +1875,7 @@
         "CTX_ROLES",
         "LI_ROLES"
       ],
-      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles_note": "Cargos que pueden participar; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
       "roles": [
         {
           "role": "usuario",
@@ -2127,7 +2127,7 @@
         "CTX_ROLES",
         "LI_ROLES"
       ],
-      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles_note": "Cargos que pueden participar; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
       "roles": [
         {
           "role": "usuario",
@@ -2395,7 +2395,7 @@
         "CTX_ROLES",
         "LI_ROLES"
       ],
-      "roles_note": "Cargos funcionales de referencia; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
+      "roles_note": "Cargos que pueden participar; no son contactos ni organigramas confirmados de Marley. Validar por cuenta.",
       "roles": [
         {
           "role": "usuario",

@@ -89,9 +89,9 @@ async function inspeccionar(page) {
         background: getComputedStyle(pill).backgroundColor,
         ratio: contrast(getComputedStyle(pill).color, getComputedStyle(pill).backgroundColor),
       } : null,
-      formula: document.querySelector('.ld-resultado .nm-nota')?.innerText || '',
+      formula: document.querySelector('.ld-resultado .nm-nota')?.textContent || '',
       buyer: config.buyer,
-      genericNamesSector: /restaurante|hotel|cafeter|oficin|evento|catering|conveniencia|panader/i.test(document.body.innerText),
+      genericNamesSector: /restaurante|hotel|cafeter|oficin|evento|catering|conveniencia|panader/i.test(document.querySelector('#calculo')?.innerText || ''),
       fichaRows: Array.from(document.querySelectorAll('.ld-ficha__fila')).map((row) => ({
         label: row.querySelector('.ld-ficha__etiqueta')?.textContent.trim() || '',
         value: row.querySelector('.ld-ficha__valor')?.textContent.trim() || '',
@@ -206,16 +206,20 @@ async function testCalculadoras(browser) {
   ];
   for (const caso of casos) {
     await page.goto(ruta(caso.slug, 'media=static&motion=off'), { waitUntil: 'networkidle' });
+    await page.locator('#calculo .ld-disclosure__summary').click();
     const inicial = await page.evaluate(() => ({
       config: JSON.parse(document.querySelector('#ld-config').textContent),
-      formula: document.querySelector('.ld-resultado .nm-nota')?.innerText || '',
+      formula: document.querySelector('.ld-resultado .nm-nota')?.textContent || '',
       supuestos: Array.from(document.querySelectorAll('.ld-resultado .nm-nota')).map((el) => el.innerText).join(' '),
       rows: Object.fromEntries(['c-row-base', 'c-row-porpersona', 'c-row-dias', 'c-row-eventos', 'c-row-gramos', 'c-tazas', 'c-row-kg'].map((id) => [id, document.getElementById(id)?.textContent.trim() || null])),
       bodyText: document.body.innerText,
+      calculatorText: document.querySelector('#calculo')?.innerText || '',
+      routeLabels: Array.from(document.querySelectorAll('#buyer-routes .ld-buyer-route')).map((a) => a.textContent.trim()),
     }));
     assert.equal(inicial.config.calc.mode, caso.mode, `${caso.slug}: modo de cálculo incorrecto.`);
     assert.ok(inicial.formula.toLowerCase().includes(caso.formula), `${caso.slug}: fórmula visible incorrecta.`);
-    assert.match(inicial.supuestos, /Supuestos:.*ejemplo/i, `${caso.slug}: falta rotular supuestos/valores de ejemplo.`);
+    assert.match(inicial.supuestos, /Supuestos:.*(?:referencial|editable)/i, `${caso.slug}: falta rotular valores referenciales/editables.`);
+    assert.doesNotMatch(inicial.supuestos, /ejemplo/i, `${caso.slug}: no debe mostrar textos de demostración.`);
     if (caso.generic) {
       assert.equal(inicial.config.buyer, 'general');
       assert.equal(inicial.rows['c-row-base'], '80 tazas');
@@ -223,7 +227,8 @@ async function testCalculadoras(browser) {
       assert.equal(inicial.rows['c-row-gramos'], '9 g');
       assert.equal(inicial.rows['c-tazas'], caso.initialTazas.toLocaleString('es-CL'));
       assert.equal(inicial.rows['c-row-kg'], caso.initialKg);
-      assert.equal(/restaurante|hotel|cafeter|oficin|evento|catering|conveniencia|panader/i.test(inicial.bodyText), false, 'El control genérico no debe nombrar rubros.');
+      assert.deepEqual(inicial.routeLabels, ['Oficinas', 'Eventos o catering', 'Restaurantes', 'Cafeterías', 'Hoteles', 'Panaderías', 'Tiendas de conveniencia']);
+      assert.equal(/restaurante|hotel|cafeter|oficin|evento|catering|conveniencia|panader/i.test(inicial.calculatorText), false, 'La calculadora genérica no debe nombrar rubros.');
     }
     await page.locator('#c-base').evaluate((el, value) => { el.value = String(value); el.dispatchEvent(new Event('input', { bubbles: true })); }, caso.range);
     if (caso.dias) await page.locator(`input[name="dias"][value="${caso.dias}"]`).check();

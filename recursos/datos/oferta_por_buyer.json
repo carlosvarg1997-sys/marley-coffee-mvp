@@ -1,0 +1,161 @@
+{
+  "fuente": "Plan de mejora R3 (13-nov-2026). Máquina por negocio = MACH_BY_BIZ del prototipo. La selección por buyer es una hipótesis de oferta (H): las cantidades son las de la cotización y las confirma el ejecutivo.",
+  "concepto": "A tu ritmo (elegido por el equipo en la V6): identidad musical de Marley, continuidad del servicio y la experiencia que el negocio entrega a sus clientes. Principio de propuesta: «Cuentas claras» (el 89 % del pago inicial son insumos, explicado producto por producto).",
+  "maquinas": {
+    "bar": {
+      "foto": "recursos/maquinas/bar.webp",
+      "nombre": "Bar",
+      "tipo": "Espresso profesional con molinillo",
+      "linea": "La barra de una cafetería: espresso, cappuccino y latte con barista.",
+      "tazas": "100 a 400 tazas al día",
+      "formato": "Café en grano",
+      "atencion": "Con barista (capacitación a confirmar)"
+    },
+    "pods": {
+      "foto": "recursos/maquinas/pods.webp",
+      "nombre": "Pods",
+      "tipo": "Espresso en dosis individuales, 2 tazas a la vez",
+      "linea": "Espresso parejo en cada taza, sin moler ni ajustar: ideal sin barista.",
+      "tazas": "30 a 120 tazas al día",
+      "formato": "Pods (monodosis de café)",
+      "atencion": "Sin barista"
+    },
+    "cafe_al_paso": {
+      "foto": "recursos/maquinas/cafe_al_paso.webp",
+      "nombre": "Café al paso",
+      "tipo": "Automática de autoservicio",
+      "linea": "El cliente se sirve solo en vaso para llevar, a toda hora.",
+      "tazas": "80 a 300 tazas al día",
+      "formato": "Grano molido al momento y bebidas calientes",
+      "atencion": "Sin barista"
+    },
+    "oficina": {
+      "foto": "recursos/maquinas/oficina.webp",
+      "nombre": "Oficina",
+      "tipo": "Superautomática con pantalla",
+      "linea": "Un toque y sale el café con leche: grano recién molido sin barista.",
+      "tazas": "40 a 150 tazas al día",
+      "formato": "Café en grano y leche",
+      "atencion": "Autoservicio de un toque"
+    }
+  },
+  "buyers": [
+    {
+      "id": "oficina",
+      "negocio": "OCS",
+      "landing": "oficinas",
+      "maquina": "oficina",
+      "interes": "café bueno para el equipo sin trabajo extra y sin quiebres de stock",
+      "lineas_clave": [
+        "cafe",
+        "leche",
+        "azucar",
+        "revolvedores",
+        "vaso65"
+      ],
+      "mensaje": "Café a tu ritmo: el equipo se sirve cuando quiere y la reposición llega antes de que se acabe.",
+      "etiqueta": "Oficinas"
+    },
+    {
+      "id": "eventos",
+      "negocio": "Eventos o catering",
+      "landing": "eventos-catering",
+      "maquina": "cafe_al_paso",
+      "interes": "servicio rápido por evento, para llevar, con volumen variable",
+      "lineas_clave": [
+        "cafe",
+        "chocolate",
+        "vaso9",
+        "vaso14",
+        "azucar",
+        "revolvedores"
+      ],
+      "mensaje": "A tu ritmo de evento: café para llevar en cada jornada, con insumos listos antes del montaje.",
+      "etiqueta": "Eventos o catering"
+    },
+    {
+      "id": "restaurante",
+      "negocio": "Restaurante",
+      "landing": "restaurantes",
+      "maquina": "pods",
+      "interes": "café parejo en cada mesa sin depender de un barista",
+      "lineas_clave": [
+        "cafe",
+        "leche",
+        "azucar",
+        "revolvedores"
+      ],
+      "mensaje": "A tu ritmo de servicio: el mismo café en cada mesa, sin barista.",
+      "etiqueta": "Restaurantes"
+    },
+    {
+      "id": "cafeteria",
+      "negocio": "Cafetería",
+      "landing": "cafeterias",
+      "maquina": "bar",
+      "interes": "calidad de barra y variedad para la carta",
+      "lineas_clave": [
+        "cafe",
+        "leche",
+        "chocolate",
+        "vainilla",
+        "vaso9",
+        "vaso14"
+      ],
+      "mensaje": "A tu ritmo de barra: espresso, leche y sabores para tu carta.",
+      "etiqueta": "Cafeterías"
+    },
+    {
+      "id": "hotel",
+      "negocio": "Hotel",
+      "landing": "hoteles",
+      "maquina": "bar",
+      "interes": "desayuno, lobby y eventos con el mismo estándar",
+      "lineas_clave": [
+        "cafe",
+        "leche",
+        "chocolate",
+        "azucar",
+        "revolvedores",
+        "vaso9"
+      ],
+      "mensaje": "A tu ritmo, del desayuno al evento.",
+      "etiqueta": "Hoteles"
+    },
+    {
+      "id": "panaderia",
+      "negocio": "Panadería",
+      "landing": "panaderias",
+      "maquina": "bar",
+      "interes": "café para acompañar y para llevar sin frenar el mostrador",
+      "lineas_clave": [
+        "cafe",
+        "leche",
+        "vaso65",
+        "vaso9",
+        "azucar"
+      ],
+      "mensaje": "A tu ritmo de mostrador: café para acompañar y para llevar.",
+      "etiqueta": "Panaderías"
+    },
+    {
+      "id": "conveniencia",
+      "negocio": "Conveniencia",
+      "landing": "conveniencia",
+      "maquina": "cafe_al_paso",
+      "interes": "autoservicio rápido para llevar, con poca atención",
+      "lineas_clave": [
+        "cafe",
+        "chocolate",
+        "vaso9",
+        "vaso14",
+        "azucar",
+        "revolvedores"
+      ],
+      "mensaje": "A tu ritmo de paso: café rápido para llevar.",
+      "etiqueta": "Tiendas de conveniencia"
+    }
+  ],
+  "modalidad_maquina": "En comodato: Marley presta la máquina y tú compras los insumos. Modelo, mínimo mensual y condiciones a confirmar con tu ejecutivo.",
+  "nota_campos": "Texto visible: usa «etiqueta» del buyer (nunca «negocio», que es la clave interna, p. ej. «OCS») y «nombre» de la máquina. Datos de máquina copiados de D.MACHINES del prototipo (13-nov). «modalidad_maquina» sale de la FAQ aprobada del sitio."
+}

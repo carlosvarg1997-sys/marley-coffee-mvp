@@ -187,11 +187,10 @@ async function journey(browser, base, width) {
     // Haiku P3: la línea de tiempo (con E08) está en un <details> cerrado; textContent la lee aunque esté plegada.
     assert.ok((await page.locator('#app').textContent()).includes('E08'));
 
-    const support = page.locator('form[data-cycle-form="support"]');
-    await support.locator('[name="type"]').selectOption({ label: 'Producto o formato' });
-    await support.locator('[name="detail"]').fill('Necesito revisar el formato para mi operación.');
-    await support.locator('button[type="submit"]').click();
-    await page.getByText('Caso CAS-', { exact: false }).waitFor();
+    // Diseño R3 (13-nov): la ayuda se pide por tipo de problema y «Hablar con una persona» abre el caso, sin formulario de texto.
+    await page.locator('[data-r3-support-type="El café no sale como antes"]').click();
+    await page.locator('[data-r3-talk]').click();
+    await page.getByText(/Caso \S+ abierto/).first().waitFor();
     const csat = page.locator('form[data-cycle-form="csat"]');
     await csat.locator('[name="score"]').selectOption('4');
     await csat.locator('[name="comment"]').fill('La atención fue clara y pude dejar mi consulta.');

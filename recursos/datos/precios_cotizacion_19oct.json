@@ -1,0 +1,92 @@
+{
+  "fuente": "Cotización del área comercial de Marley Coffee, 19-oct-2026 (comodato con compra mensual de insumos)",
+  "estado": "referencial",
+  "nota_cliente": "Precios netos referenciales, de la cotización de Marley del 19-oct-2026. Los confirma tu ejecutivo.",
+  "moneda": "CLP neto (más IVA)",
+  "aprobado": "Carlitos, 12-nov-2026: publicar como «referencial» y mostrar precio por producto («eso es claridad para el cliente»)",
+  "lineas": [
+    {
+      "k": "cafe",
+      "t": "Café en grano orgánico",
+      "d": "8 × 907 g",
+      "precio": 447920,
+      "foto": "recursos/productos/catalog/grano.webp"
+    },
+    {
+      "k": "leche",
+      "t": "Leche",
+      "d": "20 × 500 g",
+      "precio": 185000,
+      "foto": "recursos/productos/catalog/milk.webp"
+    },
+    {
+      "k": "chocolate",
+      "t": "Chocolate",
+      "d": "10 × 1 kg",
+      "precio": 169900,
+      "foto": "recursos/productos/catalog/chocolate.webp"
+    },
+    {
+      "k": "vainilla",
+      "t": "Vainilla",
+      "d": "10 × 1 kg",
+      "precio": 169900,
+      "foto": "recursos/productos/catalog/vanilla.webp"
+    },
+    {
+      "k": "vaso65",
+      "t": "Vaso 6,5 + tapa",
+      "d": "500 de cada uno",
+      "precio": 67000,
+      "foto": "recursos/productos/catalog/consumibles.webp"
+    },
+    {
+      "k": "vaso9",
+      "t": "Vaso 9 + tapa",
+      "d": "500 de cada uno",
+      "precio": 94000,
+      "foto": "recursos/productos/catalog/consumibles.webp"
+    },
+    {
+      "k": "vaso14",
+      "t": "Vaso 14 + tapa",
+      "d": "500 de cada uno",
+      "precio": 107500,
+      "foto": "recursos/productos/catalog/consumibles.webp"
+    },
+    {
+      "k": "azucar",
+      "t": "Azúcar y stevia en sobres",
+      "d": "",
+      "precio": 58000,
+      "foto": "recursos/productos/catalog/consumibles.webp"
+    },
+    {
+      "k": "revolvedores",
+      "t": "Revolvedores y servilletas",
+      "d": "",
+      "precio": 32000,
+      "foto": "recursos/productos/catalog/consumibles.webp"
+    }
+  ],
+  "instalacion": {
+    "k": "kit",
+    "t": "Kit de instalación",
+    "precio": 100000
+  },
+  "filtro": {
+    "k": "filtro",
+    "t": "Filtro",
+    "precio": 60000
+  },
+  "totales": {
+    "insumos": 1331220,
+    "antes_de_instalar": 1491220
+  },
+  "sin_precio_canonico": "Todo producto fuera de estas líneas se muestra con «precio con tu ejecutivo», nunca vacío.",
+  "a_confirmar": [
+    "mínimo mensual",
+    "plazo de entrega",
+    "compatibilidad de insumos con cada máquina"
+  ]
+}
