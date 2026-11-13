@@ -176,18 +176,17 @@ async function completeJourney(browser,base,pathway,participant) {
   await wheel(host,frame,`${pathway}/${participant}/C04 E2 diagnóstico @390`);
   if(pathway==='A')await capture(host,`A1_r5_E3_portal_${participant}_390.png`);
 
-  await frame.locator('[data-a="answer"][data-k="negocio"]').first().click();
-  await frame.locator('[data-a="next"]').click();
+  // R4 (13-nov): «Tu negocio» en una pantalla. Si el negocio no se conoce se elige aquí; si ya se conoce, no se vuelve a preguntar.
+  const negociosR4=frame.locator('#r4Datos [data-a="answer"][data-k="negocio"]');
+  if(await negociosR4.count())await negociosR4.first().click();
+  else assert.ok(await frame.evaluate(()=>{const s=M4.get();return Boolean(s.answers.negocio||M4C.ui.biz||(s.landingHandoff&&s.landingHandoff.buyer)||(s.lead&&s.lead.landing&&s.lead.landing.buyerLabel));}),'C04 omite el negocio solo cuando ya se conoce');
   await frame.locator('#m5Comuna').selectOption({label:'Las Condes'});
-  await frame.locator('[data-a="next"]').click();
   await frame.locator('[data-a="next"]').click();
   await frame.waitForFunction(()=>String(location.hash).startsWith('#C10'),null,{timeout:10000});
   await frame.locator('.m9-catalog').waitFor({state:'visible'});
   await wheel(host,frame,`${pathway}/${participant}/C10 productos @390`);
   await frame.locator('#m9-continue').click();
-  await frame.waitForFunction(()=>String(location.hash).startsWith('#C04'),null,{timeout:10000});
-  await frame.locator('.m5-qcard').waitFor({state:'visible'});
-  await frame.locator('[data-a="next"]').click();
+  // Del catálogo se pasa directo a la propuesta, sin volver a C04.
   await frame.waitForFunction(()=>String(location.hash).startsWith('#C05'),null,{timeout:10000});
   await frame.locator('.m5-propsec').waitFor({state:'visible'});
   // Haiku P3: la bandeja de seguimiento pasó a C09 (<details> «Mensajes de seguimiento»); no se espera en C05.

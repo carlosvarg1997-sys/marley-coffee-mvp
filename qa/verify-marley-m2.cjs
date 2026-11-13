@@ -583,14 +583,15 @@ function verifyFallbackScreens(html, file, mode) {
 function verifyMachineEntryRoutes(ctx, file) {
   const M = ctx.M4, catalog = ctx.M9Catalog;
   const gatedRoute = ['index.html', 'prototipo.html'].includes(file);
-  const firstTarget = gatedRoute ? 'C03' : 'C04';
+  // R4 (13-nov): «Tu negocio» (C04) pide el contacto si falta; el formulario aparte C03 solo se exige para ver la propuesta (C05–C07).
+  const firstTarget = 'C04';
   let destination = null;
   const app = ctx.MarleyApp;
   if (!M.STATIC && ['index.html', 'prototipo.html'].includes(file)) {
     M.reset();
-    ctx.location.hash = '#C04';
+    ctx.location.hash = '#C05';
     app.render();
-    assert.equal(ctx.location.hash, '#C03', `${file}: direct diagnostic deep link is redirected to mandatory contact`);
+    assert.equal(ctx.location.hash, '#C03', `${file}: direct proposal deep link is redirected to mandatory contact`);
     M.saveContact({ name: 'Contacto de ruta', email: 'ruta@example.cl', consent: true, marketingConsent: false });
     app.go('C04', { afterContact: true });
     assert.equal(ctx.location.hash, 'C04', `${file}: valid contact continues to the diagnostic without losing its saved route`);

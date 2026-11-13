@@ -4596,7 +4596,7 @@ window.M4D = (() => {
     // Flujo vigente: LM1 orienta, LM3 entrega la propuesta antes de pedir contacto; LM2 queda para seguimiento voluntario.
     { id: 'LM1', name: 'Orientación', screen: 'C02', before: 'Después de ver las máquinas, antes de pulsar «Ver mi solución»', promise: 'Descubre qué solución Marley Coffee se adapta a tu negocio', gives: 'La máquina que te conviene, el café al mes y la ejecutiva de tu zona, en 1 minuto.', marley: 'Intención declarada y origen del contacto.', signal: 'Pulsa «Ver mi solución» (+10)', next: 'C04' },
     { id: 'LM2', name: 'Seguimiento', screen: 'C03', before: 'Después de ver la propuesta, solo si solicita apoyo o confirmación', promise: 'Pide que una persona revise tu propuesta contigo', gives: 'Respuesta por correo sobre su selección y los siguientes pasos, tras dar permiso.', marley: 'Contacto voluntario asociado a una solicitud; no alta automática a marketing.', signal: 'Formulario 1 (+20)', next: 'C06' },
-    { id: 'LM3', name: 'Configuración', screen: 'C04 · C05', before: 'Antes del diagnóstico de 3 pasos', promise: 'Configura el café de tu negocio', gives: 'Tu propuesta al instante: máquina, modalidad, café al mes, abastecimiento mensual por cotizar y la ruta de despacho de tu comuna.', marley: 'Datos para calificar: negocio, volumen, servicio, preferencias y comuna (zona).', signal: 'Diagnóstico y comuna (+24 a +32)', next: 'C05' },
+    { id: 'LM3', name: 'Configuración', screen: 'C04 · C05', before: 'Antes de «Tu negocio» (una pantalla)', promise: 'Configura el café de tu negocio', gives: 'Tu propuesta al instante: máquina, modalidad, café al mes, abastecimiento mensual por cotizar y la ruta de despacho de tu comuna.', marley: 'Datos para calificar: negocio, volumen, servicio, preferencias y comuna (zona).', signal: 'Diagnóstico y comuna (+24 a +32)', next: 'C05' },
     { id: 'LM4', name: 'Ampliación', screen: 'C05 · C07', before: 'Junto a la propuesta, como recomendación apagada', promise: 'Descubre cómo ampliar la experiencia Marley Coffee', gives: 'Extras recomendados para tu negocio: tazas de la marca, material para tu local, capacitación, eventos o catering. Solo entra lo que marcas.', marley: 'Venta cruzada: sube el ticket promedio.', signal: 'Recomendación (+8) y propuesta ampliada (+12)', next: 'SQL (lo acepta una persona)' },
     { id: 'LM5', name: 'Reposición', screen: 'C09', before: 'Antes de repetir el pedido', promise: 'Repón en menos pasos y mantén continuidad', gives: 'Repetir el último pedido con un toque y un aviso antes de quedarte sin café, según tu consumo.', marley: 'Frecuencia de compra estable; menos clientes inactivos.', signal: 'Financial: frecuencia (25 %)', next: 'Pedido de reposición' },
     { id: 'LM6', name: 'Expansión', screen: 'C09', before: 'Antes de pedir un servicio nuevo', promise: 'Escala tu experiencia Marley Coffee', gives: 'Eventos y catering con Marley Coffee, puntos de activación, material POP y branding, tazas y accesorios.', marley: 'Más categorías por cliente y ticket más alto.', signal: 'Financial: amplitud (10 %) y ticket (30 %)', next: 'Propuesta de servicio del ejecutivo de cuenta' },
@@ -6522,7 +6522,7 @@ window.M9Catalog = (() => {
     if(ui.returnTo&&/^C0[3-7]$/.test(ui.returnTo)&&!(ui.returnTo==='C06'&&s.proposal?.needsReview))return ui.returnTo;
     return window.M4C.entryTarget(s);
   }
-  function continueFlow(){reviewProducts({target:'C04'});}
+  function continueFlow(){const d=M.get().diag;reviewProducts({target:d&&d.done?'C05':'C04'});}
   function picture(p,compact=false){
     if(wf())return `<div class="m9-picture m9-picture--wire">Imagen de producto<br>${esc(p.name)}</div>`;
     if(p.image)return `<figure><img class="m9-picture" src="${p.image}" alt="${esc(p.name)} · ${p.generated?'ilustración generada con IA':'fotografía oficial de referencia'}" ${compact?'':'loading="lazy"'} width="720" height="720"></figure>`;
@@ -6613,7 +6613,7 @@ window.M9Catalog = (() => {
     const proposalBefore = Boolean(M.get().proposal);
     if(!M.get().lead)M.startQuote(window.M4C.ui.biz||null);
     // Primero el diagnóstico y la propuesta; el contacto se ofrece después, si el comprador pide seguimiento.
-    const to=proposalBefore?(target||continueTarget()):'C03';window.M4C.ui.intent='inicio';window.M4C.ui.afterForm=proposalBefore?null:'C04';window.MarleyApp.go(to);
+    const to=proposalBefore?(target||continueTarget()):'C04';window.M4C.ui.intent='inicio';window.M4C.ui.afterForm=null;window.MarleyApp.go(to);
   }
   function machinesHTML(){
     const j=journey(),selected=j.machineSource==='cliente'&&D.MACHINES[j.machine];
@@ -8116,7 +8116,7 @@ window.MarleyApp = (() => {
       document.body.dataset.current = id;
       return;
     }
-    if (!M.STATIC && !isCRM(id) && /^C0[4-7]$/.test(id) && !hasFirstContact() && C.ui.intent !== 'creator') {
+    if (!M.STATIC && !isCRM(id) && /^C0[5-7]$/.test(id) && !hasFirstContact() && C.ui.intent !== 'creator') {
       setFormReturn(M.get().proposal ? id : 'C04'); C.ui.intent = 'inicio'; location.replace('#C03'); return;
     }
     if (!M.STATIC && id === 'C05' && !M.get().proposal) { location.replace('#C04'); return; }
@@ -8204,7 +8204,7 @@ window.MarleyApp = (() => {
   }
   function go(id, options = {}) {
     if (/^C0[5-7]$/.test(id) && !M.get().proposal) id = 'C04';
-    if (!options.evaluation && /^C0[4-7]$/.test(id) && !hasFirstContact() && C.ui.intent !== 'creator') { setFormReturn(M.get().proposal ? id : 'C04'); C.ui.intent = 'inicio'; id = 'C03'; }
+    if (!options.evaluation && /^C0[5-7]$/.test(id) && !hasFirstContact() && C.ui.intent !== 'creator') { setFormReturn(M.get().proposal ? id : 'C04'); C.ui.intent = 'inicio'; id = 'C03'; }
     if (!options.evaluation && !options.afterContact && /^C0[3-7]$/.test(id)) id = window.M9Catalog.nextExploration() || id;
     if (hashId() === id) render(); else location.hash = id;
   }
@@ -8286,7 +8286,7 @@ window.MarleyApp = (() => {
         C.ui.intent = 'hablar';
         if (!s.diag.done || !s.proposal) {
           C.ui.talkPending = true;
-          if (C.contactReady()) go('C04'); else go('C03');
+          go('C04');
         } else go('C03');
         break;
       }
@@ -13158,7 +13158,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const label = quote.selected ? "Insumos" : "Productos del pack", totalLabel = quote.selected ? "Total neto antes de instalar" : "Total del pack de partida";
     const rows = quote.items.map(quotationLineHTML).join("");
     const unknownNote = quote.unknown ? '<p class="r3-price-note">Los productos sin precio canónico se confirman con tu ejecutivo; el total mostrado considera solo las líneas con precio.</p>' : "";
-    return '<section class="r3-offer-card r3-proposal-confirmation" aria-label="Propuesta para ' + esc(offer.negocio) + '"><div class="r3-offer-machine"><img class="r3-machine-photo" src="' + esc(photo) + '" alt="' + esc(machine.nombre || offer.maquina) + '" loading="lazy"><div><span class="r3-kicker">Máquina recomendada</span><h3>' + esc(machine.nombre || offer.maquina) + '</h3><p>' + esc(machine.tipo || "Tipo a confirmar") + ' · ' + esc(machine.tazas || "Tazas al día a confirmar") + '</p></div></div><p class="r3-buyer-message">' + esc(offer.mensaje) + '</p><ul class="mcp-lista r3-c06-line-list">' + rows + '</ul><dl class="r3-proposal-totals"><div><dt>' + label + '</dt><dd>' + money(quote.subtotal) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>' + totalLabel + '</dt><dd>' + money(quote.total) + '</dd></div></dl>' + unknownNote + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p>' + quotationReferenceHTML() + '</section>';
+    return '<section class="r3-offer-card r3-proposal-confirmation" aria-label="Propuesta para ' + esc(offer.negocio) + '"><div class="r3-offer-machine"><img class="r3-machine-photo" src="' + esc(photo) + '" alt="' + esc(machine.nombre || offer.maquina) + '" loading="lazy"><div><span class="r3-kicker">Máquina recomendada</span><h3>' + esc(machine.nombre || offer.maquina) + '</h3><p>' + esc(machine.tipo || "Tipo a confirmar") + ' · ' + esc(machine.tazas || "Tazas al día a confirmar") + '</p></div></div><p class="r3-buyer-message">' + esc(offer.mensaje) + '</p><p class="r4-c06-total"><span>' + totalLabel + '</span><b>' + money(quote.total) + '</b></p><details class="r4-c06-detalle"><summary>Ver productos y precios (' + quote.items.length + ')</summary><ul class="mcp-lista r3-c06-line-list">' + rows + '</ul><dl class="r3-proposal-totals"><div><dt>' + label + '</dt><dd>' + money(quote.subtotal) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>' + totalLabel + '</dt><dd>' + money(quote.total) + '</dd></div></dl>' + unknownNote + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p>' + quotationReferenceHTML() + '</details></section>';
   }
   function offerCard(offer, cls) {
     if (!offer) return "";
@@ -13218,6 +13218,13 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const totalsHTML = items.length ? '<dl class="r3-totals"><div><dt>Subtotal productos</dt><dd>' + money(subtotal) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(fixed) + '</dd></div><div class="r3-total"><dt>Total neto antes de instalar</dt><dd>' + money(total) + '</dd></div></dl>' : '';
     return '<section class="r3-quote-box" id="r3-quote" aria-labelledby="r3-quote-title"><div class="r3-section-heading"><div><span class="r3-kicker">Qué llevas</span><h2 id="r3-quote-title">Mi cotización</h2></div><span class="r3-count">' + items.length + ' productos</span></div>' + (items.length ? '<div class="r3-cart-list">' + rows + '</div>' : '<div class="r3-empty"><b>Elige un pack recomendado o agrega productos</b><p>Verás aquí el formato, la cantidad y el precio por línea.</p><button type="button" class="m5-link" data-r3-open-products>Agregar productos</button></div>') + totalsHTML + (unknown ? '<p class="r3-price-note">Los productos sin precio canónico se confirman con tu ejecutivo; el total mostrado considera solo líneas con precio.</p>' : "") + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p></section>';
   }
+  function r4NextBar() {
+    /* R4 (13-nov): lo elegido y el siguiente paso en una barra; el texto del botón dice adónde lleva. */
+    const s = M.get(), offer = buyerFor(s), items = window.M9Catalog.lines(), done = Boolean(s.diag && s.diag.done);
+    let resumen = items.length ? items.length + (items.length === 1 ? " producto elegido" : " productos elegidos") : "Pack recomendado para tu negocio";
+    if (offer) resumen += " · " + money(quotationFor(s, offer).total);
+    return '<div class="r3-next-step r4-next-bar"><span class="r4-next-sum"><b>Tu selección</b><span>' + esc(resumen) + '</span></span><button type="button" id="m9-continue" class="m5-btn r3-main" data-m9-continue data-r3-continue>' + (done ? "Continuar a tu propuesta" : "Continuar con mis datos") + ' →</button></div>';
+  }
   function catalogHTML() {
     const offer = buyerFor(M.get()), m = offer && D.MACHINES[offer.maquina], lines = offer ? keyLines(offer) : DATA.prices.lines.slice(0, 3);
     const packSum = lines.reduce(function (sum, line) { return sum + line.precio; }, 0), firstTotal = packSum + DATA.prices.kit.precio + DATA.prices.filter.precio;
@@ -13225,7 +13232,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const pack = '<article class="r3-pack-card"><div class="r3-pack-top"><span class="r3-recommended">' + esc(recommendation) + '</span><h2>Tu pack de partida</h2><p>Productos clave de la cotización, con formatos y precios visibles.</p></div><ul class="r3-pack-lines">' + lines.map(function (line) { return '<li>' + lineImage(line) + '<span><b>' + esc(line.t) + '</b><small>' + esc(fmtFor(line)) + '</small></span><strong>' + money(line.precio) + '</strong></li>'; }).join("") + '</ul><dl class="r3-pack-total"><div><dt>Productos del pack</dt><dd>' + money(packSum) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>Total del pack de partida</dt><dd>' + money(firstTotal) + '</dd></div></dl><button type="button" class="m5-btn m5-btn--ghost r3-pack-choose" data-r3-pack="recommended">Elegir este pack</button>' + quotationReferenceHTML() + '</article>';
     const machine = offer && m ? '<section class="r3-machine-recommendation"><img src="' + esc(machinePhoto(offer)) + '" alt="' + esc(m.name) + '" loading="lazy"><div><span class="r3-kicker">' + esc(recommendationText("Máquina recomendada", offer)) + '</span><b>' + esc(m.name) + '</b><small>' + esc(m.format) + ' · modelo y disponibilidad a confirmar</small></div><a href="#C11" data-go="C11">Ver máquinas</a></section>' : "";
     const productList = DATA.prices.lines.map(function (line) { return '<article class="r3-product-card">' + lineImage(line, "r3-product-photo") + '<div><b>' + esc(line.t) + '</b><small>' + esc(fmtFor(line)) + '</small><strong>' + money(line.precio) + '</strong></div><button type="button" class="m5-btn m5-btn--ghost" data-m9-add="' + esc(line.catalogId) + '">Agregar</button></article>'; }).join("");
-    return '<section class="r3-catalog m9-catalog m5-wrap" aria-labelledby="r3-catalog-title">' + stepGuide(1) + '<div class="r3-next-step"><b>Tu siguiente paso</b><span>Completa tus datos antes del diagnóstico.</span><button type="button" id="m9-continue" class="m5-btn r3-main" data-m9-continue data-r3-continue>Continuar con mis datos</button></div><header class="r3-catalog-heading"><span class="r3-kicker">Productos y precios netos referenciales</span><h1 id="r3-catalog-title">Elige tu pack o tus productos</h1><p>Revisa fotos, formatos y precios por línea. La compatibilidad y las cantidades se confirman con tu ejecutivo.</p></header>' + machine + '<section class="r3-packs" aria-labelledby="r3-pack-heading"><div class="r3-section-heading"><div><span class="r3-kicker">Por dónde empezar</span><h2 id="r3-pack-heading">Pack recomendado</h2></div></div>' + pack + '</section>' + catalogCartHTML() + '<details class="r3-catalog-products" id="r3-products"><summary>Ver todos los productos (' + DATA.prices.lines.length + ')</summary><div class="r3-product-grid">' + productList + '</div></details></section>';
+    return '<section class="r3-catalog m9-catalog m5-wrap" aria-labelledby="r3-catalog-title">' + stepGuide(1) + r4NextBar() + '<header class="r3-catalog-heading"><span class="r3-kicker">Productos y precios netos referenciales</span><h1 id="r3-catalog-title">Elige tu pack o tus productos</h1><p>Revisa fotos, formatos y precios por línea. La compatibilidad y las cantidades se confirman con tu ejecutivo.</p></header>' + machine + '<section class="r3-packs" aria-labelledby="r3-pack-heading"><div class="r3-section-heading"><div><span class="r3-kicker">Por dónde empezar</span><h2 id="r3-pack-heading">Pack recomendado</h2></div></div>' + pack + '</section>' + catalogCartHTML() + '<details class="r3-catalog-products" id="r3-products"><summary>Ver todos los productos (' + DATA.prices.lines.length + ')</summary><div class="r3-product-grid">' + productList + '</div></details></section>';
   }
   function machinesHTML() {
     const offer = buyerFor(M.get()), chosen = window.M9Catalog.journey().machine;
@@ -13669,6 +13676,8 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
         return result;
       };
     }
+    window.R3C2 = { stepGuide: stepGuide, buyerFor: buyerFor, keyLines: keyLines, quotationFor: quotationFor, money: money, esc: esc, machinePhoto: machinePhoto, displayBuyerHTML: displayBuyerHTML, data: function () { return DATA; } };
+    window.__r3Listo = true; document.dispatchEvent(new CustomEvent("r3:listo"));
     window.MarleyApp && window.MarleyApp.render();
   }
   Promise.all([
@@ -13681,6 +13690,305 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     install();
   }).catch(function (error) { console.error("R3 C2 no pudo cargar los datos canónicos:", error); });
 
+})();
+</script>
+<style id="r4-cards">
+/* Marley Coffee Empresas · R4 (13-nov) · orden de las cards del recorrido de cotización.
+   Pedido de Carlitos: «falta orden en las cards internas… brandearlo mejor». Paleta Marley: negro, blanco y amarillo como acento.
+   Sin fondos teñidos (celeste, verde, crema) ni bordes de color gruesos; una sola forma de card, textos legibles y jerarquía clara. */
+:root{--r4-ink:#171717;--r4-ink2:#4a4a4a;--r4-ink3:#5f5f5f;--r4-line:#e2e2e2;--r4-soft:#f6f6f6;--r4-y:#f3c900;--r4-r:12px}
+/* Guía de pasos: un solo indicador, el paso actual en negro con el número en amarillo */
+body[data-current^="C"] .m4.m5 .r3-step-guide li{background:#fff!important;border:1px solid var(--r4-line)!important;color:var(--r4-ink3)!important;border-radius:8px!important}
+body[data-current^="C"] .m4.m5 .r3-step-guide li span{background:#fff!important;border:1px solid #bdbdbd!important;color:var(--r4-ink3)!important}
+body[data-current^="C"] .m4.m5 .r3-step-guide li.is-current{background:var(--r4-ink)!important;border-color:var(--r4-ink)!important;color:#fff!important}
+body[data-current^="C"] .m4.m5 .r3-step-guide li.is-current span{background:var(--r4-y)!important;border-color:var(--r4-y)!important;color:var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 .r3-step-guide li.is-done{color:var(--r4-ink)!important;border-color:#bdbdbd!important}
+body[data-current^="C"] .m4.m5 .r3-step-guide li.is-done span{background:var(--r4-ink)!important;border-color:var(--r4-ink)!important;color:#fff!important}
+/* Una sola card: blanca, borde fino gris, radio 12, sin barras de color */
+body[data-current^="C"] .m4.m5 :is(.r3-machine-recommendation,.r3-pack-card,.r3-product-card,.r3-quote-box,.mcp-bloque,.r3-offer-card,.r3-proposal-confirmation,.r3-machine-card,.r3-conditions,.r4-card){background:#fff!important;border:1px solid var(--r4-line)!important;border-radius:var(--r4-r)!important;box-shadow:0 1px 2px rgba(0,0,0,.04)!important;color:var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-card,.r3-quote-box,.mcp-bloque,.r3-proposal-confirmation,.r3-conditions,.r4-card){padding:20px!important}
+body[data-current^="C"] .m4.m5 :is(.r3-machine-recommendation,.r3-product-card,.r3-machine-card){padding:14px!important}
+/* Lo recomendado o elegido se marca con borde negro y etiqueta amarilla, no con verde */
+body[data-current^="C"] .m4.m5 :is(.r3-pack-card,.r3-machine-card.is-recommended,.r3-machine-card.is-selected){border:2px solid var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 .r3-recommended{background:var(--r4-y)!important;color:var(--r4-ink)!important;font-size:11.5px!important;font-weight:800!important;letter-spacing:.04em!important;padding:4px 10px!important}
+/* Jerarquía del texto: etiqueta chica gris, título Festivo, lectura 14–15 px, valores en negrita a la derecha */
+body[data-current^="C"] .m4.m5 :is(.r3-kicker,.r4-eyebrow){color:var(--r4-ink3)!important;font-size:11.5px!important;font-weight:700!important;letter-spacing:.08em!important;text-transform:uppercase}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-top p,.r3-buyer-message,.r3-catalog-heading p,.r4-head p){color:var(--r4-ink2)!important;font-size:14px!important;line-height:1.5!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-lines,.mcp-lista,.r3-offer-lines ul) li{border-bottom:1px solid #ececec!important;padding:10px 0!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-lines,.mcp-lista,.r3-offer-lines ul) li b{font-size:14.5px!important;color:var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-lines,.mcp-lista,.r3-offer-lines ul) li small{font-size:12.5px!important;color:var(--r4-ink3)!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-lines,.mcp-lista,.r3-offer-lines ul) li strong{font-size:15px!important;color:var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-total,.r3-totals,.r3-proposal-totals){background:transparent!important;border-top:1px solid var(--r4-line)!important;border-radius:0!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-total,.r3-totals,.r3-proposal-totals) dt{color:var(--r4-ink2)!important;font-size:14px!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-total,.r3-totals,.r3-proposal-totals) dd{color:var(--r4-ink)!important;font-size:15px!important;font-weight:700!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-total,.r3-totals,.r3-proposal-totals) .r3-total{border-top:2px solid var(--r4-ink)!important;padding-top:10px!important;margin-top:4px!important}
+body[data-current^="C"] .m4.m5 :is(.r3-pack-total,.r3-totals,.r3-proposal-totals) .r3-total :is(dt,dd){color:var(--r4-ink)!important;font-size:18px!important;font-weight:800!important}
+/* Nota de referencia: gris neutro, sin celeste */
+body[data-current^="C"] .m4.m5 .r3-quote-reference{background:var(--r4-soft)!important;border:0!important;border-radius:8px!important;color:var(--r4-ink2)!important;font-size:12.5px!important;padding:8px 10px!important}
+/* Botones: primario amarillo; secundario blanco con borde negro; mismo radio que las cards */
+body[data-current^="C"] .m4.m5 .m5-btn{border-radius:8px!important}
+body[data-current^="C"] .m4.m5 .m5-btn:not(.m5-btn--ghost):not([aria-pressed]){background:var(--r4-y)!important;border:1px solid var(--r4-ink)!important;color:var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 .m5-btn--ghost{background:#fff!important;border:1px solid var(--r4-ink)!important;color:var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 :is(.r3-machine-recommendation a,.r3-catalog a.m5-link,.r4-card a.m5-link,.r4-card .m5-link){color:var(--r4-ink)!important;text-decoration:underline;text-underline-offset:3px}
+/* C10 · barra «Tu selección» negra con el siguiente paso */
+body[data-current^="C"] .m4.m5 .r3-next-step.r4-next-bar{display:flex!important;align-items:center;justify-content:space-between;gap:12px;background:var(--r4-ink)!important;color:#fff!important;border:0!important;border-radius:var(--r4-r)!important;padding:12px 14px!important;margin:10px 0 14px!important}
+body[data-current^="C"] .m4.m5 .r4-next-bar .r4-next-sum{display:flex;flex-direction:column;gap:2px;min-width:0}
+body[data-current^="C"] .m4.m5 .r4-next-bar .r4-next-sum b{color:var(--r4-y)!important;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+body[data-current^="C"] .m4.m5 .r4-next-bar .r4-next-sum span{color:#fff!important;font-size:14.5px;line-height:1.35}
+body[data-current^="C"] .m4.m5 .r4-next-bar .m5-btn{flex:0 0 auto;white-space:nowrap}
+/* C04 · Tu negocio en una pantalla */
+body[data-current^="C"] .m4.m5 .r4-diag{background:#fff;padding:18px 0 32px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start;margin-top:12px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-head h1{font-family:"Festivo","Pressura",Arial,sans-serif;font-size:40px;line-height:1;margin:0 0 6px;color:var(--r4-ink)}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-head p{margin:0 0 6px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-grupo{border-top:1px solid var(--r4-line);margin-top:18px;padding-top:16px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-grupo>h2{font-family:"Festivo","Pressura",Arial,sans-serif;font-size:22px;line-height:1.1;margin:0 0 10px;color:var(--r4-ink)}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-q{margin:0 0 14px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-q h3{font-size:14.5px;font-weight:700;margin:0;color:var(--r4-ink)}
+body[data-current^="C"] .m4.m5 .r4-diag .m5-qfield-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:8px}
+body[data-current^="C"] .m4.m5 .r4-diag .m5-sug{background:var(--r4-soft)!important;color:var(--r4-ink2)!important;border-radius:999px;padding:2px 8px;font-size:11.5px}
+body[data-current^="C"] .m4.m5 .r4-diag .m5-opts{display:flex;flex-wrap:wrap;gap:8px}
+body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{background:#fff!important;border:1px solid #bdbdbd!important;color:var(--r4-ink)!important;border-radius:999px!important;min-height:40px;padding:8px 14px!important;font-size:14px!important}
+body[data-current^="C"] .m4.m5 .r4-diag .m5-opt[aria-pressed="true"]{background:var(--r4-ink)!important;border-color:var(--r4-ink)!important;color:#fff!important}
+body[data-current^="C"] .m4.m5 .r4-diag .m5-opt i{color:var(--r4-y)!important;font-style:normal}
+body[data-current^="C"] .m4.m5 .r4-diag select{min-height:44px;border:1px solid #bdbdbd;border-radius:8px;padding:8px 10px;font-size:15px;width:100%;max-width:360px;background:#fff;color:var(--r4-ink)}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-zona{margin:8px 0 0;font-size:13px;color:var(--r4-ink2)}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-bizchip{display:inline-flex;align-items:center;gap:8px;background:var(--r4-soft);border-radius:999px;padding:6px 12px;margin:6px 0 0;font-size:14px;color:var(--r4-ink)}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-contacto .m5-field{display:block;margin:0 0 10px;max-width:420px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-contacto .m5-field>span{display:block;font-size:13px;font-weight:700;margin-bottom:4px;color:var(--r4-ink)}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-contacto input:not([type=checkbox]){width:100%;min-height:44px;border:1px solid #bdbdbd;border-radius:8px;padding:8px 10px;font-size:15px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-contacto .m5-check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:var(--r4-ink2);margin:6px 0}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-msg{min-height:0;margin:10px 0 0;color:#b00020;font-weight:700;font-size:14px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-msg:empty{display:none}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-acciones{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--r4-line)}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-resumen .r4-res-maquina{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center;margin:8px 0 12px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-resumen .r4-res-maquina img{width:64px;height:64px;object-fit:contain;background:#fff;border:1px solid var(--r4-line);border-radius:8px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-resumen .r4-res-maquina b{display:block;font-size:15px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-resumen .r4-res-maquina small{display:block;font-size:12.5px;color:var(--r4-ink3)}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-resumen .r4-res-total{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-top:2px solid var(--r4-ink);padding-top:10px;margin:6px 0 4px}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-resumen .r4-res-total span{font-size:14px;color:var(--r4-ink2)}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-resumen .r4-res-total b{font-size:20px;font-weight:800}
+body[data-current^="C"] .m4.m5 .r4-diag .r4-resumen small.r4-res-nota{display:block;color:var(--r4-ink3);font-size:12.5px;margin:0 0 10px}
+/* C06 · confirmación corta: el total a la vista y el detalle plegado */
+body[data-current^="C"] .m4.m5 .r4-c06-total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-top:2px solid var(--r4-ink);padding-top:10px;margin:12px 0 6px}
+body[data-current^="C"] .m4.m5 .r4-c06-total span{font-size:15px;color:var(--r4-ink2)}
+body[data-current^="C"] .m4.m5 .r4-c06-total b{font-size:22px;font-weight:800;color:var(--r4-ink)}
+body[data-current^="C"] .m4.m5 .r4-c06-detalle>summary{cursor:pointer;font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:6px 0;list-style:none}
+body[data-current^="C"] .m4.m5 .r4-c06-detalle>summary::-webkit-details-marker{display:none}
+@media (max-width:860px){
+  body[data-current^="C"] .m4.m5 .r4-diag .r4-grid{grid-template-columns:1fr}
+  body[data-current^="C"] .m4.m5 .r4-diag .r4-head h1{font-size:32px}
+  body[data-current^="C"] .m4.m5 :is(.r3-pack-card,.r3-quote-box,.mcp-bloque,.r3-proposal-confirmation,.r3-conditions,.r4-card){padding:16px!important}
+}
+@media (max-width:560px){
+  body[data-current^="C"] .m4.m5 .r3-next-step.r4-next-bar{flex-direction:column;align-items:stretch}
+  body[data-current^="C"] .m4.m5 .r4-next-bar .m5-btn{width:100%}
+  body[data-current^="C"] .m4.m5 .r4-diag .r4-wrap{padding:0 16px}
+  body[data-current^="C"] .m4.m5 .r4-diag .r4-acciones .m5-btn{width:100%}
+}
+/* Textos secundarios en gris neutro (sin azul petróleo ni café) y títulos en negro */
+body[data-current^="C"] .m4.m5 :is(.r3-catalog,.r3-machines,.r3-quote-box,.r3-pack-card,.r3-machine-recommendation,.r3-machine-card,.r3-conditions,.r3-proposal-confirmation,.mcp-bloque,.mcp-prop,.r4-diag) :is(p,small,.r3-price-note,.r3-count,.mcp-nota){color:var(--r4-ink2)!important}
+body[data-current^="C"] .m4.m5 :is(.r3-catalog,.r3-machines,.mcp-prop,.r4-diag) :is(h1,h2,h3){color:var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 .r3-machine-card p b{color:var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 details.r3-catalog-products{background:#fff!important;border:1px solid var(--r4-line)!important;border-radius:var(--r4-r)!important}
+body[data-current^="C"] .m4.m5 :is(details.r3-catalog-products,details.r3-proposal-conditions,details.r3-more-products)>summary{color:var(--r4-ink)!important;font-weight:700}
+body[data-current^="C"] .m4.m5 .r3-quote-box :is(.r3-empty,.r3-cart-empty,[class*="empty"]){background:var(--r4-soft)!important;border-radius:8px!important}
+/* Sin productos elegidos, «Mi cotización» vacía contradice la barra «Tu selección» (que ya muestra el pack recomendado): se oculta */
+body[data-current^="C"] .m4.m5 .r3-quote-box:has(.r3-empty){display:none!important}
+/* Guía de la propuesta y la confirmación (mcp-guia): mismo lenguaje que la del catálogo, sin verde */
+body[data-current^="C"] .m4.m5 .mcp-guia li{background:#fff!important;border-color:var(--r4-line)!important;color:var(--r4-ink3)!important}
+body[data-current^="C"] .m4.m5 .mcp-guia li.done{border-color:#bdbdbd!important;color:var(--r4-ink)!important}
+body[data-current^="C"] .m4.m5 .mcp-guia li.done :is(span,i,svg){color:var(--r4-ink)!important;border-color:var(--r4-ink)!important}
+/* Confirmación: filas de «Folio y estado» con línea gris, nunca crema */
+body[data-current^="C"] .m4.m5 .mcp-dl>div{border-bottom-color:var(--r4-line)!important}
+body[data-current^="C"] .m4.m5 .mcp-dl dt{color:var(--r4-ink3)!important}
+body[data-current^="C"] .m4.m5 .mcp-conf{color:var(--r4-ink)!important;font-weight:700}
+/* C04 · lo sugerido en una línea con «Cambiar»; se abre solo si la persona quiere ajustarlo */
+body[data-current^="C"] .m4.m5 .r4-sugerido{border-top:1px solid var(--r4-line);margin-top:16px;padding-top:14px}
+body[data-current^="C"] .m4.m5 .r4-sugerido>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;background:var(--r4-soft);border-radius:10px;padding:12px 14px}
+body[data-current^="C"] .m4.m5 .r4-sugerido>summary::-webkit-details-marker{display:none}
+body[data-current^="C"] .m4.m5 .r4-sugerido .r4-sug-tit{grid-column:1/-1;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--r4-ink3)}
+body[data-current^="C"] .m4.m5 .r4-sugerido .r4-sug-lista{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+body[data-current^="C"] .m4.m5 .r4-sugerido .r4-sug-lista li{font-size:14px;line-height:1.35;color:var(--r4-ink)}
+body[data-current^="C"] .m4.m5 .r4-sugerido .r4-sug-lista li span{color:var(--r4-ink3)}
+body[data-current^="C"] .m4.m5 .r4-sugerido .r4-sug-accion{font-weight:700;font-size:14px;text-decoration:underline;text-underline-offset:3px;color:var(--r4-ink);white-space:nowrap}
+body[data-current^="C"] .m4.m5 .r4-sugerido .r4-sug-accion--cerrar,body[data-current^="C"] .m4.m5 .r4-sugerido[open] .r4-sug-accion--abrir{display:none}
+body[data-current^="C"] .m4.m5 .r4-sugerido[open] .r4-sug-accion--cerrar{display:inline}
+body[data-current^="C"] .m4.m5 .r4-sugerido[open]>summary{margin-bottom:14px}
+body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
+</style>
+<script id="r4-flujo-directo">
+/* Marley Coffee Empresas · R4 (13-nov) · camino directo de cotización.
+   Pedido de Carlitos: «son muchos pasos… elijo, rellenar algo, ver de nuevo, rellenar otra cosa; tiene que ser más directo».
+   - C04 «Tu negocio» en una sola pantalla: no repite el negocio si ya se conoce; la comuna es el único dato obligatorio;
+     consumo, operación y preferencias vienen sugeridos según el negocio y se pueden cambiar; si falta el contacto, se pide aquí mismo.
+   - Del catálogo se pasa directo a la propuesta (sin volver a C04); en la confirmación el pack queda en una línea con el total.
+   Conserva los mismos datos de estado (answers, diag, lead) y los mismos pasos internos del diagnóstico, que leen el CRM y el puntaje M2. */
+(function () {
+  "use strict";
+  function install() {
+    if (window.__r4Instalado) return;
+    const C = window.M4C, M = window.M4, D = window.M4D, X = window.M8UX, R = window.R3C2;
+    if (!C || !M || !D || !R || !C.__r3Original || !C.__r3Original.C04) return;
+    window.__r4Instalado = true;
+    const esc = R.esc, money = R.money, r3C04 = C.SCREENS.C04, originalC04 = C.__r3Original.C04;
+    C.ui.r4Draft = C.ui.r4Draft || {};
+    const MULTI = ["OCS", "Conveniencia"];
+    function bizKnown(s) { return (s.answers && s.answers.negocio) || C.ui.biz || (s.landingHandoff && s.landingHandoff.buyer) || (s.lead && s.lead.landing && s.lead.landing.buyerLabel) || null; }
+    function chips(s, k, big) {
+      const q = M.question(s, k), val = s.answers[k], all = q.multi && (val || []).length === q.options.length;
+      return '<div class="m5-opts ' + (q.multi ? "m5-opts--multi " : "") + (big ? "m5-opts--big" : "") + '" role="group" aria-label="' + esc(q.title) + '">' + q.options.map(function (o) {
+        const on = q.multi ? (val || []).indexOf(o) >= 0 : val === o;
+        return '<button type="button" class="m5-opt" data-a="answer" data-k="' + k + '" data-v="' + esc(o) + '" aria-pressed="' + on + '"><i aria-hidden="true">' + (on ? "✓" : "") + "</i>" + esc(o) + "</button>";
+      }).join("") + (q.multi ? '<button type="button" class="m5-opt m5-opt--all" data-a="answer" data-k="' + k + '" data-v="__todas" aria-pressed="' + all + '"><i aria-hidden="true">' + (all ? "✓" : "") + "</i>Todas</button>" : "") + "</div>";
+    }
+    function comunaPicker(value) {
+      const c = value ? D.comuna(value) : null, ex = c ? D.execFor(value) : null;
+      const unknown = value && !c ? '<option value="' + esc(value) + '" selected>' + esc(value) + " · zona por confirmar</option>" : "";
+      const groups = Object.values(D.ZONES).map(function (z) {
+        const list = z.id === "regiones" ? D.REGIONES : D.COMUNAS.filter(function (x) { return x.zone === z.id; });
+        return '<optgroup label="' + esc(z.name) + '">' + list.map(function (x) { return "<option " + (x.name === value ? "selected" : "") + ">" + esc(x.name) + "</option>"; }).join("") + "</optgroup>";
+      }).join("");
+      return '<label class="m5-field"><span class="m4-sr">Comuna</span><select data-a="comuna" id="m5Comuna" name="comuna"><option value="">Elige tu comuna</option>' + unknown + groups + "</select></label>" +
+        (ex ? '<p class="r4-zona"><b>Te atiende una ejecutiva de tu zona</b> · ' + esc(D.ZONES[c.zone].name) + " · tu comuna también define la ruta de despacho</p>" : "");
+    }
+    function field(s, k, inner) {
+      const sug = M.suggested(s, k) && s.answers.negocio ? '<span class="m5-sug">Sugerido para tu negocio</span>' : "";
+      return '<div class="m5-qfield r4-q"><div class="m5-qfield-h"><h3>' + esc(M.question(s, k).title) + "</h3>" + sug + "</div>" + inner + "</div>";
+    }
+    function contacto(s) {
+      const L = Object.assign({}, s.lead || {}, C.ui.r4Draft);
+      return '<div class="r4-grupo r4-contacto"><h2>Tus datos</h2><p class="r4-ayuda">Para guardar tu avance y enviarte la propuesta.</p>' +
+        '<label class="m5-field"><span>Nombre</span><input id="m4FName" name="name" autocomplete="name" value="' + esc(L.name || "") + '" placeholder="Tu nombre"></label>' +
+        X.contactFields(L) +
+        '<label class="m5-check"><input type="checkbox" name="consent" ' + (L.consent ? "checked" : "") + "><span>Autorizo que Marley Coffee use estos datos para responder esta solicitud por correo.</span></label>" +
+        '<label class="m5-check m5-check--optional"><input type="checkbox" name="marketingConsent" ' + (L.marketingConsent ? "checked" : "") + "><span>Sí, quiero recibir novedades y ofertas por correo. (opcional)</span></label></div>";
+    }
+    function resumen(s) {
+      const offer = R.buyerFor(s);
+      if (!offer) return '<aside class="r4-card r4-resumen" aria-label="Tu selección"><span class="r4-eyebrow">Tu selección</span><p>Elige tu negocio para ver tu pack recomendado.</p></aside>';
+      const data = R.data(), mm = data.offer.maquinas[offer.maquina] || {}, m = D.MACHINES[offer.maquina] || {}, q = R.quotationFor(s, offer);
+      const total = q.selected ? "Total neto antes de instalar" : "Total del pack de partida";
+      return '<aside class="r4-card r4-resumen" aria-label="Tu selección"><span class="r4-eyebrow">Tu selección</span>' +
+        '<div class="r4-res-maquina"><img src="' + esc(mm.foto || R.machinePhoto(offer)) + '" alt="' + esc(mm.nombre || m.name || offer.maquina) + '" loading="lazy"><div><b>' + esc(mm.nombre || m.name || offer.maquina) + "</b><small>Máquina recomendada</small></div></div>" +
+        '<div class="r4-res-total"><span>' + q.items.length + (q.items.length === 1 ? " producto" : " productos") + " + kit y filtro</span><b>" + money(q.total) + "</b></div>" +
+        '<small class="r4-res-nota">' + total + ". Precios netos referenciales.</small>" +
+        '<a class="m5-link" href="#C10" data-go="C10">Ver o cambiar productos</a></aside>';
+    }
+    function seccion(s, biz) {
+      // Si el negocio ya se conoce (landing o portada) pero la persona todavía no actúa, se muestra lo sugerido con un estado de muestra:
+      // no se escribe nada ni se suman puntos hasta su primera acción (elegir comuna, cambiar una opción o «Ver mi propuesta»).
+      const sv = muestra(s, biz), a = sv.answers, multi = MULTI.indexOf(a.negocio) >= 0, editar = Boolean(C.ui.r4EditBiz) || !biz;
+      const negocio = editar ? field(sv, "negocio", chips(sv, "negocio", true)) :
+        '<p class="r4-bizchip">Tu negocio: <b>' + esc(a.negocio || biz) + '</b> <button type="button" class="m5-link" data-r4-cambiar-negocio>Cambiar</button></p>';
+      const local = '<div class="r4-grupo"><h2>Tu local</h2>' + field(sv, "comuna", comunaPicker(a.comuna)) + "</div>";
+      // Consumo, operación y preferencias ya vienen sugeridos por el negocio: se muestran en una línea y se abren solo para cambiarlos.
+      const claves = ["volumen"].concat(multi ? ["puntos"] : []).concat(["operacion", "preferencias"]);
+      const lista = claves.map(function (k) { const v = a[k], t = Array.isArray(v) ? v.join(", ") : v; return '<li><span>' + esc(M.question(sv, k).short || M.question(sv, k).title) + ":</span> " + esc(t || "por elegir") + "</li>"; }).join("");
+      const operacion = a.negocio ? '<details class="r4-sugerido"' + (C.ui.r4Sug ? " open" : "") + '><summary><span class="r4-sug-tit">Sugerido para tu negocio</span><ul class="r4-sug-lista">' + lista + '</ul><span class="r4-sug-accion r4-sug-accion--abrir">Cambiar</span><span class="r4-sug-accion r4-sug-accion--cerrar">Listo</span></summary>' +
+        field(sv, "volumen", chips(sv, "volumen")) + (multi ? field(sv, "puntos", chips(sv, "puntos")) : "") + field(sv, "operacion", chips(sv, "operacion")) + field(sv, "preferencias", chips(sv, "preferencias")) + "</details>" : "";
+      const datos = C.contactReady(s) ? "" : contacto(s);
+      return '<section class="r4-diag" aria-labelledby="r4-titulo"><div class="r4-wrap">' + R.stepGuide(1) +
+        '<div class="r4-grid"><form class="r4-card r4-form-card m5-qcard" id="r4Datos" novalidate><header class="r4-head"><h1 id="r4-titulo">Tu negocio</h1><p>Indica tu comuna y el consumo diario. Puedes marcar que aún no lo sabes.</p>' + negocio + "</header>" +
+        local + operacion + datos +
+        '<p class="m4-form-msg r4-msg" role="status" aria-live="polite"></p>' +
+        '<div class="m5-actions r4-acciones"><button type="button" class="m5-btn r3-main" data-a="next" data-r4-next>Ver mi propuesta →</button><button type="button" class="m5-btn m5-btn--ghost" data-m7-open="ayuda">Preguntar al asistente</button></div>' +
+        "</form>" + resumen(sv) + "</div></div></section>";
+    }
+    // Estado de muestra (solo para dibujar): el negocio conocido con sus sugerencias, sin tocar el estado guardado.
+    function muestra(s, biz) {
+      if (s.answers.negocio || !biz) return s;
+      const d = (M.DEFAULTS && (M.DEFAULTS[biz] || M.DEFAULTS.Otro)) || {}, sugeridas = {};
+      Object.keys(d).forEach(function (k) { sugeridas[k] = Array.isArray(d[k]) ? d[k].slice() : d[k]; });
+      return Object.assign({}, s, { answers: Object.assign({}, sugeridas, s.answers, { negocio: biz }), diag: Object.assign({}, s.diag, { touched: {} }) });
+    }
+    // Primera acción de la persona en «Tu negocio»: recién ahí se registra el negocio conocido (mismo evento y puntaje que si lo marcara).
+    function asegurarNegocio() {
+      const s = M.get(), biz = bizKnown(s);
+      if (!s.answers.negocio && biz) M.answer("negocio", biz);
+    }
+    function c04Directo() {
+      const s = M.get(), biz = bizKnown(s), base = originalC04();
+      const re = /<section class="m5-diag">[\s\S]*<\/aside><\/div><\/section>/;
+      if (!re.test(base)) return r3C04();
+      return R.displayBuyerHTML(base.replace(re, function () { return seccion(s, biz); }));
+    }
+    C.SCREENS.C04 = c04Directo;
+
+    // Lo que la persona escribe en «Tus datos» se conserva si cambia una opción (cada opción vuelve a dibujar la pantalla).
+    document.addEventListener("input", function (e) { const el = e.target; if (el && el.form && el.form.id === "r4Datos" && el.name && el.type !== "checkbox") C.ui.r4Draft[el.name] = el.value; }, true);
+    document.addEventListener("change", function (e) {
+      const el = e.target; if (!el || !el.form || el.form.id !== "r4Datos") return;
+      if (el.type === "checkbox") C.ui.r4Draft[el.name] = el.checked;
+      // La comuna se guarda sola (manejador general); el negocio conocido se registra al continuar, en el mismo orden de eventos de antes.
+    }, true);
+    document.addEventListener("submit", function (e) { if (e.target && e.target.id === "r4Datos") { e.preventDefault(); e.stopImmediatePropagation(); avanzar(); } }, true);
+    // «Sugerido para tu negocio» sigue abierto mientras la persona cambia opciones (cada opción vuelve a dibujar la pantalla).
+    document.addEventListener("toggle", function (e) { const d = e.target; if (d && d.classList && d.classList.contains("r4-sugerido")) C.ui.r4Sug = d.open; }, true);
+    document.addEventListener("click", function (e) {
+      const cambiar = e.target.closest && e.target.closest("[data-r4-cambiar-negocio]");
+      if (cambiar) { e.preventDefault(); e.stopImmediatePropagation(); C.ui.r4EditBiz = true; window.MarleyApp.render(); return; }
+      const opcionNegocio = e.target.closest && e.target.closest('#r4Datos [data-a="answer"][data-k="negocio"]');
+      if (opcionNegocio) C.ui.r4EditBiz = false;
+      // Cambiar una sugerencia (tazas, operación, qué ofrecer) cuenta como primera acción: antes se registra el negocio conocido.
+      const opcion = e.target.closest && e.target.closest('#r4Datos [data-a="answer"]');
+      if (opcion && !opcionNegocio) asegurarNegocio();
+      const btn = e.target.closest && e.target.closest("[data-r4-next]");
+      if (!btn) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      avanzar();
+    }, true);
+
+    function avanzar() {
+      const form = document.getElementById("r4Datos"), msg = form && form.querySelector(".r4-msg");
+      if (form) form.querySelectorAll('[aria-invalid="true"]').forEach(function (el) { el.removeAttribute("aria-invalid"); });
+      if (msg) msg.textContent = "";
+      const say = function (t, name) {
+        if (msg) msg.textContent = t;
+        const el = name && form && form.querySelector('[name="' + name + '"]');
+        if (el) { el.setAttribute("aria-invalid", "true"); el.focus(); }
+        return false;
+      };
+      let s = M.get();
+      const biz = bizKnown(s);
+      if (!biz) return say("Elige el tipo de negocio para armar tu propuesta.");
+      if (!s.answers.negocio) { M.answer("negocio", biz); s = M.get(); }
+      if (!s.answers.comuna) return say("Elige tu comuna para armar tu propuesta.", "comuna");
+      if (form && form.querySelector(".r4-contacto")) {
+        const d = new FormData(form), cv = X.contactValues(form), name = String(d.get("name") || "").trim();
+        const consent = Boolean(d.get("consent")), marketingConsent = Boolean(d.get("marketingConsent"));
+        if (!name) return say("Escribe tu nombre para guardar el avance.", "name");
+        if (!cv.email) return say("Escribe un correo válido para guardar la solicitud.", "email");
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(cv.email)) return say("Revisa el correo: escribe una dirección válida, por ejemplo nombre@empresa.cl.", "email");
+        if (cv.phone && cv.digits.length !== 8) return say("Escribe los ocho dígitos del celular; el código +56 9 ya está incluido.", "phone");
+        if (!consent) return say("Para responder esta solicitud necesitamos tu permiso.", "consent");
+        M.passStart();
+        M.saveContact({ name: name, email: cv.email, phone: cv.phone, consent: consent, marketingConsent: marketingConsent });
+        C.ui.r4Draft = {};
+      }
+      // Confirma en orden los pasos que falten: mismos eventos y puntaje que el diagnóstico paso a paso.
+      for (let k = 0; k <= M.STEPS.length && !M.get().diag.done; k++) {
+        const st = M.get();
+        if (!M.stepReady(st)) {
+          const faltan = M.stepKeys(st, st.diag.step).filter(function (x) { const v = st.answers[x]; return Array.isArray(v) ? !v.length : !v; });
+          const texto = "Falta elegir: " + faltan.map(function (x) { return M.question(st, x).title; }).join(" · ");
+          // Abre lo sugerido para que se vea qué falta, y muestra el aviso después de volver a dibujar.
+          C.ui.r4Sug = true; window.MarleyApp.render();
+          setTimeout(function () { const m = document.querySelector("#r4Datos .r4-msg"); if (m) m.textContent = texto; }, 0);
+          return false;
+        }
+        M.confirmStep();
+      }
+      if (!M.get().diag.done) return;
+      C.ui.r4EditBiz = false;
+      let target = "C05";
+      if (C.ui.talkPending || C.ui.intent === "hablar") { C.ui.talkPending = false; C.ui.intent = null; target = "C06"; }
+      // Deja terminar el clic antes de cambiar de pantalla (mismo criterio que el diagnóstico original).
+      setTimeout(function () { if ((location.hash || "").split("?")[0] === "#C04") window.MarleyApp.go(target); }, 100);
+    }
+  }
+  if (window.__r3Listo) install(); else document.addEventListener("r3:listo", install, { once: true });
 })();
 </script>
 </body></html>

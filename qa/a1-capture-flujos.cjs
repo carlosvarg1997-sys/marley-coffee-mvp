@@ -250,39 +250,28 @@ async function submitLanding(page, name, email, company) {
   await page.locator('#ld-exito').waitFor({ state: 'visible' });
 }
 async function completeDiagnosis(page, businessLabel) {
+  // R4 (13-nov): «Tu negocio» en una pantalla (negocio si falta y comuna; lo demás viene sugerido) y del catálogo directo a la propuesta.
   await page.locator('.m5-qcard').waitFor({ state: 'visible' });
-  const options = await page.locator('[data-a="answer"][data-k="negocio"]').evaluateAll((els) => els.map((el) => ({ value: el.getAttribute('data-v'), text: el.innerText })));
-  const answer = options.find((item) => new RegExp(businessLabel, 'i').test(`${item.value} ${item.text}`)) || options[0];
-  await page.locator(`[data-a="answer"][data-k="negocio"][data-v="${answer.value}"]`).click();
-  const advance = async () => {
-    const next = page.locator('[data-a="next"]');
-    if (!(await next.isEnabled())) {
-      const option = page.locator('.m5-qcard [data-a="answer"]').first();
-      if (await option.count()) await option.click();
-      else if (await page.locator('#m5Comuna').count()) await page.locator('#m5Comuna').selectOption({ index: 1 });
-    }
-    if (!(await next.isEnabled())) {
-      throw new Error(`Diagnóstico ${await page.locator('.m5-qcard').innerText()} sigue sin habilitar Continuar.`);
-    }
-    await next.click();
-  };
-  await advance();
-  await page.getByText('¿En qué comuna está tu local?', { exact: false }).waitFor({ state: 'visible' });
-  if (await page.locator('#m5Comuna').count()) {
-    await page.locator('#m5Comuna').selectOption('Las Condes');
-    await page.waitForFunction(() => document.querySelector('#m5Comuna')?.value === 'Las Condes');
+  const options = await page.locator('#r4Datos [data-a="answer"][data-k="negocio"]').evaluateAll((els) => els.map((el) => ({ value: el.getAttribute('data-v'), text: el.innerText })));
+  if (options.length) {
+    const answer = options.find((item) => new RegExp(businessLabel, 'i').test(`${item.value} ${item.text}`)) || options[0];
+    await page.locator(`#r4Datos [data-a="answer"][data-k="negocio"][data-v="${answer.value}"]`).click();
   }
+  await page.getByText('¿En qué comuna está tu local?', { exact: false }).waitFor({ state: 'visible' });
+  await page.locator('#m5Comuna').selectOption('Las Condes');
+  await page.waitForFunction(() => document.querySelector('#m5Comuna')?.value === 'Las Condes');
   await page.waitForTimeout(250);
-  const volumeOption = page.locator('[data-a="answer"][data-k="volumen"][data-v="De 150 a 400"]');
-  if (await volumeOption.count()) await volumeOption.click();
-  await advance();
-  await advance();
+  const volumeOption = page.locator('#r4Datos [data-a="answer"][data-k="volumen"][data-v="De 150 a 400"]');
+  if (await volumeOption.count()) {
+    if (!(await volumeOption.isVisible())) await page.locator('#r4Datos .r4-sugerido > summary').click();
+    if ((await volumeOption.getAttribute('aria-pressed')) !== 'true') await volumeOption.click();
+  }
+  const next = page.locator('[data-a="next"]');
+  if (!(await next.isEnabled())) throw new Error(`Diagnóstico ${await page.locator('.m5-qcard').innerText()} sigue sin habilitar Continuar.`);
+  await next.click();
   await waitHash(page, '#C10');
   await page.locator('.m9-catalog').waitFor({ state: 'visible' });
   await page.locator('#m9-continue').click();
-  await waitHash(page, '#C04');
-  await page.locator('.m5-qcard').waitFor({ state: 'visible' });
-  await page.locator('[data-a="next"]').click();
   await waitHash(page, '#C05');
   await page.locator('.m5-propsec').waitFor({ state: 'visible' });
 }

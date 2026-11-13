@@ -107,18 +107,14 @@ async function main() {
       assert.equal(await page.locator('.m5-nav, .ux-mobile-nav').count(), 0);
       await page.evaluate(() => { location.hash = '#C04'; });
       await page.locator('.m5-qcard').waitFor({ state: 'visible' });
-      await page.locator('[data-a="answer"][data-k="negocio"][data-v="Restaurante"]').click();
-      await page.locator('[data-a="next"]').click();
+      // R4 (13-nov): «Tu negocio» en una pantalla. El negocio ya viene de la landing y no se vuelve a preguntar; solo falta la comuna.
+      assert.equal(await page.locator('#r4Datos [data-a="answer"][data-k="negocio"]').count(), 0, 'C04 no vuelve a preguntar el negocio que trae la landing');
       await page.locator('#m5Comuna').selectOption({ label: 'Las Condes' });
       await page.locator('[data-a="next"]').click();
-      await page.locator('[data-a="next"]').click();
-      // El diagnóstico termina, pero el portal exige revisar productos y máquinas antes de volver a la propuesta.
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C10');
       await page.locator('.m9-catalog').waitFor({ state: 'visible' });
       await page.locator('#m9-continue').click();
-      await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C04');
-      await page.locator('.m5-qcard').waitFor({ state: 'visible' });
-      await page.locator('[data-a="next"]').click();
+      // Del catálogo se pasa directo a la propuesta, sin volver a C04.
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C05');
       await page.locator('.m5-propsec').waitFor({ state: 'visible' });
       assert.equal(await page.evaluate(() => M4.landingFocus('C05')), true);
