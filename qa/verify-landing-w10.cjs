@@ -31,9 +31,18 @@ async function context(browser, width, init) {
   return { ctx, page, errors };
 }
 
+// R5 (14-nov): en R5 el formulario de las landings va dentro de #ld-form-disclosure (plegado); abrirlo antes de completar el formulario.
+async function openLandingForm(page) {
+  const disc = page.locator('#ld-form-disclosure');
+  if (await disc.count() && (await disc.getAttribute('open')) === null) {
+    await page.locator('#ld-form-disclosure > summary').click();
+  }
+}
+
 async function completeLanding(page, base, { marketing = false, touched = false, email = 'camila.rojas@example.com', company = 'Restaurante Los Aromos' } = {}) {
   await page.goto(base + '/captacion/landing/restaurantes.html?utm_source=google&utm_medium=cpc&utm_campaign=prueba&mc_source=serp_lab&mc_session=SERP-1&mc_phase=title&mc_variant=B&mc_query_id=2&mc_surface=resultado-organico&mc_first_click_ms=1200&mc_first_click_surface=resultado-organico', { waitUntil: 'domcontentloaded' });
   if (touched) await page.locator('#c-base').evaluate((el) => { el.value = '120'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+  await openLandingForm(page);
   await page.locator('#f-nombre').fill('Camila Rojas');
   await page.locator('#f-correo').fill(email);
   await page.locator('#f-consent').check();
@@ -71,13 +80,15 @@ async function main() {
       assert.equal(entry.lead.firstTouch.params.utm_source, 'linkedin');
       assert.equal(entry.lead.lastTouch.params.utm_source, 'google');
       await page.locator('#ld-continuar').click();
-      await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C04');
+      // R6e (14-nov): esperar carga completa del documento para asegurar ejecución de R6P antes de leer M4.score()
+      await page.waitForFunction(() => document.readyState !== 'loading' && (location.hash || '').split('?')[0] === '#C04');
       await page.locator('.m5-qcard').waitFor({ state: 'visible' });
       const received = await page.evaluate(() => {
         const s = M4.get();
         return { score: M4.score(), lead: s.lead, events: s.events, emails: s.emails.length, agents: s.agents.length, focus: M4.landingFocus('C04'), menu: Boolean(document.querySelector('.m5-nav, .ux-mobile-nav')), screen: document.body.dataset.current, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, localEvents: localStorage.getItem('mc_landing_events_v1'), sessionEvents: Boolean(sessionStorage.getItem('mc_landing_events_v1')) };
       });
-      assert.equal(received.score, 20);
+      // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos); form1 pasa a 25 pts.
+      assert.equal(received.score, 25);
       assert.equal(received.events.filter((event) => event.key === 'form1').length, 1);
       assert.equal(received.lead.company, 'Restaurante Los Aromos');
       assert.equal(received.lead.marketingConsent, true);
@@ -96,11 +107,12 @@ async function main() {
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.locator('.m5-qcard').waitFor({ state: 'visible' });
       const again = await page.evaluate(() => ({ score: M4.score(), events: M4.get().events.filter((e) => e.key === 'form1').length, emails: M4.get().emails.length, agents: M4.get().agents.length, focus: M4.landingFocus('C04') }));
-      assert.deepEqual(again, { score: 20, events: 1, emails: received.emails, agents: received.agents, focus: true });
+      // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos); form1 suma 25.
+      assert.deepEqual(again, { score: 25, events: 1, emails: received.emails, agents: received.agents, focus: true });
       await page.evaluate(() => { M4.saveContact({ name: M4.get().lead.name, email: M4.get().lead.email, consent: true, marketingConsent: false }); });
       await page.reload({ waitUntil: 'domcontentloaded' });
       assert.equal(await page.evaluate(() => M4.get().lead.marketingConsent), false);
-      assert.equal(await page.evaluate(() => M4.score()), 20);
+      assert.equal(await page.evaluate(() => M4.score()), 25);
       await page.evaluate(() => { location.hash = '#C03'; });
       await page.locator('#m4Contact').waitFor({ state: 'visible' });
       assert.equal(await page.evaluate(() => M4.landingFocus('C03')), true);
@@ -110,13 +122,17 @@ async function main() {
       // R4 (13-nov): «Tu negocio» en una pantalla. El negocio ya viene de la landing y no se vuelve a preguntar; solo falta la comuna.
       assert.equal(await page.locator('#r4Datos [data-a="answer"][data-k="negocio"]').count(), 0, 'C04 no vuelve a preguntar el negocio que trae la landing');
       await page.locator('#m5Comuna').selectOption({ label: 'Las Condes' });
+      const maqC04 = await page.evaluate(() => window.R5?.maquina?.() || null); // coordinador (14-nov): clave de la máquina
       await page.locator('[data-a="next"]').click();
-      await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C10');
-      await page.locator('.m9-catalog').waitFor({ state: 'visible' });
-      await page.locator('#m9-continue').click();
-      // Del catálogo se pasa directo a la propuesta, sin volver a C04.
+      // R5 (14-nov): desde la landing («Calcula tu solución») C04 pasa directo a la propuesta C05, sin pasar por C10.
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C05');
       await page.locator('.m5-propsec').waitFor({ state: 'visible' });
+      const propR5 = await page.evaluate(() => ({
+        maqC05: window.R5?.maquina?.() || null,
+        porqueVisible: Boolean(document.querySelector('.r3-proposal-machine .r5-porque')),
+      }));
+      assert.equal(propR5.porqueVisible, true, 'R5: C05 muestra el porqué de la máquina');
+      if (maqC04) assert.equal(propR5.maqC05, maqC04, 'R5: la máquina en C05 coincide con C04');
       assert.equal(await page.evaluate(() => M4.landingFocus('C05')), true);
       assert.equal(await page.locator('.m5-nav, .ux-mobile-nav').count(), 0);
       await page.screenshot({ path: path.join(evidence, `W10_C05_${width}.png`) });
@@ -141,11 +157,14 @@ async function main() {
       const entry = await completeLanding(page, base);
       assert.equal(entry.lead.calc.tocado, false);
       await page.locator('#ld-continuar').click();
-      await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C04');
+      // R6e (14-nov): esperar carga completa del documento y bloque C04 antes de leer M4.score()
+      await page.waitForFunction(() => document.readyState !== 'loading' && (location.hash || '').split('?')[0] === '#C04');
+      await page.locator('.m5-qcard').waitFor({ state: 'visible' });
       const info = await page.evaluate(() => ({ calc: M4.get().lead.landing.calc, answers: M4.get().answers, score: M4.score() }));
       assert.deepEqual(info.calc, { tocado: false });
       assert.equal(info.answers.volumen, undefined);
-      assert.equal(info.score, 20);
+      // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos); form1 suma 25.
+      assert.equal(info.score, 25);
       await page.evaluate(() => M4.reset());
       const cleared = await page.evaluate(() => ({ lead: localStorage.getItem('mc_landing_lead_v1'), draft: localStorage.getItem('mc_landing_draft_v1'), first: localStorage.getItem('mc_first_touch_v1'), focus: sessionStorage.getItem('mc_landing_focus_v1'), events: sessionStorage.getItem('mc_landing_events_v1'), score: M4.score() }));
       assert.deepEqual(cleared, { lead: null, draft: null, first: null, focus: null, events: null, score: 0 });
@@ -175,7 +194,8 @@ async function main() {
       await page.locator('#ld-continuar').click();
       await page.getByText('Ya existe otra solicitud guardada en este navegador.', { exact: false }).waitFor();
       const kept = await page.evaluate(() => ({ email: M4.get().lead.email, company: M4.get().lead.company, score: M4.score(), pending: Boolean(localStorage.getItem('mc_landing_lead_v1')) }));
-      assert.deepEqual(kept, { email: 'diego.paredes@example.com', company: 'Cafetería Patio Sur', score: 20, pending: true });
+      // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos); form1 suma 25.
+      assert.deepEqual(kept, { email: 'diego.paredes@example.com', company: 'Cafetería Patio Sur', score: 25, pending: true });
       results.push({ existingAccount: 'preserved' });
       await ctx.close();
     }
@@ -191,6 +211,7 @@ async function main() {
       };
       const { ctx, page } = await context(browser, 390, init);
       await page.goto(base + '/captacion/landing/restaurantes.html', { waitUntil: 'domcontentloaded' });
+      await openLandingForm(page);
       await page.locator('#f-nombre').fill('Camila Rojas');
       await page.locator('#f-correo').fill('camila.rojas@example.com');
       await page.locator('#f-consent').check();
@@ -219,7 +240,8 @@ async function main() {
       await page.evaluate(() => sessionStorage.removeItem('w10_fail_key'));
       await page.getByRole('button', { name: 'Reintentar' }).click();
       await page.locator('.m5-qcard').waitFor({ state: 'visible' });
-      assert.equal(await page.evaluate(() => M4.score()), 20);
+      // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos); form1 suma 25.
+      assert.equal(await page.evaluate(() => M4.score()), 25);
       results.push({ storageFailure: 'blocked and recovered' });
       await ctx.close();
     }

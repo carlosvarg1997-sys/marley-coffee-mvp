@@ -6,6 +6,7 @@ import re
 
 HERE = Path(__file__).resolve().parent
 DATE = '10 de noviembre de 2026'
+ASSET_VERSION = '20261114-r5-c2'
 SCA = ('Specialty Coffee Association · prácticas de preparación de espresso', 'https://sca.coffee/sca-news/25-magazine/issue-3/defining-ever-changing-espresso-25-magazine-issue-3-zyx36')
 BCN = ('Biblioteca del Congreso Nacional de Chile · Código Civil, artículos 1793, 1915 y 2174', 'https://www.bcn.cl/leychile/navegar?idNorma=172986')
 MINSAL = ('Ministerio de Salud de Chile · Reglamento Sanitario de los Alimentos', 'https://www.minsal.cl/reglamento-sanitario-de-los-alimentos/')
@@ -14,7 +15,7 @@ STOCK = ('Universidad de Arkansas · sistemas y punto de reposición de inventar
 
 MONTH_CALC = '''
 <section class="ct-calculator" aria-labelledby="consumo-titulo">
-  <h2 id="consumo-titulo">Calcula tu consumo</h2><p>Comienza con este ejemplo editable y reemplázalo por los datos de tu negocio.</p>
+  <p class="ct-body-label" id="consumo-titulo">Calcula tu consumo</p><p>Comienza con este ejemplo editable y reemplázalo por los datos de tu negocio.</p>
   <form id="ct-consumo" class="ct-form">
     <div class="ct-field"><label for="cons-tazas">Tazas por día</label><input id="cons-tazas" name="tazas" type="number" min="1" max="100000" step="1" value="80" required></div>
     <div class="ct-field"><label for="cons-dias">Días de atención al mes</label><input id="cons-dias" name="dias" type="number" min="1" max="31" step="1" value="26" required></div>
@@ -26,7 +27,7 @@ MONTH_CALC = '''
 
 STOCK_CALC = '''
 <section class="ct-calculator" aria-labelledby="stock-titulo">
-  <h2 id="stock-titulo">Calcula cuándo volver a pedir</h2><p>Ejemplo editable. Usa el plazo que confirmaste con tu proveedor y la reserva que hayas definido.</p>
+  <p class="ct-body-label" id="stock-titulo">Calcula cuándo volver a pedir</p><p>Ejemplo editable. Usa el plazo que confirmaste con tu proveedor y la reserva que hayas definido.</p>
   <form id="ct-stock" class="ct-form">
     <div class="ct-field"><label for="stock-consumo">Consumo diario (kg)</label><input id="stock-consumo" name="consumo" type="number" min="0.01" max="100000" step="any" value="1" required></div>
     <div class="ct-field"><label for="stock-entrega">Días hasta recibir el pedido</label><input id="stock-entrega" name="entrega" type="number" min="1" max="365" step="1" value="3" required></div>
@@ -78,20 +79,28 @@ PAGES = [
 ORIGIN = 'https://empresas.marleycoffee.cl'
 CONTENT_PATH = '/captacion/contenidos/'
 SEO_TITLES = {
-    'cuanto-cafe-necesita-mi-negocio':'Calcular consumo de café mensual | Marley Coffee',
-    'comodato-maquina-de-cafe':'Comodato de máquina de café | Marley Coffee',
-    'comprar-arrendar-o-comodato':'Comprar, arrendar o pedir en comodato | Marley Coffee',
-    'como-elegir-maquina-cafe':'Elegir máquina de café para un negocio | Marley Coffee',
-    'cafe-desayuno-hotel':'Café para desayuno de hotel | Marley Coffee',
-    'como-evitar-quedarse-sin-cafe':'Punto de reposición de café | Marley Coffee',
+    'cuanto-cafe-necesita-mi-negocio':'Café para negocios: calcula el consumo mensual | Marley Coffee Empresas',
+    'comodato-maquina-de-cafe':'Máquina de café en comodato: qué revisar | Marley Coffee Empresas',
+    'comprar-arrendar-o-comodato':'Máquina de café comercial: compra, arriendo o comodato | Marley Coffee Empresas',
+    'como-elegir-maquina-cafe':'Máquina de café profesional: cómo elegir | Marley Coffee Empresas',
+    'cafe-desayuno-hotel':'Café para desayuno de hotel: cómo planificar | Marley Coffee Empresas',
+    'como-evitar-quedarse-sin-cafe':'Insumos para máquinas de café: cómo calcular reposición | Marley Coffee Empresas',
 }
 SEO_DESCRIPTIONS = {
-    'cuanto-cafe-necesita-mi-negocio':'Estima los kilos de café al mes con tus tazas diarias, días de atención y receta. Ajusta los supuestos a tu operación.',
-    'comodato-maquina-de-cafe':'Qué significa el comodato de una máquina de café en Chile y qué revisar por separado en una propuesta de productos y servicios.',
-    'comprar-arrendar-o-comodato':'Compara compra, arriendo y comodato de una máquina según el costo total, uso del equipo y condiciones acordadas.',
-    'como-elegir-maquina-cafe':'Revisa consumo, hora punta, carta, espacio y operación antes de comparar máquinas de café para tu negocio.',
-    'cafe-desayuno-hotel':'Organiza el servicio de café del desayuno con una estimación de tazas, demanda punta, equipo e insumos.',
-    'como-evitar-quedarse-sin-cafe':'Calcula un punto de reposición orientativo con consumo diario, plazo de entrega y la reserva que definas.',
+    'cuanto-cafe-necesita-mi-negocio':'Calcula café para negocios con tus tazas diarias, días de atención y gramos por receta. Ajusta el resultado a tus propios registros.',
+    'comodato-maquina-de-cafe':'Revisa qué significa una máquina de café en comodato y qué acordar por separado sobre productos, soporte y devolución.',
+    'comprar-arrendar-o-comodato':'Compara una máquina de café comercial por compra, arriendo o comodato según costos y condiciones confirmados.',
+    'como-elegir-maquina-cafe':'Elige una máquina de café profesional con datos de consumo, hora punta, carta, espacio e instalación.',
+    'cafe-desayuno-hotel':'Planifica café para desayuno de hotel con estimación de tazas, demanda punta, equipo e insumos.',
+    'como-evitar-quedarse-sin-cafe':'Calcula la reposición de insumos para máquinas de café con consumo diario, plazo confirmado y reserva elegida.',
+}
+ARTICLE_INTENTS = {
+ 'cuanto-cafe-necesita-mi-negocio':('café para negocios','¿Cómo estimar los kilos que necesitas al mes?','¿Cómo calculas el consumo para tu operación?','Usa tazas, días de atención y gramos por receta.'),
+ 'comodato-maquina-de-cafe':('máquina de café en comodato','¿Qué debe especificar un acuerdo de comodato?','¿Qué debes revisar antes de firmar?','Define el equipo, productos, soporte, plazo y término por escrito.'),
+ 'comprar-arrendar-o-comodato':('máquina de café comercial','¿Cómo comparar compra, arriendo y comodato?','¿Qué costos conviene comparar?','Reúne los costos confirmados del mismo período y anota lo que falta.'),
+ 'como-elegir-maquina-cafe':('máquina de café profesional','¿Qué datos necesitas para elegir un equipo?','¿Qué pedir en la ficha de la máquina?','Compara capacidad, dimensiones, conexiones, limpieza y soporte.'),
+ 'cafe-desayuno-hotel':('café para desayuno de hotel','¿Cómo prever la demanda del desayuno?','¿Cómo organizar el servicio en tres momentos?','Prepara el servicio, observa la hora punta y registra el consumo.'),
+ 'como-evitar-quedarse-sin-cafe':('insumos para máquinas de café','¿Cuándo conviene hacer un nuevo pedido?','¿Cómo calcular el punto de reposición?','Multiplica el consumo diario por el plazo y suma la reserva elegida.'),
 }
 ARTICLE_VISUALS = {
  'cuanto-cafe-necesita-mi-negocio':('CONSUMO','oficina','Máquina y taza de café en un punto de atención.'),
@@ -146,43 +155,42 @@ ASSUMPTIONS = {
 
 def jsonld(title, description, canonical, surface, article=False, faqs=None):
     blocks = [{'@context':'https://schema.org','@type':'Organization','name':'Marley Coffee Empresas','url':ORIGIN+'/'},
+      {'@context':'https://schema.org','@type':'WebPage','name':title,'description':description,'inLanguage':'es-CL','url':canonical},
       {'@context':'https://schema.org','@type':'BreadcrumbList','itemListElement':[
        {'@type':'ListItem','position':1,'name':'Inicio','item':ORIGIN+'/'},
        {'@type':'ListItem','position':2,'name':'Contenidos','item':ORIGIN+CONTENT_PATH+'index.html'},
        {'@type':'ListItem','position':3,'name':title,'item':canonical}]}]
     if article:
         blocks.append({'@context':'https://schema.org','@type':'Article','headline':title,'description':description,'inLanguage':'es-CL','mainEntityOfPage':canonical,'publisher':{'@type':'Organization','name':'Marley Coffee Empresas'}})
-    if faqs:
-        blocks.append({'@context':'https://schema.org','@type':'FAQPage','mainEntity':[{'@type':'Question','name':q,'acceptedAnswer':{'@type':'Answer','text':a}} for q,a in faqs]})
     return ''.join(f'<script type="application/ld+json">{json.dumps(x,ensure_ascii=False).replace("</","<\\/")}</script>' for x in blocks)
 
 def header(title, description, surface, body_class='', canonical=None, schema=''):
     canonical = canonical or ORIGIN+CONTENT_PATH+'index.html'
     return f'''<!doctype html>
-<html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0B0B0C"><title>{escape(title)}</title><meta name="description" content="{escape(description, quote=True)}"><link rel="canonical" href="{canonical}"><link rel="icon" href="../../recursos/marca/logo.webp"><link rel="stylesheet" href="../marca/negro-marley.css"><link rel="stylesheet" href="contenidos.css">{schema}</head>
+<html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0B0B0C"><title>{escape(title)}</title><meta name="description" content="{escape(description, quote=True)}"><link rel="canonical" href="{canonical}"><link rel="icon" href="../../recursos/marca/logo.webp"><link rel="stylesheet" href="../marca/negro-marley.css"><link rel="stylesheet" href="contenidos.css?v={ASSET_VERSION}">{schema}</head>
 <body class="nm {body_class}" data-surface="{escape(surface, quote=True)}"><a class="nm-skip" href="#contenido">Saltar al contenido</a>
 <header class="ct-barra"><div class="nm-wrap"><a href="index.html" class="ct-brand"><span class="ld-logo" aria-hidden="true"></span><span>Empresas</span></a><nav aria-label="Navegación principal"><a class="ct-head-link" href="../soluciones/index.html">Soluciones</a><a class="ct-head-link" href="../../index.html#C03" data-attribution-handoff data-screen="C03" data-surface="contenido-nav">Portal</a></nav></div></header>'''
 
-FOOTER = '''<footer class="ct-footer"><div class="nm-wrap"><p>Marley Coffee Empresas · Ideas para tu negocio</p><p>Las condiciones comerciales se confirman en tu propuesta.</p></div></footer><script src="contenidos.js" defer></script></body></html>'''
+FOOTER = f'''<footer class="ct-footer"><div class="nm-wrap"><p>Marley Coffee Empresas · Ideas para tu negocio</p><p>Las condiciones comerciales se confirman en tu propuesta.</p></div></footer><script src="contenidos.js?v={ASSET_VERSION}" defer></script></body></html>'''
 
 def cards(items=None):
     output=[]
     for p in (items or PAGES):
-        output.append(f'''<a class="ct-card" data-categories="{p['cats']}" href="{p['slug']}.html"><span class="ct-card-kind">{escape(p['tag'])}</span><h3>{escape(p['title'])}</h3><p>{escape(p['teaser'])}</p><span class="ct-card-arrow">Leer guía <span aria-hidden="true">→</span></span></a>''')
+        output.append(f'''<a class="ct-card" data-categories="{p['cats']}" href="{p['slug']}.html"><span class="ct-card-kind">{escape(p['tag'])}</span><span class="ct-card-title">{escape(p['title'])}</span><p>{escape(p['teaser'])}</p><span class="ct-card-arrow">Leer guía <span aria-hidden="true">→</span></span></a>''')
     return '\n'.join(output)
 
 def tabpanel(category, title, subset, selected=False):
-    return f'<section id="panel-{category}" role="tabpanel" aria-labelledby="tab-{category}" tabindex="0"{"" if selected else " hidden"}><h3 class="ct-panel-title">{title}</h3><div class="ct-grid">'+cards(subset)+'</div></section>'
+    return f'<section id="panel-{category}" role="tabpanel" aria-labelledby="tab-{category}" tabindex="0"{"" if selected else " hidden"}><p class="ct-panel-title">{title}</p><div class="ct-grid">'+cards(subset)+'</div></section>'
 
 def home():
-    title='Guías de café para negocios | Marley Coffee'
-    summary='Respuestas, guías y calculadoras para planificar el café de tu negocio. Prototipo; dominio B2B pendiente de confirmación.'
+    title='Servicio de café para empresas: guías y calculadoras | Marley Coffee Empresas'
+    summary='Guías y calculadoras para organizar el servicio de café de tu empresa, estimar consumo y comparar máquinas.'
     canonical=ORIGIN+CONTENT_PATH+'index.html'
     tabs=''.join(f'<button id="tab-{k}" class="ct-tab" role="tab" type="button" aria-controls="panel-{k}" aria-selected="{str(i==0).lower()}" tabindex="{0 if i==0 else -1}">{label}</button>' for i,(k,label) in enumerate([('respuestas','Respuestas'),('guias','Guías'),('calculadoras','Calculadoras'),('casos','Casos')]))
     panels=tabpanel('respuestas','Respuestas directas', [PAGES[1],PAGES[2]], True)+tabpanel('guias','Guías para tu operación', [PAGES[0],PAGES[3],PAGES[4],PAGES[5]])+tabpanel('calculadoras','Calcula con tus propios datos', [PAGES[0],PAGES[5]])+tabpanel('casos','Escenarios de planificación', [PAGES[4]])
-    return header(title,summary,'contenido-hub',canonical=canonical,schema=jsonld(title,summary,canonical,'contenido-hub'))+f'''<main id="contenido"><section class="ct-hero"><picture><source media="(max-width: 560px)" srcset="../../recursos/escenas/hero/poster_m.webp"><img src="../../recursos/escenas/hero/poster.webp" width="1440" height="804" alt="" fetchpriority="high"></picture><div class="nm-wrap"><div class="ct-hero-copy"><p class="nm-eyebrow">Marley Coffee · Empresas</p><span class="ct-display-word" aria-hidden="true">CAFÉ</span><h1 class="nm-h1">¿Cómo planificar el café para tu negocio?</h1><p class="nm-lead">Respuestas prácticas para elegir tu equipo, planificar el consumo y mantener tu servicio en marcha.</p><a href="#guias" class="nm-btn">Explorar contenidos <span aria-hidden="true">→</span></a></div></div></section>
+    return header(title,summary,'contenido-hub',canonical=canonical,schema=jsonld('Servicio de café para empresas',summary,canonical,'contenido-hub'))+f'''<main id="contenido"><section class="ct-hero"><picture><source media="(max-width: 560px)" srcset="../../recursos/escenas/hero/poster_m.webp"><img src="../../recursos/escenas/hero/poster.webp" width="1440" height="804" alt="" fetchpriority="high"></picture><div class="nm-wrap"><div class="ct-hero-copy"><p class="nm-eyebrow">Marley Coffee · Empresas</p><span class="ct-display-word" aria-hidden="true">CAFÉ</span><h1 class="nm-h1"><span class="ct-h1-intent">Servicio de café para empresas</span>: ¿Cómo planificar el café para tu negocio?</h1><p class="nm-lead">Respuestas prácticas para elegir tu equipo, planificar el consumo y mantener tu servicio en marcha.</p><a href="#guias" class="nm-btn">Explorar contenidos <span aria-hidden="true">→</span></a></div></div></section>
 <section class="ct-hub-answer nm-wrap"><div class="ct-answer" aria-label="Respuesta breve"><span class="ct-kicker">En breve</span><p>Para organizar el café de tu negocio, estima el consumo, compara el equipo y define cómo repondrás. Las guías muestran fórmulas y supuestos para que puedas usar tus propios datos.</p></div></section>
-<section class="ct-browse nm-wrap" id="guias"><div class="ct-browse-head"><div><p class="nm-eyebrow">Empieza por tu pregunta</p><h2 class="nm-h2">Encuentra una respuesta.</h2></div><p class="nm-p">Seis piezas para comparar opciones, planificar consumo y organizar el servicio.</p></div><div class="ct-tabs" role="tablist" aria-label="Tipos de contenido">{tabs}</div>{panels}</section></main>'''+FOOTER
+<section class="ct-browse nm-wrap" id="guias"><div class="ct-browse-head"><div><p class="nm-eyebrow">Empieza por tu pregunta</p><h2 class="nm-h2">¿Qué necesitas resolver?</h2><h3 class="ct-browse-answer">Elige una guía para comparar equipos, estimar consumo y planificar la reposición.</h3></div><p class="nm-p">Seis piezas para comparar opciones, planificar consumo y organizar el servicio.</p></div><div class="ct-tabs" role="tablist" aria-label="Tipos de contenido">{tabs}</div>{panels}</section></main>'''+FOOTER
 
 def article(p, i):
     related=[PAGES[(i+1)%len(PAGES)],PAGES[(i+2)%len(PAGES)]]
@@ -193,15 +201,20 @@ def article(p, i):
     seo_title=SEO_TITLES[p['slug']]
     seo_description=SEO_DESCRIPTIONS[p['slug']]
     canonical=ORIGIN+CONTENT_PATH+p['slug']+'.html'
-    schema=jsonld(p['title'],seo_description,canonical,'contenido-'+p['slug'],True,FAQS[p['slug']])
+    phrase,question,body_question,body_answer=ARTICLE_INTENTS[p['slug']]
+    phrase=phrase.strip()
+    phrase=phrase[:1].upper()+phrase[1:]
+    h1_text=phrase+': '+p['title'].strip()
+    schema=jsonld(h1_text,seo_description,canonical,'contenido-'+p['slug'],True)
     word,scene,alt=ARTICLE_VISUALS[p['slug']]
     body=p['body']
     comparison_sheet='''<dl class="ct-fact-sheet"><div class="ct-fact-row"><dt>Comprar</dt><dd>Precio de adquisición, entrega, garantía, mantenimiento y disponibilidad de insumos.</dd></div><div class="ct-fact-row"><dt>Arrendar</dt><dd>Precio por el uso, duración, servicios incluidos y condiciones de término.</dd></div><div class="ct-fact-row"><dt>Comodato</dt><dd>Préstamo de uso y devolución; revisa por separado los compromisos de productos y servicios.</dd></div></dl>'''
     if p['slug']=='comprar-arrendar-o-comodato':
         body=re.sub(r'<table class="ct-table"><thead><tr><th scope="col">Alternativa</th>.*?</table>',comparison_sheet,body,count=1,flags=re.S)
     body=re.sub(r'<div class="ct-callout">(?=<p><strong>Fórmula:)', '<div class="ct-callout ct-formula">', body)
+    body=re.sub(r'<h2(?:\s+[^>]*)?>(.*?)</h2>',r'<p class="ct-body-label">\1</p>',body,flags=re.S)
     photo=feature_photo(scene,p['slug'],alt)
-    return header(seo_title,seo_description,'contenido-'+p['slug'],'article',canonical,schema)+f'''<main id="contenido" class="ct-article nm-wrap"><a class="ct-back" href="index.html">← Hub de contenidos</a><article><header class="ct-editorial-head"><p class="nm-eyebrow">{escape(p['tag'])} · Marley Coffee Empresas</p><span class="ct-display-word" aria-hidden="true">{escape(word)}</span><h1 class="nm-h1">{escape(p['title'])}</h1><span class="ct-meta">Actualizado el {DATE}</span></header>{photo}<section class="ct-answer" aria-label="Respuesta breve"><span class="ct-kicker">En breve</span><p>{escape(p['summary'])}</p></section><div class="ct-content">{body}<section class="ct-assumptions" aria-labelledby="supuestos"><h2 id="supuestos">Supuestos y límites</h2><div class="ct-table-wrap"><table class="ct-table ct-fact-table"><tbody>{assumptions}</tbody></table></div></section><section class="ct-faqs" aria-labelledby="preguntas"><h2 id="preguntas">Preguntas frecuentes</h2>{faq_html}</section><section class="ct-sources" aria-labelledby="fuentes"><h2 id="fuentes">Fuentes y fecha de consulta</h2><div class="ct-table-wrap"><table class="ct-table"><thead><tr><th scope="col">Fuente</th><th scope="col">URL</th><th scope="col">Fecha de consulta</th></tr></thead><tbody>{source_html}</tbody></table></div></section><section class="ct-related" aria-labelledby="relacionadas"><h2 id="relacionadas">Preguntas relacionadas</h2><ul>{rel_html}</ul><p><a href="../soluciones/index.html">Ver soluciones por tipo de negocio</a></p></section></div><aside class="ct-next"><h2>Sigamos con tu negocio.</h2><p>Revisa las opciones disponibles en el portal y comparte lo que necesita tu operación.</p><a class="nm-btn" href="{p['target']}" data-attribution-handoff data-screen="C03" data-surface="contenido-{p['slug']}">{escape(p['cta'])} <span aria-hidden="true">→</span></a></aside></article></main>'''+FOOTER
+    return header(seo_title,seo_description,'contenido-'+p['slug'],'article',canonical,schema)+f'''<main id="contenido" class="ct-article nm-wrap"><a class="ct-back" href="index.html">← Hub de contenidos</a><article><header class="ct-editorial-head"><p class="nm-eyebrow">{escape(p['tag'])} · Marley Coffee Empresas</p><span class="ct-display-word" aria-hidden="true">{escape(word)}</span><h1 class="nm-h1"><span class="ct-h1-intent">{escape(phrase)}</span>: {escape(p['title'])}</h1><p class="ct-hero-cta-reason">Revisa opciones para tu negocio con los datos de tu operación.</p><a class="nm-btn" href="{p['target']}" data-attribution-handoff data-screen="C03" data-surface="contenido-{p['slug']}-hero">{escape(p['cta'])} <span aria-hidden="true">&rarr;</span></a><span class="ct-meta">Actualizado el {DATE}</span></header>{photo}<section class="ct-answer" aria-label="Respuesta breve"><h2 class="nm-h2">{escape(question)}</h2><h3>{escape(p['summary'])}</h3></section><div class="ct-content"><section class="ct-question-block"><h2 class="nm-h2">{escape(body_question)}</h2><h3>{escape(body_answer)}</h3><details class="ct-disclosure"><summary>Ver el cálculo, los pasos y las recomendaciones</summary><div class="ct-disclosure-content">{body}</div></details></section><section class="ct-question-block"><h2 class="nm-h2">¿Qué supuestos y preguntas conviene revisar?</h2><h3>Usa el cálculo como orientación y contrástalo con las condiciones de tu operación.</h3><details class="ct-disclosure"><summary>Ver los supuestos y límites</summary><div class="ct-table-wrap"><table class="ct-table ct-fact-table"><tbody>{assumptions}</tbody></table></div></details><details class="ct-disclosure"><summary>Ver preguntas y respuestas frecuentes</summary><div class="ct-faqs">{faq_html}</div></details></section><section class="ct-question-block"><h2 class="nm-h2">¿Qué fuentes y guías puedes consultar?</h2><h3>Revisa las referencias y la fecha de consulta junto con otros contenidos relacionados.</h3><details class="ct-disclosure"><summary>Ver fuentes y fecha de consulta</summary><div class="ct-table-wrap"><table class="ct-table"><thead><tr><th scope="col">Fuente</th><th scope="col">URL</th><th scope="col">Fecha de consulta</th></tr></thead><tbody>{source_html}</tbody></table></div></details><details class="ct-disclosure"><summary>Ver guías relacionadas</summary><ul>{rel_html}</ul><p><a href="../soluciones/index.html">Ver soluciones por tipo de negocio</a></p></details></section></div></article></main>'''+FOOTER
 
 if __name__ == '__main__':
     (HERE/'index.html').write_text(home(),encoding='utf-8')

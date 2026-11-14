@@ -187,10 +187,20 @@ function scorePath(M, segment, commune) {
 
 function verifyScoring(ctx, file) {
   const M = ctx.M4;
+  const isR6 = Boolean(ctx.R6P);
   assert.deepEqual(Array.from(M.B2B_SEGMENTS), buyerSegments, `${file}: B2B buyer segments`);
   assert.deepEqual(Array.from(M.M2_ORDER), expectedOrder, `${file}: M2 event order`);
-  for (const [key, points] of Object.entries(expectedWeights)) {
+  // R6e (14-nov): interacción fundamentada; recomendacion pasa de 10 a 5 para sumar 100 exacto y quedar bajo acciones activas
+  const weights = isR6 ? {
+    cotizar: 10, form1: 25, portal: 7, diag_inicio: 0, negocio: 0, volumen: 0,
+    operacion: 0, preferencias: 0, canal: 0, recomendacion: 5, propuesta: 15,
+    ejecutivo: 15, expansion: 8,
+  } : expectedWeights;
+  for (const [key, points] of Object.entries(weights)) {
     assert.equal(M.EV[key].pts, points, `${file}: M2 points for ${key}`);
+  }
+  if (isR6) {
+    assert.equal(M.EV.comuna.pts, 0, `${file}: comuna aporta 0 al interés en R6`);
   }
   const expectedBands = [
     [0, 'Exploración'], [19, 'Exploración'], [20, 'Identificado'], [39, 'Identificado'],
@@ -212,11 +222,12 @@ function verifyScoring(ctx, file) {
     const anonymousEvents = M.get().events.map((event) => event.key);
     assert.ok(anonymousEvents.length > 1, `${file}: anonymous exploration produces multiple unscored events`);
     M.saveContact({ name: 'Primer contacto', email: 'primero@example.cl', consent: true, marketingConsent: false });
-    assert.equal(M.get().events.find((event) => event.key === 'form1')?.pts, 20, `${file}: valid contact records the form scoring event once`);
+    // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos); form1 vale 25 pts.
+    assert.equal(M.get().events.find((event) => event.key === 'form1')?.pts, isR6 ? 25 : 20, `${file}: valid contact records the form scoring event once`);
     for (const event of M.get().events.filter((item) => anonymousEvents.includes(item.key))) {
       assert.equal(event.pts, 0, `${file}: identifying later does not retroactively score ${event.key}`);
     }
-    assert.equal(M.score(), 20, `${file}: the valid first contact receives only the form points`);
+    assert.equal(M.score(), isR6 ? 25 : 20, `${file}: the valid first contact receives only the form points`);
     const firstScore = M.score();
     M.saveContact({ name: 'Primer contacto', email: 'primero@example.cl', consent: true, marketingConsent: false });
     assert.equal(M.score(), firstScore, `${file}: reloading and resubmitting does not duplicate first-contact points`);
@@ -253,7 +264,8 @@ function verifyScoring(ctx, file) {
   for (const segment of buyerSegments) {
     const state = scorePath(M, segment, 'Las Condes');
     assert.equal(state.answers.negocio, segment, `${file}: selected segment ${segment}`);
-    assert.equal(M.score(), 85, `${file}: proposal-first M2 path score for ${segment} in Las Condes`);
+    // R6e (14-nov): interacción fundamentada; recomendacion=5 -> path suma 65 (25+10+10+5+15)
+    assert.equal(M.score(), isR6 ? 65 : 85, `${file}: proposal-first M2 path score for ${segment} in Las Condes`);
     assert.equal(M.isMQL(), true, `${file}: MQL for ${segment}`);
     assert.equal(M.sqlCandidate(), true, `${file}: SQL candidate for ${segment}`);
     assert.equal(M.stage(), 'MQL', `${file}: SQL remains pending a human decision`);
@@ -261,7 +273,7 @@ function verifyScoring(ctx, file) {
     // catalog's interactive "continue exploring" branch out of the unit fixture.
     ctx.M9Catalog.nextExploration = () => false;
     M.acceptProposal('ampliada');
-    assert.equal(M.score(), 100, `${file}: score cap after proposal and expansion`);
+    assert.equal(M.score(), isR6 ? 88 : 100, `${file}: score cap after proposal and expansion`);
     const eventKeys = M.get().events.filter((e) => M.M2_ORDER.includes(e.key)).map((e) => e.key);
     assert.equal(new Set(eventKeys).size, 13, `${file}: proposal-first route records M2 signals plus comuna; portal remains a later step`);
     assert.equal(M.stage(), 'MQL', `${file}: accepted proposal does not auto-accept SQL`);
@@ -296,17 +308,26 @@ function verifyScoring(ctx, file) {
   assert.match(ctx.M4R.SCREENS.R07(), /data-a="accept-sql"/, `${file}: sales sees the human SQL acceptance action`);
 
   const scenarioScores = [];
-  for (const [commune, expected] of [['Las Condes', 85], ['Santiago Centro', 81], ['Maipú', 78]]) {
+  // R6e (14-nov): interacción fundamentada; recomendacion=5 -> path suma 65 y con portal suma 72
+  const scenarioExpects = isR6 ? [['Las Condes', 65], ['Santiago Centro', 65], ['Maipú', 65]] : [['Las Condes', 85], ['Santiago Centro', 81], ['Maipú', 78]];
+  for (const [commune, expected] of scenarioExpects) {
     const state = scorePath(M, 'Hotel', commune);
     assert.equal(M.score(), expected, `${file}: proposal-first scenario score for ${commune}`);
     scenarioScores.push(M.score());
+    const valBeforePortal = isR6 ? ctx.R6P.valor(M.get()).puntaje : 0;
     M.enterPortal();
     assert.equal(M.get().events.filter((e) => e.key === 'portal').length, 1, `${file}: portal event deduplication`);
     const firstCommuneCount = M.get().events.filter((e) => e.key === 'comuna').length;
     M.setComuna('Las Condes');
+    const valCondes = isR6 ? ctx.R6P.valor(M.get()).puntaje : 0;
     M.setComuna('Maipú');
+    const valMaipu = isR6 ? ctx.R6P.valor(M.get()).puntaje : 0;
     assert.equal(M.get().events.filter((e) => e.key === 'comuna').length, firstCommuneCount, `${file}: comuna remains one signal`);
-    assert.equal(M.score(), 86, `${file}: changing the commune recalculates zone points after the later portal event`);
+    assert.equal(M.score(), isR6 ? 72 : 86, `${file}: changing the commune recalculates zone points after the later portal event`);
+    if (isR6) {
+      assert.ok(valCondes > valMaipu, `${file}: valor esperado de Las Condes (${valCondes}) supera a Maipú (${valMaipu})`);
+      assert.ok(valBeforePortal > 0);
+    }
   }
 
   M.reset();
@@ -316,17 +337,22 @@ function verifyScoring(ctx, file) {
   M.confirmStep();
   M.answer('comuna', 'Las Condes');
   M.confirmStep();
-  assert.equal(M.score(), 54, `${file}: initial commune score`);
+  // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos)
+  assert.equal(M.score(), isR6 ? 35 : 54, `${file}: initial commune score`);
+  const valCondesDiag = isR6 ? ctx.R6P.valor(M.get()).puntaje : 0;
   M.stepBack();
   M.answer('comuna', 'Maipú');
   M.confirmStep();
-  assert.equal(M.score(), 47, `${file}: diagnostic commune edit updates score`);
+  assert.equal(M.score(), isR6 ? 35 : 47, `${file}: diagnostic commune edit updates score`);
+  if (isR6) {
+    assert.ok(valCondesDiag > ctx.R6P.valor(M.get()).puntaje, `${file}: valor esperado baja al cambiar a Maipú`);
+  }
   assert.equal(M.get().lead.execId, ctx.M4D.execFor('Maipú').id, `${file}: diagnostic commune edit updates assignment`);
   assert.equal(M.get().events.filter((e) => e.key === 'comuna').length, 1, `${file}: diagnostic commune remains deduplicated`);
   M.stepBack();
   M.answer('comuna', 'Las Condes');
   M.confirmStep();
-  assert.equal(M.score(), 54, `${file}: diagnostic commune edit works in reverse`);
+  assert.equal(M.score(), isR6 ? 35 : 54, `${file}: diagnostic commune edit works in reverse`);
   M.stepBack();
   M.answer('comuna', 'Comuna de prueba');
   M.confirmStep();
@@ -364,12 +390,25 @@ function verifyActiveScreens(ctx, file) {
     assert.doesNotMatch(cleanMarkup(markup), /\bundefined\b|\bNaN\b/, `${file}: ${id} contains no missing helper values`);
   }
   const scoreRules = ctx.M4R.SCREENS.R09();
-  assert.match(scoreRules, /Engagement Score v1\.1/);
-  for (const key of ctx.M4.M2_ORDER) assert.ok(scoreRules.includes(ctx.M4.EV[key].label), `${file}: R09 shows ${key}`);
-  for (const key of ctx.M4.M2_ORDER.filter((item) => item !== 'comuna')) {
-    assert.ok(scoreRules.includes('+' + ctx.M4.EV[key].pts), `${file}: R09 shows the canonical ${key} points`);
+  // R6e (14-nov): interacción fundamentada; R09 con dos miradas (lead nuevo y cliente con compras)
+  if (ctx.R6P) {
+    assert.match(scoreRules, /¿Cómo se prioriza un lead nuevo\?/);
+    assert.match(scoreRules, /¿Cómo se prioriza un cliente con compras\?/);
+    assert.match(scoreRules, /Eje 1 · Interés/);
+    assert.match(scoreRules, /Eje 2 · Valor esperado/);
+    assert.match(scoreRules, /Eje 1 · Relación/);
+    assert.match(scoreRules, /Eje 2 · Valor real/);
+    assert.match(scoreRules, /Atender ya/);
+    assert.match(scoreRules, /Servicio primero/);
+    assert.match(scoreRules, /Recuperar con prioridad/);
+  } else {
+    assert.match(scoreRules, /Engagement Score v1\.1/);
+    for (const key of ctx.M4.M2_ORDER) assert.ok(scoreRules.includes(ctx.M4.EV[key].label), `${file}: R09 shows ${key}`);
+    for (const key of ctx.M4.M2_ORDER.filter((item) => item !== 'comuna')) {
+      assert.ok(scoreRules.includes('+' + ctx.M4.EV[key].pts), `${file}: R09 shows the canonical ${key} points`);
+    }
+    assert.match(scoreRules, /Prioridad máxima/);
   }
-  assert.match(scoreRules, /Prioridad máxima/);
   return { client: clientScreens.length, crm: crmScreens.length };
 }
 
@@ -539,7 +578,8 @@ function verifyUserHandlers(ctx, file) {
   M.stepBack();
   change({ target: { dataset: { a: 'comuna' }, value: 'Maipú', tagName: 'SELECT' } });
   M.confirmStep();
-  assert.equal(M.score(), 47, `${file}: diagnostic selector recalculates score`);
+  // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos)
+  assert.equal(M.score(), ctx.R6P ? 35 : 47, `${file}: diagnostic selector recalculates score`);
   scorePath(M, 'Hotel', 'Las Condes');
   ctx.location.hash = '#R07';
   M.setRole('ventas');
@@ -669,6 +709,10 @@ function verifyVariant(file, mode) {
     'window.MarleyApp = (() =>', 'window.M7Chat = (() =>', 'window.M8UX = (() =>', 'window.M7Connections = (() =>',
   ];
   const indexes = moduleIndices(scripts, markers);
+  const r6Idx = scripts.findIndex((s) => s.code.includes('window.R6P ='));
+  if (['index.html', 'prototipo.html'].includes(file) && r6Idx >= 0 && !indexes.includes(r6Idx)) {
+    indexes.push(r6Idx);
+  }
   const ctx = createContext(mode, fakeElement());
   for (const i of indexes) vm.runInContext(scripts[i].code, ctx, { filename: `${file}#${i}`, timeout: 5000 });
   verifyPackJourney(ctx, file);
@@ -684,6 +728,11 @@ function verifyVariant(file, mode) {
     assert.match(html, /m5-foot-guide[^>]*href="guia-servicio-cafe\.html"/, `${file}: the full useful guide is reachable without crowding the home flow`);
     assert.match(html, /Prospectos de la muestra[\s\S]*Cuentas para reactivar/, `${file}: acquisition prospects and reactivation accounts remain separate CRM bases`);
     assert.match(html, /Una recompra en esta base cuenta como reactivación o retención, no como alta nueva/, `${file}: a reactivated existing account is not miscounted as a new customer`);
+    // R5 (14-nov): verificar presencia del módulo R5 (guías de pasos por camino, API window.R5 y estilos/hoja de cotización).
+    assert.match(html, /<style id="r5-estilos">/, `${file}: R5 styles module is installed`);
+    assert.match(html, /window\.R5\s*=\s*\{/, `${file}: R5 flow and machine contract API is exposed`);
+    assert.match(html, /Tu solución[\s\S]*Propuesta[\s\S]*Confirmar/, `${file}: R5 solucion 3-step guide is defined`);
+    assert.match(html, /Productos[\s\S]*Tu negocio[\s\S]*Propuesta[\s\S]*Confirmar/, `${file}: R5 productos 4-step guide is defined`);
   }
   verifyMachineEntryRoutes(ctx, file);
   const scenarios = verifyScoring(ctx, file);

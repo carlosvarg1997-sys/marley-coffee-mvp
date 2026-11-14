@@ -1,4 +1,4 @@
-.sol-index-main{padding-block:68px 100px;max-width:1180px}.sol-index-main>.nm-h1{max-width:15ch}.sol-index-main>.nm-lead{max-width:50ch}
+﻿.sol-index-main{padding-block:68px 100px;max-width:1180px}.sol-index-main>.nm-h1{max-width:15ch}.sol-index-main>.nm-lead{max-width:50ch}
 .sol-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-top:46px}.sol-card{min-height:255px}.sol-card h2{font:500 clamp(1.3rem,1.4vw + .9rem,1.75rem)/1.12 var(--nm-display);text-transform:uppercase;margin:18px 0 12px;color:var(--nm-hueso)}
 .sol-page .ct-content>section:first-child{margin-top:30px}.sol-page .ct-content>section:first-child h2{margin-top:12px}.sol-keywords{margin-top:48px;padding-top:18px;border-top:1px solid var(--nm-linea)}.sol-keywords summary{cursor:pointer;color:var(--nm-humo);font-size:.9rem}.sol-keywords p{margin-top:12px;color:var(--nm-humo);font-size:.88rem}.sol-keywords ul{columns:2;column-gap:30px}.sol-keywords li{break-inside:avoid;font-size:.88rem;color:var(--nm-humo)}
 .sol-keyword-note{margin:32px 0 18px;color:var(--nm-humo);font-size:.86rem;line-height:1.55;max-width:80ch}.sol-hub-link{display:inline-block;margin-top:8px;text-decoration:none}
@@ -108,7 +108,7 @@
  .sol-reading-guide strong{width:100%}
  .sol-reading-guide a{min-height:44px;padding:7px 10px;font-size:.82rem}
  .sol-page .ct-editorial-head.sol-hero{margin:8px 0 18px;padding:18px 100px 16px 13px;border-radius:8px}
- .sol-page .sol-hero .nm-eyebrow{font-size:.68rem;line-height:1.3}
+ .sol-page .sol-hero .nm-eyebrow{font-size:12px;line-height:1.3}
  .sol-page .sol-hero .nm-h1{max-width:none;font-size:clamp(1.9rem,8vw,2.7rem);line-height:1.02}
  .sol-page .sol-hero .ct-display-word{left:10px;bottom:2px;width:88%;font-size:clamp(2.5rem,12vw,3.7rem);letter-spacing:-.06em;opacity:.16}
  .sol-page .sol-machine{right:8px;bottom:8px;width:min(23vw,84px);max-height:108px}
@@ -192,3 +192,73 @@
   .sol-offer-products ul{grid-template-columns:repeat(2,minmax(0,1fr))}
   .sol-offer-products li:last-child:nth-child(odd){grid-column:1/-1}
 }
+
+/* R5 C2 · preguntas visibles, datos de oferta bajo demanda y páginas compactas. */
+.sol-page .ct-answer{margin:0 0 18px;padding:18px 20px;border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon)}
+.sol-page .ct-answer h2,.sol-question-section>h2,.sol-offer>h2,.sol-next h2{margin:0 0 8px;font-size:clamp(1.25rem,2vw,1.65rem);line-height:1.15}
+.sol-page .ct-answer h3,.sol-question-section>h3,.sol-offer-answer,.ct-next>h3,.sol-index-answer-title{margin:0;color:var(--nm-hueso);font:500 1rem/1.5 var(--nm-text)}
+.sol-question-section{margin:16px 0;padding:16px 18px;border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon)}
+.sol-question-section .sol-disclosure{margin:12px 0 0}
+.sol-offer{margin:16px 0;padding:18px 0}
+.sol-offer>.nm-eyebrow{margin-bottom:6px}
+.sol-offer>.nm-h2{max-width:unset;margin:0 0 6px;font-size:clamp(1.3rem,2vw,1.7rem)}
+.sol-offer-answer{max-width:64ch;margin-bottom:12px}
+.sol-offer-disclosure{border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon);overflow:hidden}
+.sol-offer-disclosure>summary{display:flex;align-items:center;min-height:48px;padding:10px 14px;cursor:pointer;color:var(--nm-hueso);font-weight:600}
+.sol-offer-disclosure>summary::after{content:"+";margin-left:auto;color:var(--nm-oro);font:600 1.3rem/1 var(--nm-label)}
+.sol-offer-disclosure[open]>summary::after{content:"−"}
+.sol-offer-details{padding:0 14px 14px}
+.sol-offer-product-title{margin:0 0 8px;color:var(--nm-hueso);font:500 1rem/1.25 var(--nm-display);text-transform:uppercase}
+.sol-page .ct-feature-bleed{height:clamp(112px,12vw,164px);margin:14px 0;overflow:hidden;border-radius:10px}
+.sol-page .ct-feature-bleed picture,.sol-page .ct-feature-bleed img{display:block;width:100%;height:100%}
+.sol-page .ct-feature-bleed img{object-fit:cover}
+.sol-page .ct-next{margin:18px 0;padding:18px;border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon)}
+.sol-page .ct-next h2{margin:0 0 8px;font-size:clamp(1.3rem,2vw,1.7rem)}
+.sol-page .ct-next h3{margin:0 0 5px;color:var(--nm-hueso);font:500 1rem/1.45 var(--nm-text)}
+.sol-index-answer-title{margin:-2px 0 12px}
+.sol-card-title{margin:14px 0 10px;color:var(--nm-hueso);font:500 clamp(1.2rem,1.35vw + .8rem,1.6rem)/1.12 var(--nm-display);text-transform:uppercase}
+.sol-card p{font-size:.9rem;line-height:1.45}
+.sol-index-hero .ct-hero-copy{min-height:320px;padding-block:24px 82px}
+.sol-index-hero .nm-h1{max-width:70%;font-size:clamp(2.15rem,4.3vw,3.6rem)}
+.sol-index-hero .sol-index-machine{width:min(23%,220px)}
+.sol-index-answer{padding-block:16px 6px}
+.sol-index-answer .ct-answer{margin:0 0 12px;padding:12px 16px}
+.sol-index-routes-title{margin:12px 0 8px}
+.sol-buyer-routes{gap:8px}
+.sol-buyer-route{min-height:48px}
+.sol-index-content{margin-top:8px}
+.sol-reading-guide{padding-block:8px}
+.sol-page .ct-answer{margin-bottom:10px;padding:14px 16px}
+.sol-page .ct-answer .sol-cta-reason{margin:8px 0 6px;color:var(--nm-humo);font-size:.9rem;line-height:1.4}
+.sol-page .ct-answer .nm-btn{min-height:48px}
+.sol-page .ct-editorial-head.sol-hero{margin:8px 0 12px;padding-top:18px;padding-bottom:70px}
+.sol-page .sol-question-section{margin:8px 0;padding:12px 14px}
+.sol-page .sol-question-section>h2{margin-bottom:6px}
+.sol-page .sol-question-section .sol-disclosure{margin-top:8px}
+.sol-page .ct-next{margin:12px 0;padding:12px 14px}
+.sol-page .ct-next .nm-btn{min-height:48px}
+@media(min-width:561px){
+ .sol-page .ct-answer{margin-bottom:8px;padding-block:12px}
+ .sol-page .sol-question-section{margin:7px 0;padding-block:10px}
+ .sol-page .ct-next{margin:10px 0;padding-block:10px}
+}
+@media(max-width:560px){
+ .sol-page .ct-answer{margin-bottom:12px;padding:14px}
+ .sol-question-section{margin:12px 0;padding:14px}
+ .sol-offer{margin:12px 0;padding:14px 0}
+ .sol-page .ct-feature-bleed{height:116px;margin:10px 0;border-radius:8px}
+ .sol-page .ct-next{margin:12px 0;padding:14px}
+ .sol-index-hero .ct-hero-copy{min-height:320px;padding-block:20px 105px}
+ .sol-index-hero .nm-h1{max-width:100%;font-size:clamp(2rem,8.5vw,2.8rem)}
+ .sol-index-answer-title{font-size:.95rem}
+ .sol-index-answer .ct-answer{margin-bottom:8px;padding:10px 12px}
+ .sol-buyer-route{min-height:48px}
+ .sol-page .ct-editorial-head.sol-hero{padding-top:18px;padding-bottom:clamp(96px,19vw,124px)}
+ .sol-page .ct-answer .nm-btn{width:100%}
+}
+
+/* R5 C2: area tactil minima en el resumen de condiciones. */
+.sol-offer-conditions summary{min-height:44px}
+
+/* R5 C2: el contenido de un disclosure cerrado no debe conservar caja visible. */
+details:not([open]) > :not(summary){display:none!important}

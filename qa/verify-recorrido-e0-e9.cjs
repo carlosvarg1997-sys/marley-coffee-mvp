@@ -34,6 +34,16 @@ async function makeContext(browser, width) {
   page.on('pageerror', (error) => errors.push(error.message));
   return { ctx, page, errors };
 }
+// R5 (14-nov): en R5 el formulario de las landings va plegado en #ld-form-disclosure; abrirlo antes de llenar los datos.
+async function openLandingForm(p) {
+  // coordinador (14-nov): en la ventana nueva del referido, esperar a que la landing cargue antes de abrir el formulario plegado.
+  await p.waitForLoadState('domcontentloaded');
+  await p.locator('#ld-form-disclosure, #f-nombre').first().waitFor({ state: 'attached', timeout: 15000 });
+  const disc = p.locator('#ld-form-disclosure');
+  if (await disc.count() && (await disc.getAttribute('open')) === null) {
+    await p.locator('#ld-form-disclosure > summary').click();
+  }
+}
 async function journey(browser, base, width) {
   const { ctx, page, errors } = await makeContext(browser, width);
   const evidencePrefix = path.join(evidence, `A1_${width}`);
@@ -70,6 +80,7 @@ async function journey(browser, base, width) {
     assert.equal(adUrl.searchParams.get('utm_campaign'), 'CL_GOOGLE_SEARCH_RESTAURANTES_COTIZA_202612_V01');
     assert.equal(adUrl.searchParams.get('utm_id'), 'mc_hor_001');
     await ad.click();
+    await openLandingForm(page);
     await page.locator('#f-nombre').waitFor({ state: 'visible' });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
     await page.screenshot({ path: evidencePrefix + '_E1_landing.png', fullPage: true });
@@ -88,6 +99,8 @@ async function journey(browser, base, width) {
     await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C04');
     await page.locator('.m5-qcard').waitFor({ state: 'visible' });
 
+    // coordinador (14-nov): el puntaje R6 (form1 = 25) se lee cuando el módulo R6P ya cargó, como hace W10.
+    await page.waitForFunction(() => window.R6P && typeof window.R6P.interes === 'function' && M4.score() === 25, null, { timeout: 5000 }).catch(() => {});
     const imported = await page.evaluate(() => ({
       test: M4.TEST, score: M4.score(), formEvents: M4.get().events.filter((e) => e.key === 'form1').length,
       lead: M4.get().lead, handoff: M4.get().landingHandoff, focus: M4.landingFocus('C04'),
@@ -95,7 +108,8 @@ async function journey(browser, base, width) {
       cycleEvent: M4.get().events.find((e) => e.eventName === 'lead_created')
     }));
     assert.equal(imported.test, 'sitio');
-    assert.equal(imported.score, 20);
+    // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos); form1 pasa a 25 pts.
+    assert.equal(imported.score, 25);
     assert.equal(imported.formEvents, 1);
     assert.equal(imported.lead.company, 'Restaurante Los Aromos');
     assert.equal(imported.lead.consent, true);
@@ -112,7 +126,8 @@ async function journey(browser, base, width) {
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('.m5-qcard').waitFor({ state: 'visible' });
-    assert.deepEqual(await page.evaluate(() => ({ score: M4.score(), formEvents: M4.get().events.filter((e) => e.key === 'form1').length, cycleLeads: M4.get().events.filter((e) => e.eventName === 'lead_created').length })), { score: 20, formEvents: 1, cycleLeads: 1 });
+    // R6 (14-nov): la comuna pasó del interés al valor esperado (decisión de Carlitos); form1 suma 25.
+    assert.deepEqual(await page.evaluate(() => ({ score: M4.score(), formEvents: M4.get().events.filter((e) => e.key === 'form1').length, cycleLeads: M4.get().events.filter((e) => e.eventName === 'lead_created').length })), { score: 25, formEvents: 1, cycleLeads: 1 });
 
     await page.evaluate(() => { location.hash = '#C03'; });
     await page.locator('#m4Contact').waitFor({ state: 'visible' });
@@ -124,12 +139,15 @@ async function journey(browser, base, width) {
     assert.equal(await page.locator('#r4Datos [data-a="answer"][data-k="negocio"]').count(), 0, 'C04 no vuelve a preguntar el negocio que trae la landing');
     await page.locator('#m5Comuna').selectOption({ label: 'Las Condes' });
     await page.locator('[data-a="next"]').click();
-    await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C10');
-    await page.locator('.m9-catalog').waitFor({ state: 'visible' });
-    await page.locator('#m9-continue').click();
-    // Del catálogo se pasa directo a la propuesta, sin volver a C04.
+    // R5 (14-nov): desde la landing («Calcula tu solución») C04 pasa directo a la propuesta C05, sin pasar por C10.
     await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C05');
     await page.locator('.m5-propsec').waitFor({ state: 'visible' });
+    const propR5 = await page.evaluate(() => ({
+      maquina: window.R5?.maquina?.() || null, // coordinador (14-nov): R5.maquina() devuelve la clave de la máquina, no un objeto
+      porqueVisible: Boolean(document.querySelector('.r3-proposal-machine .r5-porque')),
+    }));
+    assert.ok(propR5.maquina, 'R5: C05 recibe la máquina calculada');
+    assert.equal(propR5.porqueVisible, true, 'R5: C05 muestra el porqué de la máquina recomendada');
     await page.screenshot({ path: evidencePrefix + '_E4_focus_C05.png', fullPage: true });
     // Haiku P3: la bandeja de seguimiento pasó a C09 (<details> «Mensajes de seguimiento»); no se espera en C05.
     const inbox = await page.evaluate(() => M4.get().emails.filter((e) => e.journeyCode).map((e) => ({ code: e.journeyCode, href: e.href, subject: e.subject })));
@@ -230,6 +248,7 @@ async function journey(browser, base, width) {
     const referredPage = await popupPromise;
     const referredErrors = [];
     referredPage.on('pageerror', (error) => referredErrors.push(error.message));
+    await openLandingForm(referredPage);
     await referredPage.locator('#f-nombre').waitFor({ state: 'visible' });
     await referredPage.locator('#f-nombre').fill('Rocío Fuentes');
     await referredPage.locator('#f-correo').fill('rocio.fuentes@example.com');

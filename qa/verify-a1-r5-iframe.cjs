@@ -124,6 +124,9 @@ async function prefillCase(browser,base,participant,pathway) {
     assert.equal(mode.hidden,true,'autoguiado oculta el control del moderador');assert.equal(mode.cards,0,'autoguiado no monta las tarjetas remotas');
     report.cases.push({pathway,participant,session:session.id,portalPrefill:values,mode});
   } else {
+    // R5 (14-nov): el formulario de la landing está plegado dentro de #ld-form-disclosure; abrirlo antes de inspeccionar #ld-form.
+    const disc=frame.locator('#ld-form-disclosure');
+    if(await disc.count()&&(await disc.getAttribute('open'))===null)await frame.locator('#ld-form-disclosure > summary').click();
     await frame.locator('#ld-form').waitFor({state:'visible',timeout:12000});
     const values=await frame.locator('#ld-form').evaluate(form=>({name:form.elements.nombre?.value,email:form.elements.correo?.value,company:form.elements.empresa?.value,phone:form.elements.telefono?.value,consent:form.elements.consent?.checked,marketing:form.elements.marketing?.checked,lead:localStorage.getItem('mc_landing_lead_v1'),draft:localStorage.getItem('mc_landing_draft_v1')}));
     assert.equal(values.name,fixture.nombre);assert.equal(values.email,fixture.correo);assert.equal(values.company,fixture.empresa);assert.equal(values.phone,fixture.telefono);assert.equal(values.consent,false);assert.equal(values.marketing,false);assert.equal(values.lead,null);assert.equal(values.draft,null);
@@ -156,6 +159,9 @@ async function completeJourney(browser,base,pathway,participant) {
     await frame.locator('#m4Contact button[type="submit"]').click();
     await frame.waitForFunction(()=>String(location.hash).startsWith('#C04'),null,{timeout:12000});
   }else{
+    // R5 (14-nov): abrir #ld-form-disclosure en la landing antes de marcar consentimiento.
+    const disc=frame.locator('#ld-form-disclosure');
+    if(await disc.count()&&(await disc.getAttribute('open'))===null)await frame.locator('#ld-form-disclosure > summary').click();
     await frame.locator('#f-consent').check();
     await frame.locator('#f-marketing').check();
     await frame.locator('fieldset[data-paso="1"] button[type="submit"]').click();
@@ -182,13 +188,18 @@ async function completeJourney(browser,base,pathway,participant) {
   else assert.ok(await frame.evaluate(()=>{const s=M4.get();return Boolean(s.answers.negocio||M4C.ui.biz||(s.landingHandoff&&s.landingHandoff.buyer)||(s.lead&&s.lead.landing&&s.lead.landing.buyerLabel));}),'C04 omite el negocio solo cuando ya se conoce');
   await frame.locator('#m5Comuna').selectOption({label:'Las Condes'});
   await frame.locator('[data-a="next"]').click();
-  await frame.waitForFunction(()=>String(location.hash).startsWith('#C10'),null,{timeout:10000});
-  await frame.locator('.m9-catalog').waitFor({state:'visible'});
-  await wheel(host,frame,`${pathway}/${participant}/C10 productos @390`);
-  await frame.locator('#m9-continue').click();
-  // Del catálogo se pasa directo a la propuesta, sin volver a C04.
-  await frame.waitForFunction(()=>String(location.hash).startsWith('#C05'),null,{timeout:10000});
+  // R5 (14-nov): en la ruta «Calcula tu solución» (B-Meta y soluciones sin C10 previo), C04 pasa directo a C05 sin pasar por C10.
+  await frame.waitForFunction(()=>['#C05','#C10'].includes(String(location.hash).split('?')[0]),null,{timeout:10000});
+  const hashAfterC04=await frame.evaluate(()=>String(location.hash).split('?')[0]);
+  if(pathway!=='A')assert.equal(hashAfterC04,'#C05','R5: desde landing C04 va directo a C05 sin pasar por C10');
+  if(hashAfterC04==='#C10'){
+    await frame.locator('.m9-catalog').waitFor({state:'visible'});
+    await wheel(host,frame,`${pathway}/${participant}/C10 productos @390`);
+    await frame.locator('#m9-continue').click();
+    await frame.waitForFunction(()=>String(location.hash).startsWith('#C05'),null,{timeout:10000});
+  }
   await frame.locator('.m5-propsec').waitFor({state:'visible'});
+  assert.equal(await frame.evaluate(()=>Boolean(document.querySelector('.r3-proposal-machine .r5-porque'))),true,'R5: C05 muestra el porqué de la máquina');
   // Haiku P3: la bandeja de seguimiento pasó a C09 (<details> «Mensajes de seguimiento»); no se espera en C05.
   await frame.waitForFunction(()=>window.MarleyPrueba?.estado?.().propuestaVisible===true,null,{timeout:8000});
   await wheel(host,frame,`${pathway}/${participant}/C05 propuesta E4-E5 @390`);
@@ -326,6 +337,8 @@ async function testModesAndPrefixedKit(browser,base) {
   await frame.locator('#query').fill('café para restaurantes');await frame.locator('#search button[type="submit"]').click();
   await frame.locator('#results:not([hidden])').waitFor({state:'visible'});await wheel(host,frame,'B-Google/local resultados @390');
   await frame.locator('#sponsored-title').click();frame=await currentFrame(host,/captacion\/landing\//);await wheel(host,frame,'B-Google/local landing @390');
+  const discLocal=frame.locator('#ld-form-disclosure');
+  if(await discLocal.count()&&(await discLocal.getAttribute('open'))===null)await frame.locator('#ld-form-disclosure > summary').click();
   await frame.locator('#f-consent').check();await frame.locator('#f-marketing').check();
   await frame.locator('fieldset[data-paso="1"] button[type="submit"]').click();
   await frame.locator('#f-empresa').fill(fixtures.P1.empresa);await frame.locator('#f-telefono').fill(fixtures.P1.telefono);

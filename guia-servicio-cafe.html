@@ -5,8 +5,8 @@
   <link rel="icon" type="image/webp" href="recursos/marca/logo.webp">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="description" content="Guía para definir servicio, volumen, productos y preguntas clave antes de pedir una propuesta de café para tu negocio.">
-  <title>Planificar el café de tu negocio | Marley Coffee</title>
+  <meta name="description" content="Planifica el café para tu negocio: define quién prepara, cuándo se sirve, qué productos necesitas y qué condiciones debes confirmar.">
+  <title>Café para negocios: cómo planificar el servicio | Marley Coffee Empresas</title>
   <style>
     :root{color-scheme:dark;--ink:#f5f3ec;--muted:#bdb9ac;--gold:#f4c400;--bg:#111;--panel:#1a1a1a;--line:#393939;--max:900px}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 Inter,Arial,sans-serif}
@@ -16,7 +16,27 @@
     .steps{display:grid;gap:14px;counter-reset:step}.step{counter-increment:step;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;grid-template-columns:42px 1fr;gap:12px}.step:before{content:counter(step,decimal-leading-zero);color:var(--gold);font-weight:800;font-variant-numeric:tabular-nums}.step p{margin-bottom:0}.role-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}.role{border:1px solid var(--line);border-radius:14px;padding:20px}.questions{border-top:1px solid var(--line);margin-top:44px;padding-top:32px}.questions details{border-bottom:1px solid var(--line);padding:14px 0}.questions summary{cursor:pointer;font-weight:700}.questions details p{margin:10px 0 0}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0 0}.button{min-height:48px;padding:12px 18px;border-radius:8px;background:var(--gold);color:#111;text-decoration:none;font-weight:800;display:inline-flex;align-items:center;justify-content:center}.button.secondary{background:transparent;color:var(--ink);border:1px solid #777}.note{font-size:13px;color:var(--muted);margin-top:24px}.source-note{font-size:12px;color:#aaa;border-top:1px solid var(--line);margin-top:38px;padding-top:16px}
     @media(max-width:600px){.top{padding:15px 18px}.top a:last-child{max-width:130px;text-align:right}.role-grid{grid-template-columns:1fr}.step{padding:16px;grid-template-columns:32px 1fr}main{padding-inline:18px}.actions{display:grid}.button{width:100%}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    .brandline{font-size:clamp(1.08rem,2.4vw,1.28rem);font-weight:700;color:#f5f3ec;margin:-4px 0 12px}.path-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 18px}.path-actions .button{min-height:48px}.quick{margin:14px 0 24px}.steps{gap:8px}.step{display:block;padding:13px 16px}.step:before{float:left;margin:8px 12px 0 0}.step summary{display:flex;align-items:center;min-height:44px;cursor:pointer;list-style:none}.step summary::-webkit-details-marker,.questions summary::-webkit-details-marker{display:none}.step summary h2{font-size:16px;line-height:1.3;margin:0}.step>div{padding:10px 0 0 40px}.step h3{font-size:15px;margin:0 0 5px}.role-grid{gap:8px;margin-top:12px}.role{padding:14px}.role h3{font-size:15px}.questions{margin-top:28px;padding-top:22px}.questions details{padding:8px 0}.questions summary{display:flex;align-items:center;min-height:44px;list-style:none}.questions summary h2{font-size:16px;line-height:1.3;margin:0}.questions details>div{padding:8px 0 0}.questions details h3{font-size:15px}.actions{margin-top:18px}.source-note{margin-top:20px}
+    @media(max-width:600px){.path-actions{grid-template-columns:1fr}.role-grid{grid-template-columns:1fr}.role-grid details{padding:10px 14px}}
+    @media(min-width:601px){main{padding-bottom:32px}}
+  
+    /* R5 C2: respuestas directas visibles; se pliega el desarrollo, no H2/H3. */
+    .skip{min-height:44px;display:inline-flex;align-items:center;padding:9px 12px}
+    .top{padding-block:8px}.top a{min-height:44px;display:inline-flex;align-items:center}
+    body{line-height:1.5}.quick{margin:8px 0 12px}.steps{gap:4px}.step{padding:8px 12px}
+    .step summary,.questions summary{position:relative;flex-direction:column;align-items:flex-start;gap:2px;padding:6px 26px 6px 0}
+    .step summary h2,.questions summary h2{font-size:16px;line-height:1.3;margin:0}
+    .step summary h3,.questions summary h3{font-size:15px;line-height:1.25;margin:0;color:var(--muted)}
+    .step summary:after,.questions summary:after{content:"+";position:absolute;right:2px;top:14px;color:var(--gold);font-size:20px;line-height:1}
+    .step[open]>summary:after,.questions details[open]>summary:after{content:"?"}
+    .step>div,.questions details>div{padding:4px 0 0 32px}
+    .role-grid{gap:8px;margin-top:8px}.role{padding:10px 12px}
+    .questions{margin-top:14px;padding-top:12px}.questions details{padding:4px 0}
+    .actions{margin-top:12px}.note{margin-top:16px}.source-note{margin-top:12px}
+    @media(max-width:600px){.top{padding:6px 18px}main{padding-top:16px;padding-bottom:32px}}
+    @media(min-width:601px){main{padding-top:40px;padding-bottom:16px}}
   </style>
+  
 </head>
 <body>
   <a class="skip" href="#contenido">Saltar al contenido</a>
@@ -24,34 +44,34 @@
   <main id="contenido">
     <article>
       <span class="eyebrow">Guía práctica · decisiones antes de cotizar</span>
-      <h1>Planifica el servicio de café de tu negocio</h1>
+      <h1>Café para negocios: cómo planificar el servicio</h1>
+      <p class="brandline">Planifica el servicio de café de tu negocio</p>
       <p class="lede">Antes de comparar máquinas, aclara quién prepara el café, en qué momentos se sirve y qué productos acompañan esa operación. Si ya conoces el equipo que buscas, puedes empezar por los productos; si no, el diagnóstico ayuda a orientar la propuesta.</p>
+      <div class="path-actions"><a class="button" data-attribution-handoff data-screen="C02" data-surface="guia-solucion-top" href="index.html?utm_source=guia_contenido&amp;utm_medium=owned_content&amp;utm_campaign=servicio_cafe#C02">Ver mi solución</a><a class="button secondary" data-attribution-handoff data-screen="C10" data-surface="guia-productos-top" href="index.html?utm_source=guia_contenido&amp;utm_medium=owned_content&amp;utm_campaign=servicio_cafe#C10">Ver productos y packs</a></div>
       <aside class="quick" aria-label="Respuesta breve"><b>En breve:</b> define el tipo de atención, los momentos de mayor demanda, las bebidas que quieres ofrecer y los puntos que deben abastecerse. Luego revisa la selección de productos y confirma con el equipo la compatibilidad, el consumo y las condiciones.</aside>
 
-      <section aria-labelledby="pasos-title">
-        <h2 id="pasos-title">Cinco preguntas para ordenar la decisión</h2>
+      <section aria-label="Preguntas para organizar el servicio de café">
         <div class="steps">
-          <section class="step"><div><h3>¿Quién prepara y quién sirve?</h3><p>Describe si hay una persona dedicada, si el servicio es de autoservicio o si alterna según el horario. El flujo de trabajo y el espacio disponible importan tanto como el equipo.</p></div></section>
-          <section class="step"><div><h3>¿Cuándo se concentra la demanda?</h3><p>Piensa en desayuno, pausas, sobremesa, turnos o eventos. Si aún no conoces el volumen, indícalo; la estimación debe quedar como pendiente y no como una cifra inventada.</p></div></section>
-          <section class="step"><div><h3>¿Qué bebidas quieres ofrecer?</h3><p>Haz una lista corta de las bebidas y formatos que tienen sentido para tus clientes. Quien prepara el café puede añadir criterios de consistencia, limpieza y facilidad de uso.</p></div></section>
-          <section class="step"><div><h3>¿Qué productos deben reponerse?</h3><p>La máquina acompaña el servicio y los productos sostienen la operación. Revisa los packs sugeridos, ajusta cantidades y conserva la opción de elegir cada producto por separado.</p></div></section>
-          <section class="step"><div><h3>¿Qué condiciones faltan por confirmar?</h3><p>Antes de decidir, pide claridad sobre compatibilidad, cantidades, reposición, mantenimiento, soporte, instalación y condiciones del comodato. El prototipo no confirma esos términos.</p></div></section>
+          <details class="step"><summary><h2>¿Quién prepara y quién sirve el café?</h2><h3>Describe las tareas y el espacio del servicio.</h3></summary><div><p>Indica si hay una persona dedicada, si el servicio es de autoservicio o si alterna según el horario. El flujo de trabajo y el espacio disponible importan tanto como el equipo.</p></div></details>
+          <details class="step"><summary><h2>¿Cuándo se concentra la demanda?</h2><h3>Ubica los momentos de mayor consumo.</h3></summary><div><p>Piensa en desayuno, pausas, sobremesa, turnos o eventos. Si aún no conoces el volumen, indícalo; la estimación debe quedar como pendiente y no como una cifra inventada.</p></div></details>
+          <details class="step"><summary><h2>¿Qué bebidas quieres ofrecer?</h2><h3>Prepara una lista breve de bebidas y formatos.</h3></summary><div><p>Haz una lista corta de las bebidas y formatos que tienen sentido para tus clientes. Quien prepara el café puede añadir criterios de consistencia, limpieza y facilidad de uso.</p></div></details>
+          <details class="step"><summary><h2>¿Qué productos deben reponerse?</h2><h3>Relaciona productos con cada momento de servicio.</h3></summary><div><p>La máquina acompaña el servicio y los productos sostienen la operación. Revisa los packs sugeridos, ajusta cantidades y conserva la opción de elegir cada producto por separado.</p></div></details>
+          <details class="step"><summary><h2>¿Qué condiciones faltan por confirmar?</h2><h3>Confirma compatibilidad, soporte y condiciones.</h3></summary><div><p>Antes de decidir, pide claridad sobre compatibilidad, cantidades, reposición, mantenimiento, soporte, instalación y condiciones del comodato. El prototipo no confirma esos términos.</p></div></details>
         </div>
       </section>
 
-      <section aria-labelledby="roles-title" style="margin-top:46px">
-        <h2 id="roles-title">Dos perspectivas para una buena propuesta</h2>
+      <section aria-labelledby="roles-title" style="margin-top:24px">
+        <h2 id="roles-title">¿Qué debe aportar cada persona a la propuesta?</h2>
         <div class="role-grid">
-          <article class="role"><h3>Quien administra o compra</h3><p>Necesita entender el alcance, qué se compra de forma recurrente, cómo se coordina la reposición y qué condiciones debe validar antes de avanzar.</p></article>
-          <article class="role"><h3>Quien prepara el café</h3><p>Puede describir el ritmo de trabajo, las bebidas, el espacio y las tareas de preparación y limpieza. Su experiencia ayuda a revisar si la propuesta encaja con el servicio diario.</p></article>
+          <article class="role"><h3>Quien administra o compra</h3><p>Revisa el alcance, los productos recurrentes, la reposición y las condiciones antes de avanzar.</p></article>
+          <article class="role"><h3>Quien prepara el café</h3><p>Describe el ritmo de trabajo, las bebidas, el espacio y las tareas de preparación y limpieza.</p></article>
         </div>
       </section>
 
-      <section class="questions" aria-labelledby="preguntas-title">
-        <h2 id="preguntas-title">Preguntas frecuentes</h2>
-        <details><summary>¿Tengo que saber qué máquina elegir?</summary><p>No. Puedes describir tu negocio y recibir una orientación para revisar la alternativa. Si ya tienes una preferencia, puedes empezar por esa máquina y mantenerla visible durante el diagnóstico.</p></details>
-        <details><summary>¿Puedo elegir los productos uno por uno?</summary><p>Sí. Un pack puede servir como punto de partida, pero la selección se puede ajustar y también puedes elegir productos individuales antes de pedir una propuesta.</p></details>
-        <details><summary>¿La propuesta confirma precios y condiciones?</summary><p>No en esta demostración. Precio, compatibilidad, disponibilidad, cantidades y condiciones requieren confirmación del equipo antes de tomar una decisión.</p></details>
+      <section class="questions" aria-label="Preguntas frecuentes sobre el servicio de café">
+        <details><summary><h2>¿Tengo que saber qué máquina elegir?</h2><h3>No necesitas elegirla antes de pedir orientación.</h3></summary><div><p>Puedes describir tu negocio y recibir una orientación para revisar la alternativa. Si ya tienes una preferencia, puedes empezar por esa máquina y mantenerla visible durante el diagnóstico.</p></div></details>
+        <details><summary><h2>¿Puedo elegir los productos uno por uno?</h2><h3>Sí, puedes elegir productos individuales.</h3></summary><div><p>Un pack puede servir como punto de partida, pero la selección se puede ajustar y también puedes elegir productos individuales antes de pedir una propuesta.</p></div></details>
+        <details><summary><h2>¿La propuesta confirma precios y condiciones?</h2><h3>El equipo confirma precios y condiciones.</h3></summary><div><p>Confirma precio, compatibilidad, disponibilidad, cantidades y condiciones con el equipo antes de tomar una decisión.</p></div></details>
       </section>
 
       <div class="actions">

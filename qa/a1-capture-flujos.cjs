@@ -237,7 +237,15 @@ async function openLandingPath(page, route, participant, profile, name, email, c
   await page.locator('#f-nombre').waitFor({ state: 'visible' });
   return { landing: true };
 }
+// R5 (14-nov): en R5 el formulario de la landing está plegado dentro de #ld-form-disclosure; abrirlo antes de llenar.
+async function openLandingForm(page) {
+  const disc = page.locator('#ld-form-disclosure');
+  if (await disc.count() && (await disc.getAttribute('open')) === null) {
+    await page.locator('#ld-form-disclosure > summary').click();
+  }
+}
 async function submitLanding(page, name, email, company) {
+  await openLandingForm(page);
   await page.locator('#f-nombre').fill(name);
   await page.locator('#f-correo').fill(email);
   await page.locator('#f-consent').check();
@@ -269,11 +277,16 @@ async function completeDiagnosis(page, businessLabel) {
   const next = page.locator('[data-a="next"]');
   if (!(await next.isEnabled())) throw new Error(`Diagnóstico ${await page.locator('.m5-qcard').innerText()} sigue sin habilitar Continuar.`);
   await next.click();
-  await waitHash(page, '#C10');
-  await page.locator('.m9-catalog').waitFor({ state: 'visible' });
-  await page.locator('#m9-continue').click();
-  await waitHash(page, '#C05');
+  // R5 (14-nov): «Calcula tu solución» pasa directo de C04 a C05 sin pasar por C10; solo «Elige tus productos» pasa por C10.
+  await page.waitForFunction(() => ['#C05', '#C10'].includes((location.hash || '').split('?')[0]), null, { timeout: 12000 });
+  if ((await page.evaluate(() => (location.hash || '').split('?')[0])) === '#C10') {
+    await page.locator('.m9-catalog').waitFor({ state: 'visible' });
+    await page.locator('#m9-continue').click();
+    await waitHash(page, '#C05');
+  }
   await page.locator('.m5-propsec').waitFor({ state: 'visible' });
+  const r5PropOk = await page.evaluate(() => Boolean(document.querySelector('.r3-proposal-machine .r5-porque')));
+  if (!r5PropOk) throw new Error('R5: la propuesta C05 debe mostrar el porqué de la máquina (.r5-porque).');
 }
 const journeyChecks = [];
 async function sendModeratorJump(moderatorPage, page, sessionId, flowId, days) {
@@ -484,6 +497,7 @@ async function captureSocial(browser, flowId, route, participant, profile, formN
   const e1Node = flows.find((f) => f.id === flowId).nodes.find((x) => x.etapa === 'E1' && x.tipo === 'vista');
   await screenshot(personPage, flowId, e1Node.id);
   await personPage.locator('#ad-link').click();
+  await openLandingForm(personPage);
   await personPage.locator('#f-nombre').waitFor({ state: 'visible' });
   const e2Node = flows.find((f) => f.id === flowId).nodes.find((x) => x.etapa === 'E2' && x.tipo === 'vista');
   await screenshot(personPage, flowId, e2Node.id);
@@ -539,6 +553,7 @@ async function captureGoogleAd(browser) {
   await screenshot(personPage, flowId, 'B-Google-05');
   const paid = new URL(await personPage.locator('#sponsored-title').getAttribute('href'), BASE);
   await personPage.locator('#sponsored-title').click();
+  await openLandingForm(personPage);
   await personPage.locator('#f-nombre').waitFor({ state: 'visible' });
   await screenshot(personPage, flowId, 'B-Google-06');
   const pause1 = flows.find((f) => f.id === flowId).nodes.find((x) => x.titulo.startsWith('Pausa 1'));

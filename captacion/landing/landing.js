@@ -90,7 +90,7 @@
   document.body.classList.add('ld--form-' + variante.f, 'ld--pasos-' + variante.form, 'ld--nav-' + variante.nav);
   const mensaje = cfg.mensajes ? cfg.mensajes[variante.m] : null;
   if (mensaje && variante.m !== cfg.mensajeBase) {
-    $('#ld-h1').textContent = mensaje.h1;
+    $('#ld-bajada').textContent = mensaje.h1;
     $('#ld-lead').textContent = mensaje.lead;
   }
 
@@ -112,7 +112,7 @@
     Object.entries(ultimoOrigen).forEach(([k, v]) => u.searchParams.set(k, v));
     if (ultimoOrigen.mc_surface) u.searchParams.set('mc_entry_surface', ultimoOrigen.mc_entry_surface || ultimoOrigen.mc_surface);
     u.searchParams.set('mc_surface', superficie);
-    u.searchParams.set('mc_landing', cfg.buyer);
+    u.searchParams.set('mc_landing', cfg.buyer); // fix 14-nov (coordinador): el portal compara mc_landing con el buyer en singular, como en R4
     if (pantalla) u.hash = pantalla;
     return u.toString();
   }
@@ -168,26 +168,60 @@
       actualizarControl();
     };
     const cargar = () => { if (!video.src) video.src = movil ? video.dataset.srcM : video.dataset.srcD; };
+    const mensajePreferenciaVideo = avisoMovimiento.textContent.trim();
+    const mostrarFalloVideo = () => {
+      if (pausaManual) return;
+      pausaManual = true;
+      mostrarPoster();
+      controlVideo.hidden = false;
+      controlVideo.textContent = 'Reintentar video';
+      controlVideo.setAttribute('aria-pressed', 'false');
+      avisoMovimiento.textContent = 'No se pudo reproducir el video. La imagen de portada sigue visible.';
+      avisoMovimiento.hidden = false;
+    };
     const reproducir = () => {
       if (preferenciaMovimiento.matches || movimientoForzadoOff) {
         pausaManual = true;
         mostrarPoster();
         controlVideo.hidden = true;
+        avisoMovimiento.textContent = mensajePreferenciaVideo;
         avisoMovimiento.hidden = false;
         return;
       }
+      pausaManual = false;
       cargar();
+      avisoMovimiento.hidden = true;
+      controlVideo.hidden = false;
+      controlVideo.textContent = 'Cargando video\u2026';
+      controlVideo.setAttribute('aria-pressed', 'false');
+      let inicioConfirmado = false;
       const intento = video.play();
-      if (intento && typeof intento.catch === 'function') {
-        intento.catch(() => { pausaManual = true; mostrarPoster(); });
+      if (intento && typeof intento.then === 'function') {
+        intento.then(() => {
+          inicioConfirmado = true;
+          avisoMovimiento.hidden = true;
+        }).catch(mostrarFalloVideo);
       }
+      window.setTimeout(() => {
+        if (!inicioConfirmado && video.paused && !pausaManual) mostrarFalloVideo();
+      }, 1200);
     };
     video.addEventListener('playing', () => { video.classList.add('es-activo'); actualizarControl(); });
     video.addEventListener('pause', actualizarControl);
+    let intencionControlVideo = null;
+    const capturarIntencionControlVideo = () => {
+      intencionControlVideo = controlVideo.getAttribute('aria-pressed') === 'true' ? 'pause' : 'play';
+    };
+    controlVideo.addEventListener('pointerdown', capturarIntencionControlVideo);
+    controlVideo.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Enter' || evento.key === ' ') capturarIntencionControlVideo();
+    });
     controlVideo.addEventListener('click', () => {
       if (preferenciaMovimiento.matches || movimientoForzadoOff) return;
-      if (video.paused) { pausaManual = false; reproducir(); }
-      else { pausaManual = true; mostrarPoster(); }
+      const intencion = intencionControlVideo || (video.paused ? 'play' : 'pause');
+      intencionControlVideo = null;
+      if (intencion === 'play') { pausaManual = false; reproducir(); }
+      else { pausaManual = true; mostrarPoster(); avisoMovimiento.hidden = true; }
     });
     if (sinMovimiento) {
       pausaManual = true;
@@ -200,16 +234,20 @@
       actualizarControl();
       if ('IntersectionObserver' in window) {
         new IntersectionObserver(([entrada]) => {
-          if (entrada.isIntersecting && !pausaManual) reproducir();
-          else if (!entrada.isIntersecting && video.src) video.pause();
+          if (!entrada.isIntersecting && video.src && !video.paused) {
+            pausaManual = true;
+            mostrarPoster();
+            avisoMovimiento.hidden = true;
+          }
         }, { threshold: 0.15 }).observe(video);
-      } else reproducir();
+      }
     }
     const cambioMovimiento = (evento) => {
       if (evento.matches || movimientoForzadoOff) {
         pausaManual = true;
         mostrarPoster();
         controlVideo.hidden = true;
+        avisoMovimiento.textContent = mensajePreferenciaVideo;
         avisoMovimiento.hidden = false;
       } else if (!medioEstatico) {
         pausaManual = true;
@@ -296,16 +334,13 @@
   }
 
   /* ---------- Formulario en el primer bloque (variante f=inicio) ---------- */
-  const caja = $('#ld-form-caja');
+  const caja = $('#ld-form-disclosure') || $('#ld-form-caja');
   const ranura = $('#ld-hero-form');
   if (variante.f === 'inicio' && caja && ranura) {
+    if (caja instanceof HTMLDetailsElement) caja.open = true;
     ranura.appendChild(caja);
     ranura.hidden = false;
     $$('a[href="#contacto"]').forEach((a) => a.setAttribute('href', '#ld-form-caja'));
-    if (variante.form === 'directo') {
-      const ctaHero = $('[data-cta="hero"]');
-      if (ctaHero && ctaHero.firstChild) ctaHero.firstChild.textContent = 'Completar solicitud ';
-    }
   }
 
   /* ---------- CTA internos ---------- */
@@ -378,7 +413,7 @@
   }
   function mostrarPaso(n, enfocar = true) {
     $$('.ld-form__paso', form).forEach((p) => { p.hidden = p.dataset.paso !== String(n); });
-    $('#ld-paso-etiqueta').textContent = n === 1 ? 'Paso 1 de 2 · tus datos' : 'Paso 2 de 2 · tu negocio';
+    $('#ld-paso-etiqueta').textContent = n === 1 ? 'Paso 1 de 2 · tus datos' : 'Datos guardados · paso 2 de 2 · tu negocio';
     form.dataset.paso = String(n);
     if (enfocar) { const primero = $('.ld-form__paso:not([hidden]) input:not([type="checkbox"])', form); if (primero) primero.focus({ preventScroll: variante.f === 'inicio' }); }
   }
