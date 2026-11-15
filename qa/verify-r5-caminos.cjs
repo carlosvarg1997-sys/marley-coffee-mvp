@@ -489,7 +489,7 @@ async function testViewportFlows(browser, base, vp, failures) {
       await page.goto(`${base}/captacion/landing/${l.slug}.html`, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(250);
       await checkHeadingHierarchy(page, 'main', `${tag}/landing/${l.slug}/encabezados`, failures);
-      await checkHeightsAndOverflow(page, 2500, 1800, `${tag}/landing/${l.slug}/medidas`, failures);
+      await checkHeightsAndOverflow(page, 3000, 2200, /* 15-nov: con el aire pedido por Carlitos («cero aire»), las landings crecieron ~16 %; tope nuevo 3000/2200 */ `${tag}/landing/${l.slug}/medidas`, failures);
       await checkPalette(page, 'body', `${tag}/landing/${l.slug}/paleta`, failures);
 
       // Barra fija en landing si visible <= 15% y sin tapar CTA héroe

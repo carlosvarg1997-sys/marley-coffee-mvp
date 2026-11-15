@@ -97,8 +97,8 @@
 .sol-keyword-note-details{margin:0;padding:0 14px 14px;color:var(--nm-humo);font-size:.8rem;line-height:1.5}
 .sol-keywords:not([open])>.sol-keyword-note-details{display:none}
 .sol-keyword-note-details code{overflow-wrap:anywhere;word-break:break-word}
-.sol-floating-cta{position:fixed;z-index:100;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:52px;max-height:64px;max-width:calc(100vw - 28px);padding:11px 17px;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,.4);transition:opacity .18s ease,visibility .18s ease}
-.sol-floating-cta[data-sol-hidden="true"]{opacity:0;visibility:hidden;pointer-events:none}
+.sol-floating-cta{position:fixed;z-index:100;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:48px;max-height:56px;max-width:calc(100vw - 28px);padding:10px 16px;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,.4);transition:opacity .18s ease,visibility .18s ease}
+.sol-floating-cta:not([data-sol-hidden="false"]),.sol-floating-cta[data-sol-hidden="true"]{opacity:0;visibility:hidden;pointer-events:none}
 .sol-index-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:24px}
 .sol-index-actions .nm-btn{margin-top:0}
 .sol-page .ct-next{scroll-margin-top:16px}
@@ -193,67 +193,98 @@
   .sol-offer-products li:last-child:nth-child(odd){grid-column:1/-1}
 }
 
-/* R5 C2 · preguntas visibles, datos de oferta bajo demanda y páginas compactas. */
-.sol-page .ct-answer{margin:0 0 18px;padding:18px 20px;border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon)}
-.sol-page .ct-answer h2,.sol-question-section>h2,.sol-offer>h2,.sol-next h2{margin:0 0 8px;font-size:clamp(1.25rem,2vw,1.65rem);line-height:1.15}
-.sol-page .ct-answer h3,.sol-question-section>h3,.sol-offer-answer,.ct-next>h3,.sol-index-answer-title{margin:0;color:var(--nm-hueso);font:500 1rem/1.5 var(--nm-text)}
-.sol-question-section{margin:16px 0;padding:16px 18px;border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon)}
+/* R5 C2 + R7 Aire y Textos sin ladrillos (15-nov) · preguntas visibles, negrita en ideas clave, ritmo vertical con aire y encuadre limpio en 1280x600 y móvil. */
+.sol-page .ct-answer{margin:0 0 18px;padding:18px 22px;border:1px solid var(--nm-linea);border-left:3px solid var(--nm-oro);border-radius:10px;background:var(--nm-carbon)}
+.sol-page p strong,.sol-card p strong,.sol-index-answer p strong,.sol-index-hero .nm-lead strong,.sol-offer-conditions li strong,.sol-keyword-note-details strong{color:var(--nm-hueso);font-weight:700}
+.sol-offer-reference strong{color:#111;font-weight:700}
+.sol-page .ct-answer h2,.sol-question-section>h2,.sol-offer>h2,.sol-next h2{margin:0 0 8px;font-size:clamp(1.25rem,2vw,1.6rem);line-height:1.15}
+.sol-page .ct-answer h3,.sol-question-section>h3,.sol-offer-answer,.ct-next>h3,.sol-index-answer-title{margin:0;color:var(--nm-hueso);font:500 1rem/1.55 var(--nm-text)}
+.sol-question-section{margin:16px 0;padding:18px 22px;border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon)}
 .sol-question-section .sol-disclosure{margin:12px 0 0}
-.sol-offer{margin:16px 0;padding:18px 0}
+.sol-offer{margin:20px 0;padding:20px 0}
 .sol-offer>.nm-eyebrow{margin-bottom:6px}
-.sol-offer>.nm-h2{max-width:unset;margin:0 0 6px;font-size:clamp(1.3rem,2vw,1.7rem)}
-.sol-offer-answer{max-width:64ch;margin-bottom:12px}
+.sol-offer>.nm-h2{max-width:unset;margin:0 0 8px;font-size:clamp(1.3rem,2vw,1.7rem);line-height:1.15}
+.sol-offer-answer{max-width:64ch;margin-bottom:14px}
 .sol-offer-disclosure{border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon);overflow:hidden}
-.sol-offer-disclosure>summary{display:flex;align-items:center;min-height:48px;padding:10px 14px;cursor:pointer;color:var(--nm-hueso);font-weight:600}
+.sol-offer-disclosure>summary{display:flex;align-items:center;min-height:52px;padding:12px 16px;cursor:pointer;color:var(--nm-hueso);font-weight:600}
 .sol-offer-disclosure>summary::after{content:"+";margin-left:auto;color:var(--nm-oro);font:600 1.3rem/1 var(--nm-label)}
 .sol-offer-disclosure[open]>summary::after{content:"−"}
-.sol-offer-details{padding:0 14px 14px}
+.sol-offer-details{padding:4px 16px 16px}
 .sol-offer-product-title{margin:0 0 8px;color:var(--nm-hueso);font:500 1rem/1.25 var(--nm-display);text-transform:uppercase}
-.sol-page .ct-feature-bleed{height:clamp(112px,12vw,164px);margin:14px 0;overflow:hidden;border-radius:10px}
+.sol-page .ct-feature-bleed{height:clamp(128px,13vw,176px);margin:18px 0;overflow:hidden;border-radius:10px}
 .sol-page .ct-feature-bleed picture,.sol-page .ct-feature-bleed img{display:block;width:100%;height:100%}
 .sol-page .ct-feature-bleed img{object-fit:cover}
-.sol-page .ct-next{margin:18px 0;padding:18px;border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon)}
-.sol-page .ct-next h2{margin:0 0 8px;font-size:clamp(1.3rem,2vw,1.7rem)}
-.sol-page .ct-next h3{margin:0 0 5px;color:var(--nm-hueso);font:500 1rem/1.45 var(--nm-text)}
-.sol-index-answer-title{margin:-2px 0 12px}
+.sol-page .ct-next{margin:20px 0;padding:20px 22px;border:1px solid var(--nm-linea);border-radius:10px;background:var(--nm-carbon)}
+.sol-page .ct-next h2{margin:0 0 8px;font-size:clamp(1.25rem,2vw,1.6rem);line-height:1.15}
+.sol-page .ct-next h3{margin:0 0 8px;color:var(--nm-hueso);font:500 1rem/1.5 var(--nm-text)}
+.sol-page .ct-next p{margin:0 0 14px}
+.sol-index-answer-title{margin:0 0 12px}
 .sol-card-title{margin:14px 0 10px;color:var(--nm-hueso);font:500 clamp(1.2rem,1.35vw + .8rem,1.6rem)/1.12 var(--nm-display);text-transform:uppercase}
-.sol-card p{font-size:.9rem;line-height:1.45}
-.sol-index-hero .ct-hero-copy{min-height:320px;padding-block:24px 82px}
-.sol-index-hero .nm-h1{max-width:70%;font-size:clamp(2.15rem,4.3vw,3.6rem)}
-.sol-index-hero .sol-index-machine{width:min(23%,220px)}
-.sol-index-answer{padding-block:16px 6px}
-.sol-index-answer .ct-answer{margin:0 0 12px;padding:12px 16px}
-.sol-index-routes-title{margin:12px 0 8px}
-.sol-buyer-routes{gap:8px}
-.sol-buyer-route{min-height:48px}
-.sol-index-content{margin-top:8px}
-.sol-reading-guide{padding-block:8px}
-.sol-page .ct-answer{margin-bottom:10px;padding:14px 16px}
-.sol-page .ct-answer .sol-cta-reason{margin:8px 0 6px;color:var(--nm-humo);font-size:.9rem;line-height:1.4}
+.sol-card p{font-size:.92rem;line-height:1.5}
+.sol-index-hero .ct-hero-copy{width:100%;max-width:980px;min-height:0;padding-block:26px clamp(118px,10.5vw,152px)}
+.sol-index-hero .nm-h1{max-width:68%;font-size:clamp(1.9rem,3.5vw,2.95rem);line-height:1.05;margin-bottom:12px}
+.sol-index-hero .nm-lead{max-width:56ch;font-size:clamp(.96rem,1.4vw,1.08rem);line-height:1.5}
+.sol-index-hero .ct-display-word{left:0;bottom:6px;max-width:85%;font-size:clamp(3.1rem,8vw,6.2rem);opacity:.2;pointer-events:none}
+.sol-index-hero .sol-index-machine{left:clamp(220px,24vw,320px);right:auto;bottom:8px;width:min(18%,150px);max-height:102px;pointer-events:none}
+.sol-index-actions{gap:12px;margin-top:18px;position:relative;z-index:2}
+.sol-index-answer{padding-block:20px 10px}
+.sol-index-answer .ct-answer{margin:0 0 16px;padding:18px 22px}
+.sol-index-routes-title{margin:16px 0 12px;font-size:clamp(1.35rem,2.2vw,1.8rem);line-height:1.12}
+.sol-buyer-routes{gap:10px}
+.sol-buyer-route{min-height:52px;padding:10px 14px}
+.sol-index-content{margin-top:14px}
+.sol-index-secondary{margin:14px 0}
+.sol-index-secondary>summary{min-height:54px;padding:12px 16px}
+.sol-index-secondary>.sol-grid{padding:4px 16px 16px;gap:14px;margin-top:8px}
+.sol-reading-guide{padding-block:10px}
+.sol-page .ct-answer .sol-cta-reason{margin:10px 0 12px;color:var(--nm-humo);font-size:.92rem;line-height:1.48}
 .sol-page .ct-answer .nm-btn{min-height:48px}
-.sol-page .ct-editorial-head.sol-hero{margin:8px 0 12px;padding-top:18px;padding-bottom:70px}
-.sol-page .sol-question-section{margin:8px 0;padding:12px 14px}
+.sol-page .ct-editorial-head.sol-hero{margin:10px 0 16px;padding:22px 190px clamp(84px,7.5vw,110px) 24px}
+.sol-page .sol-hero .nm-h1{max-width:24ch;font-size:clamp(1.85rem,3.2vw,2.7rem);line-height:1.06;margin:0}
+.sol-page .sol-hero .ct-display-word{left:20px;bottom:6px;width:76%;font-size:clamp(2.5rem,5.5vw,4.5rem);opacity:.18;pointer-events:none}
+.sol-page .sol-machine{right:20px;bottom:8px;width:min(20%,165px);max-height:150px;pointer-events:none}
 .sol-page .sol-question-section>h2{margin-bottom:6px}
-.sol-page .sol-question-section .sol-disclosure{margin-top:8px}
-.sol-page .ct-next{margin:12px 0;padding:12px 14px}
+.sol-page .sol-question-section .sol-disclosure{margin-top:12px}
 .sol-page .ct-next .nm-btn{min-height:48px}
-@media(min-width:561px){
- .sol-page .ct-answer{margin-bottom:8px;padding-block:12px}
- .sol-page .sol-question-section{margin:7px 0;padding-block:10px}
- .sol-page .ct-next{margin:10px 0;padding-block:10px}
+@media(min-width:901px) and (max-height:680px){
+ .sol-reading-guide{padding-block:6px;gap:6px 8px}
+ .sol-reading-guide a{min-height:40px;padding:6px 11px;font-size:.86rem}
+ .sol-page .ct-editorial-head.sol-hero{margin:6px 0 12px;padding:16px 175px 62px 20px}
+ .sol-page .sol-hero .nm-eyebrow{margin-bottom:4px}
+ .sol-page .sol-hero .nm-h1{font-size:clamp(1.6rem,2.6vw,2.15rem);line-height:1.05}
+ .sol-page .sol-hero .ct-display-word{bottom:4px;font-size:clamp(2rem,4.2vw,3.2rem);opacity:.16}
+ .sol-page .sol-machine{right:18px;bottom:6px;max-height:118px}
+ .sol-page .ct-answer{margin-bottom:16px;padding:14px 18px}
+ .sol-page .ct-answer h2{font-size:clamp(1.15rem,1.7vw,1.4rem);margin-bottom:6px}
+ .sol-page .ct-answer h3{font-size:.95rem;line-height:1.45}
+ .sol-page .ct-answer .sol-cta-reason{margin:6px 0 10px;font-size:.88rem}
+ .sol-index-hero .ct-hero-copy{padding-block:18px 94px}
+ .sol-index-hero .nm-h1{font-size:clamp(1.7rem,2.9vw,2.35rem);margin-bottom:8px}
+ .sol-index-hero .nm-lead{font-size:.95rem;line-height:1.45}
+ .sol-index-actions{margin-top:12px}
+ .sol-index-hero .ct-display-word{font-size:clamp(2.4rem,5.5vw,4.2rem);opacity:.18}
+ .sol-index-hero .sol-index-machine{left:clamp(190px,22vw,280px);right:auto;max-height:80px}
+ .sol-index-answer{padding-block:12px 6px}
+ .sol-index-answer .ct-answer{margin-bottom:12px;padding:14px 18px}
+ .sol-index-routes-title{margin:10px 0 8px;font-size:1.25rem}
 }
 @media(max-width:560px){
- .sol-page .ct-answer{margin-bottom:12px;padding:14px}
- .sol-question-section{margin:12px 0;padding:14px}
- .sol-offer{margin:12px 0;padding:14px 0}
- .sol-page .ct-feature-bleed{height:116px;margin:10px 0;border-radius:8px}
- .sol-page .ct-next{margin:12px 0;padding:14px}
- .sol-index-hero .ct-hero-copy{min-height:320px;padding-block:20px 105px}
- .sol-index-hero .nm-h1{max-width:100%;font-size:clamp(2rem,8.5vw,2.8rem)}
+ .sol-page .ct-answer{margin-bottom:14px;padding:16px}
+ .sol-page .sol-question-section{margin:14px 0;padding:16px}
+ .sol-offer{margin:16px 0;padding:16px 0}
+ .sol-page .ct-feature-bleed{height:124px;margin:14px 0;border-radius:8px}
+ .sol-page .ct-next{margin:16px 0;padding:16px}
+ .sol-index-hero .ct-hero-copy{min-height:0;padding-block:20px 104px}
+ .sol-index-hero .nm-h1{max-width:100%;font-size:clamp(1.75rem,7.2vw,2.35rem);line-height:1.06}
+ .sol-index-hero .ct-display-word{font-size:clamp(2.5rem,13vw,3.8rem)}
+ .sol-index-hero .sol-index-machine{left:auto;right:14px;bottom:8px;width:min(32%,102px);max-height:96px}
  .sol-index-answer-title{font-size:.95rem}
- .sol-index-answer .ct-answer{margin-bottom:8px;padding:10px 12px}
+ .sol-index-answer .ct-answer{margin-bottom:12px;padding:14px 16px}
  .sol-buyer-route{min-height:48px}
- .sol-page .ct-editorial-head.sol-hero{padding-top:18px;padding-bottom:clamp(96px,19vw,124px)}
+ .sol-page .ct-editorial-head.sol-hero{padding:18px 102px clamp(84px,17vw,108px) 16px}
+ .sol-page .sol-hero .nm-h1{max-width:none;font-size:clamp(1.65rem,6.8vw,2.25rem);line-height:1.06}
+ .sol-page .sol-hero .ct-display-word{left:14px;bottom:4px;width:84%;font-size:clamp(2.1rem,10.5vw,3.2rem)}
+ .sol-page .sol-machine{right:10px;bottom:8px;width:min(22vw,82px);max-height:102px}
  .sol-page .ct-answer .nm-btn{width:100%}
 }
 

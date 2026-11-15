@@ -146,116 +146,30 @@
     a.addEventListener('click', () => registrar('context_link_click', { surface: a.dataset.contexto }));
   });
 
-  /* ---------- Video del héroe: póster, movimiento reducido y control ---------- */
+  /* ---------- Hero video: silent autoplay, no visible controls ---------- */
   const video = $('[data-hero-video]');
-  const controlVideo = $('#ld-video-toggle');
-  const avisoMovimiento = $('#ld-motion-status');
-  if (video && controlVideo && avisoMovimiento && !medioEstatico) {
+  if (video) {
     const movil = matchMedia('(max-width: 760px)').matches;
-    let pausaManual = false;
     video.muted = true; video.loop = true; video.playsInline = true;
-    video.setAttribute('muted', ''); video.setAttribute('playsinline', '');
-    const actualizarControl = () => {
-      const reproduciendo = !video.paused && !video.ended;
-      controlVideo.textContent = reproduciendo ? 'Pausar video' : 'Reproducir video';
-      controlVideo.setAttribute('aria-pressed', String(reproduciendo));
-    };
-    const mostrarPoster = () => {
+    video.autoplay = true;
+    video.setAttribute('muted', ''); video.setAttribute('autoplay', '');
+    video.setAttribute('loop', ''); video.setAttribute('playsinline', '');
+    const posterQuieto = () => {
       video.pause();
       video.classList.remove('es-activo');
       video.removeAttribute('src');
       video.load();
-      actualizarControl();
-    };
-    const cargar = () => { if (!video.src) video.src = movil ? video.dataset.srcM : video.dataset.srcD; };
-    const mensajePreferenciaVideo = avisoMovimiento.textContent.trim();
-    const mostrarFalloVideo = () => {
-      if (pausaManual) return;
-      pausaManual = true;
-      mostrarPoster();
-      controlVideo.hidden = false;
-      controlVideo.textContent = 'Reintentar video';
-      controlVideo.setAttribute('aria-pressed', 'false');
-      avisoMovimiento.textContent = 'No se pudo reproducir el video. La imagen de portada sigue visible.';
-      avisoMovimiento.hidden = false;
     };
     const reproducir = () => {
-      if (preferenciaMovimiento.matches || movimientoForzadoOff) {
-        pausaManual = true;
-        mostrarPoster();
-        controlVideo.hidden = true;
-        avisoMovimiento.textContent = mensajePreferenciaVideo;
-        avisoMovimiento.hidden = false;
-        return;
-      }
-      pausaManual = false;
-      cargar();
-      avisoMovimiento.hidden = true;
-      controlVideo.hidden = false;
-      controlVideo.textContent = 'Cargando video\u2026';
-      controlVideo.setAttribute('aria-pressed', 'false');
-      let inicioConfirmado = false;
+      if (preferenciaMovimiento.matches || movimientoForzadoOff || medioEstatico) { posterQuieto(); return; }
+      if (!video.src) video.src = movil ? video.dataset.srcM : video.dataset.srcD;
       const intento = video.play();
-      if (intento && typeof intento.then === 'function') {
-        intento.then(() => {
-          inicioConfirmado = true;
-          avisoMovimiento.hidden = true;
-        }).catch(mostrarFalloVideo);
-      }
-      window.setTimeout(() => {
-        if (!inicioConfirmado && video.paused && !pausaManual) mostrarFalloVideo();
-      }, 1200);
+      if (intento && typeof intento.catch === 'function') intento.catch(posterQuieto);
     };
-    video.addEventListener('playing', () => { video.classList.add('es-activo'); actualizarControl(); });
-    video.addEventListener('pause', actualizarControl);
-    let intencionControlVideo = null;
-    const capturarIntencionControlVideo = () => {
-      intencionControlVideo = controlVideo.getAttribute('aria-pressed') === 'true' ? 'pause' : 'play';
-    };
-    controlVideo.addEventListener('pointerdown', capturarIntencionControlVideo);
-    controlVideo.addEventListener('keydown', (evento) => {
-      if (evento.key === 'Enter' || evento.key === ' ') capturarIntencionControlVideo();
-    });
-    controlVideo.addEventListener('click', () => {
-      if (preferenciaMovimiento.matches || movimientoForzadoOff) return;
-      const intencion = intencionControlVideo || (video.paused ? 'play' : 'pause');
-      intencionControlVideo = null;
-      if (intencion === 'play') { pausaManual = false; reproducir(); }
-      else { pausaManual = true; mostrarPoster(); avisoMovimiento.hidden = true; }
-    });
-    if (sinMovimiento) {
-      pausaManual = true;
-      mostrarPoster();
-      controlVideo.hidden = true;
-      avisoMovimiento.hidden = !preferenciaMovimiento.matches && !movimientoForzadoOff;
-    } else {
-      controlVideo.hidden = false;
-      avisoMovimiento.hidden = true;
-      actualizarControl();
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver(([entrada]) => {
-          if (!entrada.isIntersecting && video.src && !video.paused) {
-            pausaManual = true;
-            mostrarPoster();
-            avisoMovimiento.hidden = true;
-          }
-        }, { threshold: 0.15 }).observe(video);
-      }
-    }
-    const cambioMovimiento = (evento) => {
-      if (evento.matches || movimientoForzadoOff) {
-        pausaManual = true;
-        mostrarPoster();
-        controlVideo.hidden = true;
-        avisoMovimiento.textContent = mensajePreferenciaVideo;
-        avisoMovimiento.hidden = false;
-      } else if (!medioEstatico) {
-        pausaManual = true;
-        mostrarPoster();
-        avisoMovimiento.hidden = true;
-        controlVideo.hidden = false;
-      }
-    };
+    video.addEventListener('playing', () => video.classList.add('es-activo'));
+    video.addEventListener('error', posterQuieto);
+    if (sinMovimiento || medioEstatico) posterQuieto(); else reproducir();
+    const cambioMovimiento = (evento) => evento.matches || movimientoForzadoOff || medioEstatico ? posterQuieto() : reproducir();
     if (typeof preferenciaMovimiento.addEventListener === 'function') preferenciaMovimiento.addEventListener('change', cambioMovimiento);
     else if (typeof preferenciaMovimiento.addListener === 'function') preferenciaMovimiento.addListener(cambioMovimiento);
   }

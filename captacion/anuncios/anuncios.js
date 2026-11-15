@@ -28,7 +28,7 @@
     const slide='<section class="slide s-'+template+' s-'+format+'" '+attrs+' data-design-width="'+width+'" data-design-height="'+height+'" data-safe-top="'+(format==='reel'?285:0)+'" style="width:'+width+'px;height:'+height+'px">'+stage+'</section>';
     return '<div class="creative-preview" data-design-width="'+width+'" data-design-height="'+height+'" style="aspect-ratio:'+width+'/'+height+'">'+slide+'</div>';
   };
-  const ccArt=({template='t',word='TAZAS',hookTop='ANTES DE ELEGIR',highlight='MÁQUINA',hookTail=',',hookBottom='CUENTA TUS',support='',subject='bar',series='CUENTAS CLARAS',number='01/01',format='feed',photo='',exportId='',previewOnly=false,value='80',label='Tazas al día',rows=[['Mañana','45 tazas'],['Tarde','35 tazas'],['Mes · 26 días · 9 g por taza','18,7 kg']],note='Valores de ejemplo. El consumo real se confirma en tu propuesta.',cta='DESLIZA →'})=>{
+  const ccArt=({template='t',word='TAZAS',hookTop='ANTES DE ELEGIR',highlight='MÁQUINA',hookTail=',',hookBottom='CUENTA TUS',support='',subject='bar',series='CUENTAS CLARAS',number='01/01',format='feed',photo='',videoSrc='',videoPoster='',exportId='',previewOnly=false,value='80',label='Tazas al día',rows=[['Mañana','45 tazas'],['Tarde','35 tazas'],['Mes · 26 días · 9 g por taza','18,7 kg']],note='Valores de ejemplo. El consumo real se confirma en tu propuesta.',cta='DESLIZA →'})=>{
     const [width]=artSizes[format]||artSizes.feed;
     let content='';
     if(template==='t'){
@@ -49,7 +49,10 @@
       const supportAt=format==='wide'?215:748;
       const wordAt=format==='wide'?365:900;
       const left=format==='wide'?70:76;
-      content='<img class="fondo" src="'+esc(image)+'" alt="" aria-hidden="true"><div class="velo" aria-hidden="true"></div>'+
+      const bgMedia=videoSrc
+        ?'<video class="fondo" autoplay muted loop playsinline preload="metadata" poster="'+esc(videoPoster||image)+'" src="'+esc(videoSrc)+'" aria-hidden="true"></video><img class="fondo fondo--reduced" src="'+esc(image)+'" alt="" aria-hidden="true">'
+        :'<img class="fondo" src="'+esc(image)+'" alt="" aria-hidden="true">';
+      content=bgMedia+'<div class="velo" aria-hidden="true"></div>'+
         '<p class="gancho" style="top:'+hookTopPos+'px;left:'+left+'px">'+textLines(hookTop)+' <mark>'+textLines(highlight)+'</mark>'+textLines(hookTail)+'<br>'+textLines(hookBottom)+'</p>'+
         '<p class="apoyo" style="top:'+supportAt+'px;left:'+left+'px;max-width:'+(format==='wide'?650:860)+'px">'+textLines(support)+'</p>'+
         '<h2 class="gigante" data-ancho="860" style="left:'+left+'px;top:'+wordAt+'px">'+esc(word)+'</h2>';
@@ -208,11 +211,11 @@
     const youtubeBudget=d.budget.rows.find(row=>row.channel==='YouTube').amountCLP;
     const videoScenes=y.video.scenes.map(s=>'<div class="ad-scene"><time>'+esc(s.time)+'</time><p><strong>'+esc(s.overlay)+'</strong><br>'+esc(s.visual)+'<br><span class="ad-label">Locución:</span> '+esc(s.voiceover)+'</p></div>').join('');
     const beats=y.bumper.beats.map(s=>'<div class="ad-scene"><time>'+esc(s.time)+'</time><p>'+esc(s.overlay)+'</p></div>').join('');
-    const videoArt=ccArt({template:'z',word:'RITMO',hookTop:'CADA SERVICIO',highlight:'DEJA',hookBottom:'SU',support:'Conecta consumo, horarios y preparaciones en la conversación.',photo:'../../recursos/escenas/barras/cam_lit.webp',series:'CUENTAS CLARAS',number:'01/02',format:'wide',cta:'VER PROPUESTA →',exportId:'youtube-video'});
+    const videoArt=ccArt({template:'z',word:'RITMO',hookTop:'CADA SERVICIO',highlight:'DEJA',hookBottom:'SU',support:'Conecta consumo, horarios y preparaciones en la conversación.',photo:'../../recursos/escenas/barras/cam_lit.webp',videoSrc:'../../recursos/escenas/restaurante/video_d.mp4',videoPoster:'../../recursos/escenas/restaurante/poster.webp',series:'CUENTAS CLARAS',number:'01/02',format:'wide',cta:'VER PROPUESTA →',exportId:'youtube-video'});
     const bumperArt=ccArt({template:'z',word:'PROPUESTA',hookTop:'LO QUE SE ACUERDA',highlight:'QUEDA',hookBottom:'EN LA',support:'Pregunta qué incluye la propuesta para tu negocio.',photo:'../../recursos/escenas/hotel/fin.webp',series:'CUENTAS CLARAS',number:'02/02',format:'wide',cta:'CONOCER MÁS →',exportId:'youtube-bumper'});
     const videoHyp=hyp(y.video.hypothesis,undefined,undefined,'Gancho de apertura: consumo y horarios frente a claridad del comodato. Mantener duración, cierre y destino.');
     const bumperHyp=hyp(y.bumper.hypothesis,undefined,undefined,'Mensaje: claridad de las condiciones antes de decidir. Mantener formato Z, duración y destino.');
-    const body=section('Miniatura del anuncio in-stream','1280 × 720 px · Z horizontal','<div class="ad-meta"><div><div class="ad-video">'+videoArt+'<span class="ad-video-play" aria-hidden="true"></span></div><p class="ad-scroll-note">Guion: '+esc(y.video.durationSeconds)+' s · '+esc(y.video.format)+'. La etiqueta técnica queda fuera del cuadro.</p></div><div><div class="ad-scene-list">'+videoScenes+'</div>'+printUrl('Destino con UTM',y.video.url)+videoHyp+'</div></div>')+
+    const body=section('Miniatura del anuncio in-stream','1280 × 720 px · Z horizontal','<div class="ad-meta"><div><div class="ad-video">'+videoArt+'</div><p class="ad-scroll-note">Guion: '+esc(y.video.durationSeconds)+' s · '+esc(y.video.format)+'. Reproducción automática sin botones.</p></div><div><div class="ad-scene-list">'+videoScenes+'</div>'+printUrl('Destino con UTM',y.video.url)+videoHyp+'</div></div>')+
       section('Miniatura del bumper','1280 × 720 px · Z horizontal','<div class="ad-meta"><div><div class="ad-bumper">'+bumperArt+'</div><p class="ad-scroll-note">Bumper: '+esc(y.bumper.durationSeconds)+' s · '+esc(y.bumper.format)+'. Imagen fija de apertura; la nota técnica queda fuera del cuadro.</p></div><div><div class="ad-scene-list">'+beats+'</div>'+printUrl('Destino con UTM',y.bumper.url)+bumperHyp+'</div></div>')+
       section('Presupuesto simulado','partida del contexto · sin aprobación','<div class="ad-grid"><article class="ad-stat"><strong>'+money(youtubeBudget)+'</strong><span>partida YouTube del plan</span><p>Es presupuesto simulado. El calendario y la distribución quedan pendientes.</p></article><article class="ad-card"><h3>Regla de control</h3><p>La previsión de presupuesto no equivale a alcance ni resultados. Audiencia, medición y aprobación siguen pendientes.</p><p>Esta partida está incluida en el total del plan, no se agrega como monto adicional.</p></article></div>')+
       section('Especificación oficial','duración por subtipo',sourceLinks(d.sources.filter(s=>s.platform==='YouTube')));

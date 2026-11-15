@@ -302,7 +302,7 @@
     const multiple = question.tipo === 'multi';
     const open = question.tipo === 'open';
     if (open) {
-      return '<label class="ag-sr-only" for="answer-open">Tu respuesta</label><textarea id="answer-open" class="ag-field ag-open-field" maxlength="500" aria-describedby="question-help" placeholder="Escribe tu respuesta"></textarea><p class="ag-help" id="question-help">Máximo 500 caracteres. No escribas nombres ni datos de contacto.</p>';
+      return '<label class="ag-sr-only" for="answer-open">Tu respuesta</label><textarea id="answer-open" class="ag-field ag-open-field" maxlength="500" aria-describedby="question-help" placeholder="Escribe tu respuesta"></textarea><p class="ag-help" id="question-help"><strong>Máximo 500 caracteres.</strong> No escribas nombres ni datos de contacto.</p>';
     }
     const options = optionList(question);
     const choices = options.map((option,index) => {
@@ -427,10 +427,10 @@
   function renderWelcome() {
     app.innerHTML = '<section class="ag-screen">' + brandMarkup()
       + '<p class="ag-kicker">Prueba autoguiada</p><h1 class="ag-title">Gracias por participar</h1>'
-      + '<p class="ag-note">Prototipo académico (Duoc UC). No es un sitio oficial de Marley Coffee.</p>'
-      + '<p class="ag-lede">Elige un camino, recórrelo con tareas, responde unas preguntas y descarga tu informe.</p>'
-      + '<ol class="ag-steps"><li>Eliges el camino y respondes las preguntas iniciales.</li><li>Recorres el sitio o el CRM con tareas breves.</li><li>Respondes las preguntas finales y descargas tus resultados.</li></ol>'
-      + '<div class="ag-card"><h2>Antes de empezar</h2><p>Nada se envía. Tus respuestas quedan en este navegador hasta que descargues el informe. Tú decides si lo envías.</p>'
+      + '<p class="ag-note"><strong>Prototipo académico (Duoc UC).</strong> No es un sitio oficial de Marley Coffee.</p>'
+      + '<p class="ag-lede"><strong>Elige un camino y recórrelo con tareas:</strong> responde unas preguntas y descarga tu informe.</p>'
+      + '<ol class="ag-steps"><li><span><strong>Eliges el camino</strong> y respondes las preguntas iniciales.</span></li><li><span><strong>Recorres el sitio o el CRM</strong> con tareas breves.</span></li><li><span><strong>Respondes las preguntas finales</strong> y descargas tus resultados.</span></li></ol>'
+      + '<div class="ag-card"><h2>Antes de empezar</h2><p><strong>Nada se envía:</strong> tus respuestas quedan en este navegador hasta que descargues el informe. <strong>Tú decides si lo envías.</strong></p>'
       + '<p style="margin-top:12px"><a class="ag-consent-links" href="' + KIT_URL.href + 'Consentimiento_informado.md" target="_blank" rel="noopener">Leer el consentimiento completo</a></p>'
       + '<label class="ag-check"><input id="consent-check" type="checkbox"' + (state.consentimiento?.aceptado?' checked':'') + '><span>Acepto participar</span></label>'
       + '<div class="ag-actions"><button id="welcome-next" type="button" class="ag-btn ag-btn--primary"' + (state.consentimiento?.aceptado?'':' disabled') + '>Continuar</button></div>'
@@ -460,7 +460,7 @@
     const selectedRole=state.pickedRole||'';
     app.innerHTML='<section class="ag-screen">' + brandMarkup()
       + '<p class="ag-kicker">Paso 1 · Elige tu recorrido</p><h1 class="ag-title">¿Qué quieres probar?</h1>'
-      + '<p class="ag-lede">Elige el camino que más se parece a lo que necesitas revisar.</p>'
+      + '<p class="ag-lede"><strong>Elige el camino</strong> que más se parece a lo que necesitas revisar.</p>'
       + '<div class="ag-choice-grid" role="group" aria-label="Caminos de prueba">'
       + choiceCard('A','Buscando en Google','Explora una búsqueda y sigue una alternativa.',selected==='A')
       + choiceCard('B','Desde un anuncio','Elige Meta, LinkedIn o Google.',selected.startsWith('B-'))
@@ -616,6 +616,14 @@
     let win,doc;
     try { win=iframeRef.contentWindow;doc=iframeRef.contentDocument; } catch (_) { return; }
     if(!win||!doc)return;
+    try {
+      if(doc.head&&!doc.getElementById('ag-frame-air')) {
+        const style=doc.createElement('style');
+        style.id='ag-frame-air';
+        style.textContent='html{scroll-padding-bottom:80px!important;}body{padding-bottom:clamp(44px,7vh,80px)!important;}';
+        doc.head.appendChild(style);
+      }
+    } catch(_){}
     const initial=win.location.href;
     recordRoute('load',initial);
     try { win.addEventListener('hashchange',()=>recordRoute('hashchange',win.location.href)); } catch(_){}
@@ -757,8 +765,8 @@
     const again=Boolean(task.intro_visto);
     bar.innerHTML='<div class="ag-modal" role="dialog" aria-modal="true" aria-labelledby="ag-intro-title"><p class="ag-modal-kicker">' + escapeHtml(stageKicker(task)) + '</p>'
       + '<h1 class="ag-taskbar-title" id="ag-intro-title">' + escapeHtml(task.titulo) + '</h1>'
-      + '<p class="ag-task-prompt">' + escapeHtml(task.consigna) + '</p>'
-      + '<p class="ag-modal-how">Verás el sitio en pantalla completa. Cuando termines, toca «Terminé» abajo y te haremos unas pocas preguntas. No hay respuestas correctas.</p>'
+      + '<p class="ag-task-prompt"><strong>Consigna:</strong> ' + escapeHtml(task.consigna) + '</p>'
+      + '<ul class="ag-modal-how ag-modal-points"><li><strong>Verás el sitio en pantalla completa.</strong></li><li><strong>Cuando termines, toca «Terminé» abajo</strong> y te haremos unas pocas preguntas.</li><li><strong>No hay respuestas correctas.</strong></li></ul>'
       + '<div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="button" data-action="task-start">' + (again?'Seguir con la tarea':'Empezar la tarea') + '</button>'
       + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div></div>';
     bar.querySelector('[data-action="task-start"]')?.addEventListener('click',()=>{task.intro_visto=true;state.task_details_open=false;startCurrentTask();persist();renderJourney();});
@@ -803,11 +811,11 @@
     const gate=portalSignal();
     const ready=jumpReady(days);
     const title=days===3?'3 días después':'Un mes después';
-    const prompt=days===3?'Pasaron tres días desde tu última tarea. Continúa cuando quieras retomar tu caso.':'Pasó un mes desde tu última tarea. Puedes avanzar aunque el contrato todavía no esté firmado.';
+    const prompt=days===3?'<strong>Pasaron tres días</strong> desde tu última tarea. Continúa cuando quieras retomar tu caso.':'<strong>Pasó un mes</strong> desde tu última tarea. Puedes avanzar aunque el contrato todavía no esté firmado.';
     setBarMode(bar,true);
     bar.innerHTML='<div class="ag-modal" role="dialog" aria-modal="true" aria-labelledby="ag-jump-title"><p class="ag-modal-kicker">Salto de tiempo</p><div class="ag-interstitial"><h1 class="ag-taskbar-title" id="ag-jump-title">' + title + '</h1><p>' + prompt + '</p>'
-      + '<p class="' + (ready?'ag-jump-ready':'ag-jump-wait') + '" role="status">' + (ready?'El recorrido está listo para avanzar.':'Completa el paso correspondiente en la pantalla del recorrido para habilitar el avance.') + '</p>'
-      + (days===30&&!gate.signed?'<p class="ag-help" data-contract-simulation>Para seguir, simulamos que firmaste el contrato.</p>':'')
+      + '<p class="' + (ready?'ag-jump-ready':'ag-jump-wait') + '" role="status">' + (ready?'<strong>El recorrido está listo</strong> para avanzar.':'<strong>Completa el paso correspondiente</strong> en la pantalla del recorrido para habilitar el avance.') + '</p>'
+      + (days===30&&!gate.signed?'<p class="ag-help" data-contract-simulation><strong>Para seguir, simulamos que firmaste el contrato.</strong></p>':'')
       + '<button class="ag-btn ag-btn--primary" type="button" data-action="jump" ' + (ready?'':'disabled') + '>Avanzar el tiempo</button>'
       + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div></div>';
     bar.querySelector('[data-action="jump"]')?.addEventListener('click',()=>applyJump(days));
@@ -818,7 +826,7 @@
       const button=bar.querySelector('[data-action="jump"]');
       const status=bar.querySelector('[role="status"]');
       if(button&&!simulandoFirma)button.disabled=!nowReady;
-      if(status&&!simulandoFirma){status.textContent=nowReady?'El recorrido está listo para avanzar.':'Completa el paso correspondiente en la pantalla del recorrido para habilitar el avance.';status.classList.toggle('ag-jump-ready',nowReady);status.classList.toggle('ag-jump-wait',!nowReady);}
+      if(status&&!simulandoFirma){status.innerHTML=nowReady?'<strong>El recorrido está listo</strong> para avanzar.':'<strong>Completa el paso correspondiente</strong> en la pantalla del recorrido para habilitar el avance.';status.classList.toggle('ag-jump-ready',nowReady);status.classList.toggle('ag-jump-wait',!nowReady);}
     },700);
   }
   function waitFor(predicate,timeout=2500) {
@@ -952,14 +960,14 @@
     const tapped=state.descargas?.tocadas||[];
     app.innerHTML='<section class="ag-results"><div class="ag-results-inner">' + brandMarkup()
       + '<p class="ag-kicker">Prueba ' + escapeHtml(state.session?.id||'') + '</p><h1>' + (state.termino_anticipado?'Prueba terminada':'Gracias por participar') + '</h1>'
-      + (pending?'<p class="ag-warning">Antes de empezar otra prueba, descarga este informe para conservar tus resultados.</p>':'')
-      + '<p class="ag-lede">' + escapeHtml(state.camino==='C'?'Equipo interno · '+profile:state.camino+' · '+profile) + ' · ' + formatDuration(totalDuration()) + '</p>'
+      + (pending?'<p class="ag-warning"><strong>Antes de empezar otra prueba, descarga este informe</strong> para conservar tus resultados.</p>':'')
+      + '<p class="ag-lede"><strong>' + escapeHtml(state.camino==='C'?'Equipo interno · '+profile:state.camino+' · '+profile) + '</strong> · ' + formatDuration(totalDuration()) + '</p>'
       + '<div class="ag-kpi-grid"><div class="ag-kpi"><strong>' + complete + ' / ' + tasks.length + '</strong><span>Tareas logradas</span></div>'
       + '<div class="ag-kpi"><strong>' + seqMean + '</strong><span>Facilidad media (1–7)</span></div>'
       + '<div class="ag-kpi"><strong>' + (state.umux_score==null?'—':String(state.umux_score).replace('.',',')) + '</strong><span>UMUX-Lite (0–100)</span></div>'
       + '<div class="ag-kpi"><strong>' + formatDuration(totalDuration()) + '</strong><span>Tiempo total</span></div></div>'
-      + '<section class="ag-result-section"><h2>Descargas del recorrido</h2><p>' + available.length + ' disponibles · ' + tapped.length + ' seleccionadas</p></section>'
-      + '<section class="ag-result-section"><h2>Próximo paso</h2><p>Envía el informe a quien te invitó a la prueba.</p></section>'
+      + '<section class="ag-result-section"><h2>Descargas del recorrido</h2><p><strong>' + available.length + ' disponibles</strong> · <strong>' + tapped.length + ' seleccionadas</strong></p></section>'
+      + '<section class="ag-result-section"><h2>Próximo paso</h2><p><strong>Envía el informe</strong> a quien te invitó a la prueba.</p></section>'
       + '<div class="ag-result-actions"><button id="download-pdf" class="ag-btn ag-btn--primary" type="button">Descargar informe PDF</button>'
       + '<button id="download-json" class="ag-btn" type="button">Descargar datos (JSON)</button>'
       + '<button id="download-csv" class="ag-btn" type="button">Descargar tareas (CSV)</button>'

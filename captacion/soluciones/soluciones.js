@@ -28,7 +28,7 @@
   const update = () => {
     frame = 0;
     const button = cta.getBoundingClientRect();
-    const sectionInView = Array.from(document.querySelectorAll('[data-offer-block], #propuesta')).some((section) => {
+    const sectionInView = Array.from(document.querySelectorAll('.ct-answer, .sol-index-hero, [data-offer-block], #propuesta')).some((section) => {
       const rect = section.getBoundingClientRect();
       return rect.bottom > 0 && rect.top < window.innerHeight;
     });

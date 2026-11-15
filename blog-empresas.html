@@ -19,17 +19,47 @@
     .brandline{font-size:clamp(1.08rem,2.4vw,1.28rem);font-weight:700;margin:-4px 0 12px}.top-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 18px}.top-actions .button{min-height:48px}.hero{padding-bottom:18px}.quick{margin-top:14px}.index{gap:8px;margin:18px 0 24px}.index a{padding:12px}.post{padding:18px 0}.post-kicker{margin-bottom:4px}.post-answer summary{display:flex;align-items:center;min-height:48px;cursor:pointer;list-style:none}.post-answer summary::-webkit-details-marker,.questions summary::-webkit-details-marker{display:none}.post-answer summary h2{font-size:clamp(1.2rem,2.5vw,1.55rem);line-height:1.25;margin:0}.post-content{padding-top:12px}.post-content h3{font-size:16px;margin:0 0 7px}.post-content .actions{margin:14px 0 0}.questions{margin-top:22px;padding-top:18px}.questions details{padding:8px 0}.questions summary{display:flex;align-items:center;min-height:48px;list-style:none}.questions summary h2{font-size:16px;line-height:1.3;margin:0}.questions details>div{padding:8px 0 0}.questions details h3{font-size:15px}.note{font-size:13px;margin-top:20px}
     @media(max-width:680px){.top-actions{grid-template-columns:1fr}.index{margin:14px 0 18px}.index a{min-height:44px}}
   
-    /* R5 C2: H2/H3 visibles en el resumen; la explicacion queda plegada. */
+    /* R5 C2 + R7 Aire y Textos sin ladrillos (15-nov): H2/H3 visibles en el resumen, jerarquía con negritas y listas, escala limpia en 1280x600 y aire entre artículos. */
     .skip{min-height:44px;display:inline-flex;align-items:center;padding:9px 12px}
-    .top{padding-block:8px}.top a{min-height:44px;display:inline-flex;align-items:center}
-    body{line-height:1.5}
-    .post-answer summary,.questions summary{position:relative;flex-direction:column;align-items:flex-start;gap:3px;padding:7px 28px 7px 0}
-    .post-answer summary h2,.questions summary h2{font-size:16px;line-height:1.3;margin:0}
-    .post-answer summary h3,.questions summary h3{font-size:15px;line-height:1.25;margin:0;color:var(--muted)}
+    .top{padding-block:10px}.top a{min-height:44px;display:inline-flex;align-items:center}
+    body{line-height:1.58}
+    p strong,li strong,aside strong{color:var(--ink);font-weight:700}
+    main{padding:clamp(22px,3.5vw,38px) 22px 56px}
+    .hero{padding-bottom:24px}
+    h1{font-size:clamp(1.75rem,3.2vw,2.55rem);line-height:1.08;letter-spacing:-.025em;margin:10px 0 12px;max-width:760px}
+    .brandline{font-size:clamp(1rem,1.8vw,1.15rem);line-height:1.35;margin:0 0 10px}
+    .lede{font-size:clamp(.96rem,1.5vw,1.06rem);line-height:1.55;margin:0 0 16px}
+    .top-actions{gap:12px;margin:16px 0 18px}
+    .quick{margin-top:16px;padding:16px 20px;line-height:1.5}
+    .quick-lead{margin:0 0 6px;color:var(--ink)}
+    .quick-list{margin:0;padding-left:18px;color:#dedbd2;display:grid;gap:4px}
+    @media(min-width:681px){.quick-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 16px}}
+    .index{gap:14px;margin:24px 0 32px}
+    .index a{padding:16px 18px;line-height:1.4}
+    .post{padding:24px 0}
+    .post .post-kicker{margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase}
+    .post-answer summary,.questions summary{position:relative;flex-direction:column;align-items:flex-start;gap:4px;padding:8px 30px 8px 0}
+    .post-answer summary h2{font-size:clamp(1.15rem,2vw,1.38rem);line-height:1.28;margin:0}
+    .questions summary h2{font-size:1.06rem;line-height:1.3;margin:0}
+    .post-answer summary h3,.questions summary h3{font-size:.95rem;line-height:1.35;margin:0;color:var(--muted);font-weight:500}
     .post-answer summary:after,.questions summary:after{content:"+";position:absolute;right:2px;top:16px;color:var(--gold);font-size:20px;line-height:1}
-    .post-answer[open]>summary:after,.questions details[open]>summary:after{content:"-"}
-    .post-content{padding-top:8px}.post-subhead{margin:8px 0 5px;font-size:15px;line-height:1.3;color:var(--ink)}
-    @media(max-width:680px){.top{padding:6px 18px}}
+    .post-answer[open]>summary:after,.questions details[open]>summary:after{content:"−"}
+    .post-content{padding-top:12px}.post-subhead{margin:12px 0 6px;font-size:15px;line-height:1.35;color:var(--ink)}
+    .questions{margin-top:32px;padding-top:24px}.questions details{padding:10px 0}
+    .note{margin-top:28px;padding-top:18px}
+    @media(max-width:680px){.top{padding:8px 18px}main{padding:20px 18px 44px}.quick{padding:14px 16px;font-size:.92rem}.quick-list{font-size:.83rem;padding-left:16px;gap:3px}.index{margin:18px 0 24px}}
+    @media(min-width:901px) and (max-height:680px){
+      .top{padding-block:6px}
+      main{padding-top:14px;padding-bottom:40px}
+      .hero{padding-bottom:16px}
+      h1{font-size:clamp(1.55rem,2.6vw,2.1rem);margin:4px 0 6px}
+      .brandline{font-size:.98rem;margin:0 0 6px}
+      .lede{font-size:.94rem;line-height:1.46;margin:0 0 10px}
+      .top-actions{margin:10px 0 12px}
+      .quick{margin-top:10px;padding:12px 16px;font-size:.92rem;line-height:1.42}
+      .index{margin:16px 0 22px;gap:12px}
+      .index a{padding:13px 16px}
+    }
   </style>
   
 </head>
@@ -41,9 +71,16 @@
       <span class="eyebrow">Ideas prácticas para negocios</span>
       <h1>Café para oficinas: ideas para organizarlo</h1>
       <p class="brandline">Organiza el servicio de café según tu operación</p>
-      <p class="lede">No necesitas saber qué máquina elegir para empezar. Describe cómo funciona tu negocio, qué bebidas quieres ofrecer y qué productos necesitas reponer.</p>
+      <p class="lede"><strong>No necesitas saber qué máquina elegir para empezar:</strong> describe cómo funciona tu negocio, qué bebidas quieres ofrecer y qué productos necesitas reponer.</p>
       <div class="top-actions"><a class="button" data-attribution-handoff data-screen="C02" data-surface="blog-solucion-top" href="index.html?utm_source=blog_contenido&amp;utm_medium=owned_content&amp;utm_campaign=servicio_cafe#C02">Encontrar mi solución</a><a class="button secondary" data-attribution-handoff data-screen="C10" data-surface="blog-productos-top" href="index.html?utm_source=blog_contenido&amp;utm_medium=owned_content&amp;utm_campaign=servicio_cafe#C10">Ver productos y packs</a></div>
-      <aside class="quick"><b>En breve:</b> define el servicio primero, conserva flexibilidad en los productos y confirma con el equipo la compatibilidad y las condiciones comerciales.</aside>
+      <aside class="quick">
+        <p class="quick-lead"><b>En breve:</b> <strong>organiza tu propuesta en tres pasos:</strong></p>
+        <ul class="quick-list">
+          <li><strong>Define el servicio</strong> primero.</li>
+          <li><strong>Conserva flexibilidad</strong> en productos.</li>
+          <li><strong>Confirma compatibilidad</strong> y condiciones.</li>
+        </ul>
+      </aside>
     </header>
     <nav class="index" aria-label="Guías de café para negocios">
       <a href="guia-servicio-cafe.html" data-handoff="guia-servicio-cafe.html" data-attribution-handoff data-surface="articulo-planificacion">Planificar el servicio de café<span>Una guía general antes de cotizar</span></a>
@@ -53,14 +90,14 @@
     <article class="post" id="oficinas">
       <div class="post-kicker">Guía · oficinas</div>
       <details class="post-answer"><summary><h2>¿Cómo organizar el café para una oficina?</h2><h3>Empieza por las personas, los espacios y los horarios.</h3></summary><div class="post-content">
-      <p>Empieza por el uso diario: quién prepara, dónde se sirve y en qué momentos se concentra la pausa. Esa información ayuda a conversar sobre el formato de servicio antes de escoger equipos o cantidades.</p>
+      <p><strong>Empieza por el uso diario:</strong> quién prepara, dónde se sirve y en qué momentos se concentra la pausa. Esa información ayuda a definir el formato de servicio antes de escoger equipos o cantidades.</p>
       <p class="post-subhead"><strong>Revisa tres aspectos del servicio.</strong></p>
       <ul>
         <li><strong>Personas y espacios:</strong> identifica quiénes usarán el servicio y si habrá uno o varios puntos de preparación.</li>
         <li><strong>Rutina:</strong> anota horarios, turnos y quién se encargará de preparar y reponer.</li>
         <li><strong>Preferencias:</strong> define las bebidas que te interesa ofrecer y qué productos deben estar disponibles.</li>
       </ul>
-      <p>Si todavía no conoces el consumo, déjalo pendiente para estimarlo con el equipo. Un pack puede simplificar el primer armado, pero debe poder ajustarse; también puedes elegir cada producto por separado.</p>
+      <p><strong>Si todavía no conoces el consumo, déjalo pendiente</strong> para estimarlo con el equipo. Un pack puede simplificar el primer armado, pero también puedes ajustarlo o elegir cada producto por separado.</p>
       <div class="answer"><strong>Para avanzar:</strong> reúne la información de servicio y deja que la orientación recomiende una alternativa. Si ya conoces el equipo que buscas, conserva esa preferencia.</div>
       <div class="actions"><a class="button" data-attribution-handoff data-screen="C02" data-surface="oficinas-solucion" href="index.html#C02">Encontrar mi solución</a><a class="button secondary" data-attribution-handoff data-screen="C10" data-surface="oficinas-productos" href="index.html#C10">Ver productos y packs</a></div>
       </div></details>
@@ -68,14 +105,14 @@
     <article class="post" id="hoteles-restaurantes">
       <div class="post-kicker">Guía · hoteles y restaurantes</div>
       <details class="post-answer"><summary><h2>¿Cómo coordinar el café en un hotel o restaurante?</h2><h3>Describe cada espacio, horario y tarea del servicio.</h3></summary><div class="post-content">
-      <p>El servicio puede cambiar entre desayuno, atención en mesa, habitación, lobby y eventos. Antes de conversar sobre una máquina, describe cada espacio y el trabajo que debe resolver.</p>
+      <p><strong>El servicio cambia entre desayuno, mesa, habitación, lobby y eventos.</strong> Antes de conversar sobre una máquina, describe cada espacio y el trabajo que debe resolver.</p>
       <p class="post-subhead"><strong>Mapea el recorrido del café.</strong></p>
       <ul>
-        <li>Señala dónde se prepara y quién está a cargo en cada horario.</li>
-        <li>Describe las bebidas y formatos que necesita el menú o la experiencia de huéspedes.</li>
-        <li>Registra cómo se almacenan y reponen los productos, y qué tareas de limpieza son necesarias.</li>
+        <li><strong>Puntos y responsables:</strong> señala dónde se prepara y quién está a cargo en cada horario.</li>
+        <li><strong>Carta y formatos:</strong> describe las bebidas y formatos que necesita el menú o la experiencia de huéspedes.</li>
+        <li><strong>Bodega y limpieza:</strong> registra cómo se almacenan y reponen los productos, y qué tareas de limpieza son necesarias.</li>
       </ul>
-      <p>Una sola solución podría no servir para todos los espacios. Mantén visibles las necesidades de cada punto y valida con el equipo la compatibilidad de máquina y productos, el abastecimiento y las condiciones del servicio antes de cerrar una propuesta.</p>
+      <p><strong>Una sola solución podría no servir para todos los espacios:</strong> mantén visibles las necesidades de cada punto y valida con el equipo la compatibilidad, el abastecimiento y las condiciones antes de cerrar una propuesta.</p>
       <div class="answer"><strong>Para avanzar:</strong> puedes pedir orientación para que el equipo revise la operación o iniciar con una máquina que ya tengas en mente.</div>
       <div class="actions"><a class="button" data-attribution-handoff data-screen="C02" data-surface="horeca-solucion" href="index.html#C02">Recibir orientación</a><a class="button secondary" data-attribution-handoff data-screen="C10" data-surface="horeca-productos" href="index.html#C10">Explorar productos</a></div>
       </div></details>
@@ -83,22 +120,23 @@
     <article class="post" id="productos-y-reposicion">
       <div class="post-kicker">Guía · productos y reposición</div>
       <details class="post-answer"><summary><h2>¿Cómo preparar una lista de productos sin perder flexibilidad?</h2><h3>Relaciona la selección con bebidas, horarios y equipo.</h3></summary><div class="post-content">
-      <p>La lista de productos se entiende mejor cuando se conecta con las bebidas, los momentos de servicio y el equipo que las prepara. Un pack puede ser un punto de partida; no debería impedir que adaptes cantidades o cambies productos.</p>
+      <p><strong>Conecta la lista de productos con las bebidas, los momentos de servicio y el equipo:</strong> un pack sirve como punto de partida y siempre puedes adaptar cantidades o cambiar productos.</p>
+      <p class="post-subhead"><strong>Ordena la selección en tres puntos.</strong></p>
       <ul>
-        <li>Separa lo que ya conoces de lo que todavía necesitas confirmar.</li>
-        <li>Revisa cada producto junto con la máquina y el formato de preparación.</li>
-        <li>Define quién revisa existencias y cómo se solicita la reposición.</li>
+        <li><strong>Conocido vs. pendiente:</strong> separa lo que ya conoces de lo que todavía necesitas confirmar.</li>
+        <li><strong>Compatibilidad:</strong> revisa cada producto junto con la máquina y el formato de preparación.</li>
+        <li><strong>Reposición:</strong> define quién revisa existencias y cómo se solicita el siguiente pedido.</li>
       </ul>
-      <p>El catálogo y la propuesta deben confirmar compatibilidad, cantidades y condiciones vigentes. Esta guía no fija mínimos ni promete disponibilidad.</p>
+      <p><strong>El catálogo y la propuesta confirman compatibilidad, cantidades y condiciones vigentes.</strong> Esta guía no fija mínimos ni promete disponibilidad.</p>
       <div class="actions"><a class="button" data-attribution-handoff data-screen="C10" data-surface="reposicion-productos" href="index.html#C10">Armar mi selección</a></div>
       </div></details>
     </article>
     <section class="questions" aria-label="Preguntas frecuentes sobre servicio de café">
-      <details><summary><h2>¿Tengo que elegir la máquina antes de pedir orientación?</h2><h3>No necesitas elegir una máquina antes de pedir orientación.</h3></summary><div><p>Puedes describir tu operación para recibir una recomendación inicial, o partir por una máquina que ya tengas en mente.</p></div></details>
-      <details><summary><h2>¿Puedo elegir productos individuales aunque exista un pack?</h2><h3>Sí, puedes elegir productos individuales.</h3></summary><div><p>El pack es una opción de inicio; la selección individual y los ajustes deben permanecer disponibles.</p></div></details>
-      <details><summary><h2>¿Esta guía confirma máquinas, cantidades o condiciones?</h2><h3>No confirma esos datos.</h3></summary><div><p>El catálogo actualizado y el equipo Marley deben confirmar compatibilidad, disponibilidad, reposición y condiciones comerciales.</p></div></details>
+      <details><summary><h2>¿Tengo que elegir la máquina antes de pedir orientación?</h2><h3>No necesitas elegir una máquina antes de pedir orientación.</h3></summary><div><p><strong>Puedes describir tu operación</strong> para recibir una recomendación inicial, o partir por una máquina que ya tengas en mente.</p></div></details>
+      <details><summary><h2>¿Puedo elegir productos individuales aunque exista un pack?</h2><h3>Sí, puedes elegir productos individuales.</h3></summary><div><p><strong>El pack es una opción de inicio:</strong> la selección individual y los ajustes permanecen siempre disponibles.</p></div></details>
+      <details><summary><h2>¿Esta guía confirma máquinas, cantidades o condiciones?</h2><h3>No confirma esos datos.</h3></summary><div><p><strong>El catálogo actualizado y el equipo Marley confirman</strong> compatibilidad, disponibilidad, reposición y condiciones comerciales.</p></div></details>
     </section>
-    <p class="note">Contenido de orientación. Antes de publicar, validar datos de productos y condiciones vigentes con Marley Coffee.</p>
+    <p class="note"><strong>Contenido de orientación:</strong> antes de publicar, validar datos de productos y condiciones vigentes con Marley Coffee.</p>
   </main>
   <script>
     (() => {

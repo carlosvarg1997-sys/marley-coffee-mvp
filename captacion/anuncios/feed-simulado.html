@@ -1,141 +1,707 @@
 <!doctype html>
-<html lang="es-CL">
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <link rel="icon" type="image/webp" href="../../recursos/marca/logo.webp">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#f3f4f6">
-  <title>Feed simulado para prueba</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Feed simulado · Prueba con personas · Marley Coffee Empresas</title>
   <style>
-    :root{color-scheme:light;--paper:#f3f4f6;--card:#fff;--ink:#1d1d1f;--muted:#62666b;--line:#e1e4e8;--yellow:#f3c900;--accent:#315d9a;--measure:560px}
+    :root{
+      color-scheme:light;
+      --bg:#f2f4f7;
+      --surface:#ffffff;
+      --surface-soft:#f8f9fb;
+      --ink:#111317;
+      --muted:#5a6069;
+      --line:#dfe3ea;
+      --yellow:#f3c900;
+      --yellow-ink:#0b0b0c;
+      --accent:#1f4e8c;
+      --black:#0b0b0c;
+      --measure:640px;
+      --radius:14px;
+    }
     *{box-sizing:border-box}
-    html{min-width:320px;background:var(--paper);scroll-behavior:auto}
-    body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 Arial,Helvetica,sans-serif}
-    img{display:block;max-width:100%}
-    a{color:inherit}
-    .feed-shell{width:min(100%,var(--measure));margin:0 auto;padding:0 12px 28px}
-    .feed-topbar{display:flex;align-items:center;gap:11px;min-height:58px;padding:9px 2px 7px}
-    .feed-mark{width:30px;height:30px;flex:0 0 30px;border:2px solid #292b2e;border-radius:9px;position:relative;background:#fff}
-    .feed-mark::before,.feed-mark::after{content:"";position:absolute;background:#303236;border-radius:2px}
-    .feed-mark::before{width:13px;height:3px;left:6px;top:8px;box-shadow:0 6px 0 #303236}
-    .feed-mark::after{width:3px;height:13px;right:6px;top:7px}
-    .feed-top-title{min-width:0;flex:1;font-size:17px;font-weight:700;letter-spacing:-.02em}
-    .feed-search{min-height:36px;display:flex;align-items:center;gap:7px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:#fff;color:#6c7075;font-size:13px;white-space:nowrap}
-    .feed-search::before{content:"";width:10px;height:10px;border:1.6px solid currentColor;border-radius:50%;display:inline-block;box-shadow:4px 4px 0 -2.5px currentColor}
-    .sim-label{margin:0 0 12px;padding:5px 9px;width:max-content;max-width:100%;border:1px solid #d9dde2;border-radius:4px;background:#fff;color:#53575c;font-size:11px;line-height:1.2;letter-spacing:.025em}
-    .feed-stream{display:grid;gap:12px}
-    .feed-post{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:0 1px 2px #15171a0a}
-    .post-head{display:flex;align-items:center;gap:9px;padding:12px 13px 0;min-width:0}
-    .avatar{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:linear-gradient(145deg,#b8c6bc,#e3d6c4);position:relative;overflow:hidden}
-    .avatar::before,.avatar::after{content:"";position:absolute;display:block}
-    .avatar::before{width:12px;height:12px;left:11px;top:6px;border-radius:50%;background:#fff9}
-    .avatar::after{width:25px;height:15px;left:4px;bottom:-5px;border-radius:50% 50% 0 0;background:#fff9}
-    .avatar--two{background:linear-gradient(145deg,#d3c5b4,#a8b9c3)}
-    .avatar--three{background:linear-gradient(145deg,#c9d0b8,#e3cbb9)}
-    .avatar--four{background:linear-gradient(145deg,#a9bbc2,#d8d2c3)}
-    .post-author{min-width:0;flex:1}
-    .post-author strong{display:block;overflow:hidden;color:#34373a;font-size:12px;font-weight:700;white-space:nowrap;text-overflow:ellipsis}
-    .post-author small{display:block;color:#73777c;font-size:11px;line-height:1.25}
-    .post-menu{width:30px;height:30px;display:grid;place-items:center;color:#73777c;font-size:20px;line-height:1}
-    .post-copy{margin:8px 13px 10px;color:#292c30;font-size:14px;line-height:1.4}
-    .neutral-art{height:116px;margin:0 12px;position:relative;overflow:hidden;border-radius:8px;background:#d7dfdc}
-    .neutral-art span{position:absolute;display:block}
-    .neutral-art--one{background:linear-gradient(130deg,#d9e2df 0 40%,#f0e4d1 40% 72%,#c8d1dc 72%)}
-    .neutral-art--one .shape-a{width:42%;height:74%;left:8%;top:13%;border-radius:12px;background:#faf8f1;transform:rotate(-5deg)}
-    .neutral-art--one .shape-b{width:27%;height:58%;right:12%;bottom:0;border-radius:45% 45% 0 0;background:#b4c4bc}
-    .neutral-art--one .shape-c{width:32%;height:3px;left:14%;top:35%;background:#9daaa5;box-shadow:0 12px 0 #c4ccc7,0 24px 0 #c4ccc7}
-    .neutral-art--two{background:linear-gradient(105deg,#d8d2c7,#ece8df 46%,#c3d0cc)}
-    .neutral-art--two .shape-a{width:32%;height:88%;left:9%;bottom:-19%;border-radius:50% 50% 0 0;background:#b7c5bd}
-    .neutral-art--two .shape-b{width:32%;height:68%;left:39%;top:16%;border-radius:8px;background:#fff9}
-    .neutral-art--two .shape-c{width:19%;height:56%;right:8%;bottom:0;background:#9caeb1}
-    .neutral-art--three{background:linear-gradient(145deg,#d8e0e8,#f1e8d8 55%,#d0d9d0)}
-    .neutral-art--three .shape-a{width:23%;aspect-ratio:1;left:12%;top:20%;border-radius:50%;background:#fdfbf6}
-    .neutral-art--three .shape-b{width:38%;height:55%;left:37%;top:27%;border-radius:11px;background:#c0cbc5;transform:rotate(4deg)}
-    .neutral-art--three .shape-c{width:18%;height:77%;right:8%;bottom:-8%;border-radius:50% 50% 0 0;background:#e1cdb7}
-    .neutral-art--four{background:linear-gradient(115deg,#e5dccd,#c8d7d2 50%,#dce1e7)}
-    .neutral-art--four .shape-a{width:70%;height:2px;left:15%;top:28%;background:#a9b4ad;box-shadow:0 16px 0 #b7c0ba,0 32px 0 #c2c8c3}
-    .neutral-art--four .shape-b{width:22%;height:60%;right:13%;bottom:0;background:#b4c2ba;border-radius:45% 45% 0 0}
-    .post-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 13px 11px;color:#656a70;font-size:11px}
-    .post-action-group{display:flex;gap:15px;flex-wrap:wrap}
-    .neutral-post{padding-bottom:1px}
-    .ad-post{border-color:#d4d7dc}
-    .ad-post-head{display:flex;align-items:center;gap:9px;padding:13px 13px 0}
-    .brand-dot{width:34px;height:34px;flex:0 0 34px;border-radius:9px;background:#111;color:#f4f1ea;display:grid;place-items:center;font-size:9px;font-weight:700;letter-spacing:.04em}
-    .ad-publisher{min-width:0;flex:1}
-    .ad-publisher strong{display:block;color:#202225;font-size:12px;line-height:1.25}
-    .ad-publisher small{display:block;color:#72767c;font-size:11px;line-height:1.3}
-    .ad-disclosure{padding:4px 6px;border:1px solid #d8dade;border-radius:3px;color:#65696f;font-size:10px;line-height:1.1;white-space:nowrap}
-    .ad-copy{margin:12px 14px 11px;color:#24272b;font-size:14px;line-height:1.48;overflow-wrap:anywhere}
-    .ad-tap{display:block;min-width:0;margin:0 12px 12px;border:1px solid #dfe1e4;border-radius:9px;overflow:hidden;text-decoration:none;color:inherit;background:#fff}
-    .ad-image{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;background:#0b0b0c}
-    .ad-image.is-square{aspect-ratio:1/1}
-    .ad-cta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;padding:8px 10px 8px 12px;background:#fff}
-    .ad-cta-text{min-width:0;color:#3c4045;font-size:12px;line-height:1.3}
-    .ad-cta-button{min-height:44px;min-width:120px;display:inline-flex;align-items:center;justify-content:center;padding:0 14px;border-radius:6px;background:var(--yellow);color:#151515;font-size:12px;font-weight:700;text-align:center;white-space:nowrap}
-    .ad-tap:focus-visible{outline:3px solid #1d1d1f;outline-offset:3px}
-    .feed-footer{margin:18px 2px 0;color:#747980;font-size:11px;text-align:center}
-    body[data-red="meta"]{--paper:#f2f3f5;--line:#e6e7e9}
-    body[data-red="meta"] .feed-topbar{padding-top:10px}
-    body[data-red="meta"] .feed-mark{border-radius:50%}
-    body[data-red="meta"] .feed-post{border:0;border-radius:16px;box-shadow:0 1px 4px #10151a14}
-    body[data-red="meta"] .post-actions{font-size:12px}
-    body[data-red="linkedin"]{--paper:#f3f4f5;--line:#d9dde1;--accent:#315d9a}
-    body[data-red="linkedin"] .feed-mark{border-radius:6px}
-    body[data-red="linkedin"] .feed-top-title{font-size:16px}
-    body[data-red="linkedin"] .feed-search{border-radius:6px}
-    body[data-red="linkedin"] .feed-post{border-radius:10px;box-shadow:0 1px 2px #10151a0b}
-    body[data-red="linkedin"] .neutral-art{height:104px;border-radius:5px}
-    body[data-red="linkedin"] .ad-post{border:1px solid #d4d7dc}
-    body[data-red="linkedin"] .ad-tap{border-radius:4px}
-    body[data-red="linkedin"] .ad-cta-button{background:#f3c900}
-    @media(min-width:600px){.feed-shell{padding-right:18px;padding-left:18px}.feed-topbar{min-height:64px}.post-copy,.ad-copy{font-size:15px}.neutral-art{height:132px}body[data-red="linkedin"] .neutral-art{height:116px}}
-    @media(max-width:359px){.feed-shell{padding-right:8px;padding-left:8px}.feed-search{padding:0 8px}.ad-cta-button{min-width:110px;padding:0 10px}}
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    html,body{margin:0;padding:0;max-width:100%;overflow-x:clip}
+    body{
+      background:var(--bg);
+      color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      font-size:15px;
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* Barra superior tipo red social real */
+    .feed-topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(255,255,255,.94);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--line);
+    }
+    .feed-topbar-inner{
+      max-width:1180px;
+      margin:0 auto;
+      padding:10px clamp(14px,3vw,28px);
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
+      align-items:center;
+      gap:14px;
+    }
+    .feed-brand{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .feed-mark{
+      width:32px;
+      height:32px;
+      border-radius:10px;
+      background:var(--ink);
+      color:#fff;
+      display:grid;
+      place-items:center;
+      font-weight:800;
+      font-size:13px;
+      letter-spacing:-.02em;
+      flex:0 0 auto;
+    }
+    body[data-red="linkedin"] .feed-mark{background:#0a66c2}
+    .feed-top-title{
+      font-size:15px;
+      font-weight:700;
+      letter-spacing:-.01em;
+      white-space:nowrap;
+    }
+    .feed-search{
+      max-width:340px;
+      width:100%;
+      justify-self:center;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border-radius:999px;
+      background:var(--surface-soft);
+      border:1px solid var(--line);
+      padding:7px 14px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.2;
+    }
+    .feed-search svg{width:14px;height:14px;flex:0 0 auto;opacity:.7}
+    .feed-sim-pill{
+      font-size:11.5px;
+      font-weight:600;
+      color:var(--muted);
+      background:var(--surface-soft);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:5px 11px;
+      white-space:nowrap;
+    }
+
+    /* Estructura centrada con contexto silencioso en pantallas amplias */
+    .feed-layout{
+      max-width:1180px;
+      margin:0 auto;
+      padding:18px clamp(12px,3vw,28px) 56px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr);
+      justify-content:center;
+      gap:24px;
+      align-items:start;
+    }
+    .feed-rail{display:none}
+    .feed-shell{
+      width:min(100%,var(--measure));
+      margin:0 auto;
+      display:grid;
+      gap:14px;
+    }
+    .sim-label{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:0 4px;
+    }
+    .feed-stream{
+      display:grid;
+      gap:20px;
+    }
+    #posts-before,#posts-after{
+      display:grid;
+      gap:18px;
+    }
+
+    /* Tarjetas del feed */
+    .feed-post{
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      overflow:hidden;
+      box-shadow:0 1px 2px rgba(17,19,23,.04);
+    }
+    .post-head,.ad-post-head{
+      display:grid;
+      grid-template-columns:40px minmax(0,1fr) auto;
+      gap:12px;
+      align-items:center;
+      padding:14px 18px 10px;
+    }
+    .avatar{
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      font-size:12px;
+      font-weight:700;
+      color:#293241;
+      background:#e7ecf2;
+      flex:0 0 auto;
+    }
+    .avatar--1{background:#e4eaf2;color:#273a55}
+    .avatar--2{background:#e8eee8;color:#2d4733}
+    .avatar--3{background:#f0eae2;color:#4a3b2c}
+    .avatar--4{background:#eae7f2;color:#3d3257}
+    .post-author,.ad-publisher{
+      display:grid;
+      gap:1px;
+      min-width:0;
+    }
+    .post-author strong,.ad-publisher strong{
+      font-size:14.5px;
+      font-weight:700;
+      line-height:1.25;
+      color:var(--ink);
+    }
+    .post-author small,.ad-publisher small{
+      font-size:12px;
+      line-height:1.3;
+      color:var(--muted);
+    }
+    .post-menu{
+      color:var(--muted);
+      font-size:16px;
+      letter-spacing:1px;
+      padding:4px 6px;
+    }
+    .post-copy{
+      margin:0;
+      padding:0 18px 12px;
+      font-size:14.5px;
+      line-height:1.45;
+      color:#252930;
+    }
+
+    /* Miniaturas neutras estilizadas y compactas (respetan el fold 390x844) */
+    .neutral-art{
+      margin:0 18px 12px;
+      height:92px;
+      border-radius:10px;
+      position:relative;
+      overflow:hidden;
+      border:1px solid #e6e9ef;
+      background:#f4f6f9;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 16px;
+      gap:14px;
+    }
+    .neutral-art--one{background:linear-gradient(135deg,#eef2f6 0%,#f8f9fb 100%)}
+    .neutral-art--two{background:linear-gradient(135deg,#edf2ee 0%,#f7faf8 100%)}
+    .neutral-art--three{background:linear-gradient(135deg,#f3efe9 0%,#faf8f5 100%)}
+    .neutral-art--four{background:linear-gradient(135deg,#efedf5 0%,#f8f7fb 100%)}
+    .shape-a{
+      display:block;
+      width:62%;
+      height:46px;
+      border-radius:8px;
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(17,19,23,.06);
+      position:relative;
+    }
+    .shape-a::after{
+      content:"";
+      position:absolute;
+      left:12px;
+      top:14px;
+      width:58%;
+      height:6px;
+      border-radius:4px;
+      background:rgba(17,19,23,.12);
+      box-shadow:0 12px 0 rgba(17,19,23,.08);
+    }
+    .shape-b{
+      display:block;
+      width:64px;
+      height:64px;
+      border-radius:10px;
+      background:rgba(17,19,23,.06);
+      flex:0 0 auto;
+    }
+    .shape-c{display:none}
+    .post-actions{
+      border-top:1px solid #edf0f4;
+      padding:9px 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      color:var(--muted);
+      font-size:12.5px;
+      font-weight:500;
+    }
+    .post-action-group{display:flex;gap:18px;align-items:center}
+    .post-action-item{display:inline-flex;align-items:center;gap:6px}
+    .post-action-item svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+    /* Anuncio patrocinado Marley Coffee: limpio, vivo y encuadrado en 1280x600 */
+    .ad-post{
+      border-color:#d4dae3;
+      box-shadow:0 10px 26px rgba(17,19,23,.08);
+    }
+    .brand-dot{
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      background:var(--black);
+      color:var(--yellow);
+      border:1.5px solid var(--yellow);
+      display:grid;
+      place-items:center;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.03em;
+    }
+    .ad-disclosure{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 10px;
+      border-radius:999px;
+      background:#f1f3f6;
+      border:1px solid var(--line);
+      font-size:11.5px;
+      font-weight:700;
+      color:#2d333c;
+    }
+    .ad-copy{
+      margin:0;
+      padding:2px 18px 14px;
+      font-size:14.5px;
+      line-height:1.45;
+      color:var(--ink);
+      display:grid;
+      gap:6px;
+    }
+    .ad-copy-lead{
+      display:block;
+      font-weight:700;
+      color:var(--ink);
+      font-size:15px;
+      line-height:1.35;
+    }
+    .ad-copy-points{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px 14px;
+      font-size:13.5px;
+      color:#2b3038;
+    }
+    .ad-copy-points li{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .ad-copy-points li::before{
+      content:"";
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:var(--yellow);
+      border:1px solid var(--black);
+      flex:0 0 auto;
+    }
+
+    .ad-tap{
+      display:block;
+      text-decoration:none;
+      color:inherit;
+      border-top:1px solid var(--line);
+      background:var(--surface);
+      transition:background-color .16s ease;
+    }
+    .ad-tap:hover{background:#fafbfc}
+    .ad-tap:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+
+    /* Galería mixta: video vivo sin botones + pieza gráfica completa */
+    .ad-media{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      grid-template-rows:minmax(0,264px);
+      background:var(--black);
+      border-bottom:1px solid var(--line);
+      height:264px;
+      overflow:hidden;
+    }
+    .ad-video-slot{
+      position:relative;
+      min-width:0;
+      min-height:0;
+      height:100%;
+      overflow:hidden;
+      background:var(--black);
+      border-right:1px solid rgba(255,255,255,.12);
+    }
+    .ad-video{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+      background:var(--black);
+    }
+    .ad-video-poster{
+      display:none;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .ad-creative-slot{
+      position:relative;
+      min-width:0;
+      min-height:0;
+      height:100%;
+      overflow:hidden;
+      background:var(--black);
+      display:grid;
+      place-items:center;
+      padding:6px;
+    }
+    .ad-image{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:var(--black);
+    }
+
+    .ad-cta-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:14px 18px;
+      background:#f8f9fb;
+    }
+    .ad-cta-copy{
+      display:grid;
+      gap:3px;
+      min-width:0;
+    }
+    .ad-cta-domain{
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .ad-cta-text{
+      font-size:15.5px;
+      font-weight:800;
+      line-height:1.25;
+      color:var(--ink);
+      letter-spacing:-.01em;
+    }
+    .ad-cta-button{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:44px;
+      padding:10px 18px;
+      border-radius:10px;
+      background:var(--yellow);
+      color:var(--yellow-ink);
+      font-size:14px;
+      font-weight:800;
+      white-space:nowrap;
+      box-shadow:0 2px 6px rgba(17,19,23,.12);
+    }
+    .ad-tap:hover .ad-cta-button{background:#ffd71a}
+
+    .feed-footer{
+      margin-top:8px;
+      text-align:center;
+      font-size:12.5px;
+      color:var(--muted);
+      padding:8px 0 12px;
+    }
+
+    /* Rieles laterales silenciosos para equilibrar 1280x600 y 1880x720 */
+    @media (min-width:1080px){
+      .feed-layout{
+        grid-template-columns:230px minmax(0,var(--measure)) 230px;
+        justify-content:center;
+      }
+      .feed-rail{
+        display:grid;
+        gap:12px;
+        position:sticky;
+        top:74px;
+      }
+      .rail-card{
+        background:var(--surface);
+        border:1px solid var(--line);
+        border-radius:12px;
+        padding:14px 16px;
+        display:grid;
+        gap:8px;
+      }
+      .rail-title{
+        font-size:12px;
+        font-weight:700;
+        color:var(--muted);
+        text-transform:uppercase;
+        letter-spacing:.06em;
+      }
+      .rail-line{
+        height:9px;
+        border-radius:999px;
+        background:#e9edf2;
+      }
+      .rail-line.is-short{width:64%}
+      .rail-chip{
+        display:inline-flex;
+        padding:6px 10px;
+        border-radius:8px;
+        background:var(--surface-soft);
+        border:1px solid var(--line);
+        font-size:12.5px;
+        color:#3b414b;
+      }
+    }
+
+    @media (max-width:640px){
+      .feed-topbar-inner{
+        grid-template-columns:auto 1fr auto;
+        gap:10px;
+        padding:10px 14px;
+      }
+      .feed-search{display:none}
+      .feed-layout{padding:14px 12px 44px}
+      .feed-stream,#posts-before,#posts-after{gap:16px}
+      .post-head,.ad-post-head{padding:12px 14px 8px}
+      .post-copy,.ad-copy{padding-left:14px;padding-right:14px}
+      .neutral-art{margin:0 14px 10px;height:80px}
+      .post-actions{padding:8px 14px}
+      .ad-media{
+        grid-template-columns:1fr;
+        grid-template-rows:auto auto;
+        height:auto;
+      }
+      .ad-video-slot{
+        height:155px;
+        border-right:0;
+        border-bottom:1px solid rgba(255,255,255,.14);
+      }
+      .ad-creative-slot{
+        height:auto;
+        padding:8px;
+      }
+      .ad-image{
+        width:min(100%,230px);
+        height:auto;
+        max-height:240px;
+      }
+      .ad-cta-row{
+        flex-direction:column;
+        align-items:stretch;
+        gap:12px;
+        padding:14px;
+      }
+      .ad-cta-button{width:100%}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .ad-video{display:none}
+      .ad-video-poster{display:block}
+    }
   </style>
 </head>
 <body>
-  <div class="feed-shell">
-    <header class="feed-topbar" aria-label="Cabecera del feed">
-      <span class="feed-mark" aria-hidden="true"></span>
-      <div class="feed-top-title">Feed</div>
-      <span class="feed-search" aria-hidden="true">Buscar</span>
-    </header>
-    <p class="sim-label">Simulación de feed para prueba</p>
-    <main id="feed" class="feed-stream" aria-label="Publicaciones">
-      <section id="posts-before" aria-label="Publicaciones anteriores"></section>
-      <article class="feed-post ad-post" id="sponsored-ad" data-testid="sponsored-ad">
-        <header class="ad-post-head">
-          <span class="brand-dot" aria-hidden="true">MC</span>
-          <span class="ad-publisher"><strong>Marley Coffee Empresas</strong><small id="ad-context">Contenido para negocios</small></span>
-          <span class="ad-disclosure">Publicidad</span>
-        </header>
-        <p class="ad-copy" id="ad-copy"></p>
-        <a class="ad-tap" id="ad-link" href="#">
-          <img class="ad-image" id="ad-image" src="" alt="">
-          <span class="ad-cta-row">
-            <span class="ad-cta-text" id="ad-cta-context"></span>
-            <span class="ad-cta-button" id="ad-cta"></span>
-          </span>
-        </a>
-      </article>
-      <section id="posts-after" aria-label="Más publicaciones"></section>
-    </main>
-    <footer class="feed-footer">Fin de la muestra simulada</footer>
+  <header class="feed-topbar" aria-label="Cabecera del feed">
+    <div class="feed-topbar-inner">
+      <div class="feed-brand">
+        <span class="feed-mark" id="feed-mark" aria-hidden="true">FS</span>
+        <div class="feed-top-title" id="feed-top-title">Feed</div>
+      </div>
+      <div class="feed-search" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <span>Buscar publicaciones o temas</span>
+      </div>
+      <span class="feed-sim-pill">Vista simulada</span>
+    </div>
+  </header>
+
+  <div class="feed-layout">
+    <aside class="feed-rail" aria-hidden="true">
+      <div class="rail-card">
+        <div class="rail-title">Explorar</div>
+        <div class="rail-chip">Inicio</div>
+        <div class="rail-chip">Negocios locales</div>
+        <div class="rail-chip">Hospitalidad</div>
+      </div>
+      <div class="rail-card">
+        <div class="rail-title">Resumen</div>
+        <div class="rail-line"></div>
+        <div class="rail-line is-short"></div>
+      </div>
+    </aside>
+
+    <div class="feed-shell">
+      <p class="sim-label">
+        <span>Simulación de feed para prueba</span>
+        <span id="feed-channel-tag">Publicaciones recientes</span>
+      </p>
+      <main id="feed" class="feed-stream" aria-label="Publicaciones">
+        <section id="posts-before" aria-label="Publicaciones anteriores"></section>
+
+        <article class="feed-post ad-post" id="sponsored-ad" data-testid="sponsored-ad">
+          <header class="ad-post-head">
+            <span class="brand-dot" aria-hidden="true">MC</span>
+            <span class="ad-publisher">
+              <strong>Marley Coffee Empresas</strong>
+              <small id="ad-context">Contenido para negocios</small>
+            </span>
+            <span class="ad-disclosure">Publicidad</span>
+          </header>
+
+          <div class="ad-copy" id="ad-copy"></div>
+
+          <a class="ad-tap" id="ad-link" href="#">
+            <div class="ad-media">
+              <div class="ad-video-slot">
+                <video class="ad-video" id="ad-video" autoplay muted loop playsinline preload="metadata"></video>
+                <img class="ad-video-poster" id="ad-video-poster" src="" alt="">
+              </div>
+              <div class="ad-creative-slot">
+                <img class="ad-image" id="ad-image" src="" alt="">
+              </div>
+            </div>
+            <span class="ad-cta-row">
+              <span class="ad-cta-copy">
+                <span class="ad-cta-domain">MARLEYCOFFEE.CL · EMPRESAS</span>
+                <span class="ad-cta-text" id="ad-cta-context"></span>
+              </span>
+              <span class="ad-cta-button" id="ad-cta"></span>
+            </span>
+          </a>
+        </article>
+
+        <section id="posts-after" aria-label="Más publicaciones"></section>
+      </main>
+      <footer class="feed-footer">Fin de la muestra simulada</footer>
+    </div>
+
+    <aside class="feed-rail" aria-hidden="true">
+      <div class="rail-card">
+        <div class="rail-title">Tendencias</div>
+        <div class="rail-line"></div>
+        <div class="rail-line is-short"></div>
+        <div class="rail-line"></div>
+      </div>
+    </aside>
   </div>
+
   <script>
     (()=>{
       const params=new URLSearchParams(location.search);
       const red=params.get('red')==='linkedin'?'linkedin':'meta';
       const profiles={
-        restaurante:{label:'restaurante',slug:'restaurantes',h1:'El café de tu restaurante, con cuentas claras.',copy:'Máquina en comodato, café y productos para tu carta, y un equipo que responde. Todo queda por escrito antes de firmar.',assetGroup:'restaurante',metaAsset:'meta-carrusel-01-1080x1350.webp',metaAlt:'Pieza Marley Coffee con una taza y la palabra Tazas.',fallback:''},
-        hotel:{label:'hotel',slug:'hoteles',h1:'El café de tu hotel, del desayuno al evento.',copy:'Una solución para cada punto de servicio: desayuno, lobby y salones. Máquina en comodato, productos y un equipo que responde. Todo queda por escrito antes de firmar.',assetGroup:'hotel',metaAsset:'meta-carrusel-04-1080x1350.webp',metaAlt:'Pieza Marley Coffee sobre servicio y alcance.',fallback:''},
-        cafeteria:{label:'cafetería',slug:'cafeterias',h1:'Café y máquina para tu cafetería, con cuentas claras.',copy:'Máquina de barra en comodato, café en grano y productos para tu carta, y un equipo que responde. Todo queda por escrito antes de firmar.',assetGroup:'cafeteria',metaAsset:'meta-carrusel-02-1080x1350.webp',metaAlt:'Pieza Marley Coffee sobre el ritmo de servicio.',fallback:''},
-        oficina:{label:'oficina',slug:'oficinas',h1:'Buen café en tu oficina, sin complicarte.',copy:'Máquina automática en comodato, café y productos con reposición coordinada, y un equipo que responde. Todo queda por escrito antes de firmar.',assetGroup:'oficina',metaAsset:'meta-carrusel-03-1080x1350.webp',metaAlt:'Pieza Marley Coffee con un ejemplo de tazas por día.',fallback:''},
-        eventos:{label:'eventos',slug:'eventos-catering',h1:'Café para eventos y catering, con cuentas claras.',copy:'Estima tus tazas por servicio y cuéntanos el formato de tus eventos. Las condiciones se confirman en tu propuesta.',assetGroup:'hotel',metaAsset:'meta-carrusel-04-1080x1350.webp',metaAlt:'Pieza hotelera Marley Coffee reutilizada para eventos.',fallback:'Sin pieza específica de eventos: usa la pieza de hotel por afinidad con salones y servicios.'},
-        conveniencia:{label:'conveniencia',slug:'conveniencia',h1:'Café para tu local de conveniencia, con cuentas claras.',copy:'Estima el consumo por jornada y cuéntanos cómo atiendes tu local. Las condiciones se confirman en tu propuesta.',assetGroup:'cafeteria',metaAsset:'meta-carrusel-02-1080x1350.webp',metaAlt:'Pieza de cafetería Marley Coffee reutilizada para conveniencia.',fallback:'Sin pieza específica de conveniencia: usa la pieza de cafetería por afinidad con servicio de café.'},
-        panaderia:{label:'panadería',slug:'panaderias',h1:'Café para acompañar la atención de tu panadería.',copy:'Estima tazas por día y cuéntanos cómo atiendes tu negocio. Las condiciones se confirman en tu propuesta.',assetGroup:'cafeteria',metaAsset:'meta-carrusel-02-1080x1350.webp',metaAlt:'Pieza de cafetería Marley Coffee reutilizada para panadería.',fallback:'Sin pieza específica de panadería: usa la pieza de cafetería por afinidad con servicio de café.'}
+        restaurante:{
+          label:'restaurante',
+          slug:'restaurantes',
+          h1:'El café de tu restaurante, con cuentas claras.',
+          lead:'Servicio de café sin comprar la máquina desde el día uno.',
+          points:['Máquina en comodato','Café e insumos para tu carta','Condiciones por escrito'],
+          scene:'restaurante',
+          metaAsset:'meta-carrusel-01-1080x1350.webp',
+          metaAlt:'Pieza Marley Coffee con una taza y la palabra Tazas.'
+        },
+        hotel:{
+          label:'hotel',
+          slug:'hoteles',
+          h1:'El café de tu hotel, del desayuno al evento.',
+          lead:'Solución integral para desayuno, lobby y salones.',
+          points:['Máquina en comodato','Reposición coordinada','Todo por escrito antes de firmar'],
+          scene:'hotel',
+          metaAsset:'meta-carrusel-04-1080x1350.webp',
+          metaAlt:'Pieza Marley Coffee sobre servicio y alcance.'
+        },
+        cafeteria:{
+          label:'cafetería',
+          slug:'cafeterias',
+          h1:'Café y máquina para tu cafetería, con cuentas claras.',
+          lead:'Operación continua con máquina de barra y grano.',
+          points:['Máquina de barra en comodato','Grano y productos de carta','Equipo que responde'],
+          scene:'cafeteria',
+          metaAsset:'meta-carrusel-02-1080x1350.webp',
+          metaAlt:'Pieza Marley Coffee sobre el ritmo de servicio.'
+        },
+        oficina:{
+          label:'oficina',
+          slug:'oficinas',
+          h1:'Buen café en tu oficina, sin complicarte.',
+          lead:'Café diario para tu equipo sin dolores operativos.',
+          points:['Máquina automática en comodato','Reposición coordinada','Cuentas claras desde el inicio'],
+          scene:'oficina',
+          metaAsset:'meta-carrusel-03-1080x1350.webp',
+          metaAlt:'Pieza Marley Coffee con un ejemplo de tazas por día.'
+        },
+        eventos:{
+          label:'eventos',
+          slug:'eventos-catering',
+          h1:'Café para eventos y catering, con cuentas claras.',
+          lead:'Estima tus tazas por servicio según el formato del evento.',
+          points:['Cobertura por jornada','Insumos listos para montar','Condiciones en tu propuesta'],
+          scene:'evento',
+          metaAsset:'meta-carrusel-04-1080x1350.webp',
+          metaAlt:'Pieza hotelera Marley Coffee reutilizada para eventos.'
+        },
+        conveniencia:{
+          label:'conveniencia',
+          slug:'conveniencia',
+          h1:'Café para tu local de conveniencia, con cuentas claras.',
+          lead:'Autoatención rápida y ordenada para flujo continuo.',
+          points:['Estima tu consumo por jornada','Formato adaptado al local','Propuesta con cuentas claras'],
+          scene:'cafeteria',
+          metaAsset:'meta-carrusel-02-1080x1350.webp',
+          metaAlt:'Pieza de cafetería Marley Coffee reutilizada para conveniencia.'
+        },
+        panaderia:{
+          label:'panadería',
+          slug:'panaderias',
+          h1:'Café para acompañar la atención de tu panadería.',
+          lead:'Suma café en grano o bebida caliente junto a tu vitrina.',
+          points:['Estima tazas por día','Atención acorde al ritmo del local','Condiciones en tu propuesta'],
+          scene:'cafeteria',
+          metaAsset:'meta-carrusel-02-1080x1350.webp',
+          metaAlt:'Pieza de cafetería Marley Coffee reutilizada para panadería.'
+        }
       };
+
       const requested=params.get('perfil')||'restaurante';
       const profile=profiles[requested]||profiles.restaurante;
       const linkedinAsset='linkedin-imagen-1200x1200.webp';
@@ -145,13 +711,37 @@
       image.src=source+imageFile;
       image.alt=red==='meta'?profile.metaAlt:'Pieza Marley Coffee con una propuesta y una máquina de espresso.';
       if(red==='linkedin')image.classList.add('is-square');
+
+      // Video vivo sin botones: corre solo y respeta prefers-reduced-motion
+      const video=document.getElementById('ad-video');
+      const posterFallback=document.getElementById('ad-video-poster');
+      const isMobile=window.matchMedia('(max-width:640px)').matches;
+      const posterPath='../../recursos/escenas/'+profile.scene+'/'+(isMobile?'poster_m.webp':'poster.webp');
+      const videoPath='../../recursos/escenas/'+profile.scene+'/'+(isMobile?'video_m.mp4':'video_d.mp4');
+      video.poster=posterPath;
+      posterFallback.src=posterPath;
+      posterFallback.alt=profile.metaAlt;
+      const reduceMotion=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+      if(!reduceMotion){
+        video.src=videoPath;
+        const p=video.play();
+        if(p&&typeof p.catch==='function')p.catch(()=>{});
+      }
+
       document.body.dataset.red=red;
       document.body.dataset.perfil=requested in profiles?requested:'restaurante';
       document.documentElement.dataset.ready='1';
-      document.getElementById('ad-copy').textContent=profile.copy;
-      document.getElementById('ad-context').textContent='Café para '+profile.label;
+      document.getElementById('feed-mark').textContent=red==='linkedin'?'in':'FS';
+      document.getElementById('feed-top-title').textContent=red==='linkedin'?'Red profesional':'Feed social';
+      document.getElementById('feed-channel-tag').textContent=red==='linkedin'?'Actualizaciones de red':'Publicaciones recientes';
+
+      document.getElementById('ad-copy').innerHTML=
+        '<strong class="ad-copy-lead">'+profile.lead+'</strong>'+
+        '<ul class="ad-copy-points">'+profile.points.map((pt)=>'<li>'+pt+'</li>').join('')+'</ul>';
+      document.getElementById('ad-context').textContent='Café para '+profile.label+' · B2B';
       document.getElementById('ad-cta-context').textContent=profile.h1;
       document.getElementById('ad-cta').textContent=red==='linkedin'?'Solicitar propuesta':'Más información';
+
       const destination=new URL('../landing/'+profile.slug+'.html',location.href);
       destination.searchParams.set('utm_source',red);
       destination.searchParams.set('utm_medium','paid_social');
@@ -163,18 +753,39 @@
       const link=document.getElementById('ad-link');
       link.href=destination.href;
       link.setAttribute('aria-label',(red==='linkedin'?'Solicitar propuesta':'Más información')+' para '+profile.label);
+
       const neutralBefore=[
-        ['Notas del día','Una pausa corta puede ordenar una agenda cargada.','one'],
-        ['Comunidad','Un espacio claro ayuda a comenzar una tarea.','two'],
-        ['Ideas útiles','Una lista breve deja más tiempo para avanzar.','three'],
-        ['Lecturas de la semana','Los pequeños hábitos hacen más llevadera la jornada.','four']
+        ['Notas del día','ND','Una pausa corta ordena una agenda cargada de reuniones.','one'],
+        ['Comunidad Local','CL','Un espacio despejado ayuda a comenzar mejor la jornada.','two'],
+        ['Ideas útiles','IU','Una lista breve de prioridades deja más tiempo para avanzar.','three'],
+        ['Lecturas de la semana','LS','Pequeños hábitos diarios hacen más llevadero el turno.','four']
       ];
       const neutralAfter=[
-        ['Comunidad','Una mesa ordenada invita a compartir.','three'],
-        ['Notas del día','La luz de la mañana cambia el ambiente.','one'],
-        ['Ideas útiles','Planificar la semana puede empezar con una nota.','two']
+        ['Comunidad Local','CL','Una mesa ordenada invita a conversar sin apuro.','three'],
+        ['Notas del día','ND','La luz de la mañana cambia por completo el ambiente.','one'],
+        ['Ideas útiles','IU','Planificar la semana puede empezar con una nota simple.','two']
       ];
-      const renderPosts=(items)=>items.map(([author,copy,art],i)=>'<article class="feed-post neutral-post"><header class="post-head"><span class="avatar avatar--'+(i+1)+'" aria-hidden="true"></span><span class="post-author"><strong>'+author+'</strong><small>Actualización · hace un momento</small></span><span class="post-menu" aria-hidden="true">···</span></header><p class="post-copy">'+copy+'</p><div class="neutral-art neutral-art--'+art+'" aria-hidden="true"><span class="shape-a"></span><span class="shape-b"></span><span class="shape-c"></span></div><footer class="post-actions"><span class="post-action-group"><span>Me gusta</span><span>Comentar</span></span><span>Compartir</span></footer></article>').join('');
+      const icoHeart='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9z"/></svg>';
+      const icoComment='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H7l-3 3V5z"/></svg>';
+      const icoShare='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 8l5-4-5-4v2.5C8 2.5 4 6 4 12c1.5-2.5 5-3.5 11-3.5V8z"/></svg>';
+      const renderPosts=(items)=>items.map(([author,ini,copy,art],i)=>
+        '<article class="feed-post neutral-post">'+
+          '<header class="post-head">'+
+            '<span class="avatar avatar--'+(i%4+1)+'" aria-hidden="true">'+ini+'</span>'+
+            '<span class="post-author"><strong>'+author+'</strong><small>Actualización · hace un momento</small></span>'+
+            '<span class="post-menu" aria-hidden="true">···</span>'+
+          '</header>'+
+          '<p class="post-copy">'+copy+'</p>'+
+          '<div class="neutral-art neutral-art--'+art+'" aria-hidden="true"><span class="shape-a"></span><span class="shape-b"></span><span class="shape-c"></span></div>'+
+          '<footer class="post-actions">'+
+            '<span class="post-action-group">'+
+              '<span class="post-action-item">'+icoHeart+'<span>Me gusta</span></span>'+
+              '<span class="post-action-item">'+icoComment+'<span>Comentar</span></span>'+
+            '</span>'+
+            '<span class="post-action-item">'+icoShare+'<span>Compartir</span></span>'+
+          '</footer>'+
+        '</article>'
+      ).join('');
       document.getElementById('posts-before').innerHTML=renderPosts(neutralBefore);
       document.getElementById('posts-after').innerHTML=renderPosts(neutralAfter);
     })();

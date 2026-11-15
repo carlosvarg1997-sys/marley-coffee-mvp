@@ -16,7 +16,7 @@ DATE = '10 de noviembre de 2026'
 KEYWORD_FILE = HERE.parents[2] / 'ecosistema_captacion_10nov' / 'CLASIFICACION_FRASES_B2B_09NOV.csv'
 OFFER_SOURCE = PROJECT_ROOT / 'recursos' / 'datos' / 'oferta_por_buyer.json'
 PRICE_SOURCE = PROJECT_ROOT / 'recursos' / 'datos' / 'precios_cotizacion_19oct.json'
-ASSET_VERSION = '20261114-r5-c2'
+ASSET_VERSION = '20261115-r7-textos'
 OFFER_DATA = json.loads(OFFER_SOURCE.read_text(encoding='utf-8'))
 PRICE_DATA = json.loads(PRICE_SOURCE.read_text(encoding='utf-8'))
 BUYER_BY_LANDING = {buyer['landing']: buyer for buyer in OFFER_DATA['buyers']}
@@ -70,31 +70,33 @@ def render_offer(slug):
             f'{image}<div><strong>{escape(line["t"])}</strong><span>{escape(format_text)}</span>'
             f'<b>{price_clp(price)} neto</b></div></li>'
         )
-    kit_filter_total = int(PRICE_DATA['instalacion']['precio']) + int(PRICE_DATA['filtro']['precio'])
-    pack_total = product_total + kit_filter_total
+    kit_total = int(PRICE_DATA['instalacion']['precio'])
+    filter_total = int(PRICE_DATA['filtro']['precio'])
+    pack_total = product_total + kit_total + filter_total
     reference_total = int(PRICE_DATA['totales']['antes_de_instalar'])
+    mensaje = buyer['mensaje'].rstrip('.')
     return f'''<section class="sol-offer" id="tu-oferta" data-offer-block>
   <p class="nm-eyebrow">Tu oferta · {escape(buyer['etiqueta'])}</p>
   <h2 class="nm-h2" id="sol-oferta-{escape(slug, quote=True)}">¿Qué pack de partida puedes revisar?</h2>
-  <h3 class="sol-offer-answer">{escape(buyer['mensaje'])}. La máquina Marley se presta en comodato.</h3>
+  <h3 class="sol-offer-answer">{escape(mensaje)}. La máquina Marley se presta en comodato.</h3>
   <details class="sol-offer-disclosure"><summary>Ver máquina, productos y precios</summary><div class="sol-offer-details"><div class="sol-offer-grid">
     <article class="sol-offer-machine" data-offer-machine="{escape(buyer['maquina'], quote=True)}">
       <img src="../../{escape(machine_path, quote=True)}" width="{machine_width}" height="{machine_height}" alt="Máquina de café para {escape(buyer['etiqueta'], quote=True)}" loading="lazy" decoding="async">
-      <div><p class="sol-offer-product-title">{escape(machine['nombre'])}</p><p class="sol-offer-machine-specs"><strong>{escape(machine['tipo'])}</strong><br>{escape(machine['tazas'])}</p><p>{escape(OFFER_DATA['modalidad_maquina'])}</p></div>
+      <div><p class="sol-offer-product-title">{escape(machine['nombre'])}</p><p class="sol-offer-machine-specs"><strong>{escape(machine['tipo'])}</strong><br>{escape(machine['tazas'])}</p><p><strong>En comodato: Marley presta la máquina y tú compras los insumos.</strong> Modelo, mínimo mensual y condiciones a confirmar con tu ejecutivo.</p></div>
     </article>
     <div class="sol-offer-products"><p class="sol-offer-product-title">Productos del pack</p><ul>{''.join(products)}</ul></div>
   </div>
   <div class="sol-offer-total" data-offer-summary>
     <div class="sol-offer-metric" data-offer-products-total="{product_total}"><span>Productos del pack</span><strong>{price_clp(product_total)}</strong></div>
-    <div class="sol-offer-metric" data-offer-kit-filter-total="{kit_filter_total}"><span>Kit de instalación y filtro</span><strong>{price_clp(kit_filter_total)}</strong></div>
+    <div class="sol-offer-metric" data-offer-kit-total="{kit_total}"><span>Kit de instalación</span><strong>{price_clp(kit_total)}</strong></div><div class="sol-offer-metric" data-offer-filter-total="{filter_total}"><span>Filtro</span><strong>{price_clp(filter_total)}</strong></div>
     <div class="sol-offer-metric" data-offer-total="{pack_total}"><span>Total del pack de partida</span><strong>{price_clp(pack_total)}</strong></div>
     <a class="nm-btn" data-sol-route href="../../index.html#C03" data-screen="C03" data-surface="solucion-{escape(slug, quote=True)}">Arma tu propuesta</a>
-    <p class="sol-offer-reference">Referencia: la cotización completa de Marley del 19-oct-2026, con todas las líneas, suma {price_clp(reference_total)} neto con kit y filtro.</p>
+    <p class="sol-offer-reference"><strong>Referencia:</strong> la cotización completa de Marley del 19-oct-2026, con todas las líneas, suma <strong>{price_clp(reference_total)} neto</strong> con kit y filtro.</p>
   </div>
   <details class="sol-offer-conditions"><summary>Condiciones a confirmar</summary><ul>
-    <li>Compra mínima mensual: a confirmar.</li><li>Plazo de entrega: a confirmar.</li><li>Compatibilidad de insumos con la máquina: a confirmar.</li>
+    <li><strong>Compra mínima mensual:</strong> a confirmar.</li><li><strong>Plazo de entrega:</strong> a confirmar.</li><li><strong>Compatibilidad de insumos con la máquina:</strong> a confirmar.</li>
   </ul></details></div></details>
-  <p class="sol-offer-note">{escape(PRICE_DATA['nota_cliente'])}</p>
+  <p class="sol-offer-note"><strong>Precios netos referenciales</strong> de la cotización de Marley del 19-oct-2026. Los confirma tu ejecutivo.</p>
 </section>'''
 
 
@@ -290,7 +292,7 @@ def render_page(p, groups):
     answer = seo['answer']
     compare_question = seo['compare_question']
     html = head(seo['title'],seo['description'],canonical,'sol-'+p['slug'],p['slug'],p['faqs'],seo['h1'])
-    return html+f'''<main id="contenido" class="ct-article nm-wrap sol-page"><article><header class="ct-editorial-head sol-hero"><p class="nm-eyebrow">Marley Coffee · Empresas · {escape(p['buyer'])}</p><span class="ct-display-word" aria-hidden="true">{escape(visual['word'])}</span>{machine}<h1 class="nm-h1">{escape(seo['h1'])}</h1></header><section class="ct-answer" aria-label="Respuesta directa"><h2 class="nm-h2">{escape(question)}</h2><h3>{escape(answer)}</h3><p class="sol-cta-reason">Cuéntanos el servicio y el volumen que buscas evaluar.</p><a class="nm-btn" data-sol-route href="../../index.html#C03" data-screen="C03" data-surface="solucion-{p['slug']}-hero">Arma tu propuesta</a></section>{offer}<div class="ct-content"><section class="sol-question-section" id="como-funciona"><h2 class="nm-h2">¿Cómo evalúas y comparas una solución para {escape(p['buyer'].lower())}?</h2><h3>{escape(seo['how_answer'])} {escape(seo['compare_answer'])}</h3><details class="sol-disclosure"><summary>Ver los pasos de evaluación</summary><section><ol>{how}</ol><p>Compatibilidad, disponibilidad, servicios, soporte y condiciones comerciales se confirman para cada operación en una propuesta.</p></section></details><details class="sol-disclosure"><summary>Ver los puntos de comparación</summary><section><div class="ct-table-wrap"><table class="ct-table ct-fact-table"><tbody>{table}</tbody></table></div></section></details></section><section class="sol-question-section" id="preguntas"><h2 class="nm-h2">¿Qué preguntas conviene resolver antes de elegir?</h2><h3>{escape(seo['faq_answer'])}</h3><details class="sol-disclosure sol-faq-disclosure"><summary>Ver preguntas y respuestas frecuentes</summary><section class="ct-faqs">{faq}</section></details><details class="sol-disclosure"><summary>Ver guías relacionadas</summary><section class="ct-related"><ul>{guides}</ul><p><a href="../contenidos/index.html">Ver las seis guías y calculadoras</a></p>{legal_note}</section></details></section></div><aside class="ct-next" id="propuesta"><h2 class="nm-h2">¿Cómo continúas con tu evaluación?</h2><h3>Arma una propuesta con los datos de tu operación.</h3><p>Las condiciones se confirman en el portal.</p><a class="nm-btn" href="{cta}" data-attribution-handoff data-screen="C03" data-surface="solucion-{p['slug']}">Ir al portal <span aria-hidden="true">→</span></a></aside></article></main>{floating_cta}'''+FOOTER
+    return html+f'''<main id="contenido" class="ct-article nm-wrap sol-page"><article><header class="ct-editorial-head sol-hero"><p class="nm-eyebrow">Marley Coffee · Empresas · {escape(p['buyer'])}</p><span class="ct-display-word" aria-hidden="true">{escape(visual['word'])}</span>{machine}<h1 class="nm-h1">{escape(seo['h1'])}</h1></header><section class="ct-answer" aria-label="Respuesta directa"><h2 class="nm-h2">{escape(question)}</h2><h3>{escape(answer)}</h3><p class="sol-cta-reason">Cuéntanos <strong>el servicio y el volumen</strong> que buscas evaluar.</p><a class="nm-btn" data-sol-route href="../../index.html#C03" data-screen="C03" data-surface="solucion-{p['slug']}-hero">Arma tu propuesta</a></section>{offer}<div class="ct-content"><section class="sol-question-section" id="como-funciona"><h2 class="nm-h2">¿Cómo evalúas y comparas una solución para {escape(p['buyer'].lower())}?</h2><h3>{escape(seo['how_answer'])} {escape(seo['compare_answer'])}</h3><details class="sol-disclosure"><summary>Ver los pasos de evaluación</summary><section><ol>{how}</ol><p>Compatibilidad, disponibilidad, servicios, soporte y condiciones comerciales <strong>se confirman para cada operación en una propuesta</strong>.</p></section></details><details class="sol-disclosure"><summary>Ver los puntos de comparación</summary><section><div class="ct-table-wrap"><table class="ct-table ct-fact-table"><tbody>{table}</tbody></table></div></section></details></section><section class="sol-question-section" id="preguntas"><h2 class="nm-h2">¿Qué preguntas conviene resolver antes de elegir?</h2><h3>{escape(seo['faq_answer'])}</h3><details class="sol-disclosure sol-faq-disclosure"><summary>Ver preguntas y respuestas frecuentes</summary><section class="ct-faqs">{faq}</section></details><details class="sol-disclosure"><summary>Ver guías relacionadas</summary><section class="ct-related"><ul>{guides}</ul><p><a href="../contenidos/index.html">Ver las seis guías y calculadoras</a></p>{legal_note}</section></details></section></div><aside class="ct-next" id="propuesta"><h2 class="nm-h2">¿Cómo continúas con tu evaluación?</h2><h3>Arma una propuesta con los datos de tu operación.</h3><p><strong>Las condiciones se confirman en el portal.</strong></p><a class="nm-btn" href="{cta}" data-attribution-handoff data-screen="C03" data-surface="solucion-{p['slug']}">Ir al portal <span aria-hidden="true">→</span></a></aside></article></main>{floating_cta}'''+FOOTER
 
 CONTENT_GUIDES = [
  {'slug':'cuanto-cafe-necesita-mi-negocio','title':'¿Cuánto café necesita mi negocio al mes?'},
