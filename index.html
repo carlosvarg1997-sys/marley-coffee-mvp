@@ -6715,7 +6715,7 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
   }
   // Guía de pasos (C03, C04, C05, C06 y C09): va en el flujo del documento, nunca fija, para no tapar contenido en celular.
   const GUIA_PASOS = ['1 · Tu negocio', '2 · Tu propuesta', '3 · Confirmar', '4 · Tu portal'];
-  const stepper = (n0) => { const r5 = window.R5 && window.R5.guia ? window.R5.guia(n0) : null; const pasos = r5 ? r5.pasos.map((t, i) => (i + 1) + ' · ' + t) : GUIA_PASOS; const n = r5 ? r5.actual : n0; return `<nav class="mcp-guia-wrap" aria-label="Guía de pasos, paso ${n} de ${pasos.length}"><ol class="mcp-guia">${pasos.map((t, i) => { const k = i + 1; const cls = k < n ? 'done' : k === n ? 'now' : ''; return `<li class="${cls}"${k === n ? ' aria-current="step"' : ''}>${k < n ? `<span class="mcp-ok" aria-hidden="true">${icon('check', 14)}</span>` : ''}<span>${esc(t)}</span></li>`; }).join('')}</ol></nav>`; };
+  const stepper = (n0) => { const r5 = window.R5 && window.R5.guia ? window.R5.guia(n0) : null; const pasos = r5 ? r5.pasos.map((t, i) => (i + 1) + ' · ' + t) : GUIA_PASOS; const n = r5 ? r5.actual : n0; return `<nav class="mcp-guia-wrap mcp-guia-wrap--steps-${pasos.length}" aria-label="Guía de pasos, paso ${n} de ${pasos.length}"><ol class="mcp-guia">${pasos.map((t, i) => { const k = i + 1; const cls = k < n ? 'done' : k === n ? 'now' : ''; return `<li class="${cls}"${k === n ? ' aria-current="step"' : ''}>${k < n ? `<span class="mcp-ok" aria-hidden="true">${icon('check', 14)}</span>` : ''}<span>${esc(t)}</span></li>`; }).join('')}</ol></nav>`; };
 
   // ---------- C02 · Empresas ----------
   function svcPrice(sv) { return 'Por cotizar'; }
@@ -6961,7 +6961,7 @@ ${inicio && note ? `<p class="m5-cta-note a1-next-step">${note}</p>` : ''}
     const done = `<div class="m5-done" role="status"><span class="m5-done-ic">${icon('check', 24)}</span><div><b>Propuesta confirmada</b><p>Tu elección quedó registrada. El equipo continúa la validación por correo.</p><div class="m5-actions"><button type="button" class="m5-btn m5-btn--sm" data-go="C06">Ver confirmación y siguiente paso</button></div></div></div>`;
     const acciones = `${b2bPayNotice}<div class="mcp-acc"><button type="button" class="m5-btn m5-btn--lg" data-a="accept-prop">Siguiente: confirmar mi propuesta ${icon('arrow', 18)}</button><button type="button" class="m5-btn m5-btn--ghost" data-a="talk">Hablar con un ejecutivo</button><button type="button" class="m5-btn m5-btn--ghost" data-a="save-later">Guardar y seguir después</button></div>`;
     return shell(`<style>@media (max-width:600px){.mcp-acc{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mcp-acc .m5-btn--lg{grid-column:1/-1}}</style><section class="m5-sec m5-sec--tight m5-gray m5-propsec"><div class="m5-wrap">${stepper(2)}
-<div class="m5-prop-head"><h1>Revisa tu propuesta</h1><p class="m5-lead">Máquina, insumos y condiciones. Confirma cuando estés listo.</p></div>
+<div class="m5-prop-head"><h1>Revisa tu propuesta</h1><p class="m5-lead m5-prop-copy">Máquina, insumos y condiciones. Confirma cuando estés listo.</p></div>
 ${machineNote}${minNote}${sent}${propuestaBloques(s, q)}
 ${accepted ? done : acciones}
 </div></section>`);
@@ -25604,14 +25604,17 @@ body[data-current="R09"] .r6-r09-preview p {
  body[data-current="C02"] .m5 #negocios .ux-buyer-copy .m5-btn{min-height:44px;padding:8px 12px}
 }
 /* C05 · encuadre de propuesta en tres pasos y jerarquía corta. */
-body[data-current="C05"] .m5-prop-head h1{max-width:22ch;margin:0 0 8px}
-body[data-current="C05"] .m5-prop-head .m5-lead{max-width:56ch;margin:0}
+body[data-current="C05"] .m5-prop-head h1{max-width:22ch;margin:0 0 12px}
+body[data-current="C05"] .m5-prop-head .m5-prop-copy{max-width:56ch;margin:0}
 body[data-current="C05"] .mcp-guia-wrap{margin:0 0 16px}
-body[data-current="C05"] .mcp-guia{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
-body[data-current="C05"] .mcp-guia li{min-width:0;min-height:44px;padding:8px 10px!important;overflow-wrap:normal;word-break:normal;hyphens:none}
-body[data-current="C05"] .mcp-guia li>span:not(.mcp-ok){min-width:0;overflow-wrap:normal;word-break:normal;hyphens:none}
+body[data-current="C05"] .mcp-guia-wrap--steps-3 .mcp-guia,body[data-current="C06"] .mcp-guia-wrap--steps-3 .mcp-guia{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+body[data-current="C05"] .mcp-guia-wrap--steps-4 .mcp-guia,body[data-current="C06"] .mcp-guia-wrap--steps-4 .mcp-guia{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+body[data-current="C05"] .mcp-guia li,body[data-current="C06"] .mcp-guia li{min-width:0;min-height:44px;padding:8px 10px!important;overflow-wrap:normal;word-break:normal;hyphens:none}
+body[data-current="C05"] .mcp-guia li>span:not(.mcp-ok),body[data-current="C06"] .mcp-guia li>span:not(.mcp-ok){min-width:0;overflow-wrap:normal;word-break:normal;hyphens:none}
 body[data-current="C05"] #m7-launcher{display:none!important}
 @media(max-width:560px){
- body[data-current="C05"] .mcp-guia li{gap:4px;padding:6px 6px!important;font-size:clamp(10px,3.15vw,12px)!important;line-height:1.25}
+ body[data-current="C05"] .mcp-guia-wrap--steps-3 .mcp-guia,body[data-current="C06"] .mcp-guia-wrap--steps-3 .mcp-guia{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ body[data-current="C05"] .mcp-guia-wrap--steps-4 .mcp-guia,body[data-current="C06"] .mcp-guia-wrap--steps-4 .mcp-guia{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ body[data-current="C05"] .mcp-guia li,body[data-current="C06"] .mcp-guia li{gap:4px;padding:6px 6px!important;font-size:clamp(10px,3.15vw,12px)!important;line-height:1.25}
 }
 </style></body></html>
