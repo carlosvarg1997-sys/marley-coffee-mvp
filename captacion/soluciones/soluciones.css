@@ -293,3 +293,20 @@
 
 /* R5 C2: el contenido de un disclosure cerrado no debe conservar caja visible. */
 details:not([open]) > :not(summary){display:none!important}
+
+/* R8 ENCUADRE: keep the solution guide and hero inside compact mobile viewports. */
+@media(max-width:560px){
+ .sol-reading-guide{display:flex;flex-wrap:nowrap;justify-content:flex-start;gap:8px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+ .sol-reading-guide::-webkit-scrollbar{display:none}
+ .sol-reading-guide>strong{display:none}
+ .sol-reading-guide>a{flex:0 0 auto;min-height:40px;padding:8px 12px}
+ .sol-index-hero .ct-hero-copy{padding-block:20px 96px}
+}
+@media(max-width:360px){
+ .sol-index .ct-barra .nm-wrap,.sol-page .ct-barra .nm-wrap{min-height:64px;gap:10px}
+ .sol-index .ct-brand,.sol-page .ct-brand{flex:0 0 auto;gap:8px;white-space:nowrap;font-size:.72rem;letter-spacing:.08em}
+ .sol-index .ct-brand .ld-logo,.sol-page .ct-brand .ld-logo{width:34px;height:34px;flex-basis:34px}
+ .sol-index .ct-barra nav,.sol-page .ct-barra nav{flex:0 0 auto;gap:8px}
+ .sol-index .ct-head-link,.sol-page .ct-head-link{font-size:.72rem}
+ .sol-index .sol-index-hero .ct-hero-copy{padding-bottom:88px}
+}
