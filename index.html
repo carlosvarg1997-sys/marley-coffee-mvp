@@ -6961,7 +6961,7 @@ ${inicio && note ? `<p class="m5-cta-note a1-next-step">${note}</p>` : ''}
     const done = `<div class="m5-done" role="status"><span class="m5-done-ic">${icon('check', 24)}</span><div><b>Propuesta confirmada</b><p>Tu elección quedó registrada. El equipo continúa la validación por correo.</p><div class="m5-actions"><button type="button" class="m5-btn m5-btn--sm" data-go="C06">Ver confirmación y siguiente paso</button></div></div></div>`;
     const acciones = `${b2bPayNotice}<div class="mcp-acc"><button type="button" class="m5-btn m5-btn--lg" data-a="accept-prop">Siguiente: confirmar mi propuesta ${icon('arrow', 18)}</button><button type="button" class="m5-btn m5-btn--ghost" data-a="talk">Hablar con un ejecutivo</button><button type="button" class="m5-btn m5-btn--ghost" data-a="save-later">Guardar y seguir después</button></div>`;
     return shell(`<style>@media (max-width:600px){.mcp-acc{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mcp-acc .m5-btn--lg{grid-column:1/-1}}</style><section class="m5-sec m5-sec--tight m5-gray m5-propsec"><div class="m5-wrap">${stepper(2)}
-<div class="m5-prop-head"><h1>Tu propuesta</h1><h2 class="r5-question">¿Qué incluye tu propuesta?</h2><h3 class="r5-answer">Una máquina en comodato, los insumos, el pago inicial y las condiciones de entrega y servicio.</h3><p class="m5-lead">Revisa los cuatro bloques y confirma cuando estés listo.</p></div>
+<div class="m5-prop-head"><h1>Revisa tu propuesta</h1><p class="m5-lead">Máquina, insumos y condiciones. Confirma cuando estés listo.</p></div>
 ${machineNote}${minNote}${sent}${propuestaBloques(s, q)}
 ${accepted ? done : acciones}
 </div></section>`);
@@ -25602,5 +25602,16 @@ body[data-current="R09"] .r6-r09-preview p {
  body[data-current="C02"] .m5 #negocios .ux-buyer-copy h3{font-size:clamp(21px,6.8vw,24px);line-height:1.06;margin-bottom:6px}
  body[data-current="C02"] .m5 #negocios .ux-buyer-copy p{font-size:14px;line-height:1.4;margin-bottom:8px}
  body[data-current="C02"] .m5 #negocios .ux-buyer-copy .m5-btn{min-height:44px;padding:8px 12px}
+}
+/* C05 · encuadre de propuesta en tres pasos y jerarquía corta. */
+body[data-current="C05"] .m5-prop-head h1{max-width:22ch;margin:0 0 8px}
+body[data-current="C05"] .m5-prop-head .m5-lead{max-width:56ch;margin:0}
+body[data-current="C05"] .mcp-guia-wrap{margin:0 0 16px}
+body[data-current="C05"] .mcp-guia{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+body[data-current="C05"] .mcp-guia li{min-width:0;min-height:44px;padding:8px 10px!important;overflow-wrap:normal;word-break:normal;hyphens:none}
+body[data-current="C05"] .mcp-guia li>span:not(.mcp-ok){min-width:0;overflow-wrap:normal;word-break:normal;hyphens:none}
+body[data-current="C05"] #m7-launcher{display:none!important}
+@media(max-width:560px){
+ body[data-current="C05"] .mcp-guia li{gap:4px;padding:6px 6px!important;font-size:clamp(10px,3.15vw,12px)!important;line-height:1.25}
 }
 </style></body></html>
