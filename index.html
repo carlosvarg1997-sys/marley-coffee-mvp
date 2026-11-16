@@ -11781,7 +11781,7 @@ window.M7BuyerCRM = (() => {
     M.acceptSql();
     window.MarleyApp?.render?.();
   }, true);
-  loadData().catch(() => {});
+  // page() loads the CRM data only when R17 is opened; public routes do not need this request.
   return { getData: () => data, render: page, selectBuyer: (code) => { ui.buyerCode = code; window.MarleyApp?.render?.(); } };
 })();
 </script>
