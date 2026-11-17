@@ -45,7 +45,7 @@ La prueba autoguiada sirve para que cada persona recorra el prototipo por su cue
 4. En caminos externos, responde las dos pausas. Antes de seguir, la prueba muestra «3 días después» y «Un mes después»; el avance se habilita cuando el recorrido confirma que la propuesta o el contrato de prueba están listos. En C, hay una pausa después de la primera tarea.
 5. Responde el bloque final: 9 preguntas externas o 7 internas. El puntaje de usabilidad es UMUX-Lite (0–100); la ficha ficticia de E3 se usa solo dentro del prototipo y no se incluye en los archivos.
 6. En resultados, descarga el informe PDF, los datos JSON y el CSV de tareas. El PDF reúne camino, tareas, respuestas, pausas, saltos, descargas observadas y páginas visitadas; no incluye nombre, correo ni teléfono.
-7. Nada se envía automáticamente. Tú decides si compartes el informe con quien te invitó. Para comenzar otra prueba, primero descarga el PDF y pulsa «Hacer otra prueba».
+7. Nada se envía automáticamente. Tú decides si compartes el informe con quien te invitó. Descarga el PDF para guardar el resultado; si necesitas repetir antes, pulsa «Empezar de cero» y confirma. Se borra el avance de esa prueba y se limpian los datos temporales del prototipo, pero no los archivos descargados ni las respuestas de otras sesiones.
 
 Si abres `prueba.html` con una sesión en curso, retomas el punto donde quedaste. Al comenzar una prueba nueva se limpian solo las claves del prototipo y la sesión del kit; otras claves del mismo sitio se conservan. Los cuestionarios y el informe se procesan dentro de este navegador.
 

@@ -21,11 +21,11 @@ const ratio = (a,b) => { const f=x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1
     const page=await context.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(e.message));
     for (const file of files) {
       const url=new URL(file,root); url.search='utm_source=busqueda&utm_medium=organic&utm_campaign=prueba_segura&mc_session=caso_1&mc_surface=serp&mc_query_id=q1&evil=secreto';
-      await page.goto(url.href,{waitUntil:'networkidle'});
+      await page.goto(url.href,{waitUntil:'networkidle'}); await page.evaluate(()=>Promise.all([...document.images].map(img=>{img.loading='eager';return img.decode?.().catch(()=>{})})));
       const state=await page.evaluate(()=>{
         const outside=Array.from(document.querySelectorAll('h1,h2,h3,p,a,button,input,table,summary')).filter(el=>el.getClientRects().length&&!el.classList.contains('nm-skip')&&!el.closest('.ct-tabs')&&!el.closest('.ct-table-wrap')).map(el=>{const r=el.getBoundingClientRect();return {tag:el.tagName,left:r.left,right:r.right,text:(el.textContent||'').trim().slice(0,50)}}).filter(x=>x.left < -1 || x.right > innerWidth+1);
         const ld=[...document.querySelectorAll('script[type="application/ld+json"]')].map(s=>JSON.parse(s.textContent));
-        const answer=document.querySelector('.ct-answer'); const answerText=answer?.querySelector('p');
+        const answer=document.querySelector('.ct-answer'); const answerText=answer?.querySelector('p,h3');
         const contrast=(fg,bg)=>{const parse=s=>(s.match(/[\d.]+/g)||[]).slice(0,3).map(Number);const f=x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4};const a=parse(fg),b=parse(bg);if(a.length!==3||b.length!==3)return 0;const lum=c=>.2126*f(c[0])+.7152*f(c[1])+.0722*f(c[2]);const [hi,lo]=[lum(a),lum(b)].sort((x,y)=>y-x);return (hi+.05)/(lo+.05)};
         const cs=e=>getComputedStyle(e); const answerRatio=answer&&answerText?contrast(cs(answerText).color,cs(answer).backgroundColor):0;
         const button=document.querySelector('.ct-next .nm-btn,.ct-hero .nm-btn'); const buttonRatio=button?contrast(cs(button).color,cs(button).backgroundColor):0;
@@ -53,10 +53,12 @@ const ratio = (a,b) => { const f=x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1
         await page.getByRole('tab',{name:'Respuestas',exact:true}).click();
       }
       if(file==='cuanto-cafe-necesita-mi-negocio.html'){
+        await page.locator('#ct-consumo').evaluate(el=>{for(let node=el.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS')node.open=true;});
         await page.locator('#ct-consumo button').click(); assert((await page.locator('#ct-consumo-resultado').innerText()).includes('18,72 kg'));
         await page.fill('#cons-tazas','40');await page.fill('#cons-dias','22');await page.fill('#cons-gramos','18');await page.locator('#ct-consumo button').click();assert((await page.locator('#ct-consumo-resultado').innerText()).includes('15,84 kg'));
       }
       if(file==='como-evitar-quedarse-sin-cafe.html'){
+        await page.locator('#ct-stock').evaluate(el=>{for(let node=el.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS')node.open=true;});
         await page.locator('#ct-stock button').click();assert((await page.locator('#ct-stock-resultado').innerText()).includes('5 kg'));
         await page.fill('#stock-consumo','0.5');await page.fill('#stock-entrega','4');await page.fill('#stock-reserva','1');await page.locator('#ct-stock button').click();assert((await page.locator('#ct-stock-resultado').innerText()).includes('3 kg'));
       }
@@ -64,8 +66,10 @@ const ratio = (a,b) => { const f=x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1
         const faqs=await page.locator('.ct-faq summary').allTextContents(); const faqJson=state.ld.find(x=>x['@type']==='FAQPage');
         assert(faqJson,`${file}: FAQPage schema`); assert.deepEqual(faqJson.mainEntity.map(x=>x.name),faqs,`${file}: schema questions match visible FAQs`);
         assert(state.answerText.split(/[.!?]+/).filter(x=>x.trim()).length<=5,`${file}: direct answer exceeds five sentences`);
-        assert(await page.locator('.ct-sources table').count(),`${file}: source table`); assert((await page.locator('.ct-sources').innerText()).includes('Consultado el 10 de noviembre de 2026'),`${file}: consultation date`);
-        assert(await page.locator('.ct-related li').count()>=2,`${file}: related questions missing`);
+        const resourceBlock=page.locator('.ct-question-block').filter({hasText:'¿Qué fuentes y guías puedes consultar?'});
+        await resourceBlock.locator('details').evaluateAll(items=>items.forEach(item=>item.open=true));
+        assert(await resourceBlock.locator('table').count(),`${file}: source table`); assert((await resourceBlock.innerText()).includes('Consultado el 10 de noviembre de 2026'),`${file}: consultation date`);
+        assert(await page.locator('details').filter({hasText:'Ver guías relacionadas'}).locator('li').count()>=2,`${file}: related questions missing`);
         assert.equal(await page.locator('.ct-next [data-attribution-handoff]').count(),1,`${file}: one next step`);
         const next=new URL(await page.locator('.ct-next [data-attribution-handoff]').getAttribute('href'),page.url()); assert(next.pathname.endsWith('/index.html')&&next.hash==='#C03',`${file}: next step must go to the portal C03`); assert.equal(next.searchParams.get('mc_query_id'),'q1');
       }

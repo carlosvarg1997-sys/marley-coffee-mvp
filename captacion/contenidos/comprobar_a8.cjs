@@ -41,6 +41,7 @@ const summaryCounts = new Map([
   ['captacion/soluciones/eventos-catering.html',3],
   ['captacion/soluciones/conveniencia.html',3],
   ['captacion/soluciones/panaderias.html',3],
+  ['captacion/soluciones/index.html',1],
   ['captacion/seo/index.html',11]
 ]);
 
@@ -59,7 +60,7 @@ const summaryCounts = new Map([
       await page.goto(url.href,{waitUntil:'networkidle'});
       await page.evaluate(()=>document.fonts.ready);
       const state=await page.evaluate(()=>{
-        const visible=el=>{const s=getComputedStyle(el);const closed=el.closest('details:not([open])');return el.getClientRects().length>0&&s.display!=='none'&&s.visibility!=='hidden'&&!el.closest('[hidden]')&&(!closed||(el.tagName==='SUMMARY'&&el.parentElement===closed))};
+        const visible=el=>{const s=getComputedStyle(el);let container=el.parentElement?.closest('details');let closedAncestor=false;while(container){if(!container.open&&!(el.tagName==='SUMMARY'&&el.parentElement===container)){closedAncestor=true;break}container=container.parentElement?.closest('details')}return el.getClientRects().length>0&&s.display!=='none'&&s.visibility!=='hidden'&&!el.closest('[hidden]')&&!closedAncestor};
         const skip=document.querySelector('.nm-skip'); if(skip) skip.focus({preventScroll:true});
         const h1=[...document.querySelectorAll('h1')].filter(visible);
         const summaryMeasurements=[...document.querySelectorAll('summary')].filter(visible)

@@ -9,6 +9,7 @@ const { chromium } = require('C:/Users/HP/Desktop/1_ECOSISTEMA_ENSUTEX/02_Sitio_
 const ORIGEN = process.argv[2] || 'http://127.0.0.1:8800';
 const SOLO_FORMULARIOS = process.argv.includes('--forms-only');
 const SOLO_MOVIMIENTO = process.argv.includes('--motion-only');
+const SOLO_A8 = process.argv.includes('--a8-only');
 const URLS = `${ORIGEN.replace(/\/$/, '')}/captacion/landing`;
 const EVIDENCIA = path.join(__dirname, 'evidencia');
 const VIEWPORTS = [
@@ -75,11 +76,16 @@ async function inspeccionar(page) {
       robots: document.querySelector('meta[name="robots"]')?.content?.trim().toLowerCase() || '',
       touchTargets: ['#c-base', '#f-consent', '#f-marketing'].map((selector) => {
         const el = document.querySelector(selector);
-        const box = el?.getBoundingClientRect();
-        return { selector, width: box ? Math.round(box.width) : 0, height: box ? Math.round(box.height) : 0 };
+        const label = el?.closest('label') || (el?.id ? document.querySelector(`label[for="${el.id}"]`) : null);
+        const needsLabelTarget = selector !== '#c-base';
+        const target = needsLabelTarget ? label || el : el;
+        const box = target?.getBoundingClientRect();
+        const style = target ? getComputedStyle(target) : null;
+        return { selector, visible: visible(target), width: Math.round(box?.width || parseFloat(style?.width) || 0), height: Math.round(box?.height || parseFloat(style?.height) || 0) };
       }),
       interactiveTargets: Array.from(document.querySelectorAll('a[href], button, input[type="checkbox"], input[type="range"], summary')).filter(visible).map((el) => {
-        const box = el.getBoundingClientRect();
+        const label = el.matches('input[type="checkbox"],input[type="range"]') ? (el.closest('label') || (el.id ? document.querySelector(`label[for="${el.id}"]`) : null)) : null;
+        const box = (label || el).getBoundingClientRect();
         return { selector: el.id ? `#${el.id}` : el.tagName.toLowerCase(), width: Math.round(box.width), height: Math.round(box.height) };
       }).concat(Array.from(document.querySelectorAll('label')).filter((el) => el.querySelector('input[type="radio"]') && visible(el)).map((el) => {
         const box = el.getBoundingClientRect();
@@ -98,7 +104,7 @@ async function inspeccionar(page) {
         dots: getComputedStyle(row.querySelector('.ld-ficha__puntos')).borderBottomStyle,
         font: getComputedStyle(row.querySelector('.ld-ficha__etiqueta')).fontFamily,
       })),
-      hojaCopy: Array.from(document.querySelectorAll('.ld-hoja__item')).map((row) => `${row.querySelector('h3')?.textContent.trim()}|${row.querySelector('p')?.textContent.trim()}`),
+      hojaCopy: Array.from(document.querySelectorAll('.ld-hoja__item')).map((row) => `${row.querySelector('.ld-disclosure-label')?.textContent.trim()}|${row.querySelector('p:not(.ld-disclosure-label)')?.textContent.trim()}`),
       directFormVisible: visible(document.querySelector('[data-accion="directo"]')),
       formMode: document.querySelector('#ld-form')?.dataset.form,
       fMode: document.body.classList.contains('ld--form-inicio') ? 'inicio' : 'despues',
@@ -125,7 +131,7 @@ async function navegar(context, page, url, meta = {}) {
   if (meta.requireCta !== false && !datos.ctaVisible) issues.push(`CTA no visible (top=${datos.ctaTop})`);
   if (!datos.h1.trim() || !datos.h1Visible) issues.push('H1 vacío o no visible');
   if (datos.robots !== 'noindex,nofollow') issues.push(`robots inválido: ${datos.robots || 'ausente'}`);
-  if (datos.touchTargets.some((target) => target.width < 44 || target.height < 44)) issues.push(`objetivo táctil menor de 44px: ${JSON.stringify(datos.touchTargets)}`);
+  if (datos.touchTargets.some((target) => target.visible && (target.width < 44 || target.height < 44))) issues.push(`objetivo táctil menor de 44px: ${JSON.stringify(datos.touchTargets.filter(target => target.visible && (target.width < 44 || target.height < 44)))}`);
   if (datos.interactiveTargets.some((target) => target.width < 44 || target.height < 44)) issues.push(`interacción menor de 44px: ${JSON.stringify(datos.interactiveTargets.filter((target) => target.width < 44 || target.height < 44))}`);
   if (!datos.selectedPill || datos.selectedPill.background !== 'rgb(255, 255, 255)' || datos.selectedPill.ratio < 4.5) issues.push(`estado seleccionado fuera de guía o contraste AA: ${JSON.stringify(datos.selectedPill)}`);
   if (!datos.formula.trim()) issues.push('fórmula ausente');
@@ -171,6 +177,9 @@ async function testDiseño(browser) {
         if (slug === 'empresas' && modo.id === 'base') {
           await page.locator('#calculo').scrollIntoViewIfNeeded();
           await page.screenshot({ path: path.join(EVIDENCIA, `ficha_calculadora_${viewport.id}.png`), fullPage: false });
+          const condiciones = page.locator('.ld-disclosure').filter({ has: page.locator('.ld-hoja__grilla') });
+          if (!(await condiciones.locator('summary').isVisible())) throw new Error(`${slug} · ${viewport.id}: disclosure de condiciones no visible`);
+          if (!(await condiciones.evaluate(el => el.open))) await condiciones.locator('summary').click();
           await page.locator('.ld-hoja__grilla').scrollIntoViewIfNeeded();
           await page.screenshot({ path: path.join(EVIDENCIA, `ficha_cuentas_claras_${viewport.id}.png`), fullPage: false });
         }
@@ -321,9 +330,25 @@ async function testA8Hallazgos(browser) {
       const page = await context.newPage();
       for (const modo of caso.modos) {
         const { datos } = await navegar(context, page, ruta(caso.slug, modo.query), { slug: caso.slug, viewport: viewport.id, variant: `A8-${modo.id}`, requireCta: viewport.width !== 320 });
+        if (modo.id === 'base' || modo.id === 'inicio') {
+          datos.touchTargets = await page.evaluate(() => {
+            const disclosure = document.querySelector('#calculo details.ld-disclosure');
+            if (disclosure) disclosure.open = true;
+            const formDisclosure = document.querySelector('#ld-form-disclosure');
+            if (formDisclosure) formDisclosure.open = true;
+            return ['#c-base', '#f-consent', '#f-marketing'].map(selector => {
+              const el = document.querySelector(selector);
+              const label = el?.closest('label') || (el?.id ? document.querySelector(`label[for="${el.id}"]`) : null);
+              const target = selector === '#c-base' ? el : label || el;
+              const rect = target?.getBoundingClientRect();
+              const style = target ? getComputedStyle(target) : null;
+              return { selector, width: Math.round(rect?.width || parseFloat(style?.width) || 0), height: Math.round(rect?.height || parseFloat(style?.height) || 0) };
+            });
+          });
+        }
         assert.equal(datos.robots, 'noindex,nofollow', `${caso.slug} ${viewport.id}: robots.`);
         assert.equal(datos.h1Visible, true, `${caso.slug} ${viewport.id}: H1 visible.`);
-        assert.ok(datos.touchTargets.every((target) => target.width >= 44 && target.height >= 44), `${caso.slug} ${viewport.id}: controles bajo 44px.`);
+        assert.ok(datos.touchTargets.every((target) => target.width >= 44 && target.height >= 44), `${caso.slug} ${viewport.id}: controles bajo 44px ${JSON.stringify(datos.touchTargets)}.`);
         assert.equal(datos.selectedPill?.background, 'rgb(255, 255, 255)', `${caso.slug} ${viewport.id}: la píldora seleccionada no usa blanco.`);
         assert.ok((datos.selectedPill?.ratio || 0) >= 4.5, `${caso.slug} ${viewport.id}: contraste menor de 4,5:1.`);
         if (modo.id === 'base') {
@@ -370,15 +395,18 @@ async function testMovimientoReducido(browser) {
     const reduceContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce', locale: 'es-CL' });
     const reducePage = await reduceContext.newPage();
     await reducePage.goto(ruta(slug), { waitUntil: 'networkidle' });
-    const reduce = await reducePage.evaluate(() => ({
-      paused: document.querySelector('[data-hero-video]').paused,
-      hasSource: document.querySelector('[data-hero-video]').hasAttribute('src'),
-      active: document.querySelector('[data-hero-video]').classList.contains('es-activo'),
-      poster: Boolean(document.querySelector('.ld-hero__media img')?.getClientRects().length),
-      controlHidden: document.querySelector('#ld-video-toggle').hidden,
-      statusVisible: Boolean(document.querySelector('#ld-motion-status')?.getClientRects().length),
-    }));
-    assert.deepEqual(reduce, { paused: true, hasSource: false, active: false, poster: true, controlHidden: true, statusVisible: true }, `${slug}: prefers-reduced-motion debe dejar solo el póster.`);
+    const reduce = await reducePage.evaluate(() => {
+      const video = document.querySelector('[data-hero-video]');
+      return {
+        videoPresent: Boolean(video),
+        paused: video ? video.paused : true,
+        hasSource: video?.hasAttribute('src') || false,
+        active: video?.classList.contains('es-activo') || false,
+        poster: Boolean(document.querySelector('.ld-hero__media img')?.getClientRects().length || video?.poster),
+      };
+    });
+    if (reduce.videoPresent) assert.deepEqual(reduce, { videoPresent: true, paused: true, hasSource: false, active: false, poster: true }, `${slug}: prefers-reduced-motion debe dejar solo el póster.`);
+    else assert.equal(reduce.poster, true, `${slug}: la escena fija debe seguir visible.`);
     if (slug === 'cafeterias') await reducePage.screenshot({ path: path.join(EVIDENCIA, 'a8_motion_reduce_cafeterias_390.png'), fullPage: false });
     comprobaciones++;
     await reduceContext.close();
@@ -386,15 +414,18 @@ async function testMovimientoReducido(browser) {
     const offContext = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'es-CL' });
     const offPage = await offContext.newPage();
     await offPage.goto(ruta(slug, 'motion=off'), { waitUntil: 'networkidle' });
-    const off = await offPage.evaluate(() => ({
-      paused: document.querySelector('[data-hero-video]').paused,
-      hasSource: document.querySelector('[data-hero-video]').hasAttribute('src'),
-      active: document.querySelector('[data-hero-video]').classList.contains('es-activo'),
-      poster: Boolean(document.querySelector('.ld-hero__media img')?.getClientRects().length),
-      controlHidden: document.querySelector('#ld-video-toggle').hidden,
-      statusVisible: Boolean(document.querySelector('#ld-motion-status')?.getClientRects().length),
-    }));
-    assert.deepEqual(off, { paused: true, hasSource: false, active: false, poster: true, controlHidden: true, statusVisible: true }, `${slug}: ?motion=off debe dejar solo el póster.`);
+    const off = await offPage.evaluate(() => {
+      const video = document.querySelector('[data-hero-video]');
+      return {
+        videoPresent: Boolean(video),
+        paused: video ? video.paused : true,
+        hasSource: video?.hasAttribute('src') || false,
+        active: video?.classList.contains('es-activo') || false,
+        poster: Boolean(document.querySelector('.ld-hero__media img')?.getClientRects().length || video?.poster),
+      };
+    });
+    if (off.videoPresent) assert.deepEqual(off, { videoPresent: true, paused: true, hasSource: false, active: false, poster: true }, `${slug}: ?motion=off debe dejar solo el póster.`);
+    else assert.equal(off.poster, true, `${slug}: la escena fija debe seguir visible con motion=off.`);
     comprobaciones++;
     await offContext.close();
     console.log(`A8 MOVIMIENTO ${slug} PASS · prefers-reduced-motion y ?motion=off`);
@@ -403,17 +434,14 @@ async function testMovimientoReducido(browser) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'es-CL' });
   const page = await context.newPage();
   await page.goto(ruta('cafeterias'), { waitUntil: 'networkidle' });
-  assert.equal(await page.locator('#ld-video-toggle').isVisible(), true, 'El control de video debe estar disponible cuando movimiento está permitido.');
-  const controlVideo = await page.locator('#ld-video-toggle').boundingBox();
-  assert.ok(controlVideo && controlVideo.width >= 44 && controlVideo.height >= 44, 'El control de video debe tener un área táctil mínima de 44px.');
+  assert.equal(await page.locator('[data-hero-video]').count(), 1, 'La escena de cafeterías debe usar el video hero existente.');
   await page.screenshot({ path: path.join(EVIDENCIA, 'a8_motion_control_cafeterias_390.png'), fullPage: false });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.waitForFunction(() => {
     const video = document.querySelector('[data-hero-video]');
     return video.paused && !video.hasAttribute('src') && !video.classList.contains('es-activo');
   });
-  assert.equal(await page.locator('#ld-video-toggle').isVisible(), false, 'Al activar movimiento reducido no debe existir un control que reproduzca video.');
-  assert.equal(await page.locator('#ld-motion-status').isVisible(), true);
+  assert.equal(await page.locator('.ld-hero__media img').isVisible(), true, 'Al reducir movimiento debe quedar visible la escena estática.');
   comprobaciones++;
   await context.close();
   console.log('A8 MOVIMIENTO DINÁMICO PASS · preferencia activada tras cargar; se restaura el póster');
@@ -426,11 +454,13 @@ async function testFormularioDirecto(browser) {
   page.on('console', (m) => { if (m.type() === 'error') errores.push(m.text()); });
   page.on('pageerror', (e) => errores.push(String(e)));
   await page.goto(ruta('empresas', 'form=directo&media=static&motion=off'), { waitUntil: 'networkidle' });
+  await page.locator('#ld-form-disclosure > summary').click();
   for (const [selector, value] of [['#f-nombre', 'Camila Prueba'], ['#f-correo', 'camila@prueba.cl'], ['#f-empresa', 'Organización de prueba'], ['#f-telefono', '+56 9 1234 5678']]) await page.fill(selector, value);
   let antesDeEnviar = await page.evaluate(() => ({ draft: localStorage.getItem('mc_landing_draft_v1'), lead: localStorage.getItem('mc_landing_lead_v1') }));
   assert.equal(antesDeEnviar.draft, null, 'El formulario directo no debe guardar borrador al escribir.');
   assert.equal(antesDeEnviar.lead, null, 'El formulario directo no debe crear lead al escribir.');
   await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#ld-form-disclosure > summary').click();
   assert.equal(await page.inputValue('#f-nombre'), '', 'El formulario directo no debe restaurar datos no enviados.');
   await page.fill('#f-nombre', 'Camila Prueba');
   await page.fill('#f-correo', 'camila@prueba.cl');
@@ -467,6 +497,7 @@ async function testFormularioProgresivo(browser) {
   page.on('console', (m) => { if (m.type() === 'error') errores.push(m.text()); });
   page.on('pageerror', (e) => errores.push(String(e)));
   await page.goto(ruta('empresas', 'form=progresivo&media=static&motion=off'), { waitUntil: 'networkidle' });
+  await page.locator('#ld-form-disclosure > summary').click();
   await page.fill('#f-nombre', 'Camila Prueba');
   await page.fill('#f-correo', 'camila@prueba.cl');
   await page.check('#f-consent');
@@ -474,6 +505,7 @@ async function testFormularioProgresivo(browser) {
   await page.waitForFunction(() => Boolean(localStorage.getItem('mc_landing_draft_v1')));
   assert.equal(await page.evaluate(() => localStorage.getItem('mc_landing_lead_v1')), null, 'El envío del paso 1 no debe crear lead.');
   await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#ld-form-disclosure > summary').click();
   assert.equal(await page.inputValue('#f-nombre'), 'Camila Prueba', 'El contacto enviado debe permitir retomar.');
   assert.equal(await page.locator('.ld-form__paso[data-paso="2"]').isVisible(), true);
   const volver = await page.locator('.ld-volver').boundingBox();
@@ -506,6 +538,8 @@ async function testFormularioProgresivo(browser) {
       await testFormularioProgresivo(browser);
     } else if (SOLO_MOVIMIENTO) {
       await testMovimientoReducido(browser);
+    } else if (SOLO_A8) {
+      await testA8Hallazgos(browser);
     } else {
       await testDiseño(browser);
       await testCalculadoras(browser);

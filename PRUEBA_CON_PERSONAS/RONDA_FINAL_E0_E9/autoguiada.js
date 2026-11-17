@@ -91,16 +91,23 @@
     pdf_downloaded:false, exports:{}, started_at:'', finished_at:''
   });
 
-  function prototypeReset() {
+  function prototypeReset(clearAutoguiada = false) {
     const prefixes = ['marleyMVP:','m4test:','mc_landing_','mc_first_touch_','m4:','m4notes','marley-','marleyHorecaDemo:'];
-    const exact = [ACTIVE_KEY,JUMP_KEY];
+    const exact = clearAutoguiada ? [AUTO_KEY,ACTIVE_KEY,JUMP_KEY] : [ACTIVE_KEY,JUMP_KEY];
     const keys = [];
     for (let i=0;i<localStorage.length;i++) {
       const key = localStorage.key(i);
       if (key && (exact.includes(key) || prefixes.some(prefix => key.startsWith(prefix)))) keys.push(key);
     }
     keys.forEach(key => localStorage.removeItem(key));
-    try { sessionStorage.clear(); } catch (_) {}
+    try {
+      const sessionKeys = [];
+      for (let i=0;i<sessionStorage.length;i++) {
+        const key = sessionStorage.key(i);
+        if (key && prefixes.some(prefix => key.startsWith(prefix))) sessionKeys.push(key);
+      }
+      sessionKeys.forEach(key => sessionStorage.removeItem(key));
+    } catch (_) {}
     return keys;
   }
   function showFatal(message) {
@@ -343,7 +350,7 @@
       + '</fieldset><p class="ag-status" id="question-status" role="status"></p><div class="ag-question-actions">'
       + '<button class="ag-btn" id="question-back" type="button"' + (backDisabled?' disabled':'') + '>Volver</button>'
       + '<button class="ag-btn ag-btn--primary" id="question-next" type="submit">' + (index+1===questions.length?'Continuar':'Siguiente') + '</button>'
-      + '</div></form>' + questionClose;
+      + '</div></form>' + (embedded?restartButtonMarkup('Empezar de cero','ag-restart-inline'):'') + questionClose;
     const form = document.getElementById('question-form');
     const status = document.getElementById('question-status');
     const skip = document.getElementById('skip-answer');
@@ -422,11 +429,15 @@
   }
 
   function brandMarkup() {
-    return '<div class="ag-brand" aria-label="Marley Coffee Empresas"><span class="ag-brand-mark" aria-hidden="true">M</span><span class="ag-brand-word">Marley Coffee<small>Empresas · prueba autoguiada</small></span></div><div class="ag-signature" aria-hidden="true"></div>';
+    const restart=state?.session&&state.phase!=='complete'?restartButtonMarkup('Empezar de cero','ag-restart-brand'):'';
+    return '<div class="ag-brand" aria-label="Marley Coffee Empresas"><span class="ag-brand-mark" aria-hidden="true">M</span><span class="ag-brand-word">Marley Coffee<small>Empresas · prueba autoguiada</small></span>' + restart + '</div><div class="ag-signature" aria-hidden="true"></div>';
+  }
+  function restartButtonMarkup(label='Empezar de cero',extraClass='') {
+    return '<button class="ag-btn ag-restart-control ' + escapeHtml(extraClass) + '" type="button" data-action="restart-test">' + escapeHtml(label) + '</button>';
   }
   function renderWelcome() {
     app.innerHTML = '<section class="ag-screen">' + brandMarkup()
-      + '<p class="ag-kicker">Prueba autoguiada</p><h1 class="ag-title">Gracias por participar</h1>'
+      + '<p class="ag-kicker">Prueba autoguiada</p><h1 class="ag-title">Empieza la prueba</h1>'
       + '<p class="ag-note"><strong>Prototipo académico (Duoc UC).</strong> No es un sitio oficial de Marley Coffee.</p>'
       + '<p class="ag-lede"><strong>Elige un camino y recórrelo con tareas:</strong> responde unas preguntas y descarga tu informe.</p>'
       + '<ol class="ag-steps"><li><span><strong>Eliges el camino</strong> y respondes las preguntas iniciales.</span></li><li><span><strong>Recorres el sitio o el CRM</strong> con tareas breves.</span></li><li><span><strong>Respondes las preguntas finales</strong> y descargas tus resultados.</span></li></ol>'
@@ -757,6 +768,7 @@
     bar.innerHTML='<div class="ag-strip-info"><span class="ag-strip-kicker">' + escapeHtml(stageKicker(task)) + '</span><h1 class="ag-strip-title">' + escapeHtml(task.titulo) + '</h1></div>'
       + '<div class="ag-strip-actions"><button class="ag-btn" type="button" data-action="task-details">Ver tarea</button>'
       + '<button class="ag-btn ag-btn--primary" type="button" data-action="task-done">Terminé</button></div>';
+    bar.querySelector('.ag-strip-info')?.insertAdjacentHTML('beforeend',restartButtonMarkup('Empezar de cero','ag-restart-inline'));
     bar.querySelector('[data-action="task-details"]')?.addEventListener('click',()=>{state.task_details_open=true;persist();renderJourney();});
     bar.querySelector('[data-action="task-done"]')?.addEventListener('click',taskFinished);
   }
@@ -768,7 +780,7 @@
       + '<p class="ag-task-prompt"><strong>Consigna:</strong> ' + escapeHtml(task.consigna) + '</p>'
       + '<ul class="ag-modal-how ag-modal-points"><li><strong>Verás el sitio en pantalla completa.</strong></li><li><strong>Cuando termines, toca «Terminé» abajo</strong> y te haremos unas pocas preguntas.</li><li><strong>No hay respuestas correctas.</strong></li></ul>'
       + '<div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="button" data-action="task-start">' + (again?'Seguir con la tarea':'Empezar la tarea') + '</button>'
-      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div></div>';
+      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div>' + restartButtonMarkup() + '</div></div>';
     bar.querySelector('[data-action="task-start"]')?.addEventListener('click',()=>{task.intro_visto=true;state.task_details_open=false;startCurrentTask();persist();renderJourney();});
     bar.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
   }
@@ -803,7 +815,7 @@
       + '</div></fieldset><fieldset><legend>¿Qué tan fácil o difícil fue?</legend><div class="ag-task-progress">1 = Muy difícil · 7 = Muy fácil</div><div class="ag-seq-grid">' + seq + '</div></fieldset>'
       + stageQuestionsFor(task).map(stageQuestionHtml).join('')
       + '<label for="task-comment">¿Algo te confundió o te hizo dudar? <span class="ag-task-progress">Opcional</span></label><textarea id="task-comment" class="ag-textarea" maxlength="500" placeholder="Hasta 500 caracteres. No escribas nombres ni datos de contacto."></textarea>'
-      + '<p class="ag-status" id="task-evaluation-status" role="status"></p><div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="submit">Guardar y seguir</button><button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button></div></form></div>';
+      + '<p class="ag-status" id="task-evaluation-status" role="status"></p><div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="submit">Guardar y seguir</button><button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button></div></form>' + restartButtonMarkup() + '</div>';
     document.getElementById('task-evaluation').addEventListener('submit',event=>{event.preventDefault();saveTaskEvaluation();});
     bar.querySelector('[data-action="return-task"]')?.addEventListener('click',()=>{state.evaluating=false;persist();renderJourney();});
   }
@@ -817,7 +829,7 @@
       + '<p class="' + (ready?'ag-jump-ready':'ag-jump-wait') + '" role="status">' + (ready?'<strong>El recorrido está listo</strong> para avanzar.':'<strong>Completa el paso correspondiente</strong> en la pantalla del recorrido para habilitar el avance.') + '</p>'
       + (days===30&&!gate.signed?'<p class="ag-help" data-contract-simulation><strong>Para seguir, simulamos que firmaste el contrato.</strong></p>':'')
       + '<button class="ag-btn ag-btn--primary" type="button" data-action="jump" ' + (ready?'':'disabled') + '>Avanzar el tiempo</button>'
-      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div></div>';
+      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button>' + restartButtonMarkup() + '</div></div>';
     bar.querySelector('[data-action="jump"]')?.addEventListener('click',()=>applyJump(days));
     bar.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
     jumpPoll=setInterval(()=>{
@@ -960,7 +972,7 @@
     const tapped=state.descargas?.tocadas||[];
     app.innerHTML='<section class="ag-results"><div class="ag-results-inner">' + brandMarkup()
       + '<p class="ag-kicker">Prueba ' + escapeHtml(state.session?.id||'') + '</p><h1>' + (state.termino_anticipado?'Prueba terminada':'Gracias por participar') + '</h1>'
-      + (pending?'<p class="ag-warning"><strong>Antes de empezar otra prueba, descarga este informe</strong> para conservar tus resultados.</p>':'')
+      + (pending?'<p class="ag-warning"><strong>Descarga el informe PDF para guardar este resultado.</strong> Si empiezas de cero ahora, perderás las respuestas de este intento.</p>':'')
       + '<p class="ag-lede"><strong>' + escapeHtml(state.camino==='C'?'Equipo interno · '+profile:state.camino+' · '+profile) + '</strong> · ' + formatDuration(totalDuration()) + '</p>'
       + '<div class="ag-kpi-grid"><div class="ag-kpi"><strong>' + complete + ' / ' + tasks.length + '</strong><span>Tareas logradas</span></div>'
       + '<div class="ag-kpi"><strong>' + seqMean + '</strong><span>Facilidad media (1–7)</span></div>'
@@ -971,7 +983,7 @@
       + '<div class="ag-result-actions"><button id="download-pdf" class="ag-btn ag-btn--primary" type="button">Descargar informe PDF</button>'
       + '<button id="download-json" class="ag-btn" type="button">Descargar datos (JSON)</button>'
       + '<button id="download-csv" class="ag-btn" type="button">Descargar tareas (CSV)</button>'
-      + '<button id="new-test" class="ag-btn ag-btn--quiet" type="button"' + (pending?' disabled':'') + '>Hacer otra prueba</button></div>'
+      + restartButtonMarkup('Empezar de cero','ag-restart-result') + '</div>'
       + '<p class="ag-status" id="result-status" role="status">' + (pending?'El informe PDF todavía no se ha descargado.':'El PDF quedó descargado en este dispositivo.') + '</p>'
       + '<details class="ag-result-section"><summary>Resumen de tareas</summary><div class="ag-table-wrap"><table class="ag-table"><thead><tr><th>Tarea</th><th>Resultado</th><th>Tiempo</th><th>Facilidad</th></tr></thead><tbody>'
       + tasks.map(task=>'<tr><td>' + escapeHtml((task.etapa_nombre?task.etapa_nombre+' · ':'')+task.titulo) + '</td><td>' + escapeHtml(task.resultado||'No completada') + '</td><td>' + escapeHtml(formatDuration(task.duracion_ms)) + '</td><td>' + escapeHtml(task.seq||'—') + '</td></tr>').join('')
@@ -979,16 +991,15 @@
     document.getElementById('download-pdf').addEventListener('click',downloadPdf);
     document.getElementById('download-json').addEventListener('click',downloadJson);
     document.getElementById('download-csv').addEventListener('click',downloadTasksCsv);
-    document.getElementById('new-test').addEventListener('click',startAnother);
     app.setAttribute('aria-busy','false');
   }
-  function startAnother() {
-    if(!state.pdf_downloaded) {
-      const status=document.getElementById('result-status');
-      status.textContent='Descarga el informe PDF antes de empezar otra prueba.';
-      status.dataset.kind='error';return;
-    }
-    prototypeReset();
+  function restartTest() {
+    const pending=state?.phase==='complete'&&!state.pdf_downloaded;
+    const warning=pending?'El informe PDF todavía no está descargado. ':'';
+    const message=warning+'Se borrará el avance y las respuestas de este intento y se limpiarán los datos temporales del prototipo. Los archivos descargados y las respuestas de otras sesiones se conservan. ¿Quieres empezar de cero?';
+    if(!window.confirm(message)) return;
+    if(jumpPoll){clearInterval(jumpPoll);jumpPoll=null;}
+    prototypeReset(true);
     state=newDraft();persist();renderWelcome();
   }
   function markExport(name) {
@@ -1208,6 +1219,11 @@
   }
 
   window.addEventListener('beforeunload',()=>{if(jumpPoll)clearInterval(jumpPoll);});
+  app?.addEventListener('click',event=>{
+    const button=event.target.closest('[data-action="restart-test"]');
+    if(!button)return;
+    event.preventDefault();restartTest();
+  });
   window.addEventListener('resize',()=>{
     if(state?.phase==='journey') {
       const bar=app.querySelector('.ag-taskbar');

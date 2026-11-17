@@ -208,3 +208,27 @@ body.nm .nm-skip:focus{display:flex;align-items:center;min-width:44px;min-height
 
 /* R5 C2: el contenido de un disclosure cerrado no debe conservar caja visible. */
 details:not([open]) > :not(summary){display:none!important}
+
+/* Composición de lectura: títulos cortos, un solo acento y cierre con acción. */
+.ct-article:not(.sol-page) .ct-editorial-head .ct-display-word{display:none}
+.ct-article:not(.sol-page) .ct-editorial-head .nm-h1{max-width:19ch;font-size:clamp(2rem,4vw,3.1rem);line-height:1.04}
+.ct-article:not(.sol-page) .ct-editorial-head{padding-block:32px 24px}
+.ct-article:not(.sol-page) .ct-editorial-head .ct-hero-cta-reason{max-width:46ch;margin:12px 0 8px}
+.ct-article:not(.sol-page) .ct-content h2{margin:40px 0 16px}
+.ct-article:not(.sol-page) .ct-content h3{margin:16px 0 8px}
+.ct-article:not(.sol-page) .ct-question-block+.ct-question-block{margin-top:32px}
+.ct-article:not(.sol-page) .ct-disclosure{margin:10px 0;border:1px solid var(--nm-linea);border-radius:9px;background:var(--nm-carbon)}
+.ct-article:not(.sol-page) .ct-disclosure>summary{min-height:48px;padding:12px 15px;line-height:1.4}
+.ct-article:not(.sol-page) .ct-disclosure-content,.ct-article:not(.sol-page) .ct-disclosure>.ct-table-wrap,.ct-article:not(.sol-page) .ct-disclosure>.ct-faqs{padding:0 15px 15px}
+.ct-article:not(.sol-page) .ct-next{margin-top:40px;padding:24px;border:1px solid var(--nm-linea);border-radius:12px;background:#fff;color:#111}
+.ct-article:not(.sol-page) .ct-next h2{margin:0 0 10px;color:#111}
+.ct-article:not(.sol-page) .ct-next p{margin:0 0 18px;color:#3c3b38}
+.ct-article:not(.sol-page) .ct-next .nm-btn{min-height:48px}
+@media(max-width:560px){
+ .ct-article:not(.sol-page) .ct-editorial-head{padding-block:24px 20px}
+ .ct-article:not(.sol-page) .ct-editorial-head .nm-h1{max-width:22ch;font-size:clamp(1.7rem,6.8vw,2.2rem);line-height:1.08}
+ .ct-article:not(.sol-page) .ct-content h2{margin:32px 0 12px}
+ .ct-article:not(.sol-page) .ct-question-block+.ct-question-block{margin-top:24px}
+ .ct-article:not(.sol-page) .ct-next{margin-top:32px;padding:18px}
+ .ct-article:not(.sol-page) .ct-next .nm-btn{width:100%}
+}
