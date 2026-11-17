@@ -139,7 +139,8 @@
   const valueLabel = lead => {
     const result = scoreValue(lead);
     const n = Number(result?.puntaje ?? lead?.valueScore ?? 0);
-    return `${n >= 70 ? 'Valor alto' : 'Valor estándar'} · ${n}/100`;
+    const banda = result?.banda || (n >= 60 ? 'alto' : n >= 45 ? 'medio' : 'estandar');
+    return `${banda === 'alto' ? 'Valor alto' : banda === 'medio' ? 'Valor medio' : 'Valor estándar'} · ${n}/100`;
   };
   const interestLabel = lead => `${Number(scoreInterest(lead)?.puntaje ?? 0)}/100`;
   const priorityLabel = lead => scorePriority(lead)?.texto || 'Atender normal';
@@ -204,7 +205,7 @@
   function labelValue(label, value) { return `<div class="crm2-kv"><span>${esc(label)}</span><b>${esc(value || 'Sin dato registrado')}</b></div>`; }
   function statusPill(text, kind = '') { return `<span class="crm2-status ${kind ? `crm2-status--${kind}` : ''}"><span aria-hidden="true">${kind === 'good' ? '✓' : kind === 'wait' ? '◷' : kind === 'blocked' ? '!' : '·'}</span>${esc(text)}</span>`; }
   function block(title, copy, body, extra = '') {
-    return `<section class="crm2-block ${extra}"><header class="crm2-block-head"><div><h2>${esc(title)}</h2>${copy ? `<p>${esc(copy)}</p>` : ''}</div></header>${body}</section>`;
+    return `<section class="crm2-block ${extra}"><header class="crm2-block-head"><div><h2>${esc(title)}</h2>${copy ? (copy.length <= 45 ? `<p>${esc(copy)}</p>` : `<details class="crm2-note"><summary>Más información</summary><p>${esc(copy)}</p></details>`) : ''}</div></header>${body}</section>`;
   }
   function row(title, subtitle, meta, action, badge = '') {
     return `<button class="crm2-row" type="button" ${action} aria-label="${esc(title)}. ${esc(subtitle)}"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small>${icon('arrow')}</span></button>`;
@@ -234,25 +235,25 @@
   const permissionShort = item => permission(item).key === 'yes' ? 'Permiso sí' : permission(item).key === 'no' ? 'Sin permiso' : permission(item).key === 'reply' ? 'Solo respuesta solicitada' : 'Permiso por confirmar';
   function titleSub(route, role) {
     const map = {
-      salesToday: ['Tu trabajo de hoy', 'Prioridad, contexto y siguiente paso en una sola vista.'],
-      salesContacts: ['Contactos', 'Origen, actividad y decisión comercial de cada oportunidad.'],
-      salesClients: ['Clientes', 'Reposición y cuentas en riesgo, ordenadas por lo que necesitan hoy.'],
-      salesQuotes: ['Propuestas', 'Borradores y envíos simulados vinculados a su contacto.'],
-      marketingToday: ['Hoy en Marketing', 'Qué puede avanzar y qué necesita una respuesta de Ventas.'],
-      marketingChannels: ['Ventas y origen', 'Leads, MQL y SQL agrupados por fuente; sin atribuir ingresos por canal.'],
-      marketingLeads: ['Leads', 'Revisa primero el origen, el permiso y el interés.'],
-      marketingRecover: ['Recuperar', 'Cada seguimiento respeta el permiso y el motivo registrado.'],
-      marketingCampaigns: ['Campañas', 'Piezas y contactos se relacionan por origen cuando el dato existe.'],
-      managerSummary: ['Resumen de jefatura', 'Metas del programa, ventas de prueba y decisiones pendientes.'],
-      managerApprovals: ['Por aprobar', 'Decide solo excepciones; la decisión vuelve a Ventas.'],
-      managerGoals: ['Metas y canales', 'Separa el resultado observado de los escenarios de prueba.'],
-      managerTeam: ['Equipo y operación', 'Carga de trabajo, clientes y alertas con una siguiente acción clara.'],
-      managerOperations: ['Operación', 'Pedidos, disponibilidad y postventa que requieren revisión humana.'],
-      buyerCRM: ['CRM por comprador', 'Etapas, permisos y próxima decisión con contexto de la cuenta.'],
-      detail: ['Ficha del cliente', 'La misma secuencia de lectura para contactos y cuentas.']
+      salesToday: ['Hoy', ''],
+      salesContacts: ['Contactos', ''],
+      salesClients: ['Clientes', ''],
+      salesQuotes: ['Propuestas', ''],
+      marketingToday: ['Hoy', ''],
+      marketingChannels: ['Ventas y origen', ''],
+      marketingLeads: ['Leads', ''],
+      marketingRecover: ['Recuperar', ''],
+      marketingCampaigns: ['Campañas', ''],
+      managerSummary: ['Resumen', ''],
+      managerApprovals: ['Por aprobar', ''],
+      managerGoals: ['Metas y canales', ''],
+      managerTeam: ['Equipo y operación', ''],
+      managerOperations: ['Operación', ''],
+      buyerCRM: ['CRM por comprador', ''],
+      detail: ['Ficha', '']
     };
     const name = route === 'R06' && role === 'marketing' ? 'marketingChannels' : ROUTE[route]?.page || 'salesToday';
-    return map[name] || [ROUTE[route]?.title || roleTitle(role), 'Revisa el dato y el siguiente paso.'];
+    return map[name] || [ROUTE[route]?.title || roleTitle(role), ''];
   }
 
   function entryPage() {
@@ -278,7 +279,7 @@
       </aside>
       <div class="crm2-workspace">
         <header class="crm2-topbar"><div class="crm2-mobile-brand"><span class="crm2-brand-mark">M</span><b>${esc(roleTitle(role))}</b></div><div class="crm2-search-wrap">${icon('search')}<input type="search" data-c2-search placeholder="Buscar" aria-label="Buscar contacto o cuenta" autocomplete="off"><div class="crm2-search-results" data-c2-search-results hidden></div></div><button class="crm2-alerts" type="button" data-c2-go="${role === 'jefatura' ? 'R07' : role === 'marketing' ? 'R16' : 'R01'}" aria-label="Ver avisos">${icon('bell')}<span>Avisos</span><b>${alertCount(role)}</b></button></header>
-        <main class="crm2-main"><header class="crm2-page-head"><div><p class="crm2-eyebrow">${esc(roleTitle(role).toUpperCase())} · ${esc(title.toUpperCase())}</p><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div><img class="crm2-page-visual" src="${visual[0]}" alt="${esc(visual[1])}"></header><div class="crm2-content">${content}</div></main>
+        <main class="crm2-main"><header class="crm2-page-head"><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}</header><div class="crm2-content">${content}</div></main>
       </div>
       ${actionbar}
       <div class="crm2-toast-host" data-crm2-toast aria-live="polite" aria-atomic="true"></div>
@@ -609,7 +610,7 @@
     const priority = isAccount ? (accountNeedsReorder(account) ? 'Toca reponer' : (riskReason(account).startsWith('Postventa') ? 'Servicio primero' : 'Cliente activo')) : priorityLabel(lead);
     const value = isAccount ? `Valor de cuenta · ${accountValue(account)}/100` : valueLabel(lead);
     const perm = permission(item);
-    const identity = `<div class="crm2-detail-identity"><div><p class="crm2-eyebrow">${esc(isAccount ? 'CUENTA' : 'CONTACTO')} · ${esc(isAccount ? item.id : item.id || 'Dato de prueba')}</p><h2>${esc(isAccount ? item.name : contactName(item))}</h2><p>${esc(isAccount ? item.business || 'Negocio sin dato' : companyName(item))} · ${esc(item.comuna || 'Comuna sin dato')}</p></div><div class="crm2-detail-chips">${statusPill(priority, priority.includes('Servicio') ? 'blocked' : '')}${statusPill(value,'')}${statusPill(origin,'')}${role === 'marketing' && !isAccount ? statusPill(perm.label,perm.key === 'yes' ? 'good' : 'wait') : ''}</div></div>`;
+    const identity = `<div class="crm2-detail-identity"><div><p class="crm2-eyebrow">${esc(isAccount ? 'CUENTA' : 'CONTACTO')} · ${esc(isAccount ? item.id : item.id || 'Dato de prueba')}</p></div><div class="crm2-detail-chips">${statusPill(priority, priority.includes('Servicio') ? 'blocked' : '')}${statusPill(value,'')}${statusPill(origin,'')}${role === 'marketing' && !isAccount ? statusPill(perm.label,perm.key === 'yes' ? 'good' : 'wait') : ''}</div></div>`;
     const actionReason = lead ? whyValue(lead, role === 'jefatura' || role === 'ventas') : riskReason(account);
     const activity = isAccount ? `<div class="crm2-detail-facts">${labelValue('Frecuencia',accountStats(account).freqDays ? `Cada ${accountStats(account).freqDays} días` : 'Sin historial suficiente')}${labelValue('Última compra',accountStats(account).lastAgo == null ? 'Sin dato' : `Hace ${accountStats(account).lastAgo} días`)}${labelValue('Ticket promedio',Number.isFinite(Number(accountStats(account).avg)) ? money(accountStats(account).avg) : 'Sin dato')}</div>` : `<div class="crm2-detail-facts">${labelValue('Origen',origin)}${labelValue('Landing',item.landing?.slug || item.entryPage || 'Sin registro')}${labelValue('Campaña',campaignOf(item))}${labelValue('Primer contacto',fmtDate(item.at || item.createdAt))}</div><p class="crm2-score-reason">${esc(actionReason)}</p><div class="crm2-score-dual">${statusPill(`Interés · ${interestLabel(lead)}`)}${statusPill(`Valor esperado · ${scoreValue(lead)?.puntaje ?? 0}/100`)}</div>`;
     const interest = Number(scoreInterest(lead)?.puntaje || 0);
@@ -634,7 +635,7 @@
     const canSchedule = role !== 'marketing' || perm.key === 'yes';
     const scheduleControl = canSchedule ? secondary('Programar seguimiento','schedule',`data-id="${esc(item.id)}" data-kind="${isAccount ? 'account' : 'lead'}"`) : `<span class="crm2-blocked-copy">Marketing no programa promociones sin permiso registrado.</span>`;
     const folded = `<details class="crm2-fold"><summary>Permisos y preferencias</summary><div class="crm2-fold-body">${labelValue('Permiso de promoción',perm.label)}${permissionControls}${scheduleControl} ${secondary('Registrar contacto','mark-contacted',`data-id="${esc(item.id)}"`)}</div></details>`;
-    const group1 = block('Quién es', 'Origen, prioridad y valor a primera vista.', identity + referralDetails);
+    const group1 = block('Quién es', '', identity + referralDetails);
     const group2 = block('Qué hizo', 'La actividad reciente explica el siguiente paso.', activity + qualification + historyDetails + (isAccount ? '' : conversation));
     const group3 = block(isAccount ? 'Qué compra y qué hacer ahora' : 'Qué cotiza y qué hacer ahora', isAccount ? 'Usa el historial para preparar la siguiente reposición.' : 'La sugerencia acompaña la decisión; precio y stock se confirman antes de compartir.', `${postventa}${purchase}${actions}${referralDataAction}<div data-inline-panel></div>${folded}`);
     let actionbar = '';
@@ -716,6 +717,8 @@
     if (pageName === 'detail') {
       const detail = detailPage(role);
       [title, subtitle] = titleSub(route, role);
+      const sel = getSelected(); const it = sel.account || sel.lead;
+      if (it) { title = sel.account ? (sel.account.name || 'Cuenta') : contactName(sel.lead); subtitle = (sel.account ? [sel.account.business, sel.account.comuna] : [companyName(sel.lead), sel.lead.comuna]).filter(Boolean).join(' · '); }
       content = detail.content; bar = detail.actionbar;
     } else {
       const pageFn = {
