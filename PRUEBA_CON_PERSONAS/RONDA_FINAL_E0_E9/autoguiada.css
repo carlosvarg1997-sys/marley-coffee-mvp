@@ -273,3 +273,71 @@ h1,h2,h3 { overflow-wrap:anywhere; }
 @media (max-width:380px) {
   .ag-taskbar { gap:8px; padding:10px 16px max(10px,env(safe-area-inset-bottom)); }
 }
+/* ---------- Tarea por intención (17-nov): «Terminé esta tarea», tarjeta obligatoria y barra compacta ---------- */
+.ag-req { display:inline-block; margin-left:6px; padding:1px 8px; border-radius:999px; background:var(--ag-yellow); color:var(--ag-ink); font:600 .72rem/1.5 "Pressura",ui-monospace,monospace; letter-spacing:.06em; text-transform:uppercase; vertical-align:middle; }
+.ag-req-note { margin:8px 0 0; color:var(--ag-muted); font-size:.95rem; line-height:1.4; }
+.ag-comment-label { display:block; margin:6px 0; color:var(--ag-text); font-weight:700; line-height:1.35; }
+.ag-bar-status { margin:0; color:var(--ag-text); font-size:.92rem; line-height:1.35; }
+.ag-bar-status:empty { display:none; }
+.ag-bar-status[data-kind="error"] { color:#FFB4A9; }
+.ag-bar-fold,.ag-bar-sep { display:none; }
+.ag-taskbar.is-modal { justify-content:center; align-content:center; justify-items:center; gap:0; padding:20px; }
+.ag-taskbar:not(.is-modal) { display:flex; flex-direction:row; flex-wrap:nowrap; align-items:center; justify-content:space-between; gap:18px; max-height:none; overflow:visible; padding:12px clamp(28px,4.5vw,56px) max(12px,env(safe-area-inset-bottom)); border-top:1px solid #48484C; border-left:0; box-shadow:0 -8px 24px rgba(0,0,0,.28); }
+.ag-taskbar:not(.is-modal) .ag-bar-line { display:grid; gap:2px; min-width:0; flex:0 1 auto; }
+.ag-taskbar:not(.is-modal) .ag-bar-instruction { flex:1 1 auto; min-width:0; margin:0; color:var(--ag-muted); font-size:.95rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.ag-taskbar:not(.is-modal) .ag-bar-done { flex:0 0 auto; min-height:44px; white-space:nowrap; }
+.ag-taskbar:not(.is-modal) .ag-bar-status { flex:0 0 100%; }
+.ag-taskbar:not(.is-modal) .ag-bar-links { display:flex; flex:0 0 auto; flex-wrap:nowrap; align-items:center; gap:8px; }
+.ag-taskbar:not(.is-modal) .ag-bar-links .ag-btn { min-height:44px; padding:8px 12px; }
+.ag-taskbar:not(.is-modal) .ag-bar-links .ag-restart-inline { min-height:44px; margin-top:0; justify-self:auto; }
+.ag-eval-card .ag-result-form legend { font-weight:700; }
+.ag-eval-card .ag-req { margin-left:8px; }
+@media (max-width:900px) {
+  .ag-taskbar:not(.is-modal) { display:grid; grid-template-columns:minmax(0,1fr) 44px; grid-template-areas:"kicker kicker" "title title" "cta fold" "instr instr" "status status" "links links"; align-items:center; gap:4px 8px; padding:6px 12px max(6px,env(safe-area-inset-bottom)); }
+  .ag-taskbar:not(.is-modal) .ag-bar-line { display:contents; }
+  .ag-taskbar:not(.is-modal) .ag-strip-kicker { grid-area:kicker; min-width:0; font:600 14px/1.3 "Pressura",ui-monospace,monospace; letter-spacing:.04em; text-transform:uppercase; color:#F3C900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ag-taskbar:not(.is-modal) .ag-strip-title { grid-area:title; min-width:0; font:500 15px/1.25 "Festivo",Impact,sans-serif; text-transform:uppercase; color:var(--ag-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ag-taskbar:not(.is-modal) .ag-bar-done { grid-area:cta; min-height:44px; padding:8px 12px; font-size:15px; }
+  .ag-taskbar:not(.is-modal) .ag-bar-fold { display:inline-flex; grid-area:fold; width:44px; min-width:44px; min-height:44px; padding:0; font-size:15px; }
+  .ag-taskbar:not(.is-modal) .ag-bar-instruction { grid-area:instr; flex:none; font-size:14px; line-height:1.4; -webkit-line-clamp:2; }
+  .ag-taskbar:not(.is-modal) .ag-bar-status { grid-area:status; font-size:14px; }
+  .ag-taskbar:not(.is-modal) .ag-bar-links { grid-area:links; flex-wrap:wrap; gap:8px; }
+  .ag-taskbar:not(.is-modal) .ag-bar-links .ag-btn { min-height:44px; font-size:14px; padding:8px 12px; }
+  .ag-taskbar.is-folded:not(.is-modal) .ag-bar-instruction,.ag-taskbar.is-folded:not(.is-modal) .ag-bar-status,.ag-taskbar.is-folded:not(.is-modal) .ag-bar-links { display:none; }
+  .ag-taskbar.is-jump:not(.is-modal) { grid-template-areas:"kicker kicker" "title title" "instr instr" "cta cta" "status status" "links links"; }
+  .ag-taskbar.is-jump:not(.is-modal) .ag-bar-done { width:100%; }
+  .ag-taskbar.is-jump:not(.is-modal) .ag-strip-title { white-space:normal; }
+  .ag-taskbar.is-modal { place-items:end center; padding:0; align-content:end; }
+  .ag-taskbar.is-modal .ag-modal { max-height:72svh; }
+  .ag-eval-card .ag-result-options label,.ag-eval-card .ag-seq-grid label,.ag-eval-card legend,.ag-eval-card .ag-modal-how { font-size:15px; }
+  .ag-eval-card .ag-seq-grid { grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; overflow:visible; }
+  .ag-eval-card .ag-seq-grid label { min-height:44px; }
+}
+
+/* Escritorio: tarea y botón en la primera fila; instrucción y salidas en la segunda (17-nov) */
+@media (min-width:901px) {
+  .ag-taskbar:not(.is-modal) { display:grid; grid-template-columns:minmax(0,1fr) auto auto; grid-template-areas:"line cta links" "instr instr instr" "status status status"; align-items:center; column-gap:16px; row-gap:4px; }
+  .ag-taskbar:not(.is-modal) .ag-bar-line { grid-area:line; }
+  .ag-taskbar:not(.is-modal) .ag-bar-instruction { grid-area:instr; flex:none; }
+  .ag-taskbar:not(.is-modal) .ag-bar-done { grid-area:cta; }
+  .ag-taskbar:not(.is-modal) .ag-bar-links { grid-area:links; justify-self:end; }
+  .ag-taskbar:not(.is-modal) .ag-bar-status { grid-area:status; }
+}
+
+/* Celular plegado: solo la fila de tarea y la de Terminé (17-nov) */
+@media (max-width:900px) {
+  .ag-taskbar.is-folded:not(.is-modal) { grid-template-areas:"kicker kicker" "title title" "cta fold"; }
+}
+
+/* Tarjeta de la tarea (17-nov): aviso y botones fijos al pie; resultado en una fila */
+.ag-card-footer { position:sticky; bottom:0; z-index:2; display:grid; gap:6px; padding:10px 0 4px; margin-top:6px; background:var(--ag-bg); }
+.ag-card-footer .ag-status { margin:0; }
+.ag-card-footer .ag-modal-actions { margin-top:0; grid-template-columns:minmax(0,1fr) auto; }
+.ag-card-footer .ag-modal-actions .ag-btn { width:auto; }
+.ag-card-footer .ag-modal-actions .ag-btn--primary { width:100%; }
+.ag-eval-card .ag-result-options { flex-wrap:nowrap; gap:6px; }
+.ag-eval-card .ag-result-options label { padding:8px 10px; white-space:nowrap; }
+@media (max-width:900px) {
+  .ag-eval-card .ag-result-options { flex-wrap:wrap; }
+  .ag-card-footer .ag-modal-actions { grid-template-columns:minmax(0,1fr) auto; }
+}

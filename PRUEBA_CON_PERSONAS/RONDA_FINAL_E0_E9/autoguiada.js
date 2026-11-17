@@ -40,8 +40,7 @@
   ];
   // Etapas del recorrido (12-nov): las preguntas van por lo que se está haciendo, no por pantalla.
   const STAGE_NAMES = { T1:'Buscar y considerar', T2:'Cotizar', T3:'Aceptar', T4:'Seguimiento', T5:'Recomprar', T6:'Ayuda y recomendación' };
-  const AG_VERSION = '2026-11-12-etapas';
-  const MODES = ['inicial','pausa1','pausa2','pausa_c','final'];
+  const AG_VERSION = '2026-11-17-intencion';
 
   let bank = null;
   let fichas = [];
@@ -323,6 +322,31 @@
     }).join('');
     return '<div class="ag-option-list">' + choices + '</div>';
   }
+  function isOptionalQuestion(question) {
+    return question.tipo === 'open';
+  }
+  function focusInput(input) {
+    if (!input) return;
+    try { input.focus(); } catch (_) {}
+  }
+  function questionMissingReason(question,draft) {
+    if (isOptionalQuestion(question)) return '';
+    const multi = question.tipo === 'multi';
+    const values = multi ? (Array.isArray(draft?.value) ? draft.value : []) : [];
+    const single = multi ? '' : String(draft?.value ?? '').trim();
+    if (multi ? !values.length : !single) return 'empty';
+    const selectedOther = multi
+      ? values.some(value => optionFor(question,value)?.other)
+      : Boolean(optionFor(question,single)?.other);
+    if (selectedOther && !String(draft?.other || '').trim()) return 'other';
+    return '';
+  }
+  function questionMissingMessage(question,draft) {
+    const reason = questionMissingReason(question,draft);
+    if (reason === 'other') return 'Para seguir, escribe cuál otra opción querías indicar.';
+    if (reason === 'empty') return 'Para seguir, elige una opción en «' + String(question.texto || '') + '».';
+    return '';
+  }
   function renderQuestion(phase) {
     const questions = phaseQuestions(phase);
     if (!questions.length) { finishPhase(phase); return; }
@@ -331,49 +355,55 @@
     const draft = draftFor(question);
     questionOpenedAt = Date.now();
     const pct = Math.round(((index+1)/questions.length)*100);
-    const totalLabel = questions.length;
     const blockLabel = PHASE_LABELS[phase] || 'Preguntas';
-    const skipChecked = draft.skip?' checked':'';
-    const backDisabled = index === 0;
-    const embedded=Boolean(app.querySelector('.ag-journey')&&phase!=='inicial');
-    const container=embedded?app.querySelector('.ag-taskbar'):app;
-    if(embedded){container.classList.remove('is-collapsed');container.classList.add('is-modal');}
-    const questionOpen=embedded?'<div class="ag-modal ag-question-inbar" role="dialog" aria-modal="true" aria-labelledby="question-title">':'<section class="ag-question-screen" aria-label="' + escapeHtml(blockLabel) + '">' + brandMarkup();
-    const questionClose=embedded?'</div>':'</section>';
-    container.innerHTML = questionOpen
-      + '<p class="ag-step">' + escapeHtml(blockLabel) + ' · Pregunta ' + (index+1) + ' de ' + totalLabel + '</p>'
+    const optional = isOptionalQuestion(question);
+    const note = optional
+      ? 'Opcional: puedes seguir sin escribir.'
+      : '<span class="ag-req">Obligatoria</span> Elige una opción para seguir.';
+    app.innerHTML = '<section class="ag-question-screen" aria-label="' + escapeHtml(blockLabel) + '">' + brandMarkup()
+      + '<p class="ag-step">' + escapeHtml(blockLabel) + ' · Pregunta ' + (index+1) + ' de ' + questions.length + '</p>'
       + '<div class="ag-progress" role="progressbar" aria-label="Avance de preguntas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><span style="width:' + pct + '%"></span></div>'
       + '<h1 class="ag-question-title" id="question-title">' + escapeHtml(question.texto || '') + '</h1>'
+      + '<p class="ag-req-note">' + note + '</p>'
       + '<form class="ag-question-form" id="question-form" novalidate><fieldset class="ag-fieldset" aria-labelledby="question-title"><legend class="ag-sr-only">' + escapeHtml(question.texto || '') + '</legend>'
       + questionControls(question,draft)
-      + '<label class="ag-option ag-option--skip"><input id="skip-answer" type="checkbox"' + skipChecked + '><span>Prefiero no responder</span></label>'
+      + (optional ? '<label class="ag-option ag-option--skip"><input id="skip-answer" type="checkbox"' + (draft.skip?' checked':'') + '><span>Prefiero no responder</span></label>' : '')
       + '</fieldset><p class="ag-status" id="question-status" role="status"></p><div class="ag-question-actions">'
-      + '<button class="ag-btn" id="question-back" type="button"' + (backDisabled?' disabled':'') + '>Volver</button>'
+      + '<button class="ag-btn" id="question-back" type="button"' + (index===0?' disabled':'') + '>Volver</button>'
       + '<button class="ag-btn ag-btn--primary" id="question-next" type="submit">' + (index+1===questions.length?'Continuar':'Siguiente') + '</button>'
-      + '</div></form>' + (embedded?restartButtonMarkup('Empezar de cero','ag-restart-inline'):'') + questionClose;
+      + '</div></form></section>';
     const form = document.getElementById('question-form');
     const status = document.getElementById('question-status');
+    const nextButton = document.getElementById('question-next');
     const skip = document.getElementById('skip-answer');
+    const currentDraft = () => state.drafts?.[question.id] || draftFor(question);
+    const firstTarget = () => form.querySelector('input[name="q-answer"]:not(:disabled)') || document.getElementById('answer-open');
+    const refreshNext = () => {
+      const message = questionMissingMessage(question,currentDraft());
+      nextButton.disabled = Boolean(message);
+      status.textContent = message;
+      status.dataset.kind = message ? 'error' : '';
+    };
+    const applySkipState = () => {
+      const skipOn = Boolean(skip?.checked);
+      form.querySelectorAll('input[name="q-answer"],#answer-open,[data-other-text]').forEach(input=>{input.disabled=skipOn;});
+      const list=form.querySelector('.ag-option-list');
+      if(list) list.style.opacity=skipOn?'.55':'1';
+      const open=document.getElementById('answer-open');
+      if(open) open.style.opacity=skipOn?'.55':'1';
+    };
     const updateDraft = () => {
       if (!state.drafts) state.drafts = {};
-      const existing = draftFor(question);
-      const next = {...existing};
-      next.skip = skip.checked;
+      const next = {...draftFor(question)};
+      next.skip = Boolean(skip?.checked) && isOptionalQuestion(question);
       if (question.tipo === 'open') next.value = document.getElementById('answer-open')?.value || '';
       else if (question.tipo === 'multi') next.value = Array.from(form.querySelectorAll('input[name="q-answer"]:checked')).map(input=>input.value);
       else next.value = form.querySelector('input[name="q-answer"]:checked')?.value || '';
-      const otherInput = form.querySelector('[data-other-text]');
-      next.other = otherInput?.value || '';
+      next.other = form.querySelector('[data-other-text]')?.value || '';
       state.drafts[question.id] = next;
       persist();
       applySkipState();
-    };
-    const applySkipState = () => {
-      form.querySelectorAll('input[name="q-answer"],#answer-open,[data-other-text]').forEach(input=>{input.disabled=skip.checked;});
-      const list=form.querySelector('.ag-option-list');
-      if(list) list.style.opacity=skip.checked?'.55':'1';
-      const open=document.getElementById('answer-open');
-      if(open) open.style.opacity=skip.checked?'.55':'1';
+      refreshNext();
     };
     if (question.tipo === 'open') {
       const open = document.getElementById('answer-open');
@@ -393,35 +423,28 @@
         });
         updateDraft();
       }));
-      const other= form.querySelector('[data-other-text]');
+      const other=form.querySelector('[data-other-text]');
       if(other) {
         other.value=draft.other || '';
         other.addEventListener('input',updateDraft);
       }
     }
-    skip.addEventListener('change',updateDraft);
+    skip?.addEventListener('change',updateDraft);
     applySkipState();
+    refreshNext();
+    if(questionMissingMessage(question,draft)) focusInput(firstTarget());
     document.getElementById('question-back').addEventListener('click',()=>{
       if(index>0){state.questionIndex=index-1;persist();renderQuestion(phase);}
     });
     form.addEventListener('submit',event=>{
       event.preventDefault();
-      const currentDraft=state.drafts?.[question.id] || draftFor(question);
-      const hasValue=question.tipo==='multi' ? Array.isArray(currentDraft.value)&&currentDraft.value.length>0 : Boolean(String(currentDraft.value||'').trim());
-      if(!currentDraft.skip && question.tipo!=='open' && !hasValue) {
-        status.textContent='Elige una opción o marca «Prefiero no responder».';
-        status.dataset.kind='error';
+      const current=currentDraft();
+      if(questionMissingMessage(question,current)) {
+        refreshNext();
+        focusInput(firstTarget());
         return;
       }
-      const selectedOther = question.tipo==='multi'
-        ? (Array.isArray(currentDraft.value)&&currentDraft.value.some(value=>optionFor(question,value)?.other))
-        : optionFor(question,currentDraft.value)?.other;
-      if(!currentDraft.skip && selectedOther && !String(currentDraft.other||'').trim()) {
-        status.textContent='Completa cuál otra opción querías indicar.';
-        status.dataset.kind='error';
-        return;
-      }
-      saveQuestion(question,phase,currentDraft);
+      saveQuestion(question,phase,current);
       if(index+1<questions.length){state.questionIndex=index+1;persist();renderQuestion(phase);}
       else finishPhase(phase);
     });
@@ -440,7 +463,7 @@
       + '<p class="ag-kicker">Prueba autoguiada</p><h1 class="ag-title">Empieza la prueba</h1>'
       + '<p class="ag-note"><strong>Prototipo académico (Duoc UC).</strong> No es un sitio oficial de Marley Coffee.</p>'
       + '<p class="ag-lede"><strong>Elige un camino y recórrelo con tareas:</strong> responde unas preguntas y descarga tu informe.</p>'
-      + '<ol class="ag-steps"><li><span><strong>Eliges el camino</strong> y respondes las preguntas iniciales.</span></li><li><span><strong>Recorres el sitio o el CRM</strong> con tareas breves.</span></li><li><span><strong>Respondes las preguntas finales</strong> y descargas tus resultados.</span></li></ol>'
+      + '<ol class="ag-steps"><li><span><strong>Eliges el camino</strong> y respondes las preguntas iniciales.</span></li><li><span><strong>Recorres el sitio o el CRM</strong> con tareas breves. Cada tarea se cierra con «Terminé esta tarea» y una tarjeta corta.</span></li><li><span><strong>Respondes las preguntas finales</strong> y descargas tus resultados.</span></li></ol>'
       + '<div class="ag-card"><h2>Antes de empezar</h2><p><strong>Nada se envía:</strong> tus respuestas quedan en este navegador hasta que descargues el informe. <strong>Tú decides si lo envías.</strong></p>'
       + '<p style="margin-top:12px"><a class="ag-consent-links" href="' + KIT_URL.href + 'Consentimiento_informado.md" target="_blank" rel="noopener">Leer el consentimiento completo</a></p>'
       + '<label class="ag-check"><input id="consent-check" type="checkbox"' + (state.consentimiento?.aceptado?' checked':'') + '><span>Acepto participar</span></label>'
@@ -540,15 +563,13 @@
     const list=stages();
     state.tareas=list.map((stage,index)=>({etapa:stage.id,etapa_nombre:isInternal()?(ROLE_LABELS[state.rol]||'Equipo interno'):(STAGE_NAMES[stage.id]||''),intro_visto:false,numero:index+1,titulo:labelForStage(stage),consigna:stagePrompt(stage),empezo_en:'',termino_en:'',duracion_ms:0,resultado:'',seq:'',comentario:'',pantallas:[],origen_etapas:stage.origen||[]}));
     setPortalSession();
+    enterTask();
     persist();
     renderJourney(true);
   }
   function finishPhase(phase) {
     updatePortalPhases(phase);
     if(phase==='inicial') { beginJourney();return; }
-    if(phase==='pausa1') { state.pausas.push({fase:phase,termino_en:isoNow()});state.phase='journey';state.evaluating=false;startCurrentTask();persist();renderJourney();return; }
-    if(phase==='pausa2') { state.pausas.push({fase:phase,termino_en:isoNow()});state.phase='journey';state.evaluating=false;startCurrentTask();persist();renderJourney();return; }
-    if(phase==='pausa_c') { state.pausas.push({fase:phase,termino_en:isoNow()});state.phase='journey';state.taskIndex=1;state.evaluating=false;startCurrentTask();persist();renderJourney();return; }
     if(phase==='final') {
       state.finished_at=isoNow();state.phase='complete';state.evaluating=false;
       const values=['umux_1','umux_2'].map(id=>state.respuestas.find(row=>row.pregunta_id===id&&row.momento==='final'&&!row.omitida)?.respuesta);
@@ -583,12 +604,18 @@
   function saveTaskEvaluation() {
     const form=document.getElementById('task-evaluation');
     const status=document.getElementById('task-evaluation-status');
-    const result=form?.querySelector('input[name="task-result"]:checked')?.value;
-    const seq=form?.querySelector('input[name="task-seq"]:checked')?.value;
-    const comment=cleanText(document.getElementById('task-comment')?.value||'');
     const task=state.tareas[state.taskIndex];
-    const stageAnswers=stageQuestionsFor(task).map(question=>({question,value:form?.querySelector('input[name="stage-' + question.id + '"]:checked')?.value}));
-    if(!result||!seq||stageAnswers.some(item=>!item.value)){status.textContent='Responde las preguntas para continuar. El comentario es opcional.';status.dataset.kind='error';return;}
+    if(!form||!task)return;
+    const missing=evaluationMissing(form,task);
+    if(missing.length) {
+      if(status){status.textContent=evaluationMessage(missing);status.dataset.kind='error';}
+      focusInput(missing[0].input);
+      return;
+    }
+    const result=form.querySelector('input[name="task-result"]:checked')?.value;
+    const seq=form.querySelector('input[name="task-seq"]:checked')?.value;
+    const comment=cleanText(document.getElementById('task-comment')?.value||'');
+    const stageAnswers=stageQuestionsFor(task).map(question=>({question,value:form.querySelector('input[name="stage-' + question.id + '"]:checked')?.value}));
     task.resultado=result;task.seq=Number(seq);task.comentario=comment;
     task.preguntas_etapa={};
     stageAnswers.forEach(({question,value})=>{saveQuestion(question,'etapa',{value},task.etapa);task.preguntas_etapa[question.id]=value;});
@@ -600,7 +627,7 @@
       if(completed===3) {state.phase='jump30';persist();renderJourney();return;}
     }
     if(state.taskIndex>=state.tareas.length){state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
-    state.phase='journey';persist();renderJourney();
+    state.phase='journey';enterTask();persist();renderJourney();
   }
   function renderJourney(first=false) {
     if(jumpPoll){clearInterval(jumpPoll);jumpPoll=null;}
@@ -617,9 +644,7 @@
     } else iframeRef=app.querySelector('.ag-journey-frame');
     const bar=app.querySelector('.ag-taskbar');
     if(!bar)return;
-    if(state.phase==='journey') renderTaskbar(bar);
-    else if(state.phase==='jump3') renderJumpCard(bar,3);
-    else if(state.phase==='jump30') renderJumpCard(bar,30);
+    renderTaskbar(bar);
     app.setAttribute('aria-busy','false');
   }
   function onFrameLoad() {
@@ -755,33 +780,55 @@
     task.titulo=accepted?'Revisa tu pedido en el portal':'Retoma tu decisión';
     task.consigna=accepted?'Revisa en tu portal qué pasa con tu pedido.':'Retoma tu decisión.';
   }
-  function stageKicker(task) {
-    return 'Etapa ' + (state.taskIndex+1) + ' de ' + state.tareas.length + (task?.etapa_nombre ? ' · ' + task.etapa_nombre : '');
+  function taskKicker(task) {
+    return 'Tarea ' + (state.taskIndex+1) + ' de ' + state.tareas.length + (task?.etapa_nombre ? ' · ' + task.etapa_nombre : '');
   }
-  function setBarMode(bar,modal) { bar.classList.toggle('is-modal',Boolean(modal)); bar.classList.remove('is-collapsed'); }
+  function setBarMode(bar,mode) {
+    bar.classList.toggle('is-modal',mode==='modal');
+    bar.classList.toggle('is-jump',mode==='jump');
+    if(mode!=='bar')bar.classList.remove('is-folded');
+  }
+  function barLine(kicker,title) {
+    return '<div class="ag-bar-line"><span class="ag-strip-kicker">' + escapeHtml(kicker) + '</span><span class="ag-bar-sep" aria-hidden="true"> · </span><span class="ag-strip-title">' + escapeHtml(title) + '</span></div>';
+  }
+  function barLinksMarkup() {
+    return '<div class="ag-bar-links">' + restartButtonMarkup('Empezar de cero','ag-restart-inline') + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div>';
+  }
+  function enterTask() {
+    const task=state.tareas?.[state.taskIndex];
+    if(!task)return;
+    task.intro_visto=true;
+    state.bar_plegada=false;
+    startCurrentTask();
+  }
+  function toggleBar() {
+    state.bar_plegada=!state.bar_plegada;
+    persist();
+    const bar=app.querySelector('.ag-taskbar');
+    if(!bar)return;
+    bar.classList.toggle('is-folded',Boolean(state.bar_plegada));
+    const button=bar.querySelector('[data-action="bar-fold"]');
+    if(button) {
+      button.setAttribute('aria-expanded',state.bar_plegada?'false':'true');
+      button.setAttribute('aria-label',state.bar_plegada?'Desplegar la tarea':'Plegar la tarea');
+      button.textContent=state.bar_plegada?'▾':'▴';
+    }
+  }
   function renderTaskbar(bar) {
     const task=state.tareas[state.taskIndex];
     if(!task) {state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
+    if(state.phase==='jump3'||state.phase==='jump30') {renderJumpStep(bar,state.phase==='jump3'?3:30);return;}
     if(state.evaluating) {renderTaskEvaluation(bar);return;}
-    if(!task.intro_visto||state.task_details_open) {renderTaskIntro(bar,task);return;}
-    setBarMode(bar,false);
-    bar.innerHTML='<div class="ag-strip-info"><span class="ag-strip-kicker">' + escapeHtml(stageKicker(task)) + '</span><h1 class="ag-strip-title">' + escapeHtml(task.titulo) + '</h1></div>'
-      + '<div class="ag-strip-actions"><button class="ag-btn" type="button" data-action="task-details">Ver tarea</button>'
-      + '<button class="ag-btn ag-btn--primary" type="button" data-action="task-done">Terminé</button></div>';
-    bar.querySelector('.ag-strip-info')?.insertAdjacentHTML('beforeend',restartButtonMarkup('Empezar de cero','ag-restart-inline'));
-    bar.querySelector('[data-action="task-details"]')?.addEventListener('click',()=>{state.task_details_open=true;persist();renderJourney();});
+    setBarMode(bar,'bar');
+    bar.classList.toggle('is-folded',Boolean(state.bar_plegada));
+    bar.innerHTML=barLine(taskKicker(task),task.titulo)
+      + '<p class="ag-bar-instruction">' + escapeHtml(task.consigna) + '</p>'
+      + '<button class="ag-btn ag-btn--primary ag-bar-done" type="button" data-action="task-done">Terminé esta tarea</button>'
+      + '<button class="ag-btn ag-bar-fold" type="button" data-action="bar-fold" aria-expanded="' + (state.bar_plegada?'false':'true') + '" aria-label="' + (state.bar_plegada?'Desplegar la tarea':'Plegar la tarea') + '">' + (state.bar_plegada?'▾':'▴') + '</button>'
+      + '<p class="ag-bar-status" role="status"></p>'
+      + barLinksMarkup();
     bar.querySelector('[data-action="task-done"]')?.addEventListener('click',taskFinished);
-  }
-  function renderTaskIntro(bar,task) {
-    setBarMode(bar,true);
-    const again=Boolean(task.intro_visto);
-    bar.innerHTML='<div class="ag-modal" role="dialog" aria-modal="true" aria-labelledby="ag-intro-title"><p class="ag-modal-kicker">' + escapeHtml(stageKicker(task)) + '</p>'
-      + '<h1 class="ag-taskbar-title" id="ag-intro-title">' + escapeHtml(task.titulo) + '</h1>'
-      + '<p class="ag-task-prompt"><strong>Consigna:</strong> ' + escapeHtml(task.consigna) + '</p>'
-      + '<ul class="ag-modal-how ag-modal-points"><li><strong>Verás el sitio en pantalla completa.</strong></li><li><strong>Cuando termines, toca «Terminé» abajo</strong> y te haremos unas pocas preguntas.</li><li><strong>No hay respuestas correctas.</strong></li></ul>'
-      + '<div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="button" data-action="task-start">' + (again?'Seguir con la tarea':'Empezar la tarea') + '</button>'
-      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div>' + restartButtonMarkup() + '</div></div>';
-    bar.querySelector('[data-action="task-start"]')?.addEventListener('click',()=>{task.intro_visto=true;state.task_details_open=false;startCurrentTask();persist();renderJourney();});
+    bar.querySelector('[data-action="bar-fold"]')?.addEventListener('click',toggleBar);
     bar.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
   }
   function stageQuestionsFor(task) {
@@ -793,52 +840,99 @@
     const name='stage-' + question.id;
     if(question.tipo==='agreement') {
       const options=optionList(question).map(option=>'<label title="' + escapeHtml(option.text) + '"><input type="radio" name="' + name + '" value="' + option.value + '"><span>' + option.value + '</span></label>').join('');
-      return '<fieldset><legend>' + escapeHtml(question.texto) + '</legend><div class="ag-task-progress">1 = Muy en desacuerdo · 5 = Muy de acuerdo</div><div class="ag-agree-grid">' + options + '</div></fieldset>';
+      return '<fieldset><legend>' + escapeHtml(question.texto) + ' <span class="ag-req">Obligatoria</span></legend><div class="ag-task-progress">1 = Muy en desacuerdo · 5 = Muy de acuerdo</div><div class="ag-agree-grid">' + options + '</div></fieldset>';
     }
     const options=optionList(question).map(option=>'<label><input type="radio" name="' + name + '" value="' + escapeHtml(option.text) + '"><span>' + escapeHtml(option.text) + '</span></label>').join('');
-    return '<fieldset><legend>' + escapeHtml(question.texto) + '</legend><div class="ag-result-options">' + options + '</div></fieldset>';
+    return '<fieldset><legend>' + escapeHtml(question.texto) + ' <span class="ag-req">Obligatoria</span></legend><div class="ag-result-options">' + options + '</div></fieldset>';
+  }
+  function evaluationMissing(form,task) {
+    const missing=[];
+    if(!form.querySelector('input[name="task-result"]:checked'))missing.push({kind:'result',input:form.querySelector('input[name="task-result"]')});
+    if(!form.querySelector('input[name="task-seq"]:checked'))missing.push({kind:'seq',input:form.querySelector('input[name="task-seq"]')});
+    stageQuestionsFor(task).forEach(question=>{
+      const name='stage-' + question.id;
+      if(!form.querySelector('input[name="' + name + '"]:checked'))missing.push({kind:'stage',question,input:form.querySelector('input[name="' + name + '"]')});
+    });
+    return missing;
+  }
+  function evaluationMessage(missing) {
+    if(!missing.length)return '';
+    const parts=[];
+    const result=missing.some(item=>item.kind==='result');
+    const seq=missing.some(item=>item.kind==='seq');
+    if(result&&seq)parts.push('elige si lo lograste y la facilidad del 1 al 7');
+    else if(result)parts.push('elige si lo lograste');
+    else if(seq)parts.push('elige la facilidad del 1 al 7');
+    missing.filter(item=>item.kind==='stage').forEach(item=>parts.push('responde «' + String(item.question.texto||'').replace(/\.$/,'') + '»'));
+    return 'Para seguir, ' + parts.join(' y ') + '.';
   }
   function renderTaskEvaluation(bar) {
     const task=state.tareas[state.taskIndex];
-    setBarMode(bar,true);
+    setBarMode(bar,'modal');
     questionOpenedAt=Date.now();
     const seq=Array.from({length:7},(_,index)=>{
       const number=index+1;
       return '<label><input type="radio" name="task-seq" value="' + number + '"><span>' + number + '</span></label>';
     }).join('');
-    bar.innerHTML='<div class="ag-modal" role="dialog" aria-modal="true" aria-labelledby="ag-eval-title"><p class="ag-modal-kicker">' + escapeHtml(stageKicker(task)) + '</p>'
-      + '<h1 class="ag-taskbar-title" id="ag-eval-title">¿Cómo te fue?</h1><p class="ag-modal-how">' + escapeHtml(task.titulo) + '</p>'
-      + '<form class="ag-result-form" id="task-evaluation"><fieldset><legend>¿Lo lograste?</legend><div class="ag-result-options">'
-      + '<label><input type="radio" name="task-result" value="Logrado"><span>Sí</span></label>'
-      + '<label><input type="radio" name="task-result" value="Con ayuda"><span>En parte</span></label>'
-      + '<label><input type="radio" name="task-result" value="No logrado"><span>No</span></label>'
-      + '</div></fieldset><fieldset><legend>¿Qué tan fácil o difícil fue?</legend><div class="ag-task-progress">1 = Muy difícil · 7 = Muy fácil</div><div class="ag-seq-grid">' + seq + '</div></fieldset>'
+    bar.innerHTML='<div class="ag-modal ag-eval-card" role="dialog" aria-modal="true" aria-labelledby="ag-eval-title"><p class="ag-modal-kicker">' + escapeHtml(taskKicker(task)) + '</p>'
+      + '<h1 class="ag-taskbar-title" id="ag-eval-title">¿Lo lograste?</h1><p class="ag-modal-how"><strong>' + escapeHtml(task.titulo) + '</strong></p>'
+      + '<form class="ag-result-form" id="task-evaluation" novalidate>'
+      + '<fieldset><legend>Resultado <span class="ag-req">Obligatoria</span></legend><div class="ag-result-options">'
+      + '<label><input type="radio" name="task-result" value="Logrado"><span>Lo logré</span></label>'
+      + '<label><input type="radio" name="task-result" value="Con ayuda"><span>Lo logré con ayuda</span></label>'
+      + '<label><input type="radio" name="task-result" value="No logrado"><span>No lo logré</span></label>'
+      + '</div></fieldset>'
+      + '<fieldset><legend>¿Qué tan fácil fue? <span class="ag-req">Obligatoria</span></legend><div class="ag-task-progress">1 = Muy difícil · 7 = Muy fácil</div><div class="ag-seq-grid">' + seq + '</div></fieldset>'
       + stageQuestionsFor(task).map(stageQuestionHtml).join('')
-      + '<label for="task-comment">¿Algo te confundió o te hizo dudar? <span class="ag-task-progress">Opcional</span></label><textarea id="task-comment" class="ag-textarea" maxlength="500" placeholder="Hasta 500 caracteres. No escribas nombres ni datos de contacto."></textarea>'
-      + '<p class="ag-status" id="task-evaluation-status" role="status"></p><div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="submit">Guardar y seguir</button><button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button></div></form>' + restartButtonMarkup() + '</div>';
-    document.getElementById('task-evaluation').addEventListener('submit',event=>{event.preventDefault();saveTaskEvaluation();});
+      + '<label class="ag-comment-label" for="task-comment">Comentario <span class="ag-task-progress">Opcional</span></label><textarea id="task-comment" class="ag-textarea" maxlength="500" placeholder="¿Algo te confundió o te hizo dudar? No escribas nombres ni datos de contacto."></textarea>'
+      + '<div class="ag-card-footer"><p class="ag-status" id="task-evaluation-status" role="status" aria-live="polite"></p>'
+      + '<div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="submit" id="task-save">Guardar y seguir</button><button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button></div></div></form>' + restartButtonMarkup() + '</div>';
+    const form=document.getElementById('task-evaluation');
+    const save=document.getElementById('task-save');
+    const status=document.getElementById('task-evaluation-status');
+    const refresh=()=>{
+      const missing=evaluationMissing(form,task);
+      save.disabled=missing.length>0;
+      status.textContent=missing.length?evaluationMessage(missing):'Listo: ya puedes guardar y seguir.';
+      status.dataset.kind=missing.length?'error':'ok';
+      return missing;
+    };
+    form.addEventListener('change',refresh);
+    form.addEventListener('submit',event=>{
+      event.preventDefault();
+      const missing=refresh();
+      if(missing.length){focusInput(missing[0].input);return;}
+      saveTaskEvaluation();
+    });
     bar.querySelector('[data-action="return-task"]')?.addEventListener('click',()=>{state.evaluating=false;persist();renderJourney();});
+    const pending=refresh();
+    if(pending.length)focusInput(pending[0].input);
   }
-  function renderJumpCard(bar,days) {
+  function renderJumpStep(bar,days) {
+    const task=state.tareas[state.taskIndex];
     const gate=portalSignal();
     const ready=jumpReady(days);
     const title=days===3?'3 días después':'Un mes después';
-    const prompt=days===3?'<strong>Pasaron tres días</strong> desde tu última tarea. Continúa cuando quieras retomar tu caso.':'<strong>Pasó un mes</strong> desde tu última tarea. Puedes avanzar aunque el contrato todavía no esté firmado.';
-    setBarMode(bar,true);
-    bar.innerHTML='<div class="ag-modal" role="dialog" aria-modal="true" aria-labelledby="ag-jump-title"><p class="ag-modal-kicker">Salto de tiempo</p><div class="ag-interstitial"><h1 class="ag-taskbar-title" id="ag-jump-title">' + title + '</h1><p>' + prompt + '</p>'
-      + '<p class="' + (ready?'ag-jump-ready':'ag-jump-wait') + '" role="status">' + (ready?'<strong>El recorrido está listo</strong> para avanzar.':'<strong>Completa el paso correspondiente</strong> en la pantalla del recorrido para habilitar el avance.') + '</p>'
-      + (days===30&&!gate.signed?'<p class="ag-help" data-contract-simulation><strong>Para seguir, simulamos que firmaste el contrato.</strong></p>':'')
-      + '<button class="ag-btn ag-btn--primary" type="button" data-action="jump" ' + (ready?'':'disabled') + '>Avanzar el tiempo</button>'
-      + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button>' + restartButtonMarkup() + '</div></div>';
+    const what=days===3
+      ? 'Pasaron tres días desde tu última tarea. Retoma tu decisión desde donde quedaste.'
+      : 'Pasó un mes desde tu última tarea. Puedes avanzar aunque el contrato todavía no esté firmado.';
+    const label=days===3?'Avanzar el tiempo: han pasado 3 días':'Avanzar el tiempo: ha pasado un mes';
+    const simulacion=(days===30&&!gate.signed)?' Para seguir, simulamos que firmaste el contrato.':'';
+    setBarMode(bar,'jump');
+    bar.innerHTML=barLine(taskKicker(task),title)
+      + '<p class="ag-bar-instruction">' + escapeHtml(what + simulacion) + '</p>'
+      + '<button class="ag-btn ag-btn--primary ag-bar-done" type="button" data-action="jump"' + (ready?'':' disabled') + '>' + escapeHtml(label) + '</button>'
+      + '<p class="ag-bar-status" role="status"></p>'
+      + barLinksMarkup();
     bar.querySelector('[data-action="jump"]')?.addEventListener('click',()=>applyJump(days));
     bar.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
     jumpPoll=setInterval(()=>{
       if(!document.querySelector('.ag-taskbar')||!['jump3','jump30'].includes(state.phase)){clearInterval(jumpPoll);jumpPoll=null;return;}
       const nowReady=jumpReady(days);
       const button=bar.querySelector('[data-action="jump"]');
-      const status=bar.querySelector('[role="status"]');
+      const status=bar.querySelector('.ag-bar-status');
       if(button&&!simulandoFirma)button.disabled=!nowReady;
-      if(status&&!simulandoFirma){status.innerHTML=nowReady?'<strong>El recorrido está listo</strong> para avanzar.':'<strong>Completa el paso correspondiente</strong> en la pantalla del recorrido para habilitar el avance.';status.classList.toggle('ag-jump-ready',nowReady);status.classList.toggle('ag-jump-wait',!nowReady);}
+      if(status&&!simulandoFirma&&status.dataset.kind!=='error')status.textContent=nowReady?'':'Completa el paso anterior para habilitar el avance.';
     },700);
   }
   function waitFor(predicate,timeout=2500) {
@@ -912,7 +1006,7 @@
     };
     state.respuestas.push(row);
     state.saltos.push({...payload,hecho_en:isoNow(),fuente:gate.source,contrato_simulado:days===30&&!gate.signed,propuesta_aceptada_al_saltar:Boolean(gate.accepted),propuesta_aceptada_para_firma:Boolean(signature.accepted)});
-    state.phase='journey';state.evaluating=false;state.task_details_open=false;
+    state.phase='journey';state.evaluating=false;enterTask();
     if(jumpPoll){clearInterval(jumpPoll);jumpPoll=null;}
     persist();renderJourney();
   }
@@ -1212,12 +1306,12 @@
     if(!state)state=newDraft();
     if(state.phase==='welcome')renderWelcome();
     else if(state.phase==='choice')renderChoice();
-    else if(MODES.includes(state.phase))renderQuestion(state.phase);
+    else if(['inicial','final'].includes(state.phase))renderQuestion(state.phase);
     else if(['journey','jump3','jump30'].includes(state.phase))renderJourney();
     else if(state.phase==='complete')renderResults();
+    else if(['pausa1','pausa2','pausa_c'].includes(state.phase)&&state.session&&state.tareas?.length){state.phase='journey';persist();renderJourney();}
     else {state=newDraft();prototypeReset();persist();renderWelcome();}
   }
-
   window.addEventListener('beforeunload',()=>{if(jumpPoll)clearInterval(jumpPoll);});
   app?.addEventListener('click',event=>{
     const button=event.target.closest('[data-action="restart-test"]');
