@@ -893,3 +893,17 @@ body:has(.c3-floating-cta){padding-bottom:64px}
  .ld-hero .nm-lead{margin-top:10px;font-size:.98rem;line-height:1.38}
  .ld-hero__accion{margin-top:16px}
 }
+
+/* 17-nov: cierre de CTA después de la oferta (se repite la intención y la conversión de la portada). */
+.ld-cierre{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;padding:8px 16px 28px;max-width:1100px;margin:0 auto;box-sizing:border-box}
+.ld-cierre .nm-btn{min-height:44px}
+
+/* 17-nov: celular súper grande (390×844 y 360×740): H1 32, H2 24, H3 18, texto 16, botones de 44 px. */
+@media (max-width:420px){
+html body .ld-hero h1,html body h1{font-size:32px!important;line-height:1.12!important}
+html body .nm-h2,html body h2{font-size:24px!important;line-height:1.18!important}
+html body h3{font-size:18px!important}
+html body p,html body li{font-size:16px!important}
+html body .nm-btn{min-height:44px!important;font-size:16px!important;padding:11px 16px!important}
+html body .nm-seccion{padding-top:36px!important;padding-bottom:36px!important}
+}
