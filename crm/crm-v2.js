@@ -293,7 +293,7 @@
   const interestLabel = lead => `${Number(scoreInterest(lead)?.puntaje ?? 0)}/100`;
   const priorityLabel = lead => scorePriority(lead)?.texto || 'Atender normal';
   const crmQuotes = () => appState().quotes || [];
-  const legacyQuotes = () => { try { return R.quoted(currentState()) || []; } catch (_) { return []; } };
+  const legacyQuotes = () => { try { const legacy = R.quoted(currentState()); return Array.isArray(legacy) ? legacy : []; } catch (_) { return []; } };
   const latestQuoteFor = lead => crmQuotes().slice().reverse().find(quote => quote.leadId === lead.id) || null;
 
   function machineFor(lead) {
@@ -788,10 +788,10 @@
     if (!isAccount && role === 'ventas') {
       const reasonSelect = `<select class="crm2-action-select" data-return-reason="${esc(item.id)}" aria-label="Motivo de devolución"><option value="">Motivo para devolver</option><option>Falta volumen</option><option>No contesta</option><option>Cotiza a futuro</option><option>Falta presupuesto</option></select>`;
       const exceptionSelect = `<select class="crm2-action-select" data-approval-kind="${esc(item.id)}" aria-label="Tipo de excepción"><option value="">Tipo de excepción</option><option>Descuento fuera de lista</option><option>Comodato bajo volumen mínimo</option><option>Plazo o condición especial</option></select>`;
-      const more = `<details class="crm2-action-more"><summary>Más acciones</summary><div class="crm2-action-more-menu"><label>Motivo para devolver${reasonSelect}</label>${secondary('Devolver a Marketing','return-lead',`data-id="${esc(item.id)}"`)}<label>Tipo de excepción${exceptionSelect}</label>${secondary('Enviar a aprobación','send-approval',`data-id="${esc(item.id)}"`)}</div></details>`;
+      const more = `<details class="crm2-action-more"><summary>Más</summary><div class="crm2-action-more-menu"><label>Motivo para devolver${reasonSelect}</label>${secondary('Devolver a Marketing','return-lead',`data-id="${esc(item.id)}"`)}<label>Tipo de excepción${exceptionSelect}</label>${secondary('Enviar a aprobación','send-approval',`data-id="${esc(item.id)}"`)}</div></details>`;
       actionbar = actionBar(`${primary('Preparar propuesta','quote',`data-id="${esc(item.id)}"`)}${secondary('Aceptar como SQL','accept-sql',`data-id="${esc(item.id)}" ${isMql(item) ? '' : 'disabled title="Marketing debe validar el MQL primero"'}`)}${more}`, true);
     } else if (isAccount && role === 'ventas') actionbar = actionBar(`${primary('Preparar reposición','open-reorder',`data-id="${esc(item.id)}"`)}${secondary('Agendar contacto','start-followup',`data-id="${esc(item.id)}"`)}`, true);
-    else actionbar = actionBar(secondary('Volver a la lista','back'), true);
+    else actionbar = actionBar('', true);
     return { content: group1 + group2 + group3, actionbar };
   }
 
