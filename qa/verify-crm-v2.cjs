@@ -8,7 +8,7 @@ const { chromium } = require('C:/Users/HP/Desktop/1_ECOSISTEMA_ENSUTEX/02_Sitio_
 
 const ROOT = path.resolve(__dirname, '..');
 let BASE = process.argv.slice(2).find(arg => /^https?:\/\//i.test(arg)) || null;
-const OUT = 'C:/Users/HP/Documents/Codex/2026-11-16/mi-pedido-ejecuta-completo-el-prompt/outputs/crm-v2-16nov/capturas/despues';
+const OUT = process.env.CRM2_VERIFY_OUT || 'C:/Users/HP/Documents/Codex/2026-11-16/mi-pedido-ejecuta-completo-el-prompt/outputs/crm-v2-16nov/capturas/despues';
 const SIZES = [{ name: 'desktop', width: 1280, height: 551 }, { name: 'mobile', width: 390, height: 844 }];
 const BROWSERS = [
   { name: 'Chrome', executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe' },

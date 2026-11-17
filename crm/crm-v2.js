@@ -82,10 +82,14 @@
     if (!items.length) items = (D.PROSPECTS || []).slice();
     const live = currentState().lead;
     if (live?.id && !items.some(item => item.id === live.id)) items.unshift(Object.assign({}, live, { live: true }));
+    items = items.concat(liveReferralLeads());
     return items.map(item => item.live ? item : Object.assign({}, item, { dataTest: true }));
   }
   function accounts() {
-    try { return (R.accounts(currentState()) || []).slice(); } catch (_) { return (D.ACCOUNTS || []).slice(); }
+    let base;
+    try { base = (R.accounts(currentState()) || []).slice(); } catch (_) { base = (D.ACCOUNTS || []).slice(); }
+    const live = liveAccount();
+    return live ? [...base.filter(item => String(item.id) !== String(live.id)), live] : base;
   }
   const leadById = id => leads().find(item => String(item.id) === String(id)) || null;
   const accountById = id => accounts().find(item => String(item.id) === String(id)) || (D.ACCOUNTS || []).find(item => String(item.id) === String(id)) || null;
@@ -108,10 +112,154 @@
     if (tickets.length) return `Postventa pendiente: ${tickets[0].type || tickets[0].detail || 'revisar caso'}`;
     const stats = accountStats(account);
     if (stats.lastAgo != null && stats.freqDays != null && Number.isFinite(Number(stats.lastAgo)) && Number.isFinite(Number(stats.freqDays)) && Number(stats.lastAgo) > Number(stats.freqDays)) return `Sin compra hace ${stats.lastAgo} días; su ciclo medio es ${stats.freqDays} días.`;
-    if (account?.nps != null && Number.isFinite(Number(account.nps)) && Number(account.nps) <= 6) return `NPS detractor registrado: ${account.nps}.`;
+    const score = lastNps(account); if (score != null && score <= 6) return `NPS detractor registrado: ${score}/10.`;
     return 'Revisar frecuencia y estado de servicio antes de contactar.';
   };
-  const accountAtRisk = account => openTickets(account.id).length > 0 || (accountStats(account).lastAgo != null && accountStats(account).freqDays != null && Number(accountStats(account).lastAgo) > Number(accountStats(account).freqDays)) || (account?.nps != null && Number(account.nps) <= 6);
+  const accountAtRisk = account => openTickets(account.id).length > 0 || (accountStats(account).lastAgo != null && accountStats(account).freqDays != null && Number(accountStats(account).lastAgo) > Number(accountStats(account).freqDays)) || isDetractor(account);
+  // Cuenta viva del portal: su ciclo (customerCycle) se lee como una cuenta más del CRM. Todo es dato de prueba.
+  const DAY_MS = Number(D.DAY || 86400000);
+  const isRepeatOrder = order => order?.eventName === 'repeat_order_confirmed' || Boolean(order?.sourceOrderId);
+  const reorderChannel = order => String(order?.channel || order?.source || order?.salesChannel || '');
+  const keyText = value => String(value || '').trim().toLocaleLowerCase('es-CL');
+  function liveCycle() { const c = currentState().customerCycle; return c && c.accountId ? c : null; }
+  function liveAccount() {
+    const c = liveCycle();
+    if (!c || !Array.isArray(c.orders) || !c.orders.length) return null;
+    const orders = c.orders.map(order => ({ id: order.id, eventName: order.eventName, at: Number(order.at || 0), items: order.items || [], total: Number(order.total || 0), sourceOrderId: order.sourceOrderId || null, status: order.status || 'Pedido confirmado', receivedAt: order.receivedAt || null, waitPassed: Boolean(order.waitPassed), npsScore: order.npsScore ?? null, npsComment: order.npsComment || '', npsAt: order.npsAt || null, channel: 'portal', live: true }));
+    const last = orders[orders.length - 1];
+    const gaps = orders.slice(1).map((order, index) => (order.at - orders[index].at) / DAY_MS);
+    const avgGap = gaps.length ? Math.round(gaps.reduce((sum, value) => sum + value, 0) / gaps.length) : 0;
+    const freqDays = avgGap >= 1 ? avgGap : null;
+    const lastAgo = Math.max(0, Math.round((now() - last.at) / DAY_MS));
+    const total = orders.reduce((sum, order) => sum + order.total, 0);
+    return { id: c.accountId, name: c.company || 'Cuenta del portal', business: c.business || 'Negocio sin dato', comuna: c.comuna || 'Comuna sin dato', source: c.origin || '', orders, live: true, referral: null, st: { lastAgo, freqDays, dueIn: freqDays == null ? NaN : freqDays - lastAgo, avg: total / orders.length, first: orders[0].at, last: last.at, orders: orders.length } };
+  }
+  // Referido que la cuenta autorizó en su encuesta: aún no llega como formulario del negocio referido.
+  function liveReferralLeads() {
+    const c = liveCycle();
+    if (!c || c.referralConsent !== true || !c.referralBusiness) return [];
+    const business = String(c.referralBusiness).trim();
+    const already = (currentState().referralLeads || []).some(item => keyText(item.business || item.company) === keyText(business) && String(item.referrerAccountId || '') === String(c.accountId));
+    if (already) return [];
+    const order = (c.orders || []).at(-1) || {};
+    return [{ id: `REF-${c.accountId}`, name: 'Contacto por confirmar', company: business, business, comuna: 'Por confirmar', source: `Referido · ${c.company || 'cuenta del portal'}`, referralLead: true, referralPending: true, referrerAccountId: c.accountId, referralCode: c.accountCode, stage: 'Lead', at: Number(c.referralSentAt || order.npsAt || order.receivedAt || 0), live: false, dataTest: true }];
+  }
+  function npsEntries(account) {
+    const rows = (account?.orders || []).filter(order => order.npsScore !== null && order.npsScore !== undefined && Number.isFinite(Number(order.npsScore))).map(order => ({ score: Number(order.npsScore), at: Number(order.npsAt || order.receivedAt || order.at || 0), orderId: order.id }));
+    if (!rows.length && account?.nps != null && Number.isFinite(Number(account.nps))) rows.push({ score: Number(account.nps), at: 0, orderId: null });
+    return rows;
+  }
+  function lastNps(account) {
+    const rows = npsEntries(account).sort((a, b) => b.at - a.at);
+    return rows.length ? rows[0].score : null;
+  }
+  function isDetractor(account) { const score = lastNps(account); return score != null && score <= 6; }
+  function isPromoter(account) { const score = lastNps(account); return score != null && score >= 9; }
+  function npsSummary() {
+    const responses = accounts().flatMap(account => npsEntries(account));
+    const n = responses.length;
+    const promoters = responses.filter(item => item.score >= 9).length;
+    const passives = responses.filter(item => item.score >= 7 && item.score <= 8).length;
+    const detractors = responses.filter(item => item.score <= 6).length;
+    const average = n ? responses.reduce((sum, item) => sum + item.score, 0) / n : null;
+    return { n, promoters, passives, detractors, average, nps: n ? Math.round((promoters - detractors) / n * 100) : null };
+  }
+  function npsMetric(summary) {
+    if (!summary.n) return metric('NPS', 'Pendiente', 'Se obtiene con la encuesta que responde el comprador al confirmar la recepción de un pedido del portal · meta 52');
+    const avg = summary.average.toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const sign = summary.nps > 0 ? '+' : '';
+    return metric('NPS', `${sign}${summary.nps}`, `Meta 52 · promedio ${avg} de 10 · ${summary.promoters} promotor${summary.promoters === 1 ? '' : 'es'}, ${summary.passives} pasivo${summary.passives === 1 ? '' : 's'}, ${summary.detractors} detractor${summary.detractors === 1 ? '' : 'es'} de ${summary.n} respuesta${summary.n === 1 ? '' : 's'}`);
+  }
+  function riskShort(account) {
+    if (openTickets(account.id).length) return 'Postventa abierta';
+    const score = lastNps(account);
+    if (score != null && score <= 6) return `NPS ${score}/10 · detractor`;
+    const lastAgo = accountStats(account).lastAgo;
+    return lastAgo == null ? 'Sin fecha de compra' : `Hace ${lastAgo} días sin compra`;
+  }
+  function productLabel(key) {
+    let lines = [];
+    try { lines = window.R3C2?.data?.().prices?.lines || []; } catch (_) { lines = []; }
+    const line = lines.find(item => item.k === key || item.catalogId === key);
+    return line?.t || D.PRODUCTS?.[key]?.name || String(key || 'Producto');
+  }
+  const stockLabel = status => status === 'agotado' ? 'Sin disponibilidad · escenario de prueba' : status === 'bajo' ? 'Disponibilidad baja · escenario de prueba' : 'Alerta de stock · escenario de prueba';
+  function stockRequestRows() {
+    const s = currentState();
+    const c = s.customerCycle || {};
+    const accountId = c.accountId || null;
+    const accountName = c.company || 'Cuenta del portal';
+    const list = (c.stockAlertRequests || []).map(item => ({ productId: item.productId, status: item.status, at: Number(item.at || 0), accountId, accountName }));
+    const seen = new Set(list.map(item => `${item.productId}|${item.status}`));
+    (s.events || []).filter(event => event.eventName === 'stock_alert_requested').forEach(event => {
+      const key = `${event.product_id}|${event.stock_status}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      list.push({ productId: event.product_id, status: event.stock_status, at: Number(event.at || 0), accountId, accountName });
+    });
+    return list.sort((a, b) => b.at - a.at);
+  }
+  function stockBlockBody() {
+    const requests = stockRequestRows();
+    if (!requests.length) return `<div class="crm2-list">${empty('Sin alertas de stock en la prueba', 'Aparecen cuando el comprador pide «Avísame cuando vuelva» en un producto sin disponibilidad. No consultan inventario real.')}</div>`;
+    const rows = limitedList(requests, item => {
+      const title = productLabel(item.productId);
+      const sub = `${stockLabel(item.status)} · ${item.accountName}`;
+      const meta = `Aviso pedido ${fmtDate(item.at)}`;
+      return item.accountId && accountById(item.accountId) ? row(title, sub, meta, `data-c2="open-account" data-id="${esc(item.accountId)}"`, 'Avísame cuando vuelva') : staticRow(title, sub, meta, 'Avísame cuando vuelva');
+    }, 'Ver todos los avisos');
+    return `<div class="crm2-list">${rows}</div>`;
+  }
+  function staticRow(title, subtitle, meta, badge = '') {
+    return `<div class="crm2-row crm2-row--static"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small></span></div>`;
+  }
+  function referralStatus(lead) {
+    if (lead?.referralPending) return 'Permiso del referido por confirmar';
+    return permission(lead).key === 'yes' ? 'Permiso del referido registrado' : 'Permiso del referido por confirmar';
+  }
+  function promoterStatus() {
+    const c = liveCycle();
+    return c?.referralConsent === true && c.referralBusiness ? `Permiso registrado para ${c.referralBusiness}` : 'La cuenta confirma la invitación en su portal';
+  }
+  function referralNewBody() {
+    const referrals = leads().filter(isReferral).sort((a, b) => Number(b.at || 0) - Number(a.at || 0));
+    const promoters = accounts().filter(isPromoter);
+    const entries = [...referrals.map(lead => ({ kind: 'lead', item: lead })), ...promoters.map(account => ({ kind: 'promoter', item: account }))];
+    if (!entries.length) return empty('Sin referidos nuevos', 'Aparecen cuando el negocio referido completa el formulario o cuando una cuenta promotora registra su permiso.');
+    return `<div class="crm2-list">${limitedList(entries, entry => entry.kind === 'lead'
+      ? row(contactName(entry.item), `${companyName(entry.item)} · ${sourceOf(entry.item)}`, referralStatus(entry.item), `data-c2="open-lead" data-id="${esc(entry.item.id)}"`, 'Referido nuevo')
+      : row(entry.item.name || 'Cuenta', `${entry.item.business || 'Negocio sin dato'} · Promotor NPS ${lastNps(entry.item)}/10`, promoterStatus(), `data-c2="open-account" data-id="${esc(entry.item.id)}"`, 'Invitar a recomendar'), 'Ver todos los referidos')}</div>`;
+  }
+  function replenishBlock(account) {
+    const requests = stockRequestRows().filter(item => String(item.accountId) === String(account.id));
+    const stockRows = requests.length
+      ? requests.map(item => staticRow(productLabel(item.productId), stockLabel(item.status), `Aviso pedido ${fmtDate(item.at)}`, 'Avísame cuando vuelva')).join('')
+      : '<p class="crm2-small-note">Sin alertas de stock ni avisos «Avísame cuando vuelva» en esta cuenta. Aparecen cuando el comprador pide aviso de un producto sin disponibilidad.</p>';
+    return `<div class="crm2-replenish"><p class="crm2-eyebrow">REPOSICIÓN · ALERTAS DE STOCK</p><div class="crm2-list">${stockRows}</div></div>`;
+  }
+  function historyRow(order) {
+    const kind = order.live ? (isRepeatOrder(order) ? 'Pedido repetido' : 'Primer pedido') : '';
+    const received = order.receivedAt ? ` · recibido ${fmtDate(order.receivedAt)}` : '';
+    const nps = order.npsScore !== null && order.npsScore !== undefined && Number.isFinite(Number(order.npsScore)) ? ` · NPS ${Number(order.npsScore)}/10` : '';
+    return `<p class="crm2-activity"><b>${esc(order.id)} · ${money(order.total)}</b><small>${fmtDate(order.at)}${kind ? ` · ${kind}` : ''} · ${esc(order.status || 'Estado por confirmar')}${received}${nps}</small></p>`;
+  }
+  function livePurchase(account) {
+    const orders = (account.orders || []).slice().reverse();
+    const last = orders[0];
+    const freq = accountStats(account).freqDays;
+    const cycle = freq ? `Cada ${freq} días, promedio entre pedidos` : 'Se calcula con la distancia entre dos pedidos confirmados';
+    const reception = !last ? 'Sin pedido' : last.receivedAt ? `Confirmada el ${fmtDate(last.receivedAt)}` : 'Pendiente: la cuenta confirma la recepción en su portal';
+    return `<div class="crm2-purchase-summary"><p><b>Último pedido</b><span>${esc(last?.id || 'Sin pedido registrado')} · ${last?.total ? money(last.total) : 'Sin monto'} · ${esc(last?.status || 'Estado por confirmar')}</span></p><p><b>Recepción</b><span>${esc(reception)}</span></p><p><b>Ciclo</b><span>${esc(cycle)}</span></p><p><b>Productos</b><span>${esc(productNames(last))}</span></p></div><details class="crm2-fold"><summary>Historial de compras (${orders.length})</summary><div class="crm2-fold-body">${orders.slice(0, 5).map(historyRow).join('') || '<p>Sin historial de compra.</p>'}</div></details>`;
+  }
+  function liveReferralDetails(account) {
+    const c = liveCycle();
+    if (!account?.live || !c) return '';
+    const pending = c.referralConsent === true && c.referralBusiness;
+    const score = lastNps(account);
+    if (pending) return `<div class="crm2-referral-details"><b>Recomendación pendiente</b>${labelValue('Negocio recomendado', c.referralBusiness)}${labelValue('Permiso del referido', 'Por confirmar con el negocio referido')}${labelValue('Beneficio para quien refiere', 'Sin beneficio registrado · no pasa a Jefatura')}</div>`;
+    if (score != null && score >= 9) return `<div class="crm2-referral-details"><b>Invitación a recomendar</b>${labelValue('Estado', `Promotor NPS ${score}/10 · la cuenta confirma la invitación en su portal`)}</div>`;
+    return '';
+  }
   const sourceOf = item => item?.source || item?.attribution?.firstTouch?.source || item?.utm_source || 'Origen sin dato registrado';
   const campaignOf = item => item?.campaign || item?.attribution?.firstTouch?.campaign || item?.utm_campaign || (/Campaña/i.test(String(item?.source || '')) ? item.source : 'Sin campaña asociada');
   const pieceOf = item => item?.piece || item?.contentPiece || item?.attribution?.firstTouch?.piece || item?.utm_content || 'Pieza sin registro';
@@ -205,7 +353,9 @@
   function labelValue(label, value) { return `<div class="crm2-kv"><span>${esc(label)}</span><b>${esc(value || 'Sin dato registrado')}</b></div>`; }
   function statusPill(text, kind = '') { return `<span class="crm2-status ${kind ? `crm2-status--${kind}` : ''}"><span aria-hidden="true">${kind === 'good' ? '✓' : kind === 'wait' ? '◷' : kind === 'blocked' ? '!' : '·'}</span>${esc(text)}</span>`; }
   function block(title, copy, body, extra = '') {
-    return `<section class="crm2-block ${extra}"><header class="crm2-block-head"><div><h2>${esc(title)}</h2>${copy ? (copy.length <= 45 ? `<p>${esc(copy)}</p>` : `<details class="crm2-note"><summary>Más información</summary><p>${esc(copy)}</p></details>`) : ''}</div></header>${body}</section>`;
+    const short = Boolean(copy) && copy.length <= 45;
+    const more = copy && !short ? `<details class="crm2-note"><summary>Más información</summary><p>${esc(copy)}</p></details>` : '';
+    return `<section class="crm2-block ${extra}"><header class="crm2-block-head"><div class="crm2-block-title"><h2>${esc(title)}</h2>${short ? `<p>${esc(copy)}</p>` : ''}</div>${more}</header>${body}</section>`;
   }
   function row(title, subtitle, meta, action, badge = '') {
     return `<button class="crm2-row" type="button" ${action} aria-label="${esc(title)}. ${esc(subtitle)}"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small>${icon('arrow')}</span></button>`;
@@ -214,7 +364,7 @@
   function limitedList(items, renderer, label = 'Ver todos') {
     const shown = items.slice(0, 4).map(renderer).join('');
     const extra = items.length > 4 ? `<details class="crm2-more"><summary>${esc(label)} (${items.length})</summary><div class="crm2-more-body">${items.slice(4).map(renderer).join('')}</div></details>` : '';
-    return shown || empty('Sin elementos para revisar', 'No hay registros en este estado.');
+    return shown + extra || empty('Sin elementos para revisar', 'No hay registros en este estado.');
   }
   function listFilter() { return appState().filters || {}; }
   function leadRow(lead, mode = 'sales') {
@@ -228,7 +378,7 @@
   }
   function accountRow(account, mode = 'client') {
     const stats = accountStats(account);
-    const meta = mode === 'reorder' ? (accountNeedsReorder(account) ? 'Toca reponer' : `Ciclo · ${stats.freqDays || 'sin dato'} días`) : `Última compra · ${stats.lastAgo == null ? 'sin dato' : `hace ${stats.lastAgo} días`}`;
+    const meta = mode === 'reorder' ? (accountNeedsReorder(account) ? 'Toca reponer' : (stats.freqDays ? `Ciclo · ${stats.freqDays} días` : 'Ciclo por calcular')) : mode === 'risk' ? riskShort(account) : `Última compra · ${stats.lastAgo == null ? 'sin dato' : `hace ${stats.lastAgo} días`}`;
     const stateLabel = appState().replenishments?.[account.id]?.status || (mode === 'risk' ? 'En riesgo' : accountNeedsReorder(account) && accountAtRisk(account) ? 'Reposición · cuenta en riesgo' : accountNeedsReorder(account) ? 'Reposición por revisar' : accountAtRisk(account) ? 'En riesgo' : 'Cliente activo');
     return row(account.name || 'Cuenta sin nombre', `${account.business || 'Negocio sin dato'} · ${account.comuna || 'Comuna sin dato'}`, meta, `data-c2="open-account" data-id="${esc(account.id)}"`, stateLabel);
   }
@@ -302,7 +452,7 @@
     const passed = sortedNewest(passedLeads());
     const qualified = sortedNewest(leads().filter(lead => lead.stage === 'MQL' && isMql(lead) && !progressFor(lead).estado));
     const due = accounts().filter(accountNeedsReorder).sort((a,b) => accountDue(a) - accountDue(b));
-    const risk = accounts().filter(accountAtRisk).sort((a,b) => Number(accountStats(b).lastAgo || 0) - Number(accountStats(a).lastAgo || 0));
+    const risk = accounts().filter(accountAtRisk).sort((a,b) => Number(isDetractor(b)) - Number(isDetractor(a)) || Number(accountStats(b).lastAgo || 0) - Number(accountStats(a).lastAgo || 0));
     const referrals = leads().filter(isReferral);
     const referralAccounts = accounts().filter(account => account.referral);
     const waiting = currentState().crm2?.followups || [];
@@ -327,7 +477,7 @@
       return row(isLead ? contactName(item) : item.name, `${entry.label} · ${company}`, meta, action, badge);
     }, 'Ver el resto') : empty('Nada urgente por ahora', 'La cola se actualiza con traspasos, ciclos de compra y postventa.');
     const responseBody = waiting.length ? limitedList(waiting, item => row(item.name || item.accountName || 'Contacto', `${item.channel || 'Canal por confirmar'} · ${item.date ? fmtDate(item.date) : 'Seguimiento registrado'}`, item.status || 'Esperando respuesta', `data-c2="open-lead" data-id="${esc(item.leadId || item.id)}"`, 'Esperan respuesta')) : `<div class="crm2-inline-note">Las conversaciones y propuestas viven en la ficha del contacto.</div>`;
-    return block('A atender hoy', 'Lo primero es lo que otro equipo pasó o lo que el ciclo ya señala.', queueBody) + block('Esperan respuesta', 'Vuelve a la conversación sin perder el contacto.', responseBody);
+    return block('A atender hoy', 'Lo primero es lo que otro equipo pasó o lo que el ciclo ya señala.', queueBody) + block('Referidos nuevos', 'Permiso y beneficio antes de contactar.', referralNewBody()) + block('Esperan respuesta', 'Vuelve a la conversación sin perder el contacto.', responseBody);
   }
   function buyerCrmLink() {
     return '<p class="crm2-route-helper"><a href="#R17" data-c2-go="R17">Abrir CRM por comprador</a></p>';
@@ -344,7 +494,7 @@
     const all = accounts();
     const due = all.filter(accountNeedsReorder).sort((a,b) => accountDue(a)-accountDue(b));
     const dueIds = new Set(due.map(account => String(account.id)));
-    const risk = all.filter(accountAtRisk).filter(account => !dueIds.has(String(account.id))).sort((a,b) => Number(accountStats(b).lastAgo||0)-Number(accountStats(a).lastAgo||0));
+    const risk = all.filter(accountAtRisk).filter(account => !dueIds.has(String(account.id))).sort((a,b) => Number(isDetractor(b))-Number(isDetractor(a)) || Number(accountStats(b).lastAgo||0)-Number(accountStats(a).lastAgo||0));
     const other = all.filter(account => !due.includes(account) && !risk.includes(account));
     const first = localRoute() === 'R10' ? due : due;
     return block('Toca reponer', 'La sugerencia sigue el historial; confirma cantidades y despacho con la cuenta.', `<div class="crm2-list">${limitedList(first,account => accountRow(account,'reorder'),'Ver todas las reposiciones')}</div>`) +
@@ -472,16 +622,11 @@
   }
   function digitalReorderMetrics() {
     const orders = accounts().flatMap(item => item.orders || []);
-    const known = orders.filter(order => order.channel || order.source || order.salesChannel);
-    if (!known.length) return { value:'Sin dato', note:'La muestra no registra el canal de compra · meta del informe: 40 %' };
-    const digital = known.filter(order => /digital|portal|web/i.test(String(order.channel || order.source || order.salesChannel || ''))).length;
-    return { value:`${Math.round(digital / known.length * 100)} %`, note:`${digital} de ${known.length} pedidos con canal registrado · meta del informe: 40 %` };
-  }
-  function npsValue() {
-    const direct = currentState().npsScore ?? currentState().customerCycle?.npsScore;
-    if (Number.isFinite(Number(direct))) return Number(direct);
-    const nums = accounts().map(item => Number(item.nps)).filter(value => Number.isFinite(value));
-    return nums.length ? Math.round(nums.reduce((a,b)=>a+b,0)/nums.length) : null;
+    const received = orders.filter(order => order.receivedAt).length;
+    const known = orders.filter(order => isRepeatOrder(order) && reorderChannel(order));
+    if (!known.length) return { value:'Pendiente', note:`Se calcula con los pedidos repetidos del portal: aparece cuando una cuenta confirma un segundo pedido · ${received} recepciones confirmadas · meta 40 %` };
+    const digital = known.filter(order => /portal|digital|web/i.test(reorderChannel(order))).length;
+    return { value:`${Math.round(digital / known.length * 100)} %`, note:`${digital} de ${known.length} pedidos repetidos con canal registrado · ${received} recepciones confirmadas · meta 40 %` };
   }
   function metric(label, value, note, key = false) { return `<article class="crm2-metric"><span>${esc(label)}</span><b class="${key ? 'crm2-metric-key' : ''}">${esc(value)}</b><small>${esc(note)}</small></article>`; }
   function managerSummary() {
@@ -489,12 +634,12 @@
     const sql = leads().filter(lead => statusOfLead(lead).startsWith('SQL')).length;
     const goal = Number(appState().goalSales || 0);
     const qualified = leads().filter(isMql).length;
-    const nps = npsValue();
+    const npsInfo = npsSummary();
     const digital = digitalReorderMetrics();
     const approvals = pendingApprovals().slice(0,3);
     const decision = approvals.length ? limitedList(approvals, item => row(item.titulo || 'Solicitud pendiente', item.detalle || item.motivo || 'Revisión humana pendiente', item.monto ? `Pack catálogo · ${money(item.monto)}` : 'Monto no registrado', `data-c2="review-approval" data-id="${esc(item.id)}"`, item.dataTest ? 'Dato de prueba' : 'Pendiente')) : empty('No hay excepciones pendientes','Las cotizaciones normales no esperan aprobación de Jefatura.');
     const salesNote = goal > 0 ? `${Math.round(sales / goal * 100)} % de la meta ingresada (${money(goal)}); datos de prueba` : 'Meta comercial sin registrar · muestra financiera de prueba';
-    const metricGrid = `<div class="crm2-metrics">${metric('Ventas netas · 90 días', money(sales), salesNote, true)}${metric('Leads calificados', String(qualified), `${sql} SQL aceptados · meta del informe: +25 % vs base; base sin registrar`)}${metric('Reposición digital', digital.value, digital.note)}${metric('NPS', nps == null ? 'Sin dato' : String(nps), 'Meta del programa: 52')}</div>`;
+    const metricGrid = `<div class="crm2-metrics">${metric('Ventas netas · 90 días', money(sales), salesNote, true)}${metric('Leads calificados', String(qualified), `${sql} SQL aceptados · meta del informe: +25 % vs base; base sin registrar`)}${metric('Reposición digital', digital.value, digital.note)}${npsMetric(npsInfo)}</div>`;
     const details = `<details class="crm2-fold"><summary>Todos los indicadores</summary><div class="crm2-fold-body crm2-kpi-details">${labelValue('Retención','Meta 90 % · base 86 %')}${labelValue('Quiebres OCS','Meta: −30 %')}${labelValue('OTIF','Meta: 96 %')}${labelValue('Ticket neto','Meta: +10 % en cuentas activadas')}${labelValue('Cuentas activadas','Meta: 100 en doce meses')}${labelValue('CAC','Escenario del piloto · revisar en Metas y canales')}</div></details>`;
     return block('Resultados del programa', 'La muestra de prueba y las metas del informe se muestran por separado.', metricGrid) + block('Decisiones de hoy', 'Lo que compromete condiciones comerciales requiere una persona.', decision + details);
   }
@@ -562,7 +707,7 @@
     const tickets = window.M4R3?.postventa?.() || [];
     const open = tickets.filter(ticket => !/cerrad|resuelt|finaliz/i.test(String(ticket.status || '')));
     const ops = open.slice(0,3).map(ticket => row(ticket.customer?.name || ticket.folio || 'Caso de postventa', `${ticket.type || 'Incidencia'} · ${ticket.status || 'Recibido'}`, ticket.responsible || 'Responsable sin dato', `data-c2="open-account" data-id="${esc(ticket.customerId || ticket.folio)}"`, 'Postventa')).join('');
-    return block('Carga y operación del equipo', 'Conteos del prototipo; no son productividad ni niveles de servicio reales.', work) + block('Postventa primero', 'Los casos abiertos se revisan antes de preparar una venta.', `<div class="crm2-list">${ops || empty('Sin tickets abiertos','Postventa no registra casos pendientes.')}</div><details class="crm2-fold"><summary>CRM por comprador y etapas</summary><div class="crm2-fold-body"><p>Acceso preservado en <a href="#R17" data-c2-go="R17">CRM por comprador</a>, con permisos y siguiente acción.</p></div></details>`);
+    return block('Carga y operación del equipo', 'Conteos del prototipo; no son productividad ni niveles de servicio reales.', work) + block('Postventa primero', 'Los casos abiertos se revisan antes de preparar una venta.', `<div class="crm2-list">${ops || empty('Sin tickets abiertos','Postventa no registra casos pendientes.')}</div><details class="crm2-fold"><summary>CRM por comprador y etapas</summary><div class="crm2-fold-body"><p>Acceso preservado en <a href="#R17" data-c2-go="R17">CRM por comprador</a>, con permisos y siguiente acción.</p></div></details>`) + block('Alertas de stock', 'Escenario de prueba; sin inventario real.', stockBlockBody());
   }
   function managerOperations() {
     const all = accounts();
@@ -594,12 +739,13 @@
   }
   function postventaFor(account) { return openTickets(account?.id); }
   function productNames(order) {
-    return (order?.items || []).map(item => `${D.PRODUCTS?.[item.p]?.name || item.p} × ${item.qty}`).join(' · ') || 'Productos sin detalle';
+    return (order?.items || []).map(item => `${productLabel(item.p ?? item.k)} × ${item.qty}`).join(' · ') || 'Productos sin detalle';
   }
   function accountValue(account) {
     const value = scoreAccount(account);
     return value?.valor?.puntaje ?? value?.puntaje ?? account?.st?.fin ?? 'Sin puntaje';
   }
+  function npsChip(score) { return statusPill(`NPS ${score}/10 · ${score >= 9 ? 'promotor' : score >= 7 ? 'pasivo' : 'detractor'}`, score <= 6 ? 'blocked' : score >= 9 ? 'good' : ''); }
   function detailPage(role) {
     const s = appState();
     const { lead, account } = getSelected();
@@ -607,10 +753,10 @@
     const item = account || lead;
     if (!item) return block('Ficha del cliente','No hay un registro seleccionado.',empty('Sin ficha','Vuelve a la lista para elegir un contacto o cuenta.'));
     const origin = sourceOf(item);
-    const priority = isAccount ? (accountNeedsReorder(account) ? 'Toca reponer' : (riskReason(account).startsWith('Postventa') ? 'Servicio primero' : 'Cliente activo')) : priorityLabel(lead);
+    const priority = isAccount ? (accountNeedsReorder(account) ? 'Toca reponer' : (riskReason(account).startsWith('Postventa') || isDetractor(account) ? 'Servicio primero' : 'Cliente activo')) : priorityLabel(lead);
     const value = isAccount ? `Valor de cuenta · ${accountValue(account)}/100` : valueLabel(lead);
     const perm = permission(item);
-    const identity = `<div class="crm2-detail-identity"><div><p class="crm2-eyebrow">${esc(isAccount ? 'CUENTA' : 'CONTACTO')} · ${esc(isAccount ? item.id : item.id || 'Dato de prueba')}</p></div><div class="crm2-detail-chips">${statusPill(priority, priority.includes('Servicio') ? 'blocked' : '')}${statusPill(value,'')}${statusPill(origin,'')}${role === 'marketing' && !isAccount ? statusPill(perm.label,perm.key === 'yes' ? 'good' : 'wait') : ''}</div></div>`;
+    const identity = `<div class="crm2-detail-identity"><div><p class="crm2-eyebrow">${esc(isAccount ? 'CUENTA' : 'CONTACTO')} · ${esc(isAccount ? item.id : item.id || 'Dato de prueba')}</p></div><div class="crm2-detail-chips">${statusPill(priority, priority.includes('Servicio') ? 'blocked' : '')}${statusPill(value,'')}${statusPill(origin,'')}${isAccount && lastNps(account) != null ? npsChip(lastNps(account)) : ''}${role === 'marketing' && !isAccount ? statusPill(perm.label,perm.key === 'yes' ? 'good' : 'wait') : ''}</div></div>`;
     const actionReason = lead ? whyValue(lead, role === 'jefatura' || role === 'ventas') : riskReason(account);
     const activity = isAccount ? `<div class="crm2-detail-facts">${labelValue('Frecuencia',accountStats(account).freqDays ? `Cada ${accountStats(account).freqDays} días` : 'Sin historial suficiente')}${labelValue('Última compra',accountStats(account).lastAgo == null ? 'Sin dato' : `Hace ${accountStats(account).lastAgo} días`)}${labelValue('Ticket promedio',Number.isFinite(Number(accountStats(account).avg)) ? money(accountStats(account).avg) : 'Sin dato')}</div>` : `<div class="crm2-detail-facts">${labelValue('Origen',origin)}${labelValue('Landing',item.landing?.slug || item.entryPage || 'Sin registro')}${labelValue('Campaña',campaignOf(item))}${labelValue('Primer contacto',fmtDate(item.at || item.createdAt))}</div><p class="crm2-score-reason">${esc(actionReason)}</p><div class="crm2-score-dual">${statusPill(`Interés · ${interestLabel(lead)}`)}${statusPill(`Valor esperado · ${scoreValue(lead)?.puntaje ?? 0}/100`)}</div>`;
     const interest = Number(scoreInterest(lead)?.puntaje || 0);
@@ -627,7 +773,7 @@
     const conversation = `<details class="crm2-fold"><summary>Conversación (${convo.length})</summary><div class="crm2-fold-body">${convo.map(message=>`<p class="crm2-activity"><b>${esc(message.from || 'Equipo')}</b><span>${esc(message.text || message.body || '')}</span></p>`).join('') || '<p>La conversación aparecerá aquí cuando se registre una propuesta o un mensaje simulado.</p>'}<button type="button" class="crm2-btn crm2-btn--secondary" data-c2="quote" data-id="${esc(item.id)}">Enviar propuesta por este chat</button></div></details>`;
     const tickets = isAccount ? postventaFor(account) : [];
     const referrerAccount = !isAccount && isReferral(item) ? accountById(item.referrerAccountId) : null;
-    const referralDetails = isAccount && item.referral ? `<div class="crm2-referral-details"><b>Recomendación registrada</b>${labelValue('Recomendó',item.referral)}${labelValue('Permiso del referido','Pendiente de confirmar')}${labelValue('Negocio B2B',item.business ? `${item.business} · validar actividad y vínculo` : 'Sin dato')}${labelValue('Beneficio para quien refiere',item.benefit || item.beneficio || 'Sin beneficio registrado')}</div>` : !isAccount && isReferral(item) ? `<div class="crm2-referral-details"><b>Recomendación registrada</b>${labelValue('Origen','Origen referido')}${labelValue('Cuenta que recomienda',referrerAccount?.name || item.referrerAccountId || 'Sin cuenta asociada')}${labelValue('Código de referido',item.referralCode || 'Sin código registrado')}${labelValue('Negocio B2B',item.business ? `${item.business} · validar actividad y vínculo` : 'Sin dato')}${labelValue('Permiso del referido',perm.label)}${labelValue('Beneficio para quien refiere',item.benefit || item.referralBenefit || 'Sin beneficio registrado')}</div>` : '';
+    const referralDetails = isAccount && item.referral ? `<div class="crm2-referral-details"><b>Recomendación registrada</b>${labelValue('Recomendó',item.referral)}${labelValue('Permiso del referido','Pendiente de confirmar')}${labelValue('Negocio B2B',item.business ? `${item.business} · validar actividad y vínculo` : 'Sin dato')}${labelValue('Beneficio para quien refiere',item.benefit || item.beneficio || 'Sin beneficio registrado')}</div>` : !isAccount && isReferral(item) ? `<div class="crm2-referral-details"><b>Recomendación registrada</b>${labelValue('Origen','Origen referido')}${labelValue('Cuenta que recomienda',referrerAccount?.name || item.referrerAccountId || 'Sin cuenta asociada')}${labelValue('Código de referido',item.referralCode || 'Sin código registrado')}${labelValue('Negocio B2B',item.business ? `${item.business} · validar actividad y vínculo` : 'Sin dato')}${labelValue('Permiso del referido', item.referralPending ? 'Por confirmar con el negocio referido' : perm.label)}${labelValue('Beneficio para quien refiere',item.benefit || item.referralBenefit || 'Sin beneficio registrado · no pasa a Jefatura')}</div>` : '';
     const postventa = tickets.length ? `<div class="crm2-alert-panel"><b>Resolver postventa antes de vender</b><span>${esc(tickets[0].type || tickets[0].detail || 'Caso abierto')} · ${esc(tickets[0].status || 'Pendiente')}</span></div>` : '';
     const actions = isAccount ? `<div class="crm2-detail-actions"><button class="crm2-btn crm2-btn--secondary" type="button" data-c2="open-reorder" data-id="${esc(item.id)}">Preparar reposición</button><button class="crm2-btn crm2-btn--secondary" type="button" data-c2="start-followup" data-id="${esc(item.id)}">Agendar contacto</button>${item.referral ? `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="open-referral" data-id="${esc(item.id)}">Revisar referido</button>` : ''}</div>` : role === 'ventas' ? '' : `<div class="crm2-detail-actions"><button class="crm2-btn crm2-btn--primary" type="button" data-c2="quote" data-id="${esc(item.id)}">Preparar propuesta</button>${role === 'marketing' ? `${isMql(item) ? statusPill('MQL registrado','good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="mark-mql" data-id="${esc(item.id)}">Marcar como calificado (MQL)</button>`}${progressFor(item).estado ? statusPill(statusOfLead(item),progressFor(item).estado==='devuelto'?'blocked':'good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="pass-sales" data-id="${esc(item.id)}">Pasar a Ventas</button>`}` : ''}</div>`;
     const referralDataAction = !isAccount && isReferral(item) && role === 'ventas' ? `<div class="crm2-detail-actions">${secondary('Pedir datos a Marketing','request-referral-data',`data-id="${esc(item.id)}"`)}</div>` : '';
@@ -635,9 +781,9 @@
     const canSchedule = role !== 'marketing' || perm.key === 'yes';
     const scheduleControl = canSchedule ? secondary('Programar seguimiento','schedule',`data-id="${esc(item.id)}" data-kind="${isAccount ? 'account' : 'lead'}"`) : `<span class="crm2-blocked-copy">Marketing no programa promociones sin permiso registrado.</span>`;
     const folded = `<details class="crm2-fold"><summary>Permisos y preferencias</summary><div class="crm2-fold-body">${labelValue('Permiso de promoción',perm.label)}${permissionControls}${scheduleControl} ${secondary('Registrar contacto','mark-contacted',`data-id="${esc(item.id)}"`)}</div></details>`;
-    const group1 = block('Quién es', '', identity + referralDetails);
+    const group1 = block('Quién es', '', identity + referralDetails + (isAccount ? liveReferralDetails(account) : ''));
     const group2 = block('Qué hizo', 'La actividad reciente explica el siguiente paso.', activity + qualification + historyDetails + (isAccount ? '' : conversation));
-    const group3 = block(isAccount ? 'Qué compra y qué hacer ahora' : 'Qué cotiza y qué hacer ahora', isAccount ? 'Usa el historial para preparar la siguiente reposición.' : 'La sugerencia acompaña la decisión; precio y stock se confirman antes de compartir.', `${postventa}${purchase}${actions}${referralDataAction}<div data-inline-panel></div>${folded}`);
+    const group3 = block(isAccount ? 'Compra y reposición' : 'Qué cotiza y qué hacer ahora', isAccount ? 'Usa el historial para preparar la siguiente reposición.' : 'La sugerencia acompaña la decisión; precio y stock se confirman antes de compartir.', `${postventa}${isAccount && item.live ? livePurchase(account) : purchase}${isAccount ? replenishBlock(account) : ''}${actions}${referralDataAction}<div data-inline-panel></div>${folded}`);
     let actionbar = '';
     if (!isAccount && role === 'ventas') {
       const reasonSelect = `<select class="crm2-action-select" data-return-reason="${esc(item.id)}" aria-label="Motivo de devolución"><option value="">Motivo para devolver</option><option>Falta volumen</option><option>No contesta</option><option>Cotiza a futuro</option><option>Falta presupuesto</option></select>`;
@@ -937,8 +1083,8 @@
     const account = accountById(id);
     if (!account) return;
     const last = (account.orders || []).at(-1);
-    const orderItems = last?.items || [];
-    const productList = orderItems.map(item => `<li><label>${esc(D.PRODUCTS?.[item.p]?.name || item.p)}<input type="number" min="0" step="1" inputmode="numeric" data-reorder-qty="${esc(item.p)}" value="${esc(item.qty)}" aria-label="Cantidad de ${esc(D.PRODUCTS?.[item.p]?.name || item.p)}"></label></li>`).join('') || '<li>Sin productos del último pedido para sugerir cantidades.</li>';
+    const orderItems = (last?.items || []).map(item => ({ p: item.p ?? item.k, qty: item.qty }));
+    const productList = orderItems.map(item => `<li><label>${esc(productLabel(item.p ?? item.k))}<input type="number" min="0" step="1" inputmode="numeric" data-reorder-qty="${esc(item.p)}" value="${esc(item.qty)}" aria-label="Cantidad de ${esc(productLabel(item.p ?? item.k))}"></label></li>`).join('') || '<li>Sin productos del último pedido para sugerir cantidades.</li>';
     const panel = root()?.querySelector('[data-inline-panel]');
     if (!panel) return;
     panel.innerHTML = `<section class="crm2-inline-panel"><div><p class="crm2-eyebrow">REPOSICIÓN · DATO DE PRUEBA</p><h2>${esc(account.name)}</h2><p>Se sugieren las cantidades del último pedido; confirma con la cuenta qué necesita ahora.</p><ul>${productList}</ul><p class="crm2-small-note">Inventario, precio vigente y despacho no están conectados. Déjalos por confirmar.</p></div><label>Nota de preparación<input data-reorder-note placeholder="Dato por confirmar"></label><div class="crm2-row-actions">${primary('Dejar lista','save-reorder',`data-id="${esc(id)}"`)}${secondary('Cancelar','close-inline')}</div></section>`;
