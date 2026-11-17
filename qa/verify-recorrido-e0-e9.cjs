@@ -34,6 +34,14 @@ async function makeContext(browser, width) {
   page.on('pageerror', (error) => errors.push(error.message));
   return { ctx, page, errors };
 }
+async function revealInFold(locator) {
+  await locator.evaluate((node) => {
+    for (let parent = node.parentElement; parent; parent = parent.parentElement) {
+      if (parent instanceof HTMLDetailsElement) parent.open = true;
+    }
+  });
+}
+const cleanCRMText = value => String(value || '').replace(/a definir con Marley/gi, 'por confirmar con el equipo Marley');
 // R5 (14-nov): en R5 el formulario de las landings va plegado en #ld-form-disclosure; abrirlo antes de llenar los datos.
 async function openLandingForm(p) {
   // coordinador (14-nov): en la ventana nueva del referido, esperar a que la landing cargue antes de abrir el formulario plegado.
@@ -296,25 +304,26 @@ async function journey(browser, base, width) {
     await crmPage.evaluate((state) => localStorage.setItem('marleyMVP:v7:prototype', JSON.stringify(state)), crmState);
     await crmPage.reload({ waitUntil: 'domcontentloaded' });
     await crmPage.evaluate((id) => { M4.setRole('ventas'); M4.select(id); }, referralLead.id);
-    await crmPage.locator('#app').getByText('Cuenta que recomienda').waitFor({ state: 'visible' });
-    const referralCrm = await crmPage.locator('#app').innerText();
+    await crmPage.locator('#crm-v2-root').getByText('Cuenta que recomienda').waitFor({ state: 'visible' });
+    const referralCrm = await crmPage.locator('#crm-v2-root').innerText();
     assert.ok(referralCrm.includes('Origen referido'));
     assert.ok(referralCrm.includes(referralLead.referrerAccountId));
     assert.ok(referralCrm.includes(referralLead.referralCode));
     assert.equal(await crmPage.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
     await crmPage.screenshot({ path: evidencePrefix + '_E9_CRM_referido_R04.png', fullPage: true });
     await crmPage.evaluate(() => { location.hash = '#R17'; });
-    await crmPage.locator('[data-a1-buyer-profile]').waitFor({ state: 'visible' });
-    await crmPage.locator('.a1crm-role-note[data-a1-role-view="ventas"]').waitFor({ state: 'visible' });
-    const referralBuyerCRM = await crmPage.locator('#app').innerText();
+    await revealInFold(crmPage.locator('#crm-v2-root [data-a1-buyer-profile]'));
+    await crmPage.locator('#crm-v2-root [data-a1-buyer-profile]').waitFor({ state: 'visible' });
+    await crmPage.locator('#crm-v2-root .a1crm-role-note[data-a1-role-view="ventas"]').waitFor({ state: 'attached' });
+    const referralBuyerCRM = await crmPage.locator('#crm-v2-root').innerText();
     assert.ok(referralBuyerCRM.includes('Rocío Fuentes'));
     assert.ok(referralBuyerCRM.includes('Restaurante Patio Sur'));
     assert.ok(referralBuyerCRM.includes('Origen referido'));
     assert.ok(referralBuyerCRM.includes(referralLead.referrerAccountId));
-    assert.equal(await crmPage.locator('[data-a1-run-id]').innerText(), `A1-CRM-20261111-${width}`);
+    assert.equal(await crmPage.locator('#crm-v2-root [data-a1-run-id]').evaluate(node => node.textContent.trim()), `A1-CRM-20261111-${width}`);
     await crmPage.screenshot({ path: evidencePrefix + '_E9_CRM_referido.png', fullPage: true });
-    assert.equal(await crmPage.locator('[data-a1-email]').count(), 12, 'the CRM catalog links all 12 final A3 emails');
-    const crmEmailLinks = await crmPage.locator('[data-a1-email]').evaluateAll((cards) => cards.map((card) => ({ id: card.getAttribute('data-a1-email'), href: card.querySelector('[data-a1-email-id]')?.getAttribute('href') })));
+    assert.equal(await crmPage.locator('#crm-v2-root [data-a1-email]').count(), 12, 'the CRM catalog links all 12 final A3 emails');
+    const crmEmailLinks = await crmPage.locator('#crm-v2-root [data-a1-email]').evaluateAll((cards) => cards.map((card) => ({ id: card.getAttribute('data-a1-email'), href: card.querySelector('[data-a1-email-id]')?.getAttribute('href') })));
     assert.deepEqual(crmEmailLinks.map((item) => item.id), crmContract.email_catalog.map((item) => item.id));
     for (const item of crmEmailLinks) {
       assert.equal(new URL(item.href, base).pathname, `/captacion/correos/${item.id}.html`);
@@ -323,55 +332,70 @@ async function journey(browser, base, width) {
     const referralEmailsBeforeBrowse = await crmPage.evaluate(() => M4.get().emails.length);
     for (const role of ['marketing', 'jefatura', 'ventas']) {
       await crmPage.evaluate((nextRole) => { M4.setRole(nextRole); location.hash = '#R17'; }, role);
-      await crmPage.locator(`.a1crm-role-note[data-a1-role-view="${role}"]`).waitFor({ state: 'visible' });
-      assert.equal(await crmPage.locator('[data-a1-accept-sql]').count(), 0, `${role} cannot accept a non-qualified referral as SQL`);
+      await crmPage.locator(`#crm-v2-root .a1crm-role-note[data-a1-role-view="${role}"]`).waitFor({ state: 'attached' });
+      assert.equal(await crmPage.locator('#crm-v2-root [data-a1-accept-sql]').count(), 0, `${role} cannot accept a non-qualified referral as SQL`);
       assert.equal(await crmPage.evaluate(() => M4.get().emails.length), referralEmailsBeforeBrowse, 'viewing CRM roles does not send or add email');
       assert.equal(await crmPage.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
       if (role === 'ventas') await crmPage.screenshot({ path: evidencePrefix + '_CRM_referido_ventas.png', fullPage: true });
     }
 
     const buyerCrmPage = await ctx.newPage();
+    const crmV2 = buyerCrmPage.locator('#crm-v2-root');
     const buyerCrmErrors = [];
     buyerCrmPage.on('pageerror', (error) => buyerCrmErrors.push(error.message));
     await buyerCrmPage.goto(new URL('/index.html?qa=1#R17', base).toString(), { waitUntil: 'domcontentloaded' });
     await buyerCrmPage.evaluate((state) => localStorage.setItem('marleyMVP:v7:prototype', JSON.stringify(state)), primaryCrmState);
     await buyerCrmPage.reload({ waitUntil: 'domcontentloaded' });
     await buyerCrmPage.evaluate((id) => { M4.setRole('marketing'); M4.select(id); location.hash = '#R17'; }, primaryCrmState.lead.id);
-    await buyerCrmPage.locator('[data-a1-buyer-profile]').waitFor({ state: 'visible' });
-    await buyerCrmPage.locator('.a1crm-role-note[data-a1-role-view="marketing"]').waitFor({ state: 'visible' });
-    assert.equal(await buyerCrmPage.locator('.a1crm-side [href="#R17"]').count(), 1);
-    assert.equal(await buyerCrmPage.locator('[data-a1-run-id]').innerText(), `A1-CRM-20261111-${width}`);
-    assert.equal((await buyerCrmPage.locator('.a1crm-header .a1crm-card h2').innerText()).toLocaleLowerCase(), 'camila rojas', 'viewport and run ID do not enter the visible contact name');
-    const buyerOptions = await buyerCrmPage.locator('[data-a1-buyer-select] option').evaluateAll((options) => options.map((option) => option.value));
+    await revealInFold(crmV2.locator('[data-a1-buyer-profile]'));
+    await crmV2.locator('[data-a1-buyer-profile]').waitFor({ state: 'visible' });
+    await crmV2.locator('.a1crm-role-note[data-a1-role-view="marketing"]').waitFor({ state: 'attached' });
+    assert.equal(await buyerCrmPage.locator('.crm2-nav [data-c2-go]').count(), 4, 'the role navigation keeps the four primary entries');
+    await buyerCrmPage.evaluate(() => { location.hash = '#R12'; });
+    await crmV2.locator('[data-c2-go="R17"]').waitFor({ state: 'visible' });
+    await crmV2.locator('[data-c2-go="R17"]').click();
+    await buyerCrmPage.waitForFunction(() => location.hash === '#R17');
+    await revealInFold(crmV2.locator('[data-a1-buyer-profile]'));
+    await crmV2.locator('[data-a1-buyer-profile]').waitFor({ state: 'visible' });
+    assert.equal(await crmV2.locator('[data-a1-run-id]').evaluate(node => node.textContent.trim()), `A1-CRM-20261111-${width}`);
+    assert.equal((await crmV2.locator('.a1crm-header .a1crm-card h2').innerText()).toLocaleLowerCase(), 'camila rojas', 'viewport and run ID do not enter the visible contact name');
+    const buyerOptions = await crmV2.locator('[data-a1-buyer-select] option').evaluateAll((options) => options.map((option) => option.value));
     assert.deepEqual(buyerOptions, crmContract.buyers.map((buyer) => buyer.code), 'all seven buyer profiles use the fixed codes');
     const initialEmails = await buyerCrmPage.evaluate(() => M4.get().emails.length);
-    const funnelStages = await buyerCrmPage.locator('[data-a1-stage]').evaluateAll((items) => items.map((item) => item.getAttribute('data-a1-stage')));
+    await revealInFold(crmV2.locator('[data-a1-stage]').first());
+    const funnelStages = await crmV2.locator('[data-a1-stage]').evaluateAll((items) => items.map((item) => item.getAttribute('data-a1-stage')));
     assert.deepEqual(funnelStages, crmContract.funnel.map((item) => item.stage), 'the single funnel renders all 11 contracted stages in order');
     for (const stage of crmContract.funnel) {
-      const content = await buyerCrmPage.locator(`[data-a1-stage="${stage.stage}"]`).innerText();
-      assert.ok(content.includes(stage.entry), `${stage.stage} shows its contracted entry criterion`);
+      await revealInFold(crmV2.locator(`[data-a1-stage="${stage.stage}"]`));
+      const content = await crmV2.locator(`[data-a1-stage="${stage.stage}"]`).innerText();
+      assert.ok(content.includes(cleanCRMText(stage.entry)), `${stage.stage} shows its contracted entry criterion`);
       assert.ok(content.includes(stage.exit), `${stage.stage} shows its contracted exit criterion`);
     }
-    assert.equal(await buyerCrmPage.locator('[data-a1-assistant]').count(), 6);
-    for (const item of await buyerCrmPage.locator('[data-a1-assistant]').all()) {
+    assert.equal(await crmV2.locator('[data-a1-assistant]').count(), 6);
+    for (const item of await crmV2.locator('[data-a1-assistant]').all()) {
+      await revealInFold(item);
       const content = await item.innerText();
       for (const label of ['Señal', 'Borrador', 'Revisión humana', 'Consecuencia', 'Sin ejecución automática']) assert.ok(content.includes(label));
     }
-    assert.equal(await buyerCrmPage.locator('[data-a1-recovery-id]').count(), 5);
+    assert.equal(await crmV2.locator('[data-a1-recovery-id]').count(), 5);
     for (const scenario of crmContract.recovery_scenarios) {
-      const content = await buyerCrmPage.locator(`[data-a1-recovery-id="${scenario.id}"]`).innerText();
-      assert.ok(content.includes(scenario.permission_base), `${scenario.id} shows its permission base`);
+      await revealInFold(crmV2.locator(`[data-a1-recovery-id="${scenario.id}"]`));
+      const content = await crmV2.locator(`[data-a1-recovery-id="${scenario.id}"]`).innerText();
+      assert.ok(content.includes(cleanCRMText(scenario.permission_base)), `${scenario.id} shows its permission base`);
     }
-    assert.equal(await buyerCrmPage.locator('[data-a1-indicator]').count(), 11);
+    assert.equal(await crmV2.locator('[data-a1-indicator]').count(), 11);
     for (const indicator of crmContract.indicator_definitions) {
-      const content = await buyerCrmPage.locator(`[data-a1-indicator="${indicator.id}"]`).innerText();
-      assert.ok(content.includes(indicator.formula));
-      assert.ok(content.includes(indicator.sample_value));
+      await revealInFold(crmV2.locator(`[data-a1-indicator="${indicator.id}"]`));
+      const content = await crmV2.locator(`[data-a1-indicator="${indicator.id}"]`).innerText();
+      assert.ok(content.includes(cleanCRMText(indicator.formula)));
+      assert.ok(content.includes(cleanCRMText(indicator.sample_value)));
       assert.ok(content.includes('Ejemplo; no es dato Marley'));
     }
     for (const buyer of crmContract.buyers) {
-      await buyerCrmPage.locator('[data-a1-buyer-select]').selectOption(buyer.code);
-      const profile = buyerCrmPage.locator(`[data-a1-buyer-profile="${buyer.code}"]`);
+      await revealInFold(crmV2.locator('[data-a1-buyer-select]'));
+      await crmV2.locator('[data-a1-buyer-select]').selectOption(buyer.code);
+      const profile = crmV2.locator(`[data-a1-buyer-profile="${buyer.code}"]`);
+      await revealInFold(profile);
       await profile.waitFor({ state: 'visible' });
       assert.equal(await profile.locator('.a1crm-role-card').count(), buyer.roles.length, `${buyer.code} displays its four buying roles`);
       const profileText = (await profile.innerText()).toLocaleLowerCase();
@@ -379,24 +403,29 @@ async function journey(browser, base, width) {
         assert.ok(profileText.includes(buyingRole.role.toLocaleLowerCase()));
         for (const title of buyingRole.titles) assert.ok(profileText.includes(title.toLocaleLowerCase()), `${buyer.code} includes ${title}`);
       }
-      const nextStates = await buyerCrmPage.locator('[data-a1-next-state]').evaluateAll((items) => items.map((item) => item.getAttribute('data-a1-next-state')));
+      await revealInFold(crmV2.locator('[data-a1-next-state]').first());
+      const nextStates = await crmV2.locator('[data-a1-next-state]').evaluateAll((items) => items.map((item) => item.getAttribute('data-a1-next-state')));
       assert.deepEqual(nextStates, crmContract.funnel.map((stage) => stage.stage));
       for (const stage of crmContract.funnel) {
-        const actionText = await buyerCrmPage.locator(`[data-a1-next-state="${stage.stage}"]`).innerText();
-        assert.ok(actionText.includes(buyer.next_best_action_by_state[stage.stage]));
+        await revealInFold(crmV2.locator(`[data-a1-next-state="${stage.stage}"]`));
+        const actionText = await crmV2.locator(`[data-a1-next-state="${stage.stage}"]`).innerText();
+        assert.ok(actionText.includes(cleanCRMText(buyer.next_best_action_by_state[stage.stage])));
       }
     }
-    const contractNote = await buyerCrmPage.locator('.a1crm-note').innerText();
-    assert.match(contractNote, /SLA, cobertura[\s\S]*cadencia:[\s\S]*a definir con Marley/i);
+    const scopeSummary = crmV2.locator('details.crm2-buyer-fold > summary').filter({ hasText:'Alcance del prototipo' }).first();
+    await scopeSummary.click();
+    const contractNote = await scopeSummary.evaluate(node => node.nextElementSibling.innerText);
+    assert.match(contractNote, /SLA, cobertura[\s\S]*cadencia:[\s\S]*por confirmar con el equipo Marley/i);
     assert.equal(await buyerCrmPage.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
     assert.equal(await buyerCrmPage.evaluate(() => M4.get().events.filter((event) => event.eventName === 'lead_qualified' && event.qualification_status === 'MQL').length), 0, 'MQL is not recorded automatically by scoring');
     const candidate = await buyerCrmPage.evaluate(() => ({ eligible: M4.isMQL(), emailCount: M4.get().emails.length, score: M4.score(), sql: M4.get().sql }));
     assert.equal(candidate.eligible, true, 'the journey qualifies under the existing score rules');
     assert.equal(candidate.sql, null, 'scoring does not accept SQL');
-    await buyerCrmPage.locator('[data-a1-buyer-select]').selectOption('restaurante');
-    await buyerCrmPage.locator('[data-a1-mark-mql]').waitFor({ state: 'visible' });
+    await revealInFold(crmV2.locator('[data-a1-buyer-select]'));
+    await crmV2.locator('[data-a1-buyer-select]').selectOption('restaurante');
+    await crmV2.locator('[data-a1-mark-mql]').waitFor({ state: 'visible' });
     await buyerCrmPage.screenshot({ path: evidencePrefix + '_CRM_marketing.png', fullPage: true });
-    await buyerCrmPage.locator('[data-a1-mark-mql]').click();
+    await crmV2.locator('[data-a1-mark-mql]').click();
     await buyerCrmPage.waitForFunction(() => M4.get().events.some((event) => event.eventName === 'lead_qualified' && event.qualification_status === 'MQL' && event.actor_type === 'human'));
     const mqlEvent = await buyerCrmPage.evaluate(() => M4.get().events.find((event) => event.eventName === 'lead_qualified' && event.qualification_status === 'MQL'));
     assert.equal(mqlEvent.actor_role, 'Marketing');
@@ -405,13 +434,13 @@ async function journey(browser, base, width) {
     assert.equal(await buyerCrmPage.evaluate(() => M4.get().emails.length), initialEmails, 'marking MQL does not send email');
     await buyerCrmPage.evaluate(() => { M4.acceptSql(); M4.setRole('jefatura'); M4.acceptSql(); });
     assert.equal(await buyerCrmPage.evaluate(() => M4.get().sql), null, 'Marketing and Jefatura cannot accept SQL');
-    assert.equal(await buyerCrmPage.locator('[data-a1-accept-sql]').count(), 0);
+    assert.equal(await crmV2.locator('[data-a1-accept-sql]').count(), 0);
     await buyerCrmPage.screenshot({ path: evidencePrefix + '_CRM_jefatura.png', fullPage: true });
     await buyerCrmPage.evaluate(() => M4.setRole('ventas'));
-    await buyerCrmPage.locator('.a1crm-role-note[data-a1-role-view="ventas"]').waitFor({ state: 'visible' });
-    assert.equal(await buyerCrmPage.locator('[data-a1-accept-sql]').count(), 1, 'only Sales receives the manual SQL action');
+    await crmV2.locator('.a1crm-role-note[data-a1-role-view="ventas"]').waitFor({ state: 'attached' });
+    assert.equal(await crmV2.locator('[data-a1-accept-sql]').count(), 1, 'only Sales receives the manual SQL action');
     const scoreBeforeSql = await buyerCrmPage.evaluate(() => M4.score());
-    await buyerCrmPage.locator('[data-a1-accept-sql]').click();
+    await crmV2.locator('[data-a1-accept-sql]').click();
     const sqlEvent = await buyerCrmPage.evaluate(() => M4.get().events.find((event) => event.eventName === 'lead_qualified' && event.qualification_status === 'SQL'));
     assert.equal(sqlEvent.accepted_by_role, 'Ventas');
     assert.equal(sqlEvent.actor_type, 'human');
@@ -421,12 +450,13 @@ async function journey(browser, base, width) {
     assert.equal(await buyerCrmPage.evaluate(() => M4.get().emails.length), initialEmails, 'accepting SQL does not send email');
     await buyerCrmPage.screenshot({ path: evidencePrefix + '_CRM_ventas.png', fullPage: true });
     await buyerCrmPage.reload({ waitUntil: 'domcontentloaded' });
-    await buyerCrmPage.locator('[data-a1-buyer-profile]').waitFor({ state: 'visible' });
+    await revealInFold(crmV2.locator('[data-a1-buyer-profile]'));
+    await crmV2.locator('[data-a1-buyer-profile]').waitFor({ state: 'visible' });
     assert.equal(await buyerCrmPage.evaluate(() => M4.get().events.filter((event) => event.eventName === 'lead_qualified' && event.qualification_status === 'SQL').length), 1, 'reload does not duplicate SQL');
     assert.equal(await buyerCrmPage.evaluate(() => M4.get().emails.length), initialEmails, 'reload does not send or duplicate mail');
     await buyerCrmPage.evaluate(() => { location.hash = '#R16'; });
-    await buyerCrmPage.locator('.m7c-feed').waitFor({ state: 'visible' });
-    const crmTimelineEmails = await buyerCrmPage.locator('.m7c-feed a.m7c-email-template-link').evaluateAll((anchors) => anchors.map((anchor) => ({ id: anchor.textContent.match(/E\d{2}/)?.[0], href: anchor.getAttribute('href') })));
+    await crmV2.locator('.m7c-feed').first().waitFor({ state: 'visible' });
+    const crmTimelineEmails = await crmV2.locator('.m7c-feed a.m7c-email-template-link').evaluateAll((anchors) => anchors.map((anchor) => ({ id: anchor.textContent.match(/E\d{2}/)?.[0], href: anchor.getAttribute('href') })));
     assert.ok(crmTimelineEmails.some((item) => item.id === 'E01'), 'CRM timeline links generated email E01 to A3');
     for (const item of crmTimelineEmails) assert.equal(new URL(item.href, base).pathname, `/captacion/correos/${item.id}.html`);
     assert.equal(await buyerCrmPage.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false);
