@@ -11606,6 +11606,7 @@ window.M7BuyerCRM = (() => {
   const ui = { buyerCode: '' };
   let data = null, loadError = '', loadPromise = null;
   const currentRoute = () => (location.hash || '').slice(1).split('?')[0];
+  const rerenderCRM = () => { window.MarleyCRM2?.render?.(); window.MarleyApp?.render?.(); };
   roles.forEach((key) => {
     const menu = D.ROLE_MENUS?.[key]?.menu;
     if (menu && !menu.some(([id]) => id === 'R17')) menu.push(['R17', 'CRM por comprador', 'users']);
@@ -11620,9 +11621,9 @@ window.M7BuyerCRM = (() => {
       return response.json();
     }).then((value) => {
       data = value;
-      if (currentRoute() === 'R17') setTimeout(() => window.MarleyApp?.render?.(), 0);
+      if (currentRoute() === 'R17') setTimeout(rerenderCRM, 0);
       return data;
-    }).catch((error) => { loadError = error.message || 'No se pudo leer compradores.json.'; if (currentRoute() === 'R17') setTimeout(() => window.MarleyApp?.render?.(), 0); throw error; });
+    }).catch((error) => { loadError = error.message || 'No se pudo leer compradores.json.'; if (currentRoute() === 'R17') setTimeout(rerenderCRM, 0); throw error; });
     return loadPromise;
   }
   function buyerFromContact(contact, s) {
@@ -11763,7 +11764,7 @@ window.M7BuyerCRM = (() => {
     const select = event.target.closest?.('[data-a1-buyer-select]');
     if (!select || currentRoute() !== 'R17') return;
     ui.buyerCode = select.value;
-    window.MarleyApp?.render?.();
+    rerenderCRM();
   });
   document.addEventListener('click', (event) => {
     const mark = event.target.closest?.('[data-a1-mark-mql]');
@@ -11771,7 +11772,7 @@ window.M7BuyerCRM = (() => {
       event.preventDefault();
       if (M.get().role !== 'marketing') return;
       window.M4Journey?.markMql?.();
-      window.MarleyApp?.render?.();
+      rerenderCRM();
       return;
     }
     const button = event.target.closest?.('[data-a1-accept-sql]');
@@ -11779,10 +11780,10 @@ window.M7BuyerCRM = (() => {
     event.preventDefault();
     if (M.get().role !== 'ventas') return;
     M.acceptSql();
-    window.MarleyApp?.render?.();
+    rerenderCRM();
   }, true);
   // page() loads the CRM data only when R17 is opened; public routes do not need this request.
-  return { getData: () => data, render: page, selectBuyer: (code) => { ui.buyerCode = code; window.MarleyApp?.render?.(); } };
+  return { getData: () => data, render: page, selectBuyer: (code) => { ui.buyerCode = code; rerenderCRM(); } };
 })();
 </script>
 
@@ -13567,6 +13568,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     return '<details class="r3-offer-card r3-portal-offer"><summary><span class="r3-offer-machine">' + machineImage(offer.maquina, machine && machine.name || offer.maquina) + '<span><span class="r3-kicker">' + esc(recommendationText("Máquina recomendada", offer)) + '</span><b>' + esc(machine && machine.name || offer.maquina) + '</b><small>' + esc(machine && machine.format || "Uso y preparación a confirmar con tu ejecutivo.") + '</small></span></span></summary><div class="r3-portal-offer-body"><p class="r3-buyer-message">' + esc(offer.mensaje) + '</p><p class="r3-price-note">Los productos clave y sus precios están en el historial. ' + esc(DATA.prices.nota_cliente) + '</p></div></details>';
   }
   function customPortal(s) {
+    if (!DATA || !DATA.prices) return '<section class="m5-cycle r3-portal-loading" role="status"><span class="m5-kick">Mi cuenta Marley Coffee</span><h1>Preparando tu cuenta</h1><p>Estamos cargando los datos vigentes de catálogo para mostrar el historial y los valores correctamente.</p></section>';
     const c = s.customerCycle || {}, old = originalAccountHTML(s);
     const inboxSection = (old.match(/<section class="m5-cycle" aria-labelledby="m5-cycle-inbox-title">[\s\S]*?<\/section>/) || [""])[0];
     const recSection = (old.match(/<section class="m5-cycle" aria-labelledby="mcp-rec-j">[\s\S]*?<\/section>/) || [""])[0];
@@ -25617,4 +25619,4 @@ body[data-current="C05"] #m7-launcher{display:none!important}
  body[data-current="C05"] .mcp-guia-wrap--steps-4 .mcp-guia,body[data-current="C06"] .mcp-guia-wrap--steps-4 .mcp-guia{grid-template-columns:repeat(2,minmax(0,1fr))!important}
  body[data-current="C05"] .mcp-guia li,body[data-current="C06"] .mcp-guia li{gap:4px;padding:6px 6px!important;font-size:clamp(10px,3.15vw,12px)!important;line-height:1.25}
 }
-</style></body></html>
+</style><link rel="stylesheet" href="crm/crm-v2.css"><script src="crm/crm-v2.js" defer></script></body></html>
