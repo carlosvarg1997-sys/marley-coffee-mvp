@@ -27,7 +27,7 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 #crm-v2-root * { box-sizing: border-box; }
 #crm-v2-root[hidden] { display: none !important; }
 #crm-v2-root { --crm2-canvas: #f1f1f1; --crm2-role-accent: #171717; --crm2-role-strong: #171717; --crm2-role-tint: #f6f6f6; --crm2-role-line: #d9d9d7; min-height: 100dvh; background: var(--crm2-canvas); font-family: var(--crm2-font); font-size: 16px; line-height: 1.5; color: var(--crm2-ink); }
-.crm2-role-ventas { --crm2-role-accent: #914411; --crm2-role-strong: #682f0d; --crm2-role-tint: #fff0e5; --crm2-role-line: #e8c4ae; }
+.crm2-role-ventas { --crm2-role-accent: #914411; --crm2-role-strong: #682f0d; --crm2-role-tint: #fde1cf; --crm2-role-line: #eeb994; }
 .crm2-role-marketing { --crm2-role-accent: #5c3d80; --crm2-role-strong: #41265f; --crm2-role-tint: #f2ecf7; --crm2-role-line: #d2c2e0; }
 .crm2-role-jefatura { --crm2-role-accent: #87344a; --crm2-role-strong: #612336; --crm2-role-tint: #f8ecef; --crm2-role-line: #e4c1ca; }
 #crm-v2-root button,
@@ -141,7 +141,7 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 .crm2-status > span:first-child { font-weight: 700; }
 .crm2-status--good { border-color: var(--crm2-role-accent); background: var(--crm2-role-tint); color: var(--crm2-role-strong); }
 .crm2-status--blocked { border-color: #87344a; border-style: dashed; background: #f8ecef; color: #612336; }
-.crm2-status--wait { border-color: #9a7610; background: #fff5cc; color: #5a4700; }
+.crm2-status--wait { border-color: #9a7610; background: #fde68a; color: #5a4700; }
 .crm2-inline-note { padding: 12px 0; color: var(--crm2-muted); font-size: 14px; }
 .crm2-inline-note--split { display: flex; justify-content: space-between; gap: 12px; align-items: center; border-top: 1px solid var(--crm2-line); border-bottom: 1px solid var(--crm2-line); }
 .crm2-inline-note--split b { text-align: right; }
@@ -200,7 +200,7 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 .crm2-role-list { display: grid; gap: 10px; }
 .crm2-role-card { display: grid; grid-template-columns: 40px minmax(0,1fr) 20px; align-items: center; gap: 12px; width: 100%; min-height: 70px; padding: 12px; border: 1px solid var(--crm2-line); border-radius: 8px; background: var(--crm2-white); text-align: left; cursor: pointer; }
 .crm2-role-card:hover { border-color: var(--crm2-role-accent); }
-.crm2-role-card[data-role="ventas"] { border-color: #e8c4ae; background: #fff0e5; }
+.crm2-role-card[data-role="ventas"] { border-color: #e8c4ae; background: #fde1cf; }
 .crm2-role-card[data-role="marketing"] { border-color: #d2c2e0; background: #f2ecf7; }
 .crm2-role-card[data-role="jefatura"] { border-color: #e4c1ca; background: #f8ecef; }
 .crm2-role-card[data-role="ventas"] .crm2-role-icon { border-color: #914411; color: #682f0d; background: #ffffff; }
@@ -244,11 +244,11 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 .crm2-btn--secondary { border-color: var(--crm2-role-accent); background: var(--crm2-role-tint); color: var(--crm2-role-strong); }
 .crm2-btn--secondary:hover { filter: brightness(.96); }
 .crm2-btn--quiet:hover { background: var(--crm2-soft); }
-.crm2-btn[data-c2="pass-sales"] { border-color: #914411; background: #fff0e5; color: #682f0d; }
+.crm2-btn[data-c2="pass-sales"] { border-color: #914411; background: #fde1cf; color: #682f0d; }
 .crm2-btn[data-c2="pass-sales"]:hover { filter: brightness(.96); }
 .crm2-btn[data-c2="mark-mql"] { border-color: #5c3d80; background: #f2ecf7; color: #41265f; }
 .crm2-btn[data-c2="mark-mql"]:hover { filter: brightness(.96); }
-.crm2-btn[data-c2="decide-approval"][data-decision="pidio_info"] { border-color: #9a7610; background: #fff5cc; color: #5a4700; }
+.crm2-btn[data-c2="decide-approval"][data-decision="pidio_info"] { border-color: #9a7610; background: #fde68a; color: #5a4700; }
 .crm2-btn[data-c2="decide-approval"][data-decision="descartada"] { border-color: #87344a; background: #f8ecef; color: #612336; }
 .crm2-btn--quiet { border-color: var(--crm2-role-line); background: #f7f7f7; color: var(--crm2-role-strong); font-weight: 500; }
 .crm2-btn:disabled { border-color: #aaa; background: #eee; color: #555; cursor: not-allowed; }
@@ -439,3 +439,4 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 .crm2-note > p { max-width: 68ch; margin: 0 0 4px; color: var(--crm2-muted); font-size: 14px; line-height: 1.5; }
 .crm2-page-head h1 { margin: 0; }
 .crm2-page-head > p { margin: 4px 0 0; color: var(--crm2-muted); font-size: 14px; }
+/* 17-nov (Claude): colores por flujo intactos; el tinte de Ventas y el amarillo suave se aclaran para que no se lean como crema (pedido de Carlitos) */
