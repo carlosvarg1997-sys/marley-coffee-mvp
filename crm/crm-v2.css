@@ -30,9 +30,7 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 .crm2-role-ventas { --crm2-role-accent: #914411; --crm2-role-strong: #682f0d; --crm2-role-tint: #fde1cf; --crm2-role-line: #eeb994; }
 .crm2-role-marketing { --crm2-role-accent: #5c3d80; --crm2-role-strong: #41265f; --crm2-role-tint: #f2ecf7; --crm2-role-line: #d2c2e0; }
 .crm2-role-jefatura { --crm2-role-accent: #87344a; --crm2-role-strong: #612336; --crm2-role-tint: #f8ecef; --crm2-role-line: #e4c1ca; }
-#crm-v2-root button,
-#crm-v2-root input,
-#crm-v2-root select { font: inherit; color: inherit; }
+:where(#crm-v2-root) :is(button, input, select, textarea) { font: inherit; color: inherit; }
 #crm-v2-root button,
 #crm-v2-root a,
 #crm-v2-root summary { -webkit-tap-highlight-color: transparent; }
@@ -45,7 +43,7 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 .crm2-icon { display: block; width: 20px; height: 20px; flex: none; }
 .crm2-shell { min-height: 100dvh; display: grid; grid-template-columns: var(--crm2-sidebar) minmax(0,1fr); background: var(--crm2-canvas); }
 .crm2-sidebar { position: sticky; top: 0; height: 100dvh; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-2); border-right: 1px solid var(--crm2-line); background: #f7f7f7; z-index: 20; }
-.crm2-brand { display: flex; align-items: center; gap: var(--space-1); color: var(--crm2-ink); text-decoration: none; min-height: 42px; padding: 0 var(--space-1); }
+.crm2-brand { display: flex; align-items: center; gap: var(--space-1); color: var(--crm2-ink); text-decoration: none; min-height: 44px; padding: 0 var(--space-1); }
 .crm2-brand-mark { display: grid; place-items: center; width: 34px; height: 34px; flex: none; background: var(--crm2-ink); color: var(--crm2-white); font: 500 21px/1 var(--crm2-display); }
 .crm2-brand b { display: block; font: 500 14px/1.1 var(--crm2-display); letter-spacing: .035em; }
 .crm2-brand small { display: block; margin-top: 4px; color: var(--crm2-muted); font-size: 12px; }
@@ -67,7 +65,7 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 .crm2-mobile-brand { display: none; }
 .crm2-search-wrap { position: relative; display: flex; align-items: center; gap: var(--space-1); width: min(400px, 48vw); min-height: 44px; padding: 0 var(--space-1); border: 1px solid #a9a9a9; border-radius: 8px; background: var(--crm2-white); }
 .crm2-search-wrap > .crm2-icon { color: var(--crm2-muted); }
-.crm2-search-wrap input { width: 100%; min-width: 0; height: 42px; border: 0; outline: 0; background: transparent; font-size: 14px; }
+.crm2-search-wrap input { width: 100%; min-width: 0; height: 44px; border: 0; outline: 0; background: transparent; font-size: 14px; }
 .crm2-search-wrap input:focus-visible { outline: none; }
 .crm2-search-wrap:focus-within { outline: 3px solid #171717; outline-offset: 2px; }
 .crm2-search-results { position: absolute; top: calc(100% + 8px); left: 0; right: 0; display: grid; gap: 0; max-height: 320px; padding: var(--space-1); overflow: auto; border: 1px solid var(--crm2-line); border-radius: 8px; background: var(--crm2-white); box-shadow: 0 10px 28px rgba(0,0,0,.14); }
@@ -328,13 +326,14 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 }
 @media (max-width: 640px) {
   :root { --crm2-sidebar: 0px; }
+  #crm-v2-root { font-size: 15px; }
   .crm2-shell { display: block; min-height: 100dvh; }
   .crm2-sidebar { position: fixed; inset: auto 0 0; display: block; height: 64px; padding: 0; border-top: 1px solid var(--crm2-line); border-right: 0; background: #f7f7f7; }
   .crm2-brand, .crm2-role-label, .crm2-logout { display: none; }
   .crm2-nav { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; height: 64px; padding: 4px 5px max(4px,env(safe-area-inset-bottom)); }
-  .crm2-nav-link { display: grid; justify-items: center; align-content: center; gap: 4px; min-width: 0; min-height: 54px; padding: 4px 1px; border-radius: 5px; font-size: 12px; line-height: 1.2; text-align: center; }
+  .crm2-nav-link { display: grid; justify-items: center; align-content: center; gap: 3px; min-width: 0; min-height: 54px; padding: 3px 2px; border-radius: 5px; font-size: 13px; line-height: 1.15; text-align: center; }
   .crm2-nav-link .crm2-icon { width: 18px; height: 18px; }
-  .crm2-nav-link span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .crm2-nav-link span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; max-width: 100%; overflow: hidden; white-space: normal; text-align: center; }
   .crm2-topbar { position: sticky; top: 0; justify-content: flex-start; gap: var(--space-1); height: 58px; padding: 7px var(--space-1); }
   .crm2-content { gap: var(--space-4); }
   .crm2-mobile-brand { display: flex; align-items: center; gap: var(--space-1); flex: none; font-size: 13px; }
@@ -346,23 +345,23 @@ body.crm-v2-active .m7o-bar { display: none !important; }
   .crm2-alerts .crm2-icon { width: 18px; height: 18px; }
   .crm2-alerts span { display: none; }
   .crm2-alerts b { position: absolute; transform: translate(14px,-14px); min-width: 20px; height: 20px; font-size: 12px; }
-  .crm2-main { padding: var(--space-2) var(--space-2) 176px; }
+  .crm2-main { padding: var(--space-2) var(--space-2) 144px; }
   .crm2-page-head { grid-template-columns: minmax(0,1fr) 76px; align-items: center; gap: var(--space-1); margin-bottom: var(--space-2); }
   .crm2-page-visual { width: 76px; height: 60px; border-radius: 6px; }
-  .crm2-page-head h1 { font-size: 28px; }
-  .crm2-page-head > div > p:last-child { margin-top: 6px; font-size: 14px; }
+  .crm2-page-head h1 { font-size: 26px; }
+  .crm2-page-head > div > p:last-child { margin-top: 6px; font-size: 13px; }
   .crm2-back-top { width: fit-content; min-height: 42px; }
-  .crm2-content { gap: var(--space-3); }
+  .crm2-content { gap: 20px; }
   .crm2-block { padding: var(--space-2); border-radius: 9px; }
   .crm2-block-head { margin-bottom: var(--space-1); }
-  .crm2-block h2 { font-size: 20px; }
-  .crm2-row { min-height: 66px; gap: var(--space-1); padding: var(--space-1) 0; }
-  .crm2-row-main { max-width: 66%; }
-  .crm2-row-main b { font-size: 14px; }
-  .crm2-row-main > span { font-size: 12px; line-height: 1.35; }
-  .crm2-row-side { max-width: 34%; }
-  .crm2-row-badge { font-size: 12px; }
-  .crm2-row-side small { font-size: 12px; }
+  .crm2-block h2 { font-size: 19px; }
+  .crm2-row { min-height: 60px; gap: var(--space-1); padding: 6px 0; }
+  .crm2-row-main { max-width: 58%; }
+  .crm2-row-main b { font-size: 15px; }
+  .crm2-row-main > span { font-size: 13px; line-height: 1.35; }
+  .crm2-row-side { max-width: 40%; }
+  .crm2-row-badge { font-size: 13px; white-space: normal; overflow: visible; text-overflow: clip; border-radius: 12px; line-height: 1.2; text-align: right; }
+  .crm2-row-side small { font-size: 13px; }
   .crm2-more summary, .crm2-fold summary { min-height: 44px; }
   .crm2-fold { padding-inline: var(--space-1); }
   .crm2-filterbar { align-items: stretch; flex-wrap: wrap; }
@@ -371,17 +370,17 @@ body.crm-v2-active .m7o-bar { display: none !important; }
   .crm2-inline-note--split { align-items: flex-start; flex-direction: column; gap: 2px; }
   .crm2-inline-note--split b { text-align: left; }
   .crm2-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-1); }
-  .crm2-metric { min-height: 106px; padding: var(--space-1); }
+  .crm2-metric { min-height: 0; padding: var(--space-1); }
   .crm2-metric > b,
   .crm2-metric > b.crm2-metric-key { font-size: 18px; }
-  .crm2-metric > span { font-size: 12px; }
-  .crm2-metric > small { font-size: 12px; }
+  .crm2-metric > span { font-size: 13px; }
+  .crm2-metric > small { font-size: 13px; }
   .crm2-kpi-details { grid-template-columns: 1fr; }
   .crm2-quote-row { align-items: flex-start; gap: 8px; }
   .crm2-quote-row > strong { font-size: 13px; white-space: nowrap; }
-  .crm2-quote-row b { font-size: 13px; }
-  .crm2-quote-row span { font-size: 12px; }
-  .crm2-quote-row small { font-size: 12px; }
+  .crm2-quote-row b { font-size: 15px; }
+  .crm2-quote-row span { font-size: 13px; }
+  .crm2-quote-row small { font-size: 13px; }
   .crm2-row-actions { align-items: stretch; }
   .crm2-row-actions .crm2-btn { flex: 1 1 145px; }
   .crm2-detail-identity { display: grid; gap: var(--space-2); }
@@ -392,16 +391,16 @@ body.crm-v2-active .m7o-bar { display: none !important; }
   .crm2-purchase-summary span { font-size: 13px; }
   .crm2-detail-actions { display: grid; grid-template-columns: 1fr; }
   .crm2-detail-actions .crm2-btn { width: 100%; }
-  .crm2-actionbar { right: 0; bottom: 64px; left: 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-1); min-height: 58px; padding: var(--space-1); }
-  .crm2-actionbar .crm2-btn { flex: 1 1 90px; min-width: 0; min-height: 44px; padding: 8px; font-size: 12px; }
+  .crm2-actionbar { right: 0; bottom: 64px; left: 0; display: flex; flex-wrap: nowrap; align-items: stretch; justify-content: flex-start; gap: 6px; min-height: 0; padding: 6px 8px; }
+  .crm2-actionbar .crm2-btn { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 6px 8px; font-size: 14px; line-height: 1.2; }
   .crm2-actionbar .crm2-btn--primary { margin-right: 0; }
-  .crm2-actionbar .crm2-btn[data-c2="back"] { flex: 0 0 44px; min-width: 44px; padding: 8px; }
+  .crm2-actionbar .crm2-btn[data-c2="back"] { flex: 0 0 44px; width: 44px; min-width: 44px; padding: 0; }
   .crm2-actionbar .crm2-btn[data-c2="back"] > span { display: none; }
   .crm2-actionbar .crm2-btn[data-c2="back"]::before { content: '←'; font-size: 20px; }
-  .crm2-action-more { flex: 1 1 90px; min-width: 0; }
-  .crm2-action-more > summary { min-height: 44px; padding: 7px 8px; font-size: 12px; }
+  .crm2-action-more { flex: 0 0 auto; min-width: 0; }
+  .crm2-action-more > summary { min-height: 44px; padding: 6px 10px; font-size: 14px; }
   .crm2-action-more > summary::after { margin-left: 4px; font-size: 13px; }
-  .crm2-action-select { flex: 1 1 42%; width: 0; min-width: 0; min-height: 44px; font-size: 12px !important; }
+  .crm2-action-select { flex: 1 1 42%; width: 0; min-width: 0; min-height: 44px; font-size: 16px !important; }
   .crm2-toast-host { right: 12px; bottom: 134px; width: calc(100vw - 24px); }
   .crm2-role-card { min-height: 68px; }
   .crm2-entry { padding: var(--space-3) var(--space-2) 32px; }
@@ -424,10 +423,25 @@ body.crm-v2-active .m7o-bar { display: none !important; }
   .crm2-dialog-body { padding: var(--space-2); }
   .crm2-dialog-actions { padding: var(--space-1) var(--space-2) max(16px,env(safe-area-inset-bottom)); }
   .crm2-dialog-actions .crm2-btn { flex: 1; }
-  .crm2-actionbar .crm2-btn--quiet { flex: 0 0 auto; min-width: 92px; }
+  .crm2-btn { padding: 10px 12px; font-size: 14px; }
+  #crm-v2-root .crm2-note > summary { min-height: 44px; padding: 0 12px; font-size: 13px; }
+  #crm-v2-root .crm2-note[open] > p { width: min(340px, 86vw); font-size: 15px; }
+  .crm2-block-head p { margin-top: 4px; font-size: 13px; }
+  #crm-v2-root .crm2-page-head > p { margin-top: 4px; font-size: 13px; }
+  #crm-v2-root .crm2-alerts b { font-size: 13px; }
+  .crm2-eyebrow, .crm2-status, .crm2-alerts, .crm2-search-results small, .crm2-goal-form small, .crm2-dialog-progress span, .crm2-campaign-lead span, .crm2-tactic-list span, .crm2-team-grid article > span, .crm2-team-grid article > small, .crm2-role-card small, .crm2-cac-result span, .crm2-suggestion span, .crm2-filterbar label, .crm2-activity small { font-size: 13px; }
+  .crm2-chip-button { font-size: 14px; }
+  .crm2-entry h1 { font-size: 26px; }
+  .crm2-entry-panel > p:not(.crm2-eyebrow) { font-size: 15px; }
+  .crm2-entry-note { font-size: 13px !important; }
+  .crm2-dialog h2, .crm2-inline-panel h2 { font-size: 19px; }
+  .crm2-fold summary, .crm2-more summary, .crm2-fold-body details summary, .crm2-text-link { font-size: 15px; }
+  .crm2-fold-body p, .crm2-activity b, .crm2-activity > span, .crm2-kv > b, .crm2-purchase-summary b, .crm2-inline-note, .crm2-recovery-meta > span:last-child, .crm2-dialog-body p, .crm2-checklist li, .crm2-approval-head p:not(.crm2-eyebrow), .crm2-score-reason, .crm2-alert-panel span, .crm2-inline-panel p, .crm2-inline-panel li, .crm2-empty p, .crm2-suggestion strong, .crm2-approval-amount b { font-size: 15px; }
+  .crm2-kv { grid-template-columns: minmax(104px,.8fr) minmax(0,1.2fr); gap: 10px; }
+  .crm2-search-wrap input, .crm2-filterbar select, .crm2-inline-panel select, .crm2-inline-panel input, .crm2-goal-form input, .crm2-cac-grid input, .crm2-note-field input { font-size: 16px !important; }
 }
 .crm2-route-helper { margin: var(--space-2) 0 0; font-size: 13px; }
-.crm2-route-helper a { color: var(--crm2-ink); font-weight: 700; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.crm2-route-helper a { display: inline-flex; align-items: center; min-height: 44px; color: var(--crm2-ink); font-weight: 700; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   #crm-v2-root *, #crm-v2-root *::before, #crm-v2-root *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
