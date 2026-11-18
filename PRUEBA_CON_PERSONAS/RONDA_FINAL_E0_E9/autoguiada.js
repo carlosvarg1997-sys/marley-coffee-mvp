@@ -330,7 +330,7 @@
     try { input.focus(); } catch (_) {}
   }
   function questionMissingReason(question,draft) {
-    if (isOptionalQuestion(question)) return '';
+    if (isOptionalQuestion(question) || draft?.skip) return '';
     const multi = question.tipo === 'multi';
     const values = multi ? (Array.isArray(draft?.value) ? draft.value : []) : [];
     const single = multi ? '' : String(draft?.value ?? '').trim();
@@ -344,7 +344,7 @@
   function questionMissingMessage(question,draft) {
     const reason = questionMissingReason(question,draft);
     if (reason === 'other') return 'Para seguir, escribe cuál otra opción querías indicar.';
-    if (reason === 'empty') return 'Para seguir, elige una opción en «' + String(question.texto || '') + '».';
+    if (reason === 'empty') return 'Para seguir, elige una opción en «' + String(question.texto || '') + '» o marca «Prefiero no responder».';
     return '';
   }
   function renderQuestion(phase) {
@@ -359,7 +359,7 @@
     const optional = isOptionalQuestion(question);
     const note = optional
       ? 'Opcional: puedes seguir sin escribir.'
-      : '<span class="ag-req">Obligatoria</span> Elige una opción para seguir.';
+      : '<span class="ag-req">Obligatoria</span> Elige una opción o «Prefiero no responder» para seguir.';
     app.innerHTML = '<section class="ag-question-screen" aria-label="' + escapeHtml(blockLabel) + '">' + brandMarkup()
       + '<p class="ag-step">' + escapeHtml(blockLabel) + ' · Pregunta ' + (index+1) + ' de ' + questions.length + '</p>'
       + '<div class="ag-progress" role="progressbar" aria-label="Avance de preguntas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><span style="width:' + pct + '%"></span></div>'
@@ -367,7 +367,7 @@
       + '<p class="ag-req-note">' + note + '</p>'
       + '<form class="ag-question-form" id="question-form" novalidate><fieldset class="ag-fieldset" aria-labelledby="question-title"><legend class="ag-sr-only">' + escapeHtml(question.texto || '') + '</legend>'
       + questionControls(question,draft)
-      + (optional ? '<label class="ag-option ag-option--skip"><input id="skip-answer" type="checkbox"' + (draft.skip?' checked':'') + '><span>Prefiero no responder</span></label>' : '')
+      + '<label class="ag-option ag-option--skip"><input id="skip-answer" type="checkbox"' + (draft.skip?' checked':'') + '><span>Prefiero no responder</span></label>'
       + '</fieldset><p class="ag-status" id="question-status" role="status"></p><div class="ag-question-actions">'
       + '<button class="ag-btn" id="question-back" type="button"' + (index===0?' disabled':'') + '>Volver</button>'
       + '<button class="ag-btn ag-btn--primary" id="question-next" type="submit">' + (index+1===questions.length?'Continuar':'Siguiente') + '</button>'
@@ -395,7 +395,7 @@
     const updateDraft = () => {
       if (!state.drafts) state.drafts = {};
       const next = {...draftFor(question)};
-      next.skip = Boolean(skip?.checked) && isOptionalQuestion(question);
+      next.skip = Boolean(skip?.checked);
       if (question.tipo === 'open') next.value = document.getElementById('answer-open')?.value || '';
       else if (question.tipo === 'multi') next.value = Array.from(form.querySelectorAll('input[name="q-answer"]:checked')).map(input=>input.value);
       else next.value = form.querySelector('input[name="q-answer"]:checked')?.value || '';
@@ -616,7 +616,7 @@
     const seq=form.querySelector('input[name="task-seq"]:checked')?.value;
     const comment=cleanText(document.getElementById('task-comment')?.value||'');
     const stageAnswers=stageQuestionsFor(task).map(question=>({question,value:form.querySelector('input[name="stage-' + question.id + '"]:checked')?.value}));
-    task.resultado=result;task.seq=Number(seq);task.comentario=comment;
+    task.resultado=result;task.seq=seq==='NR'?null:Number(seq);task.seq_omitida=seq==='NR';task.comentario=comment;
     task.preguntas_etapa={};
     stageAnswers.forEach(({question,value})=>{saveQuestion(question,'etapa',{value},task.etapa);task.preguntas_etapa[question.id]=value;});
     state.evaluating=false;
@@ -840,10 +840,10 @@
     const name='stage-' + question.id;
     if(question.tipo==='agreement') {
       const options=optionList(question).map(option=>'<label title="' + escapeHtml(option.text) + '"><input type="radio" name="' + name + '" value="' + option.value + '"><span>' + option.value + '</span></label>').join('');
-      return '<fieldset><legend>' + escapeHtml(question.texto) + ' <span class="ag-req">Obligatoria</span></legend><div class="ag-task-progress">1 = Muy en desacuerdo · 5 = Muy de acuerdo</div><div class="ag-agree-grid">' + options + '</div></fieldset>';
+      return '<fieldset><legend>' + escapeHtml(question.texto) + ' <span class="ag-req">Obligatoria</span></legend><div class="ag-task-progress">1 = Muy en desacuerdo · 5 = Muy de acuerdo</div><div class="ag-agree-grid">' + options + '</div><label class="ag-skip-opt"><input type="radio" name="' + name + '" value="Prefiero no responder"><span>Prefiero no responder</span></label></fieldset>';
     }
     const options=optionList(question).map(option=>'<label><input type="radio" name="' + name + '" value="' + escapeHtml(option.text) + '"><span>' + escapeHtml(option.text) + '</span></label>').join('');
-    return '<fieldset><legend>' + escapeHtml(question.texto) + ' <span class="ag-req">Obligatoria</span></legend><div class="ag-result-options">' + options + '</div></fieldset>';
+    return '<fieldset><legend>' + escapeHtml(question.texto) + ' <span class="ag-req">Obligatoria</span></legend><div class="ag-result-options">' + options + '</div><label class="ag-skip-opt"><input type="radio" name="' + name + '" value="Prefiero no responder"><span>Prefiero no responder</span></label></fieldset>';
   }
   function evaluationMissing(form,task) {
     const missing=[];
@@ -881,8 +881,9 @@
       + '<label><input type="radio" name="task-result" value="Logrado"><span>Lo logré</span></label>'
       + '<label><input type="radio" name="task-result" value="Con ayuda"><span>Lo logré con ayuda</span></label>'
       + '<label><input type="radio" name="task-result" value="No logrado"><span>No lo logré</span></label>'
+      + '<label class="ag-skip-opt"><input type="radio" name="task-result" value="Prefiero no responder"><span>Prefiero no responder</span></label>'
       + '</div></fieldset>'
-      + '<fieldset><legend>¿Qué tan fácil fue? <span class="ag-req">Obligatoria</span></legend><div class="ag-task-progress">1 = Muy difícil · 7 = Muy fácil</div><div class="ag-seq-grid">' + seq + '</div></fieldset>'
+      + '<fieldset><legend>¿Qué tan fácil fue? <span class="ag-req">Obligatoria</span></legend><div class="ag-task-progress">1 = Muy difícil · 7 = Muy fácil</div><div class="ag-seq-grid">' + seq + '</div><label class="ag-skip-opt"><input type="radio" name="task-seq" value="NR"><span>Prefiero no responder</span></label></fieldset>'
       + stageQuestionsFor(task).map(stageQuestionHtml).join('')
       + '<label class="ag-comment-label" for="task-comment">Comentario <span class="ag-task-progress">Opcional</span></label><textarea id="task-comment" class="ag-textarea" maxlength="500" placeholder="¿Algo te confundió o te hizo dudar? No escribas nombres ni datos de contacto."></textarea>'
       + '<div class="ag-card-footer"><p class="ag-status" id="task-evaluation-status" role="status" aria-live="polite"></p>'
@@ -1148,7 +1149,7 @@
         return redacted(question)+' · '+redacted(answerText(row));
       });
     };
-    const taskLines=data.tareas.length?data.tareas.map((task,index)=>(index+1)+'. '+(task.etapa_nombre?task.etapa_nombre+' · ':'')+task.titulo+' | '+(task.resultado||'No completada')+' | '+formatDuration(task.duracion_ms)+' | Facilidad '+(task.seq||'—')+'/7'+(task.comentario?' | '+redacted(task.comentario):'')):['No se registraron tareas.'];
+    const taskLines=data.tareas.length?data.tareas.map((task,index)=>(index+1)+'. '+(task.etapa_nombre?task.etapa_nombre+' · ':'')+task.titulo+' | '+(task.resultado||'No completada')+' | '+formatDuration(task.duracion_ms)+(task.seq_omitida?' | Facilidad: prefiero no responder':' | Facilidad '+(task.seq||'—')+'/7')+(task.comentario?' | '+redacted(task.comentario):'')):['No se registraron tareas.'];
     const pauseLines=data.pausas.length?data.pausas.map(item=>PHASE_LABELS[item.fase]+' · '+formatDate(item.termino_en||item.empezo_en)):['Sin pausas registradas.'];
     const stageRows=data.respuestas.filter(row=>row.momento==='etapa'&&row.tipo!=='evento');
     const stageLines=stageRows.length?stageRows.map(row=>(STAGE_NAMES[row.etapa]||row.etapa)+' · '+redacted(bank.preguntas[row.pregunta_id]?.texto||row.pregunta_id)+' · '+redacted(answerText(row))):['Sin preguntas por etapa registradas.'];
