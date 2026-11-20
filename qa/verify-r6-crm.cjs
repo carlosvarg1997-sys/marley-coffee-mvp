@@ -263,7 +263,7 @@ async function runSuite(name, launcher, launchOpts) {
     for (const [cHash, sel] of [['C02', '.ux-hero'], ['C10', '.m9-catalog'], ['C04', '.m5-qcard'], ['C11', '.r3-machine-grid'], ['C09', 'h1:has-text("Portal de cliente"), .m5-cycle-head']]) { // coordinador (14-nov): .m5-cycle-head solo existe con un pedido en curso; sin pedido, C09 muestra «Portal de cliente» (igual en la R5 sin CRM)
       await page.goto(BASE + '#' + cHash, { waitUntil: 'domcontentloaded' });
       await page.waitForFunction((h) => document.body.dataset.current === h, cHash, { timeout: 8000 });
-      assert.ok(await page.locator(sel).count() > 0, `Pantalla comprador ${cHash} debe seguir intacta`);
+      await page.locator(sel).first().waitFor({ state: 'attached', timeout: 8000 });
     }
 
     assert.deepEqual(errors, [], `Errores JS en ${name}: ${errors.join(' | ')}`);
