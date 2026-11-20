@@ -26,6 +26,9 @@ html body[data-current] .m4.m5.m4-client :is(h1, h2, h3) { font-family: var(--af
 html body[data-current] .m4.m5.m4-client :is(p, .mcp-nota, .r3-price-note, .r7-muted) { font-family: var(--af-text); line-height: 1.5; }
 html body[data-current] .m4.m5.m4-client :is(button, summary, .m5-nav, .m5-top, .r3-order-folio, .af-total strong, dd) { font-family: var(--af-label); }
 html body[data-current] .m4.m5.af-flow #m4-main { background: #fff; }
+html body[data-current][data-current] .m4.m5.af-flow .m5-top,
+html body[data-current='C08'][data-current] .m4.m5.m4-client .m5-top,
+html body[data-current='C03'][data-current] .m4.m5 .m5-split-media { position: relative !important; top: auto !important; }
 
 html body[data-current] .m4.m5.af-flow .m5-top-in { justify-content: flex-start; gap: 16px; }
 html body[data-current] .m4.m5.af-flow .ux-mobile-nav { display: block; position: relative; margin-left: auto; }

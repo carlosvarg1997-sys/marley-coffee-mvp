@@ -2,6 +2,7 @@
 
 // R6 · Verificador integral CRM por rol y traspasos (S + V + MJ).
 // Corre en Chrome y Edge, a 390x844 y 1440x900 (+ 360x800, 414x896, 1280x600).
+const { useLegacyCrm } = require('./legacy-crm-contract.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { chromium: chromeLauncher } = require('./playwright-system-chrome.cjs');
@@ -115,6 +116,7 @@ async function runSuite(name, launcher, launchOpts) {
   const heights = {};
   try {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+    await useLegacyCrm(ctx);
     const page = await ctx.newPage();
     page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
     page.on('console', (m) => { if (m.type() === 'error') errors.push(`console: ${m.text()}`); });
@@ -130,6 +132,7 @@ async function runSuite(name, launcher, launchOpts) {
         const menuEntry = menu.find((x) => x[0] === h);
         if (menuEntry) assert.equal(menuEntry[1], title, `${role}/${h}: menú "${menuEntry[1]}" !== H1 "${title}"`);
         heights[`${role}_${h}_1440`] = await auditScreen(page, { width: 1440, height: 900 }, role, h, title, max1440);
+        heights[`${role}_${h}_1280`] = await auditScreen(page, { width: 1280, height: 551 }, role, h, title, max1440);
         heights[`${role}_${h}_390`] = await auditScreen(page, { width: 390, height: 844 }, role, h, title, 2500);
       }
     }

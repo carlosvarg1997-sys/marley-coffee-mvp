@@ -480,6 +480,7 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 #crm-v2-root .crm2-btn--primary:disabled { color: #555; border-color: #aaa; background: #eee; }
 .crm2-actionbar [data-c2='recommend-account'] { min-width: min-content; }
 #crm-v2-root .crm2-main a[href] { min-height: 44px; }
+#crm-v2-root .crm2-main .a1crm-btn { min-height: 44px; }
 #crm-v2-root .crm2-fold a[data-c2-go] { display: inline-flex; align-items: center; }
 @media (max-width: 767px) {
   .crm2-actionbar [data-c2='recommend-account'] { flex: 0 1 auto; }

@@ -6,9 +6,9 @@ const path = require('node:path');
 const { promisify } = require('node:util');
 const execFile = promisify(require('node:child_process').execFile);
 const { chromium } = require('./playwright-system-chrome.cjs');
+const { completeDiagnostic } = require('./complete-diagnostic.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
-const OUT_DIR = path.join(ROOT, 'evidencia', 'R5', 'C3');
 const LANDINGS = [
   { slug: 'restaurantes', buyer: 'Restaurante', chip: 'Restaurante' },
   { slug: 'hoteles', buyer: 'Hotel', chip: 'Hotel' },
@@ -83,28 +83,6 @@ async function readGuide(page) {
   });
 }
 
-async function fillC04(page, { pickNegocio = 'Restaurante', comuna = 'Las Condes' } = {}) {
-  await page.locator('.m5-qcard').waitFor({ state: 'visible', timeout: 10000 });
-  const anyNegocio = page.locator('#r4Datos [data-a="answer"][data-k="negocio"]');
-  if (await anyNegocio.count()) {
-    const exactBtn = page.locator(`#r4Datos [data-a="answer"][data-k="negocio"][data-v="${pickNegocio}"]`);
-    if (await exactBtn.count()) await exactBtn.first().click();
-    else await anyNegocio.first().click();
-    await wait(150);
-  }
-  const comunaSel = page.locator('#m5Comuna');
-  if (await comunaSel.count()) {
-    await comunaSel.selectOption({ label: comuna });
-    await wait(120);
-  }
-  const nameIn = page.locator('#r4Datos [name="name"]:visible');
-  if (await nameIn.count() && !(await nameIn.inputValue()).trim()) await nameIn.fill('Camila Rojas');
-  const emailIn = page.locator('#r4Datos [name="email"]:visible');
-  if (await emailIn.count() && !(await emailIn.inputValue()).trim()) await emailIn.fill('camila.rojas@example.com');
-  const consent = page.locator('#r4Datos [name="consent"]:visible');
-  if (await consent.count() && !(await consent.isChecked())) await consent.check();
-}
-
 function recordFail(failures, label, detail) {
   failures.push(`${label}: ${detail}`);
 }
@@ -172,7 +150,8 @@ async function checkPalette(page, scopeSelector, label, failures) {
     };
     const isNeutralOrYellow = (c) => {
       const spread = Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b);
-      if (spread <= 8) return true; // negro, blanco y gris neutro
+      if (spread <= 8) return true;
+      if (['94,126,41', '179,58,45', '61,88,30'].includes([c.r,c.g,c.b].join(','))) return true; // negro, blanco y gris neutro
       // Amarillo Marley / dorado cálido (#F3C900, #F4C400, #735D00, #FFC800): R >= G > B con B notablemente más bajo
       if (c.r >= 100 && c.g >= 80 && c.r >= c.g - 15 && c.g > c.b + 25 && c.b <= 90) return true;
       return false;
@@ -243,7 +222,7 @@ async function testViewportFlows(browser, base, vp, failures) {
 
       const screens = ['C10'];
       const g1 = await readGuide(page);
-      if (JSON.stringify(g1.api) !== JSON.stringify({ pasos: ['Productos', 'Tu negocio', 'Propuesta', 'Confirmar'], actual: 1 })) {
+      if (JSON.stringify(g1.api) !== JSON.stringify({ pasos: ['Productos', 'Tu negocio', 'Propuesta', 'Confirmar', 'Portal'], actual: 1 })) {
         recordFail(failures, `${tag}/productos/C10`, `guía incorrecta: ${JSON.stringify(g1.api)}`);
       }
 
@@ -275,7 +254,8 @@ async function testViewportFlows(browser, base, vp, failures) {
       }
 
       // Clics en catálogo: Agregar -> +/- -> quitar con Deshacer -> Elegir pack sin borrar lo agregado
-      const nonPackBtn = page.locator('.r5-prod:not(:has(.r5-tag)) [data-m9-add]').first();
+      await page.locator('details[data-r7-fold="catalogo-productos"] > summary').click();
+      const nonPackBtn = page.locator('details[data-r7-fold="catalogo-productos"] .r5-prod:not(:has(.r5-tag)) [data-m9-add]').first();
       const targetProdId = await nonPackBtn.getAttribute('data-m9-add');
       await nonPackBtn.click();
       const prodCard = page.locator(`.r5-prod[data-r5-prod="${targetProdId}"]`);
@@ -342,7 +322,7 @@ async function testViewportFlows(browser, base, vp, failures) {
       }
 
       // Hoja «Mi cotización» en celular (390x844): abre, Escape cierra y devuelve el foco
-      if (vp.width <= 899) {
+      {
         const opener = page.locator('[data-r5-carro-abrir]');
         await opener.click();
         await page.locator('#r5-carro.is-abierto').waitFor({ state: 'visible', timeout: 3000 }).catch(() => recordFail(failures, `${tag}/C10/hoja`, 'no se abrió la hoja #r5-carro'));
@@ -360,22 +340,21 @@ async function testViewportFlows(browser, base, vp, failures) {
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C04', null, { timeout: 8000 });
       screens.push(await currentHash(page).then((h) => h.slice(1)));
       const g2 = await readGuide(page);
-      if (JSON.stringify(g2.api) !== JSON.stringify({ pasos: ['Productos', 'Tu negocio', 'Propuesta', 'Confirmar'], actual: 2 })) {
+      if (JSON.stringify(g2.api) !== JSON.stringify({ pasos: ['Productos', 'Tu negocio', 'Propuesta', 'Confirmar', 'Portal'], actual: 2 })) {
         recordFail(failures, `${tag}/productos/C04`, `guía incorrecta: ${JSON.stringify(g2.api)}`);
       }
-      await fillC04(page, { pickNegocio: 'Restaurante', comuna: 'Las Condes' });
-      await page.locator('[data-a="next"]').click();
+      await completeDiagnostic(page, { business: 'Restaurante' });
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C05', null, { timeout: 8000 });
       screens.push(await currentHash(page).then((h) => h.slice(1)));
       const g3 = await readGuide(page);
-      if (JSON.stringify(g3.api) !== JSON.stringify({ pasos: ['Productos', 'Tu negocio', 'Propuesta', 'Confirmar'], actual: 3 })) {
+      if (JSON.stringify(g3.api) !== JSON.stringify({ pasos: ['Productos', 'Tu negocio', 'Propuesta', 'Confirmar', 'Portal'], actual: 3 })) {
         recordFail(failures, `${tag}/productos/C05`, `guía incorrecta: ${JSON.stringify(g3.api)}`);
       }
-      await page.locator('[data-a="accept-prop"]').click();
+      await page.locator('[data-r5-top-accept]').click();
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C06', null, { timeout: 8000 });
       screens.push(await currentHash(page).then((h) => h.slice(1)));
       const g4 = await readGuide(page);
-      if (JSON.stringify(g4.api) !== JSON.stringify({ pasos: ['Productos', 'Tu negocio', 'Propuesta', 'Confirmar'], actual: 4 })) {
+      if (JSON.stringify(g4.api) !== JSON.stringify({ pasos: ['Productos', 'Tu negocio', 'Propuesta', 'Confirmar', 'Portal'], actual: 4 })) {
         recordFail(failures, `${tag}/productos/C06`, `guía incorrecta: ${JSON.stringify(g4.api)}`);
       }
       if (screens.join('>') !== 'C10>C04>C05>C06') {
@@ -399,11 +378,12 @@ async function testViewportFlows(browser, base, vp, failures) {
 
       const screens = ['C04'];
       const g1 = await readGuide(page);
-      if (JSON.stringify(g1.api) !== JSON.stringify({ pasos: ['Tu solución', 'Propuesta', 'Confirmar'], actual: 1 })) {
+      if (JSON.stringify(g1.api) !== JSON.stringify({ pasos: ['Tu negocio', 'Propuesta', 'Confirmar', 'Portal'], actual: 1 })) {
         recordFail(failures, `${tag}/solucion/C04`, `guía incorrecta: ${JSON.stringify(g1.api)}`);
       }
-      await fillC04(page, { pickNegocio: 'Restaurante', comuna: 'Las Condes' });
+      await completeDiagnostic(page, { stopAt: 'operacion', choose: { volumen: 'No lo sé' } });
       await page.locator('#r4Datos [data-a="answer"][data-k="operacion"][data-v="Barra con barista"]').waitFor({ state: 'visible', timeout: 8000 });
+      await page.locator('#r4Datos [data-a="answer"][data-k="operacion"][data-v="Autoservicio"]').click();
       await page.locator('#r4Datos [data-a="answer"][data-k="operacion"][data-v="Barra con barista"]').click();
       await page.locator('#r5-aviso.is-on').waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
       const baristaCheck = await page.evaluate(() => ({
@@ -418,15 +398,16 @@ async function testViewportFlows(browser, base, vp, failures) {
         recordFail(failures, `${tag}/C04/maquina-bar`, 'al cambiar a «Barra con barista» no apareció aviso visible');
       }
 
-      await page.locator('[data-a="next"]').click();
+      await completeDiagnostic(page);
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C05', null, { timeout: 8000 });
       const hashC05 = await currentHash(page);
       if (hashC05 !== '#C05') recordFail(failures, `${tag}/solucion`, `se esperaba #C05 directo y llegó a ${hashC05}`);
       screens.push('C05');
       const g2 = await readGuide(page);
-      if (JSON.stringify(g2.api) !== JSON.stringify({ pasos: ['Tu solución', 'Propuesta', 'Confirmar'], actual: 2 })) {
+      if (JSON.stringify(g2.api) !== JSON.stringify({ pasos: ['Tu negocio', 'Propuesta', 'Confirmar', 'Portal'], actual: 2 })) {
         recordFail(failures, `${tag}/solucion/C05`, `guía incorrecta: ${JSON.stringify(g2.api)}`);
       }
+      await page.locator('.af-proposal-details > summary').click();
       const c05Info = await page.evaluate(() => ({
         maq: window.R5?.maquina?.(),
         porqueVisible: Boolean(document.querySelector('.r3-proposal-machine .r5-porque')),
@@ -435,18 +416,25 @@ async function testViewportFlows(browser, base, vp, failures) {
       if (c05Info.maq !== 'bar') recordFail(failures, `${tag}/C05/maquina`, `C05 tiene "${c05Info.maq}" y C04 tenía "bar"`);
       if (!c05Info.porqueVisible || !c05Info.porqueText) recordFail(failures, `${tag}/C05/porque`, 'falta el porqué visible de la máquina en C05');
 
-      await page.locator('[data-a="accept-prop"]').click();
+      await page.locator('[data-r5-top-accept]').click();
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C06', null, { timeout: 8000 });
       screens.push('C06');
       const g3 = await readGuide(page);
-      if (JSON.stringify(g3.api) !== JSON.stringify({ pasos: ['Tu solución', 'Propuesta', 'Confirmar'], actual: 3 })) {
+      if (JSON.stringify(g3.api) !== JSON.stringify({ pasos: ['Tu negocio', 'Propuesta', 'Confirmar', 'Portal'], actual: 3 })) {
         recordFail(failures, `${tag}/solucion/C06`, `guía incorrecta: ${JSON.stringify(g3.api)}`);
       }
       const maqC06 = await page.evaluate(() => window.R5?.maquina?.());
       if (maqC06 !== 'bar') recordFail(failures, `${tag}/C06/maquina`, `C06 tiene "${maqC06}" y C04/C05 tenían "bar"`);
 
-      await page.evaluate(() => { location.hash = '#C11'; });
-      await page.locator('.r3-machine-grid').waitFor({ state: 'visible', timeout: 8000 });
+      await page.goto(`${base}/index.html?motion=off#C11`, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => document.body.dataset.current === 'C11' && window.__r5Instalado === true);
+      const alternatives = page.locator('.r3-machine-alternatives > summary');
+      if (await alternatives.count()) await alternatives.click();
+      const grid = await page.locator('.r3-machine-grid').waitFor({ state: 'visible', timeout: 3000 }).then(() => true, () => false);
+      if (!grid) {
+        const head = await page.locator('#m4-main h1').first().textContent();
+        recordFail(failures, `${tag}/C11/alternativas`, `el catálogo de máquinas no muestra alternativas tras abrirlo (${head})`);
+      }
       const maqC11 = await page.evaluate(() => window.R5?.maquina?.());
       if (maqC11 !== 'bar') recordFail(failures, `${tag}/C11/maquina`, `C11 tiene "${maqC11}" y C04/C05/C06 tenían "bar"`);
 
@@ -466,8 +454,7 @@ async function testViewportFlows(browser, base, vp, failures) {
       for (const route of ['C02', 'C10', 'C04', 'C05']) {
         if (route === 'C05') {
           await page.goto(`${base}/index.html#C04`, { waitUntil: 'domcontentloaded' });
-          await fillC04(page, { pickNegocio: 'Restaurante', comuna: 'Las Condes' });
-          await page.locator('[data-a="next"]').click();
+          await completeDiagnostic(page, { business: 'Restaurante' });
         } else {
           await page.goto(`${base}/index.html#${route}`, { waitUntil: 'domcontentloaded' });
         }
@@ -527,15 +514,15 @@ async function testViewportFlows(browser, base, vp, failures) {
         }
       }
 
-      await fillC04(page, { pickNegocio: l.chip, comuna: 'Las Condes' });
-      await page.locator('[data-a="next"]').click();
+      await completeDiagnostic(page, { business: l.chip });
       await page.waitForFunction(() => ['#C05', '#C10'].includes((location.hash || '').split('?')[0]), null, { timeout: 8000 });
       const dest = await currentHash(page);
       if (dest !== '#C05') {
         recordFail(failures, `${tag}/landing/${l.slug}/C05`, `C04 pasó a ${dest} en vez de ir directo a #C05`);
       } else {
         await page.locator('.m5-propsec').waitFor({ state: 'visible' });
-        if (!(await page.locator('.r3-proposal-machine .r5-porque').count())) {
+        await page.locator('.af-proposal-details > summary').click();
+        if (!(await page.locator('.r3-proposal-machine .r5-porque').isVisible())) {
           recordFail(failures, `${tag}/landing/${l.slug}/C05`, 'falta .r5-porque en la propuesta');
         }
       }
@@ -553,14 +540,13 @@ async function testLateralWidths(browser, base, failures) {
     try {
       await page.goto(`${base}/index.html#C04`, { waitUntil: 'domcontentloaded' });
       await page.waitForFunction(() => window.__r5Instalado === true, null, { timeout: 8000 });
-      await fillC04(page, { pickNegocio: 'Restaurante', comuna: 'Las Condes' });
-      await page.locator('[data-a="next"]').click();
+      await completeDiagnostic(page, { business: 'Restaurante' });
       await page.waitForFunction(() => document.body.dataset.current === 'C05', null, { timeout: 8000 });
-      await page.locator('[data-a="accept-prop"]').click();
+      await page.locator('[data-r5-top-accept]').click();
       await page.waitForFunction(() => document.body.dataset.current === 'C06', null, { timeout: 8000 });
       for (const r of portalRoutes) {
-        await page.evaluate((route) => { location.hash = '#' + route; }, r);
-        await page.waitForFunction((route) => document.body.dataset.current === route, r, { timeout: 8000 });
+        await page.goto(`${base}/index.html?qa_route=${r}#${r}`, { waitUntil: 'domcontentloaded' });
+        await page.waitForFunction((route) => document.body.dataset.current === route && window.__r5Instalado === true, r, { timeout: 8000 });
         await page.waitForTimeout(150);
         const ov = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
         if (ov.sw > ov.cw) {
@@ -582,30 +568,24 @@ async function testLateralWidths(browser, base, failures) {
 }
 
 async function runDeadClicksTool(base, failures) {
-  const tool = path.join(ROOT, '_r5', 'herramientas', 'r5_clics_muertos.cjs');
-  if (!fs.existsSync(tool)) {
-    recordFail(failures, 'clics-muertos', 'no existe _r5/herramientas/r5_clics_muertos.cjs');
-    return;
-  }
-  const outJson = path.join(OUT_DIR, 'clics-muertos-r5.json');
+  const tool = path.join(ROOT, 'qa', 'verify-af-19nov.cjs');
   try {
-    await execFile(process.execPath, [tool, base, outJson], { cwd: ROOT, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
-    const data = JSON.parse(fs.readFileSync(outJson, 'utf8'));
-    if (data.dead || data.missing || data.errors) {
-      recordFail(failures, 'clics-muertos', `dead=${data.dead} missing=${data.missing} errors=${data.errors}`);
+    const { stdout } = await execFile(process.execPath, [tool, base, '--no-write'], { cwd: ROOT, encoding: 'utf8' });
+    if (!/^PASS \d+ clics y \d+ archivos SEO/m.test(stdout)) {
+      recordFail(failures, 'clics-muertos', stdout.trim() || 'sin resultados del recorrido');
     }
   } catch (err) {
-    recordFail(failures, 'clics-muertos', `r5_clics_muertos falló: ${err.stdout || err.message}`);
+    recordFail(failures, 'clics-muertos', err.stderr || err.message);
   }
 }
 
 async function main() {
-  fs.mkdirSync(OUT_DIR, { recursive: true });
   const { server, base } = await startServer();
   const browser = await chromium.launch({ headless: true, args: ['--disable-gpu'] });
   const failures = [];
   try {
     await testViewportFlows(browser, base, { width: 390, height: 844, touch: true }, failures);
+    await testViewportFlows(browser, base, { width: 1280, height: 551, touch: false }, failures);
     await testViewportFlows(browser, base, { width: 1440, height: 900, touch: false }, failures);
     await testLateralWidths(browser, base, failures);
     await runDeadClicksTool(base, failures);

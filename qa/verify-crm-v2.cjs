@@ -232,6 +232,7 @@ async function taskJourney(browser, size, task) {
       assert.equal(await page.locator('[data-c2="nurture"]').count(), 0, 'aparece promoción para contacto sin permiso');
     } else if (id === 'C-J1') {
       evidenceRoute = 'R05';
+      await click(page.locator('#crm-v2-root summary').filter({ hasText: 'Resultados del programa' }), 'resultados del programa'); counted += 1;
       assert.equal(await page.locator('.crm2-metric').count(), 4, 'Resumen no muestra 4 indicadores');
       assert.match(await page.locator('#crm-v2-root').innerText(), /Decisiones de hoy|Todos los indicadores/);
     } else if (id === 'C-J2') {

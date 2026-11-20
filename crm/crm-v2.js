@@ -327,6 +327,8 @@
   }
   let currentToast = null;
   let requestedReview = null;
+  let selectedReviewId = null;
+  let permissionReviewId = null;
   let reviewPermissionOnDetail = false;
   let recommendationPanelId = null;
   function showToast() {
@@ -343,6 +345,8 @@
   function goto(route) {
     const next = ROUTE[route] ? route : 'R00';
     if (next !== 'R04') recommendationPanelId = null;
+    if (next !== 'R04') permissionReviewId = null;
+    if (next !== 'R07') selectedReviewId = null;
     if (localRoute() === next) render();
     else location.hash = next;
   }
@@ -708,7 +712,8 @@
     return [...saved, ...samples.filter(example => !records.some(item => item.id === example.id || item.status === example.status))];
   }
   function managerApprovals() {
-    const items = pendingApprovals();
+    const firstSelected = (left, right) => Number(right.id === selectedReviewId) - Number(left.id === selectedReviewId);
+    const items = pendingApprovals().sort(firstSelected);
     const body = items.length ? items.map(item => {
       const isReferralApproval = item.tipo === 'referido';
       const amount = item.monto ? `<div class="crm2-approval-amount"><small>${item.tipo === 'referido' ? 'Monto de beneficio no registrado' : 'Pack de catálogo · referencial'}</small><b>${money(item.monto)}</b></div>` : '<span class="crm2-inline-note">Monto no registrado</span>';
@@ -722,14 +727,16 @@
       const checks = isReferralApproval ? `<ul class="crm2-checklist"><li>${statusPill(`Permiso del referido · ${permissionVerified ? 'registrado' : 'por confirmar'}`,permissionVerified ? 'good' : 'wait')}</li><li>${statusPill(`Negocio B2B · ${b2bVerified ? 'registrado' : 'por confirmar'}`,b2bVerified ? 'good' : 'wait')}</li><li>${statusPill(`Beneficio · ${benefitVerified ? 'registrado' : 'por confirmar'}`,benefitVerified ? 'good' : 'wait')}</li></ul>${!canApprove ? '<p class="crm2-small-note">Aprobar queda bloqueado hasta registrar los tres datos. No se asigna un monto al beneficio.</p>' : ''}` : `<ul class="crm2-checklist"><li>${statusPill('Excepción y motivo · revisar','wait')}</li><li>${statusPill('Monto del catálogo · referencial','wait')}</li></ul>`;
       return `<article class="crm2-approval" data-approval="${esc(item.id)}"><div class="crm2-approval-head"><div><p class="crm2-eyebrow">${item.dataTest ? 'DATO DE PRUEBA' : 'SOLICITUD'} · ${esc(item.tipo || 'excepción')}</p><h3>${esc(item.titulo || 'Solicitud pendiente')}</h3><p>${esc(item.detalle || item.motivo || 'Motivo sin registro')}</p></div>${amount}</div>${statusPill(decisionStatus,item.estado === 'pidio_info' ? 'wait' : '')}${checks}<label class="crm2-note-field">Nota para Ventas<input type="text" data-approval-note="${esc(item.id)}" value="${esc(item.nota || '')}" placeholder="Escribe qué falta confirmar"></label><div class="crm2-row-actions">${primary('Aprobar','decide-approval',`data-id="${esc(item.id)}" data-decision="aprobada" ${canApprove ? '' : 'disabled title="Faltan datos verificables del referido"'}`)}${secondary('Pedir información','decide-approval',`data-id="${esc(item.id)}" data-decision="pidio_info"`)}${secondary('Rechazar','decide-approval',`data-id="${esc(item.id)}" data-decision="descartada"`)}</div></article>`;
     }).join('') : empty('No hay solicitudes pendientes','Las decisiones registradas quedan vinculadas a su propuesta o referido.');
-    const followups = managerFollowups();
+    const followups = managerFollowups().sort(firstSelected);
     const followupHtml = followups.length ? `<div class="crm2-list">${followups.map(item => {
       const person = leadById(item.leadId) || accountById(item.leadId);
       const approvedPermission = permission(person).key === 'yes' && item.status === 'Requiere aprobación';
       const direct = approvedPermission ? primary('Aprobar recuperación', 'approve-recovery', `data-id="${esc(item.id)}"`) : '';
       return `<article class="crm2-followup-review" data-followup="${esc(item.id)}"><p>${esc(item.name)} · ${esc(item.status === 'Bloqueado' ? 'Bloqueado: falta permiso' : item.status)}</p><p>${esc(item.reason)}</p><div class="crm2-row-actions">${direct}${secondary('Revisar permiso','review-followup',`data-id="${esc(item.leadId || item.id)}"`)}</div></article>`;
     }).join('')}</div>` : `<div class="crm2-inline-note">Los seguimientos sin permiso de promoción permanecen bloqueados.</div>`;
-    return block('Solicitudes de Ventas', 'Aprobar, pedir información o rechazar; la respuesta vuelve a la ficha.', body) + block('Seguimientos preparados', 'Un bloqueo de permiso no ofrece un botón para enviar.', followupHtml);
+    const proposals = block('Solicitudes de Ventas', 'Aprobar, pedir información o rechazar; la respuesta vuelve a la ficha.', body);
+    const recovery = block('Seguimientos preparados', 'Un bloqueo de permiso no ofrece un botón para enviar.', followupHtml);
+    return followups[0]?.id === selectedReviewId ? recovery + proposals : proposals + recovery;
   }
   function saveMetaForm() {
     const goal = appState().goalSales;
@@ -838,11 +845,12 @@
     const permissionControls = !isAccount && role === 'marketing' ? `<p class="crm2-small-note">Registra una preferencia solo después de verificar la elección explícita del contacto.</p>${secondary('Confirmar permiso promocional','permission-yes',`data-id="${esc(item.id)}"`)} ${secondary('Registrar sin permiso','permission-no',`data-id="${esc(item.id)}"`)}` : '';
     const canSchedule = role !== 'marketing' || perm.key === 'yes';
     const scheduleControl = canSchedule ? secondary('Programar seguimiento','schedule',`data-id="${esc(item.id)}" data-kind="${isAccount ? 'account' : 'lead'}"`) : `<span class="crm2-blocked-copy">Marketing no programa promociones sin permiso registrado.</span>`;
-    const folded = `<details class="crm2-fold" data-crm2-permissions><summary>Permisos y preferencias</summary><div class="crm2-fold-body">${labelValue('Permiso de promoción',perm.label)}${permissionControls}${scheduleControl} ${secondary('Registrar contacto','mark-contacted',`data-id="${esc(item.id)}"`)}</div></details>`;
+    const permissionFirst = permissionReviewId === String(item.id);
+    const folded = `<details class="crm2-fold" data-crm2-permissions${permissionFirst ? ' open' : ''}><summary>Permisos y preferencias</summary><div class="crm2-fold-body">${labelValue('Permiso de promoción',perm.label)}${permissionControls}${scheduleControl} ${secondary('Registrar contacto','mark-contacted',`data-id="${esc(item.id)}"`)}</div></details>`;
     const group1 = block('Quién es', '', identity + referralDetails + (isAccount ? liveReferralDetails(account) : ''));
     const group2 = block('Qué hizo', 'La actividad reciente explica el siguiente paso.', activity + qualification + historyDetails + (isAccount ? '' : conversation + landingContext(lead)));
     const recommendation = isAccount && role === 'ventas' && recommendationPanelId === String(item.id) ? accountRecommendation(item) : '';
-    const group3 = block(isAccount ? 'Compra y reposición' : 'Qué cotiza y qué hacer ahora', isAccount ? 'Usa el historial para preparar la siguiente reposición.' : 'La sugerencia acompaña la decisión; precio y stock se confirman antes de compartir.', `${postventa}${isAccount && item.live ? livePurchase(account) : purchase}${isAccount ? replenishBlock(account) : ''}${actions}${referralDataAction}<div data-inline-panel>${recommendation}</div>${folded}`);
+    const group3 = block(isAccount ? 'Compra y reposición' : 'Qué cotiza y qué hacer ahora', isAccount ? 'Usa el historial para preparar la siguiente reposición.' : 'La sugerencia acompaña la decisión; precio y stock se confirman antes de compartir.', `${postventa}${isAccount && item.live ? livePurchase(account) : purchase}${isAccount ? replenishBlock(account) : ''}${actions}${referralDataAction}<div data-inline-panel>${recommendation}</div>${permissionFirst ? '' : folded}`);
     let actionbar = '';
     if (!isAccount && role === 'ventas') {
       const reasonSelect = `<select class="crm2-action-select" data-return-reason="${esc(item.id)}" aria-label="Motivo de devolución"><option value="">Motivo para devolver</option><option>Falta volumen</option><option>No contesta</option><option>Cotiza a futuro</option><option>Falta presupuesto</option></select>`;
@@ -855,7 +863,7 @@
       actionbar = actionBar(`${primary('Preparar reposición','open-reorder',id)}${secondary('Recomendar','recommend-account',id)}${more}`, true);
     }
     else actionbar = actionBar('', true);
-    return { content: group1 + group2 + group3, actionbar };
+    return { content: (permissionFirst ? folded : '') + group1 + group2 + group3, actionbar };
   }
 
   function openQuoteDialog(id) {
@@ -948,6 +956,11 @@
     template.innerHTML = legacyMarkup;
     const main = template.content.querySelector('#m4-main');
     if (!main) return block('CRM por comprador', 'Cargando contrato de etapas y perfiles.', '<p role="status">Leyendo el contrato local de compradores…</p>');
+    for (const heading of main.querySelectorAll('h1')) {
+      const nested = document.createElement('h2');
+      nested.textContent = heading.textContent;
+      heading.replaceWith(nested);
+    }
     const get = selector => main.querySelector(selector);
     const header = get('.a1crm-header');
     const roleNote = get('.a1crm-role-note');
@@ -1003,21 +1016,27 @@
     if (host.querySelector('[data-c2-search]') && searchValue) host.querySelector('[data-c2-search]').value = searchValue;
     showToast();
     if (route === 'R04' && reviewPermissionOnDetail) {
-      reviewPermissionOnDetail = false;
-      const details = host.querySelector('[data-crm2-permissions]');
-      if (details) {
+      requestAnimationFrame(() => {
+        if (!reviewPermissionOnDetail || localRoute() !== 'R04') return;
+        const details = host.querySelector('[data-crm2-permissions]');
+        if (!details) return;
+        reviewPermissionOnDetail = false;
         details.open = true;
-        requestAnimationFrame(() => { details.querySelector('summary').focus({ preventScroll: true }); details.scrollIntoView({ block:'center' }); });
-      }
+        details.querySelector('summary').focus({ preventScroll: true });
+        details.scrollIntoView({ block:'center' });
+      });
     }
     if (route === 'R07' && requestedReview) {
-      const id = CSS.escape(requestedReview);
-      requestedReview = null;
-      const review = host.querySelector(`[data-approval="${id}"], [data-followup="${id}"]`);
-      if (review) {
+      requestAnimationFrame(() => {
+        if (!requestedReview || localRoute() !== 'R07') return;
+        const id = CSS.escape(requestedReview);
+        const review = host.querySelector(`[data-approval="${id}"], [data-followup="${id}"]`);
+        if (!review) return;
         if (!review.matches('button')) review.tabIndex = -1;
-        requestAnimationFrame(() => { review.focus({ preventScroll: true }); review.scrollIntoView({ block:'center' }); });
-      }
+        review.focus({ preventScroll: true });
+        review.scrollIntoView({ block:'center' });
+        if (document.activeElement === review) requestedReview = null;
+      });
     }
   }
   window.MarleyCRM2 = { render };
@@ -1301,8 +1320,8 @@
     if (action === 'return-lead') { returnLead(id); return; }
     if (action === 'send-approval') { sendForApproval(id); return; }
     if (action === 'decide-approval') { approvalDecision(id,button.dataset.decision); return; }
-    if (action === 'review-approval') { requestedReview = id; goto('R07'); return; }
-    if (action === 'review-followup') { reviewPermissionOnDetail = true; detailOpen(id,accountById(id) ? 'account' : 'lead','R07'); return; }
+    if (action === 'review-approval') { requestedReview = selectedReviewId = id; goto('R07'); return; }
+    if (action === 'review-followup') { permissionReviewId = id; reviewPermissionOnDetail = true; detailOpen(id,accountById(id) ? 'account' : 'lead','R07'); return; }
     if (action === 'approve-recovery') { approveRecovery(id); return; }
     if (action === 'schedule') { showSchedule(id); return; }
     if (action === 'start-followup') { showSchedule(id); return; }

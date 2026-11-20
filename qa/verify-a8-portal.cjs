@@ -11,8 +11,8 @@ const hashes = [
   ...Array.from({ length: 15 }, (_, i) => `C${String(i + 1).padStart(2, '0')}`),
   ...Array.from({ length: 17 }, (_, i) => `R${String(i).padStart(2, '0')}`),
 ];
-const viewports = [{ width: 390, height: 844 }, { width: 1440, height: 900 }];
-const outputDir = path.join(root, 'EVIDENCIA_10NOV');
+const viewports = [{ width: 390, height: 844 }, { width: 1280, height: 551 }, { width: 1440, height: 900 }];
+const outputDir = process.env.A8_VERIFY_OUT || path.join(root, 'EVIDENCIA_10NOV');
 const evidenceHashes = new Set(['C01', 'C02', 'C03', 'C08', 'C10', 'R02', 'R06', 'R16', 'R17']);
 
 function roleFor(hash) {
@@ -35,7 +35,7 @@ async function collect(page, expectedHash, viewport) {
   const metrics = await page.evaluate(() => {
     const visible = (el) => {
       const r = el.getBoundingClientRect(), s = getComputedStyle(el);
-      return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden' && Number(s.opacity || 1) > 0;
+      return r.width > 0 && r.height > 0 && s.display !== 'none' && el.checkVisibility({ visibilityProperty: true, opacityProperty: true }) && !el.closest('details:not([open])');
     };
     const selector = (el) => `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}${typeof el.className === 'string' && el.className.trim() ? `.${el.className.trim().split(/\s+/).join('.')}` : ''}`;
     const label = (el) => (el.innerText || el.getAttribute('aria-label') || el.value || '').trim().replace(/\s+/g, ' ').slice(0, 60);

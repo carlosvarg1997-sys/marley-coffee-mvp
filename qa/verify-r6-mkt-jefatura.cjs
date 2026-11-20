@@ -1,3 +1,4 @@
+const { useLegacyCrm } = require('./legacy-crm-contract.cjs');
 const assert = require('node:assert/strict');
 const { chromium: chromeLauncher } = require('./playwright-system-chrome.cjs');
 const { chromium: pwChromium } = require('C:/Users/HP/Desktop/1_ECOSISTEMA_ENSUTEX/02_Sitio_Web_Definitivo/node_modules/playwright');
@@ -127,6 +128,7 @@ async function runBrowserSuite(name, launcher, launchOpts) {
   const summary = { browser: name, heights: {}, checks: {} };
   try {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+    await useLegacyCrm(context);
     const page = await context.newPage();
     page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
     page.on('console', (m) => { if (m.type() === 'error') errors.push(`console: ${m.text()}`); });
@@ -149,6 +151,7 @@ async function runBrowserSuite(name, launcher, launchOpts) {
       const top1440 = h === 'R12' ? 1260 : 1800;
       const top390 = h === 'R12' ? 2460 : 2500;
       const m1440 = await auditLayout(page, { width: 1440, height: 900 }, 'marketing', h, title, top1440);
+      await auditLayout(page, { width: 1280, height: 551 }, 'marketing', h, title, top1440);
       const m390 = await auditLayout(page, { width: 390, height: 844 }, 'marketing', h, title, top390);
       summary.heights[`mkt_${h}_1440`] = m1440.height;
       summary.heights[`mkt_${h}_390`] = m390.height;
@@ -156,6 +159,7 @@ async function runBrowserSuite(name, launcher, launchOpts) {
     for (const [h, title] of JF_SCREENS) {
       const top1440 = h === 'R05' ? 1300 : 1800;
       const m1440 = await auditLayout(page, { width: 1440, height: 900 }, 'jefatura', h, title, top1440);
+      await auditLayout(page, { width: 1280, height: 551 }, 'jefatura', h, title, top1440);
       const m390 = await auditLayout(page, { width: 390, height: 844 }, 'jefatura', h, title, 2500);
       summary.heights[`jefe_${h}_1440`] = m1440.height;
       summary.heights[`jefe_${h}_390`] = m390.height;

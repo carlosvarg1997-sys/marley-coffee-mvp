@@ -1,5 +1,7 @@
 'use strict';
 
+const { useLegacyCrm } = require('./legacy-crm-contract.cjs');
+const { completeDiagnostic } = require('./complete-diagnostic.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const http = require('node:http');
@@ -69,6 +71,7 @@ async function verifyOnBrowser(target, base) {
   const browser = await realChromium.launch({ headless: true, executablePath: target.executablePath, args: ['--disable-gpu'] });
   try {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+    await useLegacyCrm(ctx);
     const page = await ctx.newPage();
     const pageErrors = [];
     page.on('pageerror', (e) => pageErrors.push(e.message));
@@ -311,6 +314,10 @@ async function verifyOnBrowser(target, base) {
     await page.locator('[data-r6-peso="volumen"]').waitFor({ state: 'visible' });
 
     const r09Desktop = await measureViewport(page, base + '/index.html#R09', 1440, 900);
+    const r09Compact = await measureViewport(page, base + '/index.html#R09', 1280, 551);
+    assert.equal(r09Compact.overflow, false, `${target.name}: R09 sin desborde a 1280×551`);
+    assert.ok(r09Compact.sh <= 1800, `${target.name}: R09 alto a 1280×551`);
+    assert.deepEqual(r09Compact.badTouch, [], `${target.name}: R09 controles de 42 px a 1280×551`);
     assert.equal(r09Desktop.overflow, false, `${target.name}: R09 sin desborde en 1440`);
     assert.ok(r09Desktop.sh <= 1800, `${target.name}: R09 alto 1440 (${r09Desktop.sh}px) <= 1800`);
     assert.equal(r09Desktop.h1Count, 1, `${target.name}: R09 tiene 1 solo H1 visible`);
@@ -411,15 +418,16 @@ async function verifyOnBrowser(target, base) {
     assert.equal(await page.locator('[data-r6-prev-hotel]').innerText(), '77/100', `${target.name}: Restaurar devuelve hotel a 77/100`);
     assert.equal(await page.evaluate(() => R6P.config.pesosRelacion.recompraTiempo), 0.35, `${target.name}: Restaurar devuelve pesos Relación base`);
 
-    // 3. C04 pregunta de locales para todos dentro del bloque plegado, con 1 punto marcado, y alto 390 <= 2500
+    // 3. C04 conserva puntos de café en ambos caminos, como pregunta independiente para Oficinas.
     await page.setViewportSize({ width: 390, height: 844 });
     for (const camino of ['productos', 'solucion']) {
       await page.evaluate((cam) => {
         M4.reset();
         localStorage.removeItem('mc_landing_lead_v1');
         M4.saveContact({ name: 'Hotel C04', email: 'hc04@example.cl', consent: true });
+        M4.answer('negocio', 'OCS');
         M4.update((s) => {
-          s.answers.negocio = 'Hotel';
+          s.answers.negocio = 'OCS';
           s.catalogJourney = cam === 'solucion'
             ? { machine: 'orientacion', machineSource: 'diagnostico', productsSkipped: true }
             : { machine: 'bar', machineSource: 'cliente', cart: [{ id: 'grano', qty: 1 }] };
@@ -427,26 +435,24 @@ async function verifyOnBrowser(target, base) {
         location.hash = '#C04';
       }, camino);
       await page.locator('#r4Datos').waitFor({ state: 'visible' });
+      await completeDiagnostic(page, { business: 'Oficinas', stopAt: 'puntos' });
+      const point = page.locator('#r4Datos [data-k="puntos"][data-v="1 punto"]');
+      if (await point.getAttribute('aria-pressed') !== 'true') await point.click();
+      await page.locator('#r4Datos [data-k="puntos"][data-v="1 punto"][aria-pressed="true"]').waitFor({ state:'visible' });
       const c04Check = await page.evaluate(() => {
-        const sug = document.querySelector('details.r4-sugerido');
         const puntosBtns = Array.from(document.querySelectorAll('#r4Datos [data-k="puntos"]'));
         const onePoint = document.querySelector('#r4Datos [data-k="puntos"][data-v="1 punto"]');
-        const insideDetails = puntosBtns.length > 0 && puntosBtns.every((b) => Boolean(b.closest('details.r4-sugerido')));
         return {
-          hasDetails: Boolean(sug),
-          detailsOpen: Boolean(sug && sug.open),
           puntosCount: puntosBtns.length,
-          insideDetails,
+          activeQuestionGroups: new Set([...document.querySelectorAll('#r4Datos [data-a="answer"]')].map(el => el.dataset.k)).size,
           onePointPressed: onePoint ? onePoint.getAttribute('aria-pressed') : null,
           sh: document.documentElement.scrollHeight,
           overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
         };
       });
-      assert.equal(c04Check.hasDetails, true, `${target.name}: C04 (${camino}) tiene bloque plegado r4-sugerido`);
-      assert.equal(c04Check.detailsOpen, false, `${target.name}: C04 (${camino}) empieza plegado`);
       assert.ok(c04Check.puntosCount >= 5, `${target.name}: C04 (${camino}) muestra opciones de puntos de café`);
-      assert.equal(c04Check.insideDetails, true, `${target.name}: C04 (${camino}) locales está SOLO dentro del bloque plegado`);
-      assert.equal(c04Check.onePointPressed, 'true', `${target.name}: C04 (${camino}) trae «1 punto» marcado`);
+      assert.equal(c04Check.activeQuestionGroups, 1, `${target.name}: C04 (${camino}) muestra solo la pregunta de locales`);
+      assert.equal(c04Check.onePointPressed, 'true', `${target.name}: C04 (${camino}) guarda la selección «1 punto»`);
       assert.equal(c04Check.overflow, false, `${target.name}: C04 (${camino}) sin desborde a 390px`);
       assert.ok(c04Check.sh <= 2500, `${target.name}: C04 (${camino}) alto 390 (${c04Check.sh}px) <= 2500px`);
     }

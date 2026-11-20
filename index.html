@@ -6827,8 +6827,8 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
 <section class="ux-strip" aria-label="Cómo funciona"><h2 class="r5-strip-title">¿Cómo funciona?</h2><div class="ux-strip-inner"><div class="ux-strip-item"><b class="ux-number">01</b><div><h3>Elige cómo empezar</h3><span>Ayuda, máquina o pack.</span></div></div><div class="ux-strip-item"><b class="ux-number">02</b><div><h3>Cuéntanos de tu negocio</h3><span>Cuéntanos cómo sirves.</span></div></div><div class="ux-strip-item"><b class="ux-number">03</b><div><h3>Revisa tu propuesta</h3><span>Revisa y pide seguimiento.</span></div></div></div></section>
 <section class="ux-section" id="insumos"><div class="ux-wrap"><div class="ux-cafe-card"><div><span class="ux-eyebrow">Café e insumos</span><h2>¿Qué café e insumos puedo pedir?</h2><p class="r5-brandline">Elige café e insumos para tu negocio.</p><p>Elige una selección sugerida y ajústala, o selecciona tus productos uno por uno.</p></div><button type="button" class="m5-btn" data-m9-open>Ver productos y selecciones ${icon('arrow',18)}</button></div></div></section>
 <section class="ux-section" id="negocios" aria-labelledby="h-negocios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Para cada forma de servir</span><h2 id="h-negocios">¿Qué necesita tu tipo de negocio?</h2></div></div><div class="m5-buyer-groups" aria-label="Categorías de negocio">${tabs}</div>
-<div class="ux-buyer-panel" id="panel-biz" aria-live="polite">${V.WF()?'<div class="m5-ph ux-buyer-photo" role="img" aria-label="Servicio de café">Imagen del negocio</div>':`<img class="ux-buyer-photo" src="${biz==='Hotel'?'recursos/legado/hotel-automatica-concept-v3.webp':D.SCENES[B.scene].fin}" alt="Servicio de café para ${esc(article(biz))}" loading="eager" decoding="sync">`}<div class="ux-buyer-copy"><span class="ux-eyebrow" style="color:#F3C900">${esc(biz === 'OCS' ? 'Oficinas' : biz)}</span><h3><span class="r5-business-h3-line">Café para ${{Hotel: 'hoteles', Restaurante: 'restaurantes', Cafetería: 'cafeterías', 'Eventos o catering': 'eventos', Oficinas: 'oficinas', Conveniencia: 'tiendas de conveniencia', Panadería: 'panaderías'}[biz] || 'negocios'}</span>${esc(B.h)}</h3><p>${esc(B.p)}</p><button type="button" class="m5-btn" data-a="quote-biz" data-v="${esc(biz)}">Elegir productos ${icon('arrow',18)}</button></div></div></div></section>
-<section class="ux-section ux-machine-scroll" id="maquinas" data-driver><div class="ux-wrap ux-machine-scroll-stage"><div class="ux-machine-visual">${V.cam('barras',{label:'Animación de las máquinas Marley Coffee'})}</div><div class="ux-cafe-card"><div><span class="ux-eyebrow">Máquina en comodato</span><span class="ux-machine-caption" data-machine-caption role="status" aria-live="polite" aria-atomic="true">Máquina Bar</span><h2>¿Qué máquina de café me prestan en comodato?</h2><h3 class="r5-machine-answer">${esc(D.MACHINES[B.machine].name)}: ${esc(D.MACHINES[B.machine].kind)}</h3><p class="r5-brandline">Una máquina para tu forma de servir.</p><p>${esc(D.MACHINES[B.machine].line)}</p><p>Prestamos la máquina; compras insumos cada mes y te orientamos según tu operación.</p></div><button type="button" class="m5-btn" data-a="quote">Armar mi solución ${icon('arrow',18)}</button></div></div></section>
+<div class="ux-buyer-panel" id="panel-biz" aria-live="polite">${V.WF()?'<div class="m5-ph ux-buyer-photo" role="img" aria-label="Servicio de café">Imagen del negocio</div>':`<img class="ux-buyer-photo" src="${D.SCENES[B.scene].fin}" alt="Servicio de café para ${esc(article(biz))}" loading="lazy" decoding="async">`}<div class="ux-buyer-copy"><span class="ux-eyebrow" style="color:#F3C900">${esc(biz === 'OCS' ? 'Oficinas' : biz)}</span><h3><span class="r5-business-h3-line">Café para ${{Hotel: 'hoteles', Restaurante: 'restaurantes', Cafetería: 'cafeterías', 'Eventos o catering': 'eventos', Oficinas: 'oficinas', Conveniencia: 'tiendas de conveniencia', Panadería: 'panaderías'}[biz] || 'negocios'}</span>${esc(B.h)}</h3><p>${esc(B.p)}</p><button type="button" class="m5-btn" data-a="quote-biz" data-v="${esc(biz)}">Elegir productos ${icon('arrow',18)}</button></div></div></div></section>
+<section class="ux-section ux-machine-scroll" id="maquinas" data-driver><div class="ux-wrap ux-machine-scroll-stage"><div class="ux-machine-visual"></div><div class="ux-cafe-card"><div><span class="ux-eyebrow">Máquina en comodato</span><span class="ux-machine-caption" data-machine-caption role="status" aria-live="polite" aria-atomic="true">Máquina Bar</span><h2>¿Qué máquina de café me prestan en comodato?</h2><h3 class="r5-machine-answer">${esc(D.MACHINES[B.machine].name)}: ${esc(D.MACHINES[B.machine].kind)}</h3><p class="r5-brandline">Una máquina para tu forma de servir.</p><p>${esc(D.MACHINES[B.machine].line)}</p><p>Prestamos la máquina; compras insumos cada mes y te orientamos según tu operación.</p></div><button type="button" class="m5-btn" data-a="quote">Armar mi solución ${icon('arrow',18)}</button></div></div></section>
 <section class="ux-section" id="servicios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Más para tu negocio</span><h2>Servicios y experiencias.</h2></div><p>Agrega lo que te interese a tu propuesta.</p></div><details class="m5-more"><summary>Explorar servicios disponibles</summary>${bento}</details><p class="m5-cta-note">Servicios y condiciones sujetos a confirmación.</p><details class="m5-more"><summary>¿Creas contenido sobre café o gastronomía?</summary><p>Conversemos sobre una posible colaboración.</p><button type="button" class="m5-btn m5-btn--ghost" data-a="creator-interest">Conversar sobre una alianza</button></details></div></section>
 <section class="ux-section ux-faq" id="faq"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Estamos para ayudarte</span><h2>Preguntas frecuentes.</h2></div></div><div>${faq}</div></div></section>
 `, { mbar: false, cls: 'm5-c02' });
@@ -11828,6 +11828,14 @@ window.M7BuyerCRM = (() => {
   D.ROLE_ACCESS = D.ROLE_ACCESS || {};
   D.ROLE_ACCESS.R17 = roles.slice();
 
+  function repaintBuyerCrm() {
+    if (currentRoute() !== 'R17') return;
+    setTimeout(() => {
+      if (currentRoute() !== 'R17') return;
+      if (window.MarleyCRM2?.render) window.MarleyCRM2.render();
+      else window.MarleyApp?.render?.();
+    }, 0);
+  }
   function loadData() {
     if (data) return Promise.resolve(data);
     if (!loadPromise) loadPromise = fetch(new URL('captacion/crm/compradores.json', location.href), { cache: 'no-store' }).then((response) => {
@@ -11835,9 +11843,9 @@ window.M7BuyerCRM = (() => {
       return response.json();
     }).then((value) => {
       data = value;
-      if (currentRoute() === 'R17') setTimeout(() => window.MarleyApp?.render?.(), 0);
+      repaintBuyerCrm();
       return data;
-    }).catch((error) => { loadError = error.message || 'No se pudo leer compradores.json.'; if (currentRoute() === 'R17') setTimeout(() => window.MarleyApp?.render?.(), 0); throw error; });
+    }).catch((error) => { loadError = error.message || 'No se pudo leer compradores.json.'; repaintBuyerCrm(); throw error; });
     return loadPromise;
   }
   function buyerFromContact(contact, s) {
@@ -11952,7 +11960,7 @@ window.M7BuyerCRM = (() => {
     const s = M.get(), roleKey = s.role, role = D.ROLE_MENUS[roleKey];
     if (!roles.includes(roleKey)) return R.SCREENS.R00();
     if (!data) {
-      loadData();
+      loadData().catch(() => {});
       return shell('<section class="a1crm-card"><p class="a1crm-kicker">CRM POR COMPRADOR</p><h1>Estamos cargando las fichas</h1><p role="status">' + esc(loadError || 'Leyendo el contrato local de A7…') + '</p></section>');
     }
     const contact = buyerList(s);
@@ -13475,14 +13483,15 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     return '<section class="r3-catalog m9-catalog m5-wrap" aria-labelledby="r3-catalog-title">' + stepGuide(1) + r4NextBar() + '<header class="r3-catalog-heading"><span class="r3-kicker">Productos y precios netos referenciales</span><h1 id="r3-catalog-title">Elige tu pack o tus productos</h1><p>Revisa fotos, formatos y precios por línea. La compatibilidad y las cantidades se confirman con tu ejecutivo.</p></header>' + machine + '<section class="r3-packs" aria-labelledby="r3-pack-heading"><div class="r3-section-heading"><div><span class="r3-kicker">Por dónde empezar</span><h2 id="r3-pack-heading">Pack recomendado</h2></div></div>' + pack + '</section>' + catalogCartHTML() + '<details class="r3-catalog-products" id="r3-products"><summary>Ver todos los productos (' + DATA.prices.lines.length + ')</summary><div class="r3-product-grid">' + productList + '</div></details></section>';
   }
   function machinesHTML() {
-    const offer = buyerFor(M.get()), chosen = window.M9Catalog.journey().machine;
+    const offer = buyerFor(M.get()), selection = window.M9Catalog.journey().machine;
+    const chosen = Object.hasOwn(D.MACHINES, selection) ? selection : null;
     const offerLines = offer ? keyLines(offer) : [];
     const productsTotal = offerLines.reduce(function (sum, line) { return sum + line.precio; }, 0);
     const fixedTotal = DATA.prices.kit.precio + DATA.prices.filter.precio;
     const startingTotal = productsTotal + fixedTotal;
     const machineKeys = Object.keys(DATA.offer.maquinas);
     const recommendedKey = offer && (((window.R5 && window.R5.recomendada(M.get(), offer)) || offer.maquina) || "");
-    const primaryKey = chosen || recommendedKey || machineKeys[0];
+    const primaryKey = chosen || (machineKeys.includes(recommendedKey) ? recommendedKey : machineKeys[0]);
     const machineCard = function (key, primary = false) {
       const m = D.MACHINES[key], businesses = DATA.offer.buyers.filter(function (b) { return b.maquina === key; }).map(buyerLabel).join(" \u00b7 "), recommended = offer && ((window.R5 && window.R5.recomendada(M.get(), offer)) || offer.maquina) === key;
       const heading = primary ? 'h2' : 'h3';
@@ -13497,8 +13506,6 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const cardLabel = chosen ? (chosen === recommendedKey ? "Máquina recomendada" : "Máquina elegida") : "Máquina recomendada";
     return '<section class="r3-machines m5-wrap" aria-labelledby="r3-machines-title">' + stepGuide(1) + '<header class="r3-catalog-heading"><h1 id="r3-machines-title">Elige una máquina en comodato</h1></header><section class="r3-machine-primary" aria-label="' + esc(cardLabel) + '"><span class="r3-kicker">' + esc(cardLabel) + '</span>' + primaryMachine + '</section>' + machineOptions + conditions + '<div class="r3-next-machine"><button type="button" class="m5-btn r3-main" data-m10-finish>Continuar a packs y productos</button></div></section>';
   }
-  window.M9Catalog.catalogHTML = catalogHTML;
-  window.M9Catalog.machinesHTML = machinesHTML;
   function ensureGuide(html, stage) {
     if (html.indexOf("r3-step-guide") >= 0 || html.indexOf("mcp-guia") >= 0) return html;
     const pos = html.indexOf("<section"); if (pos < 0) return stepGuide(stage) + html;
@@ -13592,6 +13599,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     });
   }
   function c05Wrap() {
+    if (!DATA) return C.__r3Original.C05();
     const s = M.get(), offer = buyerFor(s);
     let html = decoratePriceLists(ensureGuide(C.__r3Original.C05(), 2));
     html = proposalQuoteBlocks(html, s, offer);
@@ -13920,6 +13928,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     return '<section class="r3-order-focus" aria-labelledby="r3-order-focus-title"><h2 id="r3-order-focus-title">' + (ready ? 'Prepara tu pedido' : 'Revisa tu pack de partida') + '</h2><p class="r3-order-note">' + (ready ? 'Revisa el pack antes de confirmar.' : 'Aviso de reposición pendiente.') + '</p>' + actions + shortcuts + '<details class="r3-order-details af-fold" data-af-fold="order-products"><summary>Productos, kit y filtro · ' + money(total) + '</summary><ul class="r3-history-lines">' + rowItems(items, { stock: true }) + '</ul>' + orderStockHTML(items) + orderComplementsHTML(s, c, items, null) + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p></details></section>';
   }
   function customPortal(s) {
+    if (!DATA) return originalAccountHTML(s);
     const c = s.customerCycle || {}, old = originalAccountHTML(s);
     const inboxSection = (old.match(/<section class="m5-cycle" aria-labelledby="m5-cycle-inbox-title">[\s\S]*?<\/section>/) || [""])[0];
     const recSection = (old.match(/<section class="m5-cycle" aria-labelledby="mcp-rec-j">[\s\S]*?<\/section>/) || [""])[0];
@@ -13938,7 +13947,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
   const originalC09 = C.__r3Original.C09 || C.SCREENS.C09;
   C.SCREENS.C09 = function () {
     const s = M.get(), c = s.customerCycle;
-    if (!c || !window.M4Journey.enabled(s)) return originalC09();
+    if (!DATA || !c || !window.M4Journey.enabled(s)) return originalC09();
     const oldSigned = c.contractSignedAt, oldNotice = c.replenishmentNotice;
     window.__r3RealNotice = Boolean(oldNotice); c.contractSignedAt = oldSigned || "R3-portal-render"; c.replenishmentNotice = true;
     try { return ensureGuide(originalC09(), 4).replaceAll("Contrato simulado firmado", "Cuenta en seguimiento").replaceAll("Contrato simulado", "Cuenta en seguimiento"); }
@@ -14117,6 +14126,8 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     if (form) updateRepeatTotal(form);
   });
   function install() {
+    window.M9Catalog.catalogHTML = catalogHTML;
+    window.M9Catalog.machinesHTML = machinesHTML;
     window.MC_R3 = { prices: DATA.prices, offers: DATA.offer, buyerFor: buyerFor, rowItems: rowItems };
     bindR3();
     const lastRender = window.MarleyApp && window.MarleyApp.render;
@@ -26368,7 +26379,7 @@ body[data-current="C09"] .r3-stock-inline .m5-link{min-height:44px;padding:0 2px
 body[data-current="C09"] .r3-stock-note{margin:6px 0 0;font:500 12px/1.4 var(--font);color:#5f5f5f}
 body[data-current="C09"] #m4-main{padding-bottom:24px!important}
 .r5-c04-bajada:empty{display:none}
-</style><link rel="stylesheet" href="crm/crm-v2.css?v=20261119-af"><script src="crm/crm-v2.js?v=20261119-af" defer></script>
+</style>
 <style id="postcompra-17nov">
 /* 17-nov · Postcompra: aviso «Correo enviado», correo simulado de marca y reposición. Marca: negro, blanco, gris neutro y amarillo #F3C900. */
 #mcm-toast{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:10050;display:flex;justify-content:center;padding:0 16px;pointer-events:none;box-sizing:border-box}
@@ -26538,4 +26549,21 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
   }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && overlayEl && !overlayEl.hidden) closeMail(); });
 })();
-</script><link rel="stylesheet" href="recursos/marca/composicion-af.css?v=20261119-1"></body></html>
+</script><link rel="stylesheet" href="recursos/marca/composicion-af.css?v=20261119-1">
+<script id="marley-crm-v2-loader">
+(() => {
+  let requested = false;
+  function loadCrm() {
+    if (requested || !/^#R(?:0\d|1[0-7])(?:\?|$)/.test(location.hash)) return;
+    requested = true;
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = 'crm/crm-v2.css?v=20261119-af2';
+    const script = document.createElement('script');
+    script.src = 'crm/crm-v2.js?v=20261119-af';
+    document.head.append(style, script);
+  }
+  window.addEventListener('hashchange', loadCrm);
+  loadCrm();
+})();
+</script></body></html>
