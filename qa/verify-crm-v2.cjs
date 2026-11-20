@@ -3,12 +3,13 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const http = require('node:http');
+const os = require('node:os');
 const path = require('node:path');
 const { chromium } = require('C:/Users/HP/Desktop/1_ECOSISTEMA_ENSUTEX/02_Sitio_Web_Definitivo/node_modules/playwright');
 
 const ROOT = path.resolve(__dirname, '..');
 let BASE = process.argv.slice(2).find(arg => /^https?:\/\//i.test(arg)) || null;
-const OUT = process.env.CRM2_VERIFY_OUT || 'C:/Users/HP/Documents/Codex/2026-11-16/mi-pedido-ejecuta-completo-el-prompt/outputs/crm-v2-16nov/capturas/despues';
+const OUT = process.env.CRM2_VERIFY_OUT || fs.mkdtempSync(path.join(os.tmpdir(), 'marley-crm-v2-'));
 const SIZES = [{ name: 'desktop', width: 1280, height: 551 }, { name: 'mobile', width: 390, height: 844 }];
 const BROWSERS = [
   { name: 'Chrome', executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe' },
@@ -232,6 +233,7 @@ async function taskJourney(browser, size, task) {
       assert.equal(await page.locator('[data-c2="nurture"]').count(), 0, 'aparece promoción para contacto sin permiso');
     } else if (id === 'C-J1') {
       evidenceRoute = 'R05';
+      await click(page.locator('#crm-v2-root summary').filter({ hasText: 'Resultados del programa' }), 'resultados del programa'); counted += 1;
       assert.equal(await page.locator('.crm2-metric').count(), 4, 'Resumen no muestra 4 indicadores');
       assert.match(await page.locator('#crm-v2-root').innerText(), /Decisiones de hoy|Todos los indicadores/);
     } else if (id === 'C-J2') {

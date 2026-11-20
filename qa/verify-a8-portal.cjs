@@ -11,8 +11,8 @@ const hashes = [
   ...Array.from({ length: 15 }, (_, i) => `C${String(i + 1).padStart(2, '0')}`),
   ...Array.from({ length: 17 }, (_, i) => `R${String(i).padStart(2, '0')}`),
 ];
-const viewports = [{ width: 390, height: 844 }, { width: 1440, height: 900 }];
-const outputDir = path.join(root, 'EVIDENCIA_10NOV');
+const viewports = [{ width: 390, height: 844 }, { width: 1280, height: 551 }, { width: 1440, height: 900 }];
+const outputDir = process.env.A8_VERIFY_OUT || path.join(root, 'EVIDENCIA_10NOV');
 const evidenceHashes = new Set(['C01', 'C02', 'C03', 'C08', 'C10', 'R02', 'R06', 'R16', 'R17']);
 
 function roleFor(hash) {
@@ -35,7 +35,7 @@ async function collect(page, expectedHash, viewport) {
   const metrics = await page.evaluate(() => {
     const visible = (el) => {
       const r = el.getBoundingClientRect(), s = getComputedStyle(el);
-      return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden' && Number(s.opacity || 1) > 0;
+      return r.width > 0 && r.height > 0 && s.display !== 'none' && el.checkVisibility({ visibilityProperty: true, opacityProperty: true }) && !el.closest('details:not([open])');
     };
     const selector = (el) => `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}${typeof el.className === 'string' && el.className.trim() ? `.${el.className.trim().split(/\s+/).join('.')}` : ''}`;
     const label = (el) => (el.innerText || el.getAttribute('aria-label') || el.value || '').trim().replace(/\s+/g, ' ').slice(0, 60);
@@ -47,11 +47,13 @@ async function collect(page, expectedHash, viewport) {
       return { selector: selector(el), target: target === el ? selector(el) : selector(target), width: Math.round(r.width), height: Math.round(r.height), text: label(el) };
     })
       .filter((el) => el.width < 44 || el.height < 44);
+    const regions = [...document.querySelectorAll('header, section, article, footer, [role="region"]')];
     const yellows = [...document.querySelectorAll('a[href],button,[role="button"]')]
       .filter((el) => visible(el) && !el.disabled)
       .map((el) => {
         const s = getComputedStyle(el), r = el.getBoundingClientRect();
-        return { selector: selector(el), bg: s.backgroundColor, color: s.color, width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), right: Math.round(r.right), bottom: Math.round(r.bottom), left: Math.round(r.left), text: label(el) };
+        const region = el.closest('header, section, article, footer, [role="region"]');
+        return { region: regions.indexOf(region), selector: selector(el), bg: s.backgroundColor, color: s.color, width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), right: Math.round(r.right), bottom: Math.round(r.bottom), left: Math.round(r.left), text: label(el) };
       })
       .filter((el) => /^(rgb\()?\s*(?:243,\s*201,\s*0|247,\s*190,\s*0|239,\s*198,\s*0|203,\s*166,\s*0)/i.test(el.bg));
     const inViewport = (item) => item.bottom > 0 && item.top < innerHeight && item.right > 0 && item.left < innerWidth;
@@ -116,8 +118,13 @@ async function main() {
     .map((result) => ({ hash: result.expectedHash, count: result.smallTouches.length, controls: [...new Map(result.smallTouches.map((item) => [`${item.target} ${item.width}×${item.height} · ${item.text}`, `${item.target} ${item.width}×${item.height} · ${item.text}`])).values()] }));
   const yellowSummary = mobile.filter((result) => result.yellowActions.length)
     .map((result) => ({ hash: result.expectedHash, actions: result.yellowActions.map(({ text, selector, bg, top, bottom }) => ({ text, selector, bg, inViewport: bottom > 0 && top < 844 })) }));
-  const yellowCompetitionSummary = results.filter((result) => result.yellowInViewport.length > 1)
-    .map((result) => ({ hash: result.expectedHash, viewport: result.viewport, actions: result.yellowInViewport.map(({ text, selector, bg }) => ({ text, selector, bg })) }));
+  // The acceptance rule is one dominant action per section. Keep counting
+  // all visible actions, including the header, and report competitions by section.
+  const yellowCompetitionSummary = results.flatMap(result =>
+    [...new Set(result.yellowInViewport.map(action => action.region))].flatMap(region => {
+      const actions = result.yellowInViewport.filter(action => action.region === region);
+      return actions.length > 1 ? [{ hash: result.expectedHash, viewport: result.viewport, region, actions }] : [];
+    }));
   const status = errors.length || routeMismatches.length || overflow.length || missingH1.length || playingVideos.length || smallTouchSummary.length || yellowCompetitionSummary.length ? 'FAIL' : 'PASS';
   const summary = { status, originalA8Hashes: hashes.length, viewportVisits: results.length, rootErrors: errors, routeMismatches, overflow, missingH1, reducedMotionVideosPlaying: playingVideos, smallTouchSummary, yellowSummary, yellowCompetitionSummary };
   process.stdout.write(JSON.stringify(summary, null, 2) + '\n');
@@ -127,7 +134,7 @@ async function main() {
   assert.equal(missingH1.length, 0, 'every tested route has a visible H1');
   assert.equal(playingVideos.length, 0, 'reduced motion leaves all videos paused');
   assert.equal(smallTouchSummary.length, 0, 'all visible mobile controls have a touch target of at least 44 × 44 px');
-  assert.equal(yellowCompetitionSummary.length, 0, 'no route has competing yellow actions in its viewport');
+  assert.equal(yellowCompetitionSummary.length, 0, 'no visible section has competing yellow actions');
 }
 
 main().catch((error) => { console.error(error); process.exitCode = 1; });

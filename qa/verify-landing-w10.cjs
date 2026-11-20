@@ -4,11 +4,13 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const http = require('node:http');
+const os = require('node:os');
 const path = require('node:path');
 const { chromium } = require('./playwright-system-chrome.cjs');
+const { completeDiagnostic } = require('./complete-diagnostic.cjs');
 
 const root = path.resolve(__dirname, '..');
-const evidence = path.resolve(root, '../../..', '.qa-chrome-isolated', 'w10-evidencia');
+const evidence = process.env.W10_VERIFY_OUT || fs.mkdtempSync(path.join(os.tmpdir(), 'marley-w10-'));
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.mp4': 'video/mp4', '.woff2': 'font/woff2' };
 const server = http.createServer((req, res) => {
   let pathname;
@@ -23,7 +25,7 @@ const server = http.createServer((req, res) => {
 });
 
 async function context(browser, width, init) {
-  const ctx = await browser.newContext({ viewport: { width, height: width <= 400 ? 844 : 900 }, reducedMotion: 'reduce' });
+  const ctx = await browser.newContext({ viewport: { width, height: width <= 400 ? 844 : width === 1280 ? 551 : 900 }, reducedMotion: 'reduce' });
   if (init) await ctx.addInitScript(init);
   const page = await ctx.newPage();
   const errors = [];
@@ -57,12 +59,13 @@ async function completeLanding(page, base, { marketing = false, touched = false,
 
 async function main() {
   fs.mkdirSync(evidence, { recursive: true });
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const base = 'http://127.0.0.1:' + server.address().port;
+  const input = process.argv[2];
+  if (!input) await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const base = input ? input.replace(/\/$/, '') : 'http://127.0.0.1:' + server.address().port;
   const browser = await chromium.launch({ headless: true, args: ['--disable-gpu'] });
   const results = [];
   try {
-    for (const width of [320, 390, 1440]) {
+    for (const width of [320, 390, 1280, 1440]) {
       const { ctx, page, errors } = await context(browser, width);
       await page.goto(base + '/captacion/landing/hoteles.html?utm_source=linkedin&utm_medium=paid_social&utm_campaign=primer-origen', { waitUntil: 'domcontentloaded' });
       const entry = await completeLanding(page, base, { marketing: true, touched: true });
@@ -123,10 +126,11 @@ async function main() {
       assert.equal(await page.locator('#r4Datos [data-a="answer"][data-k="negocio"]').count(), 0, 'C04 no vuelve a preguntar el negocio que trae la landing');
       await page.locator('#m5Comuna').selectOption({ label: 'Las Condes' });
       const maqC04 = await page.evaluate(() => window.R5?.maquina?.() || null); // coordinador (14-nov): clave de la máquina
-      await page.locator('[data-a="next"]').click();
+      await completeDiagnostic(page);
       // R5 (14-nov): desde la landing («Calcula tu solución») C04 pasa directo a la propuesta C05, sin pasar por C10.
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C05');
       await page.locator('.m5-propsec').waitFor({ state: 'visible' });
+      await page.locator('.premium-proposal-details > summary').click();
       const propR5 = await page.evaluate(() => ({
         maqC05: window.R5?.maquina?.() || null,
         porqueVisible: Boolean(document.querySelector('.r3-proposal-machine .r5-porque')),
@@ -137,10 +141,11 @@ async function main() {
       assert.equal(await page.locator('.m5-nav, .ux-mobile-nav').count(), 0);
       await page.screenshot({ path: path.join(evidence, `W10_C05_${width}.png`) });
       await page.evaluate(() => { M4.setRole('ventas'); M4.select(M4.get().lead.id); location.hash = '#R04'; });
-      await page.getByText('Origen y contexto de la solicitud').waitFor({ state: 'visible' });
-      assert.ok((await page.locator('#app').innerText()).includes('120 tazas al día'));
-      assert.ok((await page.locator('#app').innerText()).includes('linkedin'));
-      assert.ok((await page.locator('#app').innerText()).includes('google'));
+      const origin = page.locator('#crm-v2-root [data-crm2-landing-context]');
+      await origin.locator('summary').click();
+      assert.match(await origin.innerText(), /120 tazas al día/);
+      assert.match(await origin.innerText(), /linkedin/i);
+      assert.match(await origin.innerText(), /google/i);
       await page.screenshot({ path: path.join(evidence, `W10_CRM_${width}.png`) });
       await page.evaluate(() => { location.hash = '#C02'; });
       await page.locator('.m5-nav').waitFor({ state: 'attached' });
@@ -257,6 +262,6 @@ async function main() {
       await ctx.close();
     }
     process.stdout.write(JSON.stringify({ status: 'PASS', origin: 'HTTP local', results, evidence }, null, 2) + '\n');
-  } finally { await browser.close(); await new Promise((resolve) => server.close(resolve)); }
+  } finally { await browser.close(); if (server.listening) await new Promise(resolve => server.close(resolve)); }
 }
 main().catch((error) => { console.error(error); server.close(); process.exitCode = 1; });

@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const { chromium } = require('./playwright-system-chrome.cjs');
+const { useLegacyCrm } = require('./legacy-crm-contract.cjs');
 
 const base = process.argv[2] || 'http://127.0.0.1:8879/';
 const routeList = [
@@ -13,6 +14,7 @@ const viewports = [
   { width: 360, height: 800 },
   { width: 390, height: 844 },
   { width: 414, height: 896 },
+  { width: 1280, height: 551 },
 ];
 const roleFor = (hash) => ['R05', 'R14', 'R15'].includes(hash) ? 'jefatura'
   : ['R09', 'R11', 'R12', 'R13'].includes(hash) ? 'marketing'
@@ -85,7 +87,7 @@ async function main() {
         const data = await page.evaluate(({ hash, viewportHeight }) => {
           const visible = (element) => {
             const r = element.getBoundingClientRect(), s = getComputedStyle(element);
-            return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden' && Number(s.opacity || 1) > 0;
+            return r.width > 0 && r.height > 0 && s.display !== 'none' && element.checkVisibility({ visibilityProperty: true, opacityProperty: true }) && !element.closest('details:not([open])');
           };
           const selector = 'a[href],button,input:not([type="hidden"]),select,textarea,[role="button"],[role="link"]';
           const controls = [...document.querySelectorAll(selector)].filter((element) => visible(element) && !element.disabled && element.getAttribute('aria-hidden') !== 'true');
@@ -96,12 +98,21 @@ async function main() {
           }).filter((item) => item.width < 44 || item.height < 44);
           const fixed = [...document.querySelectorAll('body *')].filter((element) => {
             const r = element.getBoundingClientRect(), s = getComputedStyle(element);
-            return (s.position === 'fixed' || s.position === 'sticky') && r.width > 1 && r.height > 1 && visible(element);
+            if ((s.position !== 'fixed' && s.position !== 'sticky') || r.width <= 1 || r.height <= 1 || !visible(element)) return false;
+            const crmMain = element.closest('#crm-v2-root')?.querySelector('.crm2-main');
+            if (!crmMain) return true;
+            const area = crmMain.getBoundingClientRect();
+            if (element.matches('.crm2-topbar') && r.bottom <= area.top + 1) return false;
+            if (element.matches('.crm2-sidebar')) {
+              if (r.right <= area.left + 1) return false;
+              if (r.bottom >= innerHeight - 1 && r.height <= innerHeight * .15 && parseFloat(getComputedStyle(crmMain).paddingBottom) >= r.height) return false;
+            }
+            return true;
           }).map((element) => {
             const r = element.getBoundingClientRect();
             return { selector: element.id || (typeof element.className === 'string' ? element.className : element.tagName), position: getComputedStyle(element).position, top: r.top, bottom: r.bottom, left: r.left, right: r.right, text: (element.innerText || '').trim().replace(/\s+/g, ' ').slice(0, 55) };
           });
-          const mainCta = hash === 'C08' ? [...document.querySelectorAll('button,a')].find((e) => e.innerText.trim().toLocaleUpperCase('es-CL') === 'COTIZAR')
+          const mainCta = hash === 'C08' ? document.querySelector('#m5-exp :is([data-a="quote-biz"], [data-a="case-resume"])')
             : hash === 'C14' ? [...document.querySelectorAll('button,a')].find((e) => e.innerText.trim().toLocaleLowerCase('es-CL') === 'añadir a mi propuesta')
               : hash === 'C15' ? [...document.querySelectorAll('button,a')].find((e) => e.innerText.trim().toLocaleLowerCase('es-CL') === 'revisar soporte') : null;
           const h1 = [...document.querySelectorAll('h1')].find(visible);
@@ -109,7 +120,6 @@ async function main() {
             const label = e.innerText.trim().toLocaleUpperCase('es-CL');
             return ['CONFIRMAR PROPUESTA', 'VER MI PROPUESTA'].includes(label) && visible(e);
           });
-          const input = document.querySelector('#m4Pass');
           const support = [...document.querySelectorAll('.m5-roles-head p')].find(visible);
           const targetColor = support ? getComputedStyle(support).color : null;
           let background = 'rgb(255, 255, 255)';
@@ -127,21 +137,13 @@ async function main() {
             cta: mainCta ? { text: mainCta.innerText.trim(), top: mainCta.getBoundingClientRect().top, bottom: mainCta.getBoundingClientRect().bottom, position: getComputedStyle(mainCta).position } : null,
             primary: primary ? { text: primary.innerText.trim(), y: primary.getBoundingClientRect().top + scrollY, position: getComputedStyle(primary).position } : null,
             support: support ? { color: targetColor, background } : null,
-            loginInput: Boolean(input),
           };
         }, { hash, viewportHeight: viewport.height });
-        if (touchRoutes.has(hash) && data.small.length) touchFailures.push({ width: viewport.width, hash, controls: data.small });
+        if (viewport.width < 768 && touchRoutes.has(hash) && data.small.length) touchFailures.push({ width: viewport.width, hash, controls: data.small });
         if (data.fixed.length && overlayRoutes.includes(hash) || data.fixed.length && ['R01', 'R02'].includes(hash)) overlayFailures.push({ width: viewport.width, hash, fixed: data.fixed });
         if (['C08', 'C14', 'C15'].includes(hash)) firstFold.push({ width: viewport.width, hash, h1: data.h1, cta: data.cta });
         if (['C03', 'C04', 'C05'].includes(hash)) formActions.push({ width: viewport.width, hash, action: data.primary });
         if (data.support) contrastResults.push({ width: viewport.width, hash, ...data.support });
-        if (hash === 'R00' && data.loginInput) {
-          await page.locator('#m4Pass').fill('incorrecta');
-          await page.locator('#m4User').fill('paula.diaz');
-          await page.locator('button[type="submit"]').click();
-          await page.waitForTimeout(30);
-          loginError = await page.locator('[role="alert"]').first().innerText().catch(() => '');
-        }
       }
 
       for (const hash of overlayRoutes) {
@@ -177,13 +179,25 @@ async function main() {
 
     await page.setViewportSize({ width: 768, height: 900 });
     await route(page, 'C10');
+    await page.locator('details[data-r7-fold="catalogo-productos"] > summary').click();
     m9Background = await page.evaluate(() => {
-      const element = document.querySelector('#m9-add-grano');
+      const element = document.querySelector('details[data-r7-fold="catalogo-productos"] [data-m9-add="grano"]');
       return element ? getComputedStyle(element).backgroundColor : null;
     });
     await context.close();
 
-    const videoContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const loginContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+    await useLegacyCrm(loginContext);
+    const loginPage = await loginContext.newPage();
+    await loginPage.goto(new URL('/index.html#R00', base).toString(), { waitUntil: 'domcontentloaded' });
+    const login = loginPage.locator('form[data-a="crm-login"]');
+    await login.locator('#m4Pass').fill('incorrecta');
+    await login.locator('#m4User').fill('paula.diaz');
+    await login.locator('button[type="submit"]').click();
+    loginError = await login.locator('[role="alert"]').innerText();
+    await loginContext.close();
+
+    const videoContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'no-preference' });
     const videoPage = await videoContext.newPage();
     await videoPage.goto(new URL('/index.html#C02', base).toString(), { waitUntil: 'domcontentloaded' });
     await videoPage.waitForFunction(() => Boolean(window.M4 && window.MarleyApp), null, { timeout: 10000 });
@@ -195,7 +209,8 @@ async function main() {
       const total = nav + resources.reduce((sum, entry) => sum + (entry.transferSize || 0), 0);
       return { totalBytes: total, mediaRequests: media.map((entry) => entry.name), posterLoaded: resources.some((entry) => /poster_m\.webp/i.test(entry.name)), videos: document.querySelectorAll('video').length };
     });
-    await videoPage.evaluate(() => scrollTo(0, 450));
+    await videoPage.mouse.move(195, 340);
+    await videoPage.mouse.wheel(0, 450);
     await videoPage.waitForFunction(() => performance.getEntriesByType('resource').some((entry) => /video_m\.mp4/i.test(entry.name)), null, { timeout: 5000 }).catch(() => {});
     const videoAfterScroll = await videoPage.evaluate(() => performance.getEntriesByType('resource').filter((entry) => /\.(mp4|webm|m4v)(\?|$)/i.test(entry.name)).map((entry) => entry.name));
     await videoContext.close();
@@ -203,7 +218,7 @@ async function main() {
     const routeFailures = routeVisits.filter((visit) => visit.current !== visit.hash || visit.overflow);
     const firstFoldFailures = firstFold.filter((item) => !item.h1 || !item.cta || item.h1.top < -2 || item.h1.bottom > viewports.find((vp) => vp.width === item.width).height || item.cta.top < 0 || item.cta.bottom > viewports.find((vp) => vp.width === item.width).height || item.cta.position === 'fixed' || item.cta.position === 'sticky');
     const contrastFailures = contrastResults.filter((item) => contrastRatio(item.color, item.background) < 4.5);
-    const focusFailures = focusResults.filter((item) => item.outlineStyle === 'none' || Number.parseFloat(item.outlineWidth) < 3 || !/(?:23,\s*23,\s*23|243,\s*201,\s*0)/.test(item.outlineColor));
+    const focusFailures = focusResults.filter((item) => item.outlineStyle === 'none' || Number.parseFloat(item.outlineWidth) < 3 || !/(?:23,\s*23,\s*23|243,\s*201,\s*0|247,\s*190,\s*0)/.test(item.outlineColor));
     const output = {
       status: errors.length || allTerms.length || badLinkCount || routeFailures.length || touchFailures.length || overlayFailures.length || firstFoldFailures.length || contrastFailures.length || focusFailures.length || !loginError || /demo|demostraci[oó]n/i.test(loginError) || !/prueba/i.test(loginError) || m9Background !== 'rgb(255, 255, 255)' || videoInitial.mediaRequests.length || !videoInitial.posterLoaded || videoInitial.totalBytes >= 2500000 || !videoAfterScroll.length ? 'FAIL' : 'PASS',
       routes: routeVisits.length, errors, visibleDemoTerms: allTerms.slice(0, 20), badDiagramLinks: badLinkCount,

@@ -39,6 +39,11 @@ body[data-current="C01"] .b2c-hero-subtitle {
 }
 body[data-current="C01"] .b2c-hero-cta { min-height: 48px; }
 body[data-current="C01"] .b2c-hero-cta:focus-visible { outline-color: #f3c900; }
+body[data-current="C01"] .b2c-menu-panel nav .b2c-business-link {
+  background: #f3c900;
+  border-color: #f3c900;
+  color: var(--pilot-ink);
+}
 body[data-current="C01"] .b2c-hero-product img { height: auto; max-height: 100%; }
 body[data-current="C01"] .b2c-chat {
   position: static;
@@ -174,6 +179,7 @@ body[data-current="C09"] .r3-portal > .r3-recommend-details > summary { color: v
 
 @media (hover: hover) {
   body[data-current="C01"] .b2c-hero-cta:hover { background: #ffdc22; }
+  body[data-current="C01"] .b2c-menu-panel nav .b2c-business-link:hover { background: #ffdc22; }
   body[data-current="C05"] .m5-propsec summary:hover,
   body[data-current="C09"] .r3-portal summary:hover { text-decoration: underline; text-underline-offset: .2em; }
 }
