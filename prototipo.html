@@ -6766,21 +6766,21 @@ window.M4C = (() => {
 
   // ---------- Armazón ----------
   function shell(inner, { cls = '', mbar = false } = {}) {
-    const s = M.get(); const route = (location.hash || '#C02').slice(1);
+    const s = M.get(); const route = (location.hash || '#C02').slice(1).split('?')[0];
     const focus = M.landingFocus(route);
-    const idChip = s.lead && (s.lead.email || s.lead.phone) && /^C0[3-7]/.test(route) ? `<span class="m5-top-id" title="Tu número de seguimiento">N.º ${esc(s.lead.id)}</span>` : '';
-    const portal = s.lead && (s.lead.channel || (s.proposal && s.proposal.status === 'aceptada')) ? `<a href="#C06" data-go="C06" class="m5-top-link">${icon('chat', 18)}<span>Mi propuesta</span></a>` : '';
+    const flow = /^C(?:0[3-7]|09|10|11)$/.test(route);
+    const portal = s.proposal && route !== 'C05' ? `<a href="#C05" data-go="C05" class="m5-top-link">Mi propuesta</a>` : '';
     // v6: «Máquinas» va primero (los productos antes que la solución).
     const navJourney = M.get().catalogJourney || {};
     const nav = [['C02', 'Inicio'], ['C10', 'Productos'], ['C11', 'Máquinas'], ['negocios', 'Soluciones'], ['servicios', 'Servicios'], ['C08', 'Casos'], ['faq', 'Preguntas']].map(([k, l]) => { const current = k === route || (k === 'negocios' && ['C04'].includes(route)) || (k === 'C10' && ['C05','C06'].includes(route) && navJourney.productsAt) || (k === 'negocios' && ['C05','C06'].includes(route) && !navJourney.productsAt); const active = current ? ' aria-current="page" class="is-current"' : ''; return k[0] === 'C' ? `<a href="#${k}" data-go="${k}" ${k==='C10'?'data-m9-open':''}${active}>${l}</a>` : `<a href="#C02" data-a="anchor" data-v="${k}"${active}>${l}</a>`; }).join('');
     // En Empresas, «Ver mi solución» del encabezado aparece después de ver las máquinas (25-ui5.js, frame).
     const late = false;
-    return `<div class="m4 m5 m4-client ${cls}">
+    return `<div class="m4 m5 m4-client ${flow ? 'af-flow' : ''} ${cls}">
 <header class="m5-top"><div class="m5-top-in"><a class="m5-brand" href="#C02" data-go="C02" aria-label="Marley Coffee Empresas, inicio">${U.logo()}<span>Empresas</span></a>
-${focus ? '' : `<nav class="m5-nav" aria-label="Secciones">${nav}</nav><details class="ux-mobile-nav"><summary>Menú</summary><nav aria-label="Secciones en móvil">${nav}<a href="#C09" data-go="C09" ${route === 'C09' ? 'aria-current="page" class="is-current"' : ''}>Ya soy cliente</a><a href="#C01" data-go="C01">Tienda</a></nav></details>`}
-<div class="m5-top-actions">${focus ? idChip : `${window.M9Catalog.headerHTML()}${idChip}${portal}<a href="#C09" data-go="C09" class="m5-top-link">${icon('users', 18)}<span>Ya soy cliente</span></a><a href="#C01" data-go="C01" class="m5-top-link">${icon('back', 16)}<span>Tienda</span></a>${route === 'C02' || route === 'C08' ? `<button type="button" class="m5-btn m5-btn--hide-m ${late ? 'm5-btn--late' : ''}" data-a="quote" ${late ? 'inert' : ''}>${qTxt(false)}</button>` : ''}`}</div></div></header>
+${focus ? '' : `${flow ? '' : `<nav class="m5-nav" aria-label="Secciones">${nav}</nav>`}<details class="ux-mobile-nav"><summary>Menú</summary><nav aria-label="Secciones">${nav}${flow ? portal : ''}${route === 'C09' ? '' : '<a href="#C09" data-go="C09">Ya soy cliente</a>'}<a href="#C01" data-go="C01">Tienda</a></nav></details>`}
+<div class="m5-top-actions">${focus ? '' : flow ? (route === 'C10' || route === 'C09' ? '' : window.M9Catalog.headerHTML()) : `${window.M9Catalog.headerHTML()}${portal}<a href="#C09" data-go="C09" class="m5-top-link">${icon('users', 18)}<span>Ya soy cliente</span></a><a href="#C01" data-go="C01" class="m5-top-link">${icon('back', 16)}<span>Tienda</span></a>${route === 'C02' || route === 'C08' ? `<button type="button" class="m5-btn m5-btn--hide-m ${late ? 'm5-btn--late' : ''}" data-a="quote" ${late ? 'inert' : ''}>${qTxt(false)}</button>` : ''}`}</div></div></header>
 <main id="m4-main">${inner}</main>
-<footer class="m5-foot"><div class="m5-wrap m5-foot-in"><span>Marley Coffee Empresas · ${M.MODE === 'prototype' ? 'prototipo académico con datos de prueba' : M.MODE === 'mockups' ? 'mockup con datos de prueba' : 'wireframe'}</span><span>Precios profesionales, disponibilidad y condiciones se confirman con el equipo. Prueba sin envíos ni cobros reales.</span><a class="m5-foot-guide" href="guia-servicio-cafe.html">Guía práctica para planificar el café de tu negocio</a></div></footer>
+<footer class="m5-foot"><div class="m5-wrap m5-foot-in"><span>Prototipo académico · sin contratos, envíos ni cobros reales.</span><a class="m5-foot-guide" href="guia-servicio-cafe.html">Guía para tu negocio</a></div></footer>
 ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" inert><button type="button" class="m5-btn" data-a="quote">${showResume() ? 'Continuar mi solución' : 'Armar mi solución'}</button><button type="button" class="m5-btn m5-btn--ghost" data-a="quote" aria-label="Cotizar máquina">${icon('box', 18)}</button></div>` : ''}</div>`;
   }
   // Guía de pasos (C03, C04, C05, C06 y C09): va en el flujo del documento, nunca fija, para no tapar contenido en celular.
@@ -6864,10 +6864,10 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
     const cta = creator ? 'Guardar interés (demo)' : inicio ? 'Continuar' : seguimiento ? 'Solicitar seguimiento por correo' : hablar ? 'Enviar consulta por correo' : 'Confirmar propuesta';
     const lead = creator
       ? 'Deja tu nombre y correo para registrar el interés en esta prueba local. Una persona tendría que revisar cualquier propuesta.'
-      : inicio ? (directMachine ? 'Deja tus datos; después respondes tres preguntas para ajustar el consumo y la propuesta.' : 'Deja tu nombre y correo; después eliges tu negocio y revisas la propuesta preliminar.')
+      : inicio ? ''
       : seguimiento ? 'Deja tu nombre y correo para que el equipo revise contigo la máquina, los insumos y las condiciones.'
       : hablar ? 'El equipo recibe tu consulta junto con la propuesta y tus respuestas. No tienes que contar todo de nuevo.'
-      : 'El equipo revisará tu elección y te responderá por correo. Confirmar aquí no genera un contrato, pedido ni cobro.';
+      : 'Tu ejecutivo revisará la propuesta y te responderá por correo.';
     const note = creator
       ? 'Esta ruta va aparte de la cotización B2B. No se confirman compensación, productos ni alcance.'
       : inicio ? ''
@@ -6876,8 +6876,8 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
       : 'El precio final, la disponibilidad, el pago y las condiciones de instalación requieren validación del equipo.';
     return shell(`<section class="m5-split ${inicio ? 'm5-split--start' : 'm5-split--data'}"><div class="m5-split-media ${directMachine ? 'm10-split-media--machine' : inicio ? '' : 'm5-split-media--sum'}">${media}</div>
 <div class="m5-split-body">${creator ? '' : stepper(inicio ? 1 : 3)}
-<h1>${h1}</h1><p class="m5-lead">${lead}</p>
-${creator ? '' : directMachine ? `<div class="m10-selected-choice" role="status"><span>Tu elección</span><strong>${esc(directMachine.name)}</strong><button type="button" class="m5-link" data-go="C11">Cambiar</button></div><p class="m10-value-note">Verás una propuesta preliminar antes de decidir.</p>` : inicio ? '' : V.lm('LM2', { light: true, title: 'Propuesta preliminar', list: ['Guardas tu avance', 'La revisas antes de decidir'] })}
+<h1>${h1}</h1>${lead ? `<p class="m5-lead">${lead}</p>` : ''}
+${creator ? '' : directMachine ? `<div class="m10-selected-choice" role="status"><span>Tu elección</span><strong>${esc(directMachine.name)}</strong><button type="button" class="m5-link" data-go="C11">Cambiar</button></div>` : ''}
 ${inicio && note ? `<p class="m5-cta-note a1-next-step">${note}</p>` : ''}
 <form id="m4Contact" novalidate>
   <label class="m5-field"><span>Nombre</span><input id="m4FName" name="name" autocomplete="name" value="${esc(L.name || '')}" placeholder="Tu nombre"></label>
@@ -6888,7 +6888,7 @@ ${inicio && note ? `<p class="m5-cta-note a1-next-step">${note}</p>` : ''}
   ${creator ? '' : `<label class="m5-check m5-check--optional"><input type="checkbox" id="m4FMarketing" name="marketingConsent" ${L.marketingConsent ? 'checked' : ''}><span>Sí, quiero recibir novedades y ofertas por correo. (opcional)</span></label>`}
   <p class="m4-form-msg" role="status" aria-live="polite"></p>
   <button type="submit" class="m5-btn m5-btn--block m5-btn--lg">${esc(cta)} ${icon('arrow', 18)}</button>
-  ${inicio ? '' : `<p class="m5-cta-note">${note}</p>`}
+  ${note ? `<details class="af-fold"><summary>Alcance de la solicitud</summary><p>${note}</p></details>` : ''}
 </form></div></section>`);
   }
 
@@ -7058,13 +7058,18 @@ ${accepted ? done : acciones}
       datos_pendientes: 'El equipo necesita completar datos antes de validar.',
       validada: 'La revisión interna de esta versión quedó registrada.'
     }[review?.status] || 'Tu selección está pendiente de revisión del equipo.';
-    const reviewPanel = `<div class="m5-card" role="status"><h2>Estado de la revisión</h2><p>${esc(reviewText)}</p><p>Precio, disponibilidad y condiciones se confirman con el equipo.</p></div>`;
     const cyclePanel = window.M4Journey?.enabled(s) ? window.M4Journey.contractPanelHTML(s) : '';
-    const estado = accepted || queued ? 'En revisión por tu ejecutivo' : 'Sin confirmar';
-    const aviso = accepted ? 'La propuesta confirmada se sigue viendo desde el portal.' : queued ? 'Tu consulta quedó registrada. Tu propuesta todavía no está confirmada.' : 'Tu propuesta todavía no está confirmada.';
-    const cierre = `<div class="mcp-cierre"><div class="m5-card mcp-cierre-card"><span class="m5-kick">Folio y estado</span><dl class="mcp-dl"><div><dt>Folio</dt><dd><b>${esc(folioCliente(s))}</b></dd></div><div><dt>Estado</dt><dd>${esc(estado)}</dd></div><div><dt>Revisión del equipo</dt><dd>${esc(reviewText)}</dd></div><div><dt>Quién te responde y cuándo</dt><dd>Tu ejecutivo de Marley Coffee Empresas. Recibes un acuse ahora; el plazo de respuesta lo confirma tu ejecutivo.</dd></div></dl><div class="mcp-acc">${accepted ? `<button type="button" class="m5-btn m5-btn--lg" data-go="C09">Siguiente: ir a mi portal ${icon('arrow', 18)}</button>` : `<button type="button" class="m5-btn m5-btn--lg" data-go="C05">Siguiente: revisar mi propuesta ${icon('arrow', 18)}</button>`}</div><p class="m5-cta-note">${esc(aviso)}</p></div>${cyclePanel}</div>`;
-    return shell(`<div class="m5-wrap" style="padding-top:18px">${stepper(3)}</div><section class="m5-portal-head">${V.film(sc, { mode: 'still', still: 'fin', label: 'Imagen de ' + article(biz) })}<div class="m5-wrap"><div><span class="m5-kick m5-kick--light">Tu solicitud · N.º ${esc(folioCliente(s))}</span><h1>${esc(title)}</h1><h2 class="r5-question" style="color:#fff">¿Qué sigue?</h2><p class="r5-answer" style="color:#ddd;margin:8px 0 0">${esc(sub)}</p></div></div></section>
-<div class="m5-wrap" style="padding-top:24px;padding-bottom:48px">${cierre}<p class="m5-sup">Simulación de prueba: los correos y registros se muestran en este archivo. No se realizan envíos reales.</p></div>`);
+    const action = accepted
+      ? '<button type="button" class="m5-btn m5-btn--lg af-primary" data-go="C09" data-r5-top-confirm>Ir a mi portal</button>'
+      : '<button type="button" class="m5-btn m5-btn--lg af-primary" data-go="C05" data-r5-top-confirm>Revisar mi propuesta</button>';
+    const support = accepted ? `<nav class="af-support" aria-label="Postventa"><a href="#C09" data-go="C09" data-af-portal-target="r3-help">Pedir ayuda</a><a href="#C09" data-go="C09" data-af-portal-target="r3-recommend">Recomendar</a></nav>` : '';
+    return shell(`<div class="m5-wrap af-guide-wrap">${stepper(3)}</div><section class="af-finish m5-wrap"><div class="af-finish-copy">
+      <h1>${esc(title)}</h1><p class="af-folio">Folio <strong>${esc(folioCliente(s))}</strong></p>
+      <p>${accepted ? 'Tu ejecutivo confirmará las condiciones por correo.' : esc(sub)}</p>${action}${support}
+      </div><div class="af-finish-media">${V.film(sc, { mode: 'still', still: 'fin', label: 'Imagen de ' + article(biz) })}</div></section>
+      <div class="m5-wrap mcp-cierre af-finish-details"><details class="af-fold"><summary>Revisión y plazo</summary>
+      <p role="status">${esc(reviewText)}</p><p>Tu ejecutivo confirma precio, disponibilidad, pago, instalación y plazo de respuesta.</p>${L.email ? `<p>Correo de contacto <strong>${esc(L.email)}</strong></p>` : ''}
+      </details>${cyclePanel ? `<details class="af-fold" data-af-contract data-af-fold="contract"><summary>Alta de prueba</summary>${cyclePanel}</details>` : ''}</div>`);
   }
 
   // ---------- C07 · Ajustar la propuesta (opcional) o cotizar sin diagnóstico ----------
@@ -7120,7 +7125,7 @@ ${accepted ? done : acciones}
     const cur = order.find((c) => c.k === ui.expK) || order[0];
     const priorOtherBusiness = Boolean(s.proposal && s.answers?.negocio && s.answers.negocio !== cur.biz);
     const tabs = order.map((c) => `<button type="button" class="m5-tab" data-a="exp-tab" data-v="${c.k}" aria-pressed="${c.k === cur.k}">${esc(c.t)}</button>`).join('');
-    return shell(`<section class="m5-exp-intro"><div class="m5-wrap"><div class="m5-exp-title"><span class="m5-kick m5-kick--light m5-seo-line">Casos Marley Coffee</span><h1>Café para tu negocio</h1></div><div class="m5-exp-side"><p class="m5-lead">Elige un rubro y mira una idea de atención; no son clientes reales.</p></div></div></section>
+    return shell(`<section class="m5-exp-intro"><div class="m5-wrap"><div class="m5-exp-title"><h1>Café para tu negocio</h1></div><div class="m5-exp-side"><p class="m5-lead">Elige un rubro. Las escenas son ilustrativas.</p></div></div></section>
 <section class="m5-stage" id="m5-exp" aria-labelledby="h-exp">
   <div class="m5-stage-pin">
     <div class="m5-stage-copy">
@@ -7128,17 +7133,16 @@ ${accepted ? done : acciones}
       <div class="m5-stage-beats" aria-live="polite">
         <div class="m5-stage-beat m5-cap">
           <h2 id="h-exp"><span class="m5-tag m5-tag--sm m5-seo-line">${esc(cur.t)}</span>${esc(cur.h)}</h2>
-          <p class="m5-lead">${esc(cur.p)}</p>
-          <details class="m5-case-includes"><summary>${esc(cur.t)} · lo que incluye la idea</summary><ul class="m5-exp-kit">${cur.kit.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></details>
+          <details class="m5-case-includes"><summary>Qué incluye la idea</summary><p class="m5-lead">${esc(cur.p)}</p><ul class="m5-exp-kit">${cur.kit.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></details>
           ${priorOtherBusiness ? `<p class="m5-fine">Ya tienes una propuesta para ${esc(article(s.answers.negocio))}. Puedes retomarla sin cambiar los datos de ese negocio.</p>` : ''}
-          <div class="m5-actions"><button type="button" class="m5-btn" data-a="${priorOtherBusiness ? 'case-resume' : 'quote-biz'}" data-v="${esc(cur.biz)}">${esc(priorOtherBusiness ? 'Retomar mi propuesta' : D.BUSINESS[cur.biz].cta)} ${icon('arrow', 18)}</button></div>
+          <div class="m5-actions"><button type="button" class="m5-btn af-primary" data-a="${priorOtherBusiness ? 'case-resume' : 'quote-biz'}" data-v="${esc(cur.biz)}">${esc(priorOtherBusiness ? 'Retomar mi propuesta' : D.BUSINESS[cur.biz].cta)} ${icon('arrow', 18)}</button></div>
         </div>
       </div>
     </div>
     <div class="m5-stage-media">${V.film(cur.k, { mode: 'loop', label: 'Escena ' + cur.t.toLowerCase() + ' con Marley Coffee', still: 'fin' })}</div>
   </div>
 </section>
-<section class="m5-band" aria-labelledby="h-band8">${V.fondo('activacion')}<div class="m5-wrap"><span class="m5-kick m5-kick--light">Referencia real · 2025</span><h2 id="h-band8">Hard Rock Café Santiago</h2><p class="m5-lead">Mesa de marca, cócteles de café y kits. Sin resultados comerciales publicados.</p><details class="m5-case-source"><summary>Ver alcance publicado</summary><p>Las bases públicas de Marley Coffee describen esta experiencia.</p></details><div class="m5-actions"><button type="button" class="m5-btn" data-a="quote">${qTxt()} ${icon('arrow', 18)}</button></div></div></section>`, { mbar: true });
+<details class="af-fold m5-wrap"><summary>Experiencia con Hard Rock Café</summary><section class="m5-band" aria-labelledby="h-band8">${V.fondo('activacion')}<div class="m5-wrap"><span class="m5-kick m5-kick--light">Referencia real · 2025</span><h2 id="h-band8">Hard Rock Café Santiago</h2><p class="m5-lead">Mesa de marca, cócteles de café y kits. Sin resultados comerciales publicados.</p><details class="m5-case-source"><summary>Ver alcance publicado</summary><p>Las bases públicas de Marley Coffee describen esta experiencia.</p></details><div class="m5-actions"><button type="button" class="m5-btn af-primary" data-a="quote">${qTxt()} ${icon('arrow', 18)}</button></div></div></section></details>`, { mbar: true });
   }
 
   // ---------- C09 · Mi cuenta (cliente activo) ----------
@@ -8162,17 +8166,19 @@ window.MarleyApp = (() => {
 
   // Conserva lo que el usuario está haciendo cuando la pantalla se vuelve a dibujar por un cambio de estado.
   function capture(root) {
-    const a = document.activeElement; const keep = { focus: null, scroll: {}, videos: {} };
+    const a = document.activeElement; const keep = { focus: null, scroll: {}, videos: {}, disclosures: {} };
     if (a && a.id && root.contains(a)) keep.focus = { id: a.id, value: a.value, start: a.selectionStart, end: a.selectionEnd };
     root.querySelectorAll('textarea[id], input[id]').forEach((el) => { keep[el.id] = el.type === 'checkbox' ? { checked: el.checked } : el.value; });
     root.querySelectorAll('[data-scroll]').forEach((el) => { keep.scroll[el.dataset.scroll] = { top: el.scrollTop, bottom: el.scrollHeight - el.scrollTop - el.clientHeight < 40 }; });
+    root.querySelectorAll('details[data-af-fold]').forEach(el => { keep.disclosures[el.dataset.afFold] = el.open; });
     const count = {}; root.querySelectorAll('video[data-vsrc]').forEach((v) => { const k = v.dataset.vsrc; const i = (count[k] = (count[k] || 0) + 1); keep.videos[k + '#' + i] = v; });
     return keep;
   }
   function restore(root, keep) {
     const count = {};
     root.querySelectorAll('video[data-vsrc]').forEach((v) => { const k = v.dataset.vsrc; const i = (count[k] = (count[k] || 0) + 1); const old = keep.videos[k + '#' + i]; if (old && old !== v && old.__m4 && !v.closest('[data-exp]')) v.replaceWith(old); });
-    Object.keys(keep).forEach((k) => { if (['focus', 'scroll', 'videos'].includes(k)) return; const el = document.getElementById(k); if (!el) return; if (el.type === 'checkbox' && keep[k] && typeof keep[k] === 'object') el.checked = keep[k].checked; else if (typeof keep[k] === 'string' && el.tagName !== 'SELECT' && el.type !== 'checkbox') el.value = keep[k]; });
+    Object.keys(keep).forEach((k) => { if (['focus', 'scroll', 'videos', 'disclosures'].includes(k)) return; const el = document.getElementById(k); if (!el) return; if (el.type === 'checkbox' && keep[k] && typeof keep[k] === 'object') el.checked = keep[k].checked; else if (typeof keep[k] === 'string' && el.tagName !== 'SELECT' && el.type !== 'checkbox') el.value = keep[k]; });
+    root.querySelectorAll('details[data-af-fold]').forEach(el => { if (Object.hasOwn(keep.disclosures || {}, el.dataset.afFold)) el.open = keep.disclosures[el.dataset.afFold]; });
     root.querySelectorAll('[data-scroll]').forEach((el) => { const s = keep.scroll[el.dataset.scroll]; if (!s || s.bottom) el.scrollTop = el.scrollHeight; else el.scrollTop = s.top; });
     if (keep.focus) { const el = document.getElementById(keep.focus.id); if (el) { el.focus({ preventScroll: true }); try { el.setSelectionRange(keep.focus.start, keep.focus.end); } catch (_) { /* no aplica */ } } }
   }
@@ -8216,7 +8222,7 @@ window.MarleyApp = (() => {
     if (routeChanged) R.ui.bell = false; // el panel de avisos no sigue abierto en otra pantalla (tapaba contenido)
     if (id === 'C06') M.enterPortal();
     if (id === 'C05') M.viewProposal();
-    const keep = routeChanged ? { scroll: {}, videos: {} } : capture(root);
+    const keep = routeChanged ? { scroll: {}, videos: {}, disclosures: {} } : capture(root);
     const html = (isCRM(id) ? R.SCREENS[id] : C.SCREENS[id])();
     const tpl = document.createElement('template'); tpl.innerHTML = strip(id) + html + floating(id);
     // Al cambiar de pantalla se dibuja todo; si solo cambió el estado, se reemplaza únicamente lo distinto
@@ -8236,7 +8242,7 @@ window.MarleyApp = (() => {
     if (window.M7Connections && window.M7Connections.paintOmni) window.M7Connections.paintOmni(id);
     if (window.M5UI) window.M5UI.mount(root);
     if (routeChanged || wantTop) { wantTop = false; window.scrollTo({ top: 0, behavior: 'instant' }); const h = root.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } }
-    if (pendingAnchor) { const a = pendingAnchor; pendingAnchor = null; setTimeout(() => { const el = document.getElementById(a); if (el) el.scrollIntoView({ behavior: window.M5UI && window.M5UI.reduce() ? 'auto' : 'smooth', block: 'start' }); }, 60); }
+    if (pendingAnchor) { const a = pendingAnchor; pendingAnchor = null; setTimeout(() => { const el = document.getElementById(a); if (el) { let details = el.closest('details'); while (details) { details.open = true; details = details.parentElement.closest('details'); } el.scrollIntoView({ behavior: window.M5UI && window.M5UI.reduce() ? 'auto' : 'smooth', block: 'start' }); } }, 60); }
     window.M9Catalog?.afterRender(id);
     tickTimers();
     rendering = false; sig = signature();
@@ -10709,9 +10715,9 @@ const assetURL=(value)=>MARLEY_ASSETS[value]||value;
   }
 function home() {
   const logo = ARTIFACT_MODE === 'wireframes' ? '<span class="b2c-wordmark">MARLEY COFFEE</span>' : '<img class="marley-logo b2c-logo" src="' + assetURL(MARLEY_LOGO) + '" alt="Marley Coffee" width="116" height="66">';
-  const main = '<main class="app-main b2c-main"><h1 class="b2c-sr-only">Marley Coffee Chile</h1><section class="b2c-hero" aria-labelledby="b2c-hero-title"><div class="b2c-hero-copy"><span class="b2c-hero-kicker">MARLEY COFFEE · CATÁLOGO</span><h2 id="b2c-hero-title">Keep On Moving</h2><p class="b2c-hero-subtitle">Café orgánico en grano · 227 g</p><p class="b2c-hero-copyline">Explora el catálogo Marley Coffee.</p><a class="b2c-hero-cta" href="https://www.marleycoffee.cl/cafe-organico-grano-entero-keep-on-moving-227g/p" target="_blank" rel="noopener">Ver el producto <span aria-hidden="true">→</span></a></div><a class="b2c-hero-product" href="https://www.marleycoffee.cl/cafe-organico-grano-entero-keep-on-moving-227g/p" target="_blank" rel="noopener" aria-label="Ver Keep On Moving, café orgánico en grano de 227 gramos"><img src="recursos/productos/catalog/grano.webp" alt="Bolsa Marley Coffee Keep On Moving, café orgánico en grano de 227 gramos" width="720" height="720" fetchpriority="high"></a></section><button type="button" class="b2c-chat" data-b2c-demo="Chat Online"><span aria-hidden="true">●</span> Chat Online</button><details class="b2c-coffee-club"><summary>Únete al Marley Coffee Club</summary><div class="b2c-club-body" hidden><div class="b2c-club-heading"><span>ÚNETE AL MARLEY</span><h2>COFFEE CLUB</h2><p>Recibe descuentos especiales y noticias sobre todo lo que hacemos. En este club siempre habrá mucho cafecito, música y sustentabilidad.</p></div><form id="b2cNewsletter" class="b2c-newsletter"><label class="b2c-sr-only" for="b2cName">Nombre</label><input id="b2cName" name="name" placeholder="Nombre" autocomplete="name"><label class="b2c-sr-only" for="b2cEmail">Correo electrónico</label><input id="b2cEmail" name="email" type="email" placeholder="Correo electrónico" autocomplete="email"><button type="submit">SUSCRÍBETE</button><label class="b2c-consent"><input type="checkbox" name="consent"><span>He leído y acepto los términos y condiciones, así como la política de privacidad y la política de cookies.</span></label></form></div></details></main>';
+  const main = '<main class="app-main b2c-main"><h1 class="b2c-sr-only">Marley Coffee Chile</h1><section class="b2c-hero" aria-labelledby="b2c-hero-title"><div class="b2c-hero-copy"><h2 id="b2c-hero-title">Keep On Moving</h2><p class="b2c-hero-subtitle">Café orgánico en grano · 227 g</p><a class="b2c-hero-cta" href="https://www.marleycoffee.cl/cafe-organico-grano-entero-keep-on-moving-227g/p" target="_blank" rel="noopener">Ver el producto <span aria-hidden="true">→</span></a></div><div class="b2c-hero-product"><img src="recursos/productos/catalog/grano.webp" alt="Bolsa Marley Coffee Keep On Moving, café orgánico en grano de 227 gramos" width="720" height="720" fetchpriority="high"></div></section><button type="button" class="b2c-chat" data-b2c-demo="Chat Online"><span aria-hidden="true">●</span> Chat Online</button><details class="b2c-coffee-club"><summary>Únete al Marley Coffee Club</summary><div class="b2c-club-body" hidden><div class="b2c-club-heading"><span>ÚNETE AL MARLEY</span><h2>COFFEE CLUB</h2><p>Recibe descuentos especiales y noticias sobre todo lo que hacemos. En este club siempre habrá mucho cafecito, música y sustentabilidad.</p></div><form id="b2cNewsletter" class="b2c-newsletter"><label class="b2c-sr-only" for="b2cName">Nombre</label><input id="b2cName" name="name" placeholder="Nombre" autocomplete="name"><label class="b2c-sr-only" for="b2cEmail">Correo electrónico</label><input id="b2cEmail" name="email" type="email" placeholder="Correo electrónico" autocomplete="email"><button type="submit">SUSCRÍBETE</button><label class="b2c-consent"><input type="checkbox" name="consent"><span>He leído y acepto los términos y condiciones, así como la política de privacidad y la política de cookies.</span></label></form></div></details></main>';
   const footer = '<footer class="b2c-footer"><div class="b2c-footer-brand"><a href="https://www.marleycoffee.cl/" target="_blank" rel="noopener">' + logo + '</a><p>Oficinas: Av. México 515, Recoleta.<br>Santiago de Chile.</p><a href="mailto:servicioalcliente@marleycoffee.cl">servicioalcliente@marleycoffee.cl</a><p>Comercial Dicalla S.A.</p><div class="b2c-socials"><a href="https://www.instagram.com/marleycoffee.chile/?igshid=ZDdkNTZiNTM%3D" target="_blank" rel="noopener" aria-label="Instagram">IG</a><a href="https://www.facebook.com/MarleyCoffeeChile?_rdc=2&_rdr" target="_blank" rel="noopener" aria-label="Facebook">f</a><a href="https://www.youtube.com/channel/UCCXl3ToU2ebqnjiqNynbhtQ" target="_blank" rel="noopener" aria-label="YouTube">▶</a><a href="https://www.tiktok.com/@marleycoffee.chile" target="_blank" rel="noopener" aria-label="TikTok">♪</a><a href="https://www.linkedin.com/company/marleycoffeechile/" target="_blank" rel="noopener" aria-label="LinkedIn">in</a></div></div><div class="b2c-footer-column"><h2>ENLACES</h2><a href="https://www.marleycoffee.cl/historia" target="_blank" rel="noopener">Historia</a><a href="https://www.marleycoffee.cl/valores-de-la-marca" target="_blank" rel="noopener">Valores de marca</a><a href="https://coffeemarleycl.vteximg.com.br/arquivos/Bases%20de%20concurso%20MC%20-%20Experiencia%20MC%20HRC%20.pdf" target="_blank" rel="noopener">Experiencia Marley Coffee y Hard Rock Cafe</a><a href="https://www.marleycoffee.cl/cyberday" target="_blank" rel="noopener">Cyberday</a><a href="https://www.marleycoffee.cl/cyber-monday" target="_blank" rel="noopener">Cyber Monday</a><a href="https://app.reforestemos.org/empresa/marley-coffee" target="_blank" rel="noopener">Fundación Reforestemos</a></div><div class="b2c-footer-column"><h2>PRODUCTOS</h2><a href="https://www.marleycoffee.cl/cafe" target="_blank" rel="noopener">Café</a><a href="https://www.marleycoffee.cl/te---infusiones" target="_blank" rel="noopener">Té e infusiones</a><a href="https://www.marleycoffee.cl/accesorios" target="_blank" rel="noopener">Accesorios</a><a href="https://www.marleycoffee.cl/regala-marley" target="_blank" rel="noopener">Guía de regalos</a><h2>ASISTENCIA</h2><a href="https://www.marleycoffee.cl/contactanos" target="_blank" rel="noopener">Contáctanos</a><a href="https://www.marleycoffee.cl/blog" target="_blank" rel="noopener">Blog</a><a href="https://marleycoffee.ines.cl/canaldenunciasmarleycoffee/formulario/" target="_blank" rel="noopener">Canal de denuncias</a><a href="https://www.marleycoffee.cl/seguir-pedido" target="_blank" rel="noopener">Sigue tu pedido</a></div><div class="b2c-footer-column"><h2>OTROS ENLACES</h2><a href="https://www.marleycoffee.cl/politica-privacidad" target="_blank" rel="noopener">Política de privacidad y protección de datos</a><a href="https://www.marleycoffee.cl/terminos-y-condiciones" target="_blank" rel="noopener">Términos y condiciones</a><a href="https://www.marleycoffee.cl/preguntas-frecuentes" target="_blank" rel="noopener">Preguntas frecuentes</a><a href="https://www.marleycoffee.cl/politica-cookies" target="_blank" rel="noopener">Política de cookies</a><h2>CERTIFICACIONES</h2><div class="b2c-certifications">OU Kosher · USDA Organic · Reforestemos</div></div><div class="b2c-copyright">Copyright © 2025 Marley Coffee. All Rights Reserved. Developed By <a href="https://cetrik.com/" target="_blank" rel="noopener">cetrik</a></div></footer>';
-  return main + footer;
+  return main + '<details class="af-shop-footer"><summary>Contacto y enlaces de la tienda</summary>' + footer + '</details>';
 }
 function landing(id) {
     const campaign = id === 'C03';
@@ -13394,13 +13400,6 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     if (offer) html = html.replace(/<article class="mcp-bloque(?: [^"]*)?" aria-labelledby="mcp-b1">[\s\S]*?<\/article>/, proposalMachineBlock(offer));
     return html;
   }
-  function proposalConfirmationCard(s, offer) {
-    const quote = quotationFor(s, offer), mk5 = (window.R5 && window.R5.maquina(s, offer)) || offer.maquina, machine = DATA.offer.maquinas[mk5] || {}, photo = machine.foto || (D.MACHINES[mk5] && D.MACHINES[mk5].img) || machinePhoto(offer);
-    const label = quote.selected ? "Insumos" : "Productos del pack", totalLabel = quote.selected ? "Total neto antes de instalar" : "Total del pack de partida";
-    const rows = quote.items.map(quotationLineHTML).join("");
-    const unknownNote = quote.unknown ? '<p class="r3-price-note">Los productos sin precio canónico se confirman con tu ejecutivo; el total mostrado considera solo las líneas con precio.</p>' : "";
-    return '<section class="r3-offer-card r3-proposal-confirmation" aria-label="Propuesta para ' + esc(offer.negocio) + '"><div class="r3-offer-machine"><img class="r3-machine-photo" src="' + esc(photo) + '" alt="' + esc(machine.nombre || offer.maquina) + '" loading="lazy"><div><span class="r3-kicker">Máquina recomendada</span><h3>' + esc(machine.nombre || offer.maquina) + '</h3><p>' + esc(machine.tipo || "Tipo a confirmar") + ' · Capacidad por confirmar' + '</p></div></div><p class="r3-buyer-message">' + esc(offer.mensaje) + '</p><p class="r4-c06-total"><span>' + totalLabel + '</span><b>' + money(quote.total) + '</b></p><details class="r4-c06-detalle"><summary>Ver productos y precios (' + quote.items.length + ')</summary><ul class="mcp-lista r3-c06-line-list">' + rows + '</ul><dl class="r3-proposal-totals"><div><dt>' + label + '</dt><dd>' + money(quote.subtotal) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>' + totalLabel + '</dt><dd>' + money(quote.total) + '</dd></div></dl>' + unknownNote + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p>' + quotationReferenceHTML() + '</details></section>';
-  }
   function offerCard(offer, cls) {
     if (!offer) return "";
     const machine = D.MACHINES[offer.maquina], lines = keyLines(offer);
@@ -13484,18 +13483,19 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const machineKeys = Object.keys(DATA.offer.maquinas);
     const recommendedKey = offer && (((window.R5 && window.R5.recomendada(M.get(), offer)) || offer.maquina) || "");
     const primaryKey = chosen || recommendedKey || machineKeys[0];
-    const machineCard = function (key) {
+    const machineCard = function (key, primary = false) {
       const m = D.MACHINES[key], businesses = DATA.offer.buyers.filter(function (b) { return b.maquina === key; }).map(buyerLabel).join(" \u00b7 "), recommended = offer && ((window.R5 && window.R5.recomendada(M.get(), offer)) || offer.maquina) === key;
-      return '<article class="r3-machine-card ' + (recommended ? "is-recommended" : "") + (chosen === key ? " is-selected" : "") + '">' + machineImage(key, m.name) + '<div class="r3-machine-card-body">' + (recommended ? '<span class="r3-recommended">' + esc(recommendationText("Recomendada", offer)) + '</span>' : "") + '<h3>' + esc(m.name) + '</h3><p><b>Para qui\u00e9n:</b> ' + esc(businesses || "Uso por confirmar con tu ejecutivo") + '</p><p><b>Qu\u00e9 prepara:</b> ' + esc(m.format) + '</p><p>' + esc(m.line) + '</p><button type="button" class="m5-btn m5-btn--ghost" data-m10-machine="' + esc(key) + '" aria-pressed="' + (chosen === key ? "true" : "false") + '">' + (chosen === key ? "Seleccionada" : "Elegir m\u00e1quina") + '</button></div></article>';
+      const heading = primary ? 'h2' : 'h3';
+      return '<article class="r3-machine-card ' + (recommended ? "is-recommended" : "") + (chosen === key ? " is-selected" : "") + '">' + machineImage(key, m.name) + '<div class="r3-machine-card-body">' + (recommended && !primary ? '<span class="r3-recommended">' + esc(recommendationText("Recomendada", offer)) + '</span>' : "") + '<' + heading + '>' + esc(m.name) + '</' + heading + '><details class="af-fold"><summary>Usos y preparación</summary><p><b>Para quién:</b> ' + esc(businesses || "Uso por confirmar con tu ejecutivo") + '</p><p><b>Qué prepara:</b> ' + esc(m.format) + '</p><p>' + esc(m.line) + '</p></details><button type="button" class="m5-btn m5-btn--ghost" data-m10-machine="' + esc(key) + '" aria-pressed="' + (chosen === key ? "true" : "false") + '">' + (chosen === key ? "Seleccionada" : "Elegir máquina") + '</button></div></article>';
     };
-    const primaryMachine = machineCard(primaryKey);
-    const otherMachines = machineKeys.filter(function (key) { return key !== primaryKey; }).map(machineCard).join("");
+    const primaryMachine = machineCard(primaryKey, true);
+    const otherMachines = machineKeys.filter(function (key) { return key !== primaryKey; }).map(key => machineCard(key)).join("");
     const machineOptions = otherMachines ? '<details class="r3-machine-alternatives"><summary>Comparar otras m\u00e1quinas (' + (machineKeys.length - 1) + ')</summary><div class="r3-machine-grid">' + otherMachines + '</div></details>' : "";
     const conditions = offer
       ? '<details class="r3-conditions"><summary><span><b>Pack de partida</b><small>Productos, kit y filtro · ' + money(startingTotal) + '</small></span></summary><div class="r3-conditions-body"><span class="r3-kicker">Tu pack de partida</span><ul class="r3-pack-lines r3-condition-lines">' + offerLines.map(function (line) { return '<li>' + lineImage(line) + '<span><b>' + esc(line.t) + '</b><small>' + esc(fmtFor(line)) + '</small></span><strong>' + money(line.precio) + '</strong></li>'; }).join("") + '</ul><dl class="r3-pack-total"><div><dt>Productos del pack</dt><dd>' + money(productsTotal) + '</dd></div><div><dt>Kit de instalaci\u00f3n y filtro</dt><dd>' + money(fixedTotal) + '</dd></div><div class="r3-total"><dt>Total del pack de partida</dt><dd>' + money(startingTotal) + '</dd></div></dl>' + quotationReferenceHTML() + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p></div></details>'
       : '<section class="r3-conditions"><h2>¿Qué incluye el pack de partida?</h2>' + quotationReferenceHTML() + '<a class="m5-link" href="#C02" data-go="C02">Elegir un negocio</a></section>';
     const cardLabel = chosen ? (chosen === recommendedKey ? "Máquina recomendada" : "Máquina elegida") : "Máquina recomendada";
-    return '<section class="r3-machines m5-wrap" aria-labelledby="r3-machines-title">' + stepGuide(1) + '<header class="r3-catalog-heading"><span class="r3-kicker">Máquina en comodato</span><h1 id="r3-machines-title">Revisa la máquina para tu negocio</h1><p>Compara la máquina y el pack de productos por separado.</p></header><section class="r3-machine-primary" aria-label="' + esc(cardLabel) + '"><span class="r3-kicker">' + esc(cardLabel) + '</span>' + primaryMachine + '</section>' + machineOptions + conditions + '<div class="r3-next-machine"><button type="button" class="m5-btn r3-main" data-m10-finish>Continuar a packs y productos</button></div></section>';
+    return '<section class="r3-machines m5-wrap" aria-labelledby="r3-machines-title">' + stepGuide(1) + '<header class="r3-catalog-heading"><h1 id="r3-machines-title">Elige una máquina en comodato</h1></header><section class="r3-machine-primary" aria-label="' + esc(cardLabel) + '"><span class="r3-kicker">' + esc(cardLabel) + '</span>' + primaryMachine + '</section>' + machineOptions + conditions + '<div class="r3-next-machine"><button type="button" class="m5-btn r3-main" data-m10-finish>Continuar a packs y productos</button></div></section>';
   }
   window.M9Catalog.catalogHTML = catalogHTML;
   window.M9Catalog.machinesHTML = machinesHTML;
@@ -13564,7 +13564,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const ctaEnd = '<div class="r3-c02-end-actions" aria-label="Siguiente paso"><p>¿Qué quieres revisar ahora?</p><div class="r5-dos-caminos"><button type="button" class="m5-btn r3-c02-main" data-m9-open>Ver packs y productos</button><button type="button" class="m5-btn r5-btn-claro" data-m10-unknown>Ayúdame a elegir una máquina</button></div></div>';
     faq = faq.slice(0, faqClose) + ctaEnd + faq.slice(faqClose);
     const pair = '<div class="r3-c02-product-pair" aria-label="Café y máquina">' + coffee + machine + '</div>';
-    return html.slice(0, heroStart) + hero + business + strip + pair + services + faq + html.slice(faqEnd);
+    return html.slice(0, heroStart) + hero + '<details class="af-fold m5-wrap" data-af-fold="business"><summary>Soluciones por negocio</summary>' + business + strip + '</details>' + pair + services + '<details class="af-fold m5-wrap" data-af-fold="faq"><summary>Preguntas frecuentes</summary>' + faq + '</details>' + html.slice(faqEnd);
   }
   function c04Wrap() {
     let html = ensureGuide(C.__r3Original.C04(), 1), offer = buyerFor(M.get());
@@ -13595,13 +13595,62 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const s = M.get(), offer = buyerFor(s);
     let html = decoratePriceLists(ensureGuide(C.__r3Original.C05(), 2));
     html = proposalQuoteBlocks(html, s, offer);
-    return displayBuyerHTML(html);
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const head = template.content.querySelector('.m5-prop-head');
+    if (!head) return displayBuyerHTML(html);
+    const blocks = template.content.querySelector('.mcp-prop');
+    const machine = blocks.querySelector('.r3-proposal-machine');
+    const row = machine?.querySelector('.r3-proposal-machine-row');
+    const total = blocks.querySelector('.r3-total dd');
+    const actions = template.content.querySelector('.mcp-acc, .m5-done .m5-actions');
+    const main = actions?.querySelector('[data-a="accept-prop"], [data-go="C06"]');
+    const intro = document.createElement('div');
+    intro.className = 'af-proposal-intro';
+    const facts = document.createElement('div');
+    facts.className = 'af-proposal-facts';
+    const name = row?.querySelector('b');
+    if (name) {
+      const equipment = document.createElement('p');
+      equipment.textContent = `${name.textContent} · en comodato`;
+      facts.append(equipment);
+    }
+    if (total) {
+      facts.insertAdjacentHTML('beforeend', '<p class="af-total"><strong></strong><span> Neto referencial + IVA</span></p>');
+      facts.querySelector('strong').textContent = total.textContent;
+      total.parentElement.remove();
+    }
+    const copy = head.querySelector('.m5-prop-copy');
+    copy?.remove();
+    if (main) {
+      const top = main.cloneNode(true);
+      top.setAttribute('data-r5-top-accept', '');
+      top.classList.add('af-primary');
+      top.textContent = s.proposal?.status === 'aceptada' ? 'Ver confirmación' : 'Confirmar mi propuesta';
+      main.textContent = top.textContent;
+      main.classList.add('af-primary');
+      facts.append(top);
+    }
+    const photo = row?.querySelector('img');
+    intro.append(facts);
+    if (photo) intro.append(photo);
+    head.append(intro);
+    const more = document.createElement('details');
+    more.className = 'af-fold af-proposal-details';
+    more.dataset.afFold = 'proposal';
+    more.innerHTML = '<summary>Insumos y condiciones</summary>';
+    blocks.before(more);
+    more.append(blocks);
+    if (actions) {
+      template.content.querySelector('.m5-b2b-pay')?.remove();
+      more.append(actions);
+      actions.querySelectorAll('button:not(.af-primary)').forEach(button => button.classList.add('m5-link'));
+    }
+    template.content.querySelector('.m5-done')?.remove();
+    return displayBuyerHTML(template.innerHTML);
   }
   function c06Wrap() {
-    const s = M.get(), offer = buyerFor(s);
-    let html = decoratePriceLists(ensureGuide(C.__r3Original.C06(), 3));
-    if (offer) html = html.replace('<div class="m5-wrap" style="padding-top:24px;padding-bottom:48px">', '<div class="m5-wrap r3-c06-offer" style="padding-top:24px;padding-bottom:48px">' + proposalConfirmationCard(s, offer));
-    return displayBuyerHTML(html);
+    return displayBuyerHTML(ensureGuide(C.__r3Original.C06(), 3));
   }
   C.SCREENS.C02 = c02Wrap; C.SCREENS.C04 = c04Wrap; C.SCREENS.C05 = c05Wrap; C.SCREENS.C06 = c06Wrap;
   const originalEnabled = window.M4Journey.enabled;
@@ -13830,21 +13879,21 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const total = orderTotal(items);
     return '<section class="r3-order-focus r3-repeat-summary" id="r3-repeat-summary" aria-labelledby="r3-repeat-title"><span class="r3-kicker">Reposición</span><h2 id="r3-repeat-title">Resumen de tu reposición</h2><p class="r3-order-folio">Repone el pedido <span>' + esc(order.id) + '</span> con los mismos productos.</p><form class="r3-repeat-form" data-r3-repeat-form="' + esc(order.id) + '"><div class="r3-repeat-lines">' + lines + '</div><p class="r3-repeat-total" data-r3-repeat-total>Subtotal neto referencial: ' + money(total) + '</p><p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + ' Ajusta las cantidades si quieres; con 0 quitas un producto.</p><div class="r3-form-actions"><button type="submit" class="m5-btn r3-main">Confirmar reposición</button><button type="button" class="m5-link" data-r3-repeat-close>Volver al pedido</button></div></form></section>';
   }
-  function repeatDoneHTML(s, c, id) {
+  function repeatDoneHTML(s, c, id, shortcuts) {
     const order = (c.orders || []).find(function (o) { return o.id === id; });
     const items = order.items || [];
     const mail = (s.emails || []).find(function (e) { return e.orderId === id; });
     const total = Number(order.total) || orderTotal(items);
-    return '<section class="r3-order-focus r3-repeat-done" aria-labelledby="r3-repeat-done-title"><span class="r3-kicker">Reposición confirmada</span><h2 id="r3-repeat-done-title">Reposición confirmada</h2><p class="r3-order-folio">Folio nuevo <span>' + esc(id) + '</span></p><p class="r3-order-note" role="status">Te enviamos la confirmación a tu correo de prueba.' + (mail ? ' <button type="button" class="m5-link" data-mc-mail="' + esc(mail.id) + '">Ver correo</button>' : '') + '</p><ul class="r3-history-lines">' + rowItems(items.slice(0, 3), { stock: true }) + '</ul>' + (items.length > 3 ? '<p class="r3-price-note">Y ' + (items.length - 3) + ' productos más en el detalle del pedido.</p>' : '') + '<div class="r3-history-total"><span>Total neto referencial</span><b>' + money(total) + '</b></div><div class="r3-order-actions"><button type="button" class="m5-btn r3-main" data-r3-back-portal>Volver al portal</button></div></section>';
+    return '<section class="r3-order-focus r3-repeat-done" aria-labelledby="r3-repeat-done-title"><h2 id="r3-repeat-done-title">Reposición confirmada</h2><p class="r3-order-folio">Folio nuevo <span>' + esc(id) + '</span></p><p class="r3-order-note" role="status">Correo de confirmación listo.' + (mail ? ' <button type="button" class="m5-link" data-mc-mail="' + esc(mail.id) + '">Ver correo</button>' : '') + '</p><div class="r3-order-actions"><button type="button" class="m5-btn r3-main" data-r3-back-portal>Volver al portal</button></div>' + shortcuts + '<details class="af-fold"><summary>Productos y total · ' + money(total) + '</summary><ul class="r3-history-lines">' + rowItems(items, { stock: true }) + '</ul><p>Neto referencial + IVA</p></details></section>';
   }
-  function orderFocusHTML(s, c) {
+  function orderFocusHTML(s, c, shortcuts) {
     const orders = c.orders || [], order = orders[orders.length - 1];
-    if (order && repeatDoneId && orders.some((o) => o.id === repeatDoneId)) return repeatDoneHTML(s, c, repeatDoneId);
+    if (order && repeatDoneId && orders.some((o) => o.id === repeatDoneId)) return repeatDoneHTML(s, c, repeatDoneId, shortcuts);
     if (order && repeatOpenKey === order.id && order.receivedAt && order.replenishDue) return repeatSummaryHTML(s, c, order);
     if (order) {
       const received = Boolean(order.receivedAt), due = Boolean(received && order.replenishDue), readyToReceive = Boolean(order.waitPassed && !received), progress = received ? 100 : readyToReceive ? 68 : 34;
       const title = due ? 'Toca reponer' : received ? 'Recibido' : readyToReceive ? 'Tu pedido va en camino' : 'Tu pedido está confirmado';
-      const items = order.items || [], visible = items.slice(0, 3), extra = items.slice(3);
+      const items = order.items || [];
       // Una sola acción principal según el momento: «Confirmar que llegó» mientras va en camino; después, «Repetir pedido».
       const mainAction = received
         ? (due ? '<button type="button" class="m5-btn r3-main" data-r3-repeat-summary="' + esc(order.id) + '">Repetir pedido</button>' : '')
@@ -13852,33 +13901,38 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       const sideAction = received
         ? (due ? '' : '<button type="button" class="m5-link" data-r3-advance-time="' + esc(order.id) + '">Simular avance de tiempo</button>')
         : readyToReceive ? '' : '<button type="button" class="m5-link" data-r3-advance-wait="' + esc(order.id) + '">Simular avance de espera</button>';
-      const progressCopy = due ? 'La reposición ya está lista. Revisa las cantidades y confirma cuando corresponda.' : received ? 'Marcaste la recepción en esta prueba. La próxima reposición se activa cuando pase el tiempo de la prueba.' : readyToReceive ? 'La etapa de espera de prueba terminó. Confirma la recepción cuando corresponda.' : 'La espera se representa en esta prueba; no indica una fecha ni un plazo real.';
+      const progressCopy = received ? '' : readyToReceive ? 'Confirma la recepción cuando llegue.' : 'Despacho por confirmar.';
       const editor = repeatOpenKey === order.id ? '<div class="r3-repeat-modal" role="dialog" aria-modal="true" aria-labelledby="r3-repeat-title"><div class="r3-repeat-modal-panel"><button type="button" class="r3-repeat-close" data-r3-repeat-close aria-label="Cerrar">Cerrar</button><h3 id="r3-repeat-title">Ajustar repetición</h3>' + repeatFormHTML({ key: order.id, items: order.items || [] }) + '</div></div>' : '';
       const complementSource = received ? order.id : order.sourceOrderId;
       const complements = orderComplementsHTML(s, c, items, complementSource);
-      return '<section class="r3-order-focus" aria-labelledby="r3-order-focus-title"><div class="r3-order-head"><h2 id="r3-order-focus-title">' + title + '</h2><p class="r3-order-folio">Folio <span>' + esc(order.id) + '</span></p></div><div class="r3-order-progress" role="progressbar" aria-label="Avance simulado del pedido" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress + '"><span style="width:' + progress + '%"></span></div><ol class="r3-order-steps"><li class="is-done">Confirmado</li><li class="' + (readyToReceive || received ? 'is-done' : 'is-current') + '">En espera</li><li class="' + (received ? 'is-done' : '') + '">Recibido</li></ol><div class="r3-order-actions">' + mainAction + sideAction + '</div><p class="r3-order-note" role="status">' + progressCopy + '</p><ul class="r3-history-lines">' + rowItems(visible, { stock: true }) + '</ul>' + (extra.length ? '<details class="r3-order-details"><summary>Ver ' + extra.length + ' productos más</summary><ul class="r3-history-lines">' + rowItems(extra, { stock: true }) + '</ul></details>' : '') + orderStockHTML(items) + complements + '<div class="r3-history-total"><span>Total neto referencial</span><b>' + money(order.total || orderTotal(items)) + '</b></div><p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p><div class="r3-order-actions r3-order-actions--close">' + mainAction + '</div>' + orderEmailHTML(s, order) + (received ? window.M4Journey.npsHTML(c) : '') + editor + '</section>';
+      const lineCount = items.length + (items.length === 1 ? ' producto' : ' productos');
+      return '<section class="r3-order-focus" aria-labelledby="r3-order-focus-title"><div class="r3-order-head"><h2 id="r3-order-focus-title">' + title + '</h2><p class="r3-order-folio">Folio <span>' + esc(order.id) + '</span></p></div>' +
+        '<div class="af-order-state"><span class="af-status">' + (received ? 'Recibido' : readyToReceive ? 'En camino' : 'En espera') + '</span>' +
+        '<div class="r3-order-progress" role="progressbar" aria-label="Avance simulado del pedido" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress + '"><span style="width:' + progress + '%"></span></div></div>' +
+        (progressCopy ? '<p class="r3-order-note" role="status">' + progressCopy + '</p>' : '') + '<div class="r3-order-actions">' + mainAction + sideAction + '</div>' + shortcuts +
+        '<details class="r3-order-details af-fold" data-af-fold="order-products"><summary>Productos y total · ' + money(order.total || orderTotal(items)) + '</summary><p class="r3-price-note">' + lineCount + ' · Neto referencial + IVA</p><ul class="r3-history-lines">' + rowItems(items, { stock: true }) + '</ul>' + orderStockHTML(items) + complements + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p>' + (mainAction ? '<div class="r3-order-actions r3-order-actions--close">' + mainAction + '</div>' : '') + '</details>' + orderEmailHTML(s, order) + (received ? window.M4Journey.npsHTML(c) : '') + editor + '</section>';
     }
-    const offer = buyerFor(s), items = window.M4Journey.baseItems(s), visible = items.slice(0, 3), extra = items.slice(3), total = orderTotal(items) + DATA.prices.kit.precio + DATA.prices.filter.precio;
+    const items = window.M4Journey.baseItems(s), total = orderTotal(items) + DATA.prices.kit.precio + DATA.prices.filter.precio;
     const ready = window.__r3RealNotice !== null && window.__r3RealNotice !== undefined ? Boolean(window.__r3RealNotice) : Boolean(c.replenishmentNotice);
-    const intro = ready ? 'El aviso está listo. Revisa el pack sugerido y confirma o ajusta tu selección.' : 'El pack de partida y sus precios quedan visibles mientras esperas el aviso de reposición.';
     const actions = ready
       ? '<div class="r3-order-actions"><button type="button" class="m5-btn r3-main" data-cycle-action="confirm-order">Confirmar pedido</button><a class="m5-link" href="#C10" data-go="C10">Ajustar productos</a></div>'
       : '<a class="m5-btn r3-main" href="#C10" data-go="C10">Revisar productos</a>';
-    return '<section class="r3-order-focus" aria-labelledby="r3-order-focus-title"><span class="r3-kicker">Tu pedido</span><h2 id="r3-order-focus-title">' + (ready ? 'Preparar reposición' : 'Pack de partida') + '</h2><p class="r3-order-note">' + intro + '</p>' + (offer ? '<p class="r3-order-note">Productos y máquina recomendada se revisan por separado.</p>' : '') + '<ul class="r3-history-lines">' + rowItems(visible, { stock: true }) + '</ul>' + (extra.length ? '<details class="r3-order-details"><summary>Ver ' + extra.length + ' productos más</summary><ul class="r3-history-lines">' + rowItems(extra, { stock: true }) + '</ul></details>' : '') + orderStockHTML(items) + orderComplementsHTML(s, c, items, null) + '<div class="r3-history-total"><span>Pack, kit y filtro · neto referencial</span><b>' + money(total) + '</b></div><p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p>' + actions + '</section>';
+    return '<section class="r3-order-focus" aria-labelledby="r3-order-focus-title"><h2 id="r3-order-focus-title">' + (ready ? 'Prepara tu pedido' : 'Revisa tu pack de partida') + '</h2><p class="r3-order-note">' + (ready ? 'Revisa el pack antes de confirmar.' : 'Aviso de reposición pendiente.') + '</p>' + actions + shortcuts + '<details class="r3-order-details af-fold" data-af-fold="order-products"><summary>Productos, kit y filtro · ' + money(total) + '</summary><ul class="r3-history-lines">' + rowItems(items, { stock: true }) + '</ul>' + orderStockHTML(items) + orderComplementsHTML(s, c, items, null) + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p></details></section>';
   }
   function customPortal(s) {
     const c = s.customerCycle || {}, old = originalAccountHTML(s);
     const inboxSection = (old.match(/<section class="m5-cycle" aria-labelledby="m5-cycle-inbox-title">[\s\S]*?<\/section>/) || [""])[0];
     const recSection = (old.match(/<section class="m5-cycle" aria-labelledby="mcp-rec-j">[\s\S]*?<\/section>/) || [""])[0];
-    const rec = recSection ? '<details class="r3-recommend-details" id="r3-recommend"' + (c.csat ? ' open' : '') + '><summary>Recomendar a otro negocio</summary>' + recSection + "</details>" : "";
+    const rec = recSection ? '<details class="r3-recommend-details af-fold" id="r3-recommend" data-af-fold="recommendation"><summary>Recomendar</summary>' + recSection + '</details>' : '';
     const timeline = (old.match(/<details class="m5-cycle-details" style="margin:18px 0">[\s\S]*?<\/details>/) || [""])[0], offer = buyerFor(s);
     // «Estado y línea de tiempo» reúne la línea de tiempo y los correos de seguimiento en un solo desplegable.
     const timelineBody = timeline ? timeline.replace(/^<details[^>]*>/, "").replace(/<\/details>$/, "").replace(/<summary>[\s\S]*?<\/summary>/, "") : "";
     const tracking = (timelineBody || inboxSection) ? '<details class="m5-cycle-details r3-secondary-details"><summary>Estado y línea de tiempo</summary>' + timelineBody + inboxSection + '</details>' : "";
-    const head = '<section class="m5-cycle-head r3-portal-head"><div class="m5-wrap"><span class="m5-kick m5-kick--light">Mi portal · ' + esc(offer && offer.id === "oficina" ? "Oficinas" : c.business || "cuenta de empresa") + '</span><h1>' + esc(c.company || "Tu cuenta") + '</h1></div></section>';
+    const head = '<header class="m5-wrap af-portal-head"><h1>Mi portal</h1><p>' + esc(c.company || 'Tu cuenta') + '</p></header>';
     const hasRecords = Boolean((c.tickets || []).length || (c.visits || []).length || (c.contacts || []).length);
-    const followup = '<div class="r3-case-followup' + (hasRecords ? '' : ' r3-no-records') + '">' + supportHTML(c, s) + '<div class="r3-record-followup">' + recordsHTML(c, s) + rec + '</div></div>';
-    return displayBuyerHTML(head + '<div class="m5-wrap mcp-portal2 r3-portal" style="padding:20px 0 48px">' + orderFocusHTML(s, c) + (offer ? portalOfferHTML(offer) : '') + tracking + '<details class="m5-cycle-details r3-secondary-details r3-support-fold"><summary>Ayuda y postventa</summary>' + followup + '</details><details class="m5-cycle-details r3-secondary-details"><summary>Historial</summary>' + historyHTML(s, c) + '</details></div>');
+    const followup = '<div class="r3-case-followup' + (hasRecords ? '' : ' r3-no-records') + '">' + supportHTML(c, s) + recordsHTML(c, s) + '</div>';
+    const shortcuts = '<div class="af-portal-shortcuts"><details class="m5-cycle-details r3-secondary-details r3-support-fold af-fold" data-af-fold="support"><summary>Ayuda y postventa</summary>' + followup + '</details>' + rec + '</div>';
+    return displayBuyerHTML(head + '<div class="m5-wrap mcp-portal2 r3-portal af-active-portal"><div class="af-portal-order">' + orderFocusHTML(s, c, shortcuts) + '<img class="af-portal-photo" src="recursos/marca/vaso-marley-negro-barra.webp" alt="Vaso negro de Marley Coffee en barra" width="480" height="480" decoding="async"></div>' + tracking + '<details class="m5-cycle-details r3-secondary-details"><summary>Historial</summary>' + historyHTML(s, c) + '</details>' + (offer ? '<details class="af-fold"><summary>Mi máquina</summary>' + portalOfferHTML(offer) + '</details>' : '') + '</div>');
   }
   window.M4Journey.accountHTML = customPortal;
   const originalC09 = C.__r3Original.C09 || C.SCREENS.C09;
@@ -13891,6 +13945,32 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     finally { c.contractSignedAt = oldSigned; c.replenishmentNotice = oldNotice; window.__r3RealNotice = null; }
   };
   function bindR3() {
+    function openPortalSection(id) {
+      const element = document.getElementById(id);
+      if (!element) {
+        if (id === 'r3-help') window.M7Chat?.open('ayuda');
+        else {
+          const invite = document.querySelector('#m4-main [data-a="lm-referral"]');
+          if (invite) { invite.scrollIntoView({ block: 'center' }); invite.focus({ preventScroll: true }); }
+          else window.MarleyApp.toast('Recomendación en pausa', 'Puedes recomendar cuando se resuelva la incidencia.');
+        }
+        return;
+      }
+      let detail = element.closest('details');
+      while (detail) { detail.open = true; detail = detail.parentElement.closest('details'); }
+      const focus = element.matches('details') ? element.querySelector('summary') : element.querySelector('h2');
+      if (focus) { focus.tabIndex = -1; focus.focus({ preventScroll: true }); }
+      element.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+    window.addEventListener('click', function (event) {
+      const link = event.target.closest?.('[data-af-portal-target]');
+      if (!link) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const id = link.dataset.afPortalTarget;
+      window.addEventListener('hashchange', () => requestAnimationFrame(() => openPortalSection(id)), { once: true });
+      window.MarleyApp.go('C09');
+    }, true);
     window.addEventListener("click", function (event) {
       const target = event.target.closest && event.target.closest("[data-r3-continue][data-m9-continue]");
       if (!target) return;
@@ -13925,11 +14005,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       }
       if (target.hasAttribute("data-r3-scroll")) {
         event.preventDefault();
-        const id = target.dataset.r3Scroll;
-        const element = document.getElementById(id);
-        let detail = element?.closest("details");
-        while (detail) { detail.open = true; detail = detail.parentElement?.closest("details") || null; }
-        element?.scrollIntoView({ behavior: "smooth", block: "start" });
+        openPortalSection(target.dataset.r3Scroll);
         return;
       }
       if (target.hasAttribute("data-r3-advance-wait")) {
@@ -14231,13 +14307,11 @@ body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
     }
     function field(s, k, inner) {
       const sug = M.suggested(s, k) && s.answers.negocio ? '<span class="m5-sug">Sugerido para tu negocio</span>' : "";
-      const level = k === "negocio" ? "h2" : "h3";
-      return '<div class="m5-qfield r4-q"><div class="m5-qfield-h"><' + level + '>' + esc(M.question(s, k).title) + "</" + level + ">" + sug + "</div>" + inner + "</div>";
+      return '<div class="m5-qfield r4-q">' + (sug ? '<div class="m5-qfield-h">' + sug + '</div>' : '') + inner + '</div>';
     }
     function contacto(s) {
       const L = Object.assign({}, s.lead || {}, C.ui.r4Draft);
-      const titulo = window.R5 && window.R5.camino(s) === "solucion" ? "¿A dónde te enviamos la propuesta?" : "Tus datos";
-      return '<div class="r4-grupo r4-contacto"><h2>' + titulo + '</h2><details class="r5-contact-help"><summary>¿Para qué sirven tus datos?</summary><p>Para guardar tu avance y enviarte la propuesta.</p></details>' +
+      return '<div class="r4-grupo r4-contacto">' +
         '<label class="m5-field"><span>Nombre</span><input id="m4FName" name="name" autocomplete="name" value="' + esc(L.name || "") + '" placeholder="Tu nombre"></label>' +
         X.contactFields(L) +
         '<label class="m5-check"><input type="checkbox" name="consent" ' + (L.consent ? "checked" : "") + "><span>Autorizo que Marley Coffee use estos datos para responder esta solicitud por correo.</span></label>" +
@@ -14292,15 +14366,15 @@ body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
       const nextLabel = key === "contact" ? "Ver mi propuesta" : "Continuar";
       const backKey = key === "contact" ? keys[keys.length - 1] : keys[index - 1];
       const backGroup = backKey === "contact" ? 2 : questionGroup(backKey);
-      const title = key === "contact" ? (contactReady ? "Tu propuesta está lista" : "Tu propuesta está casi lista") : "Tu máquina ideal";
-      const subtitle = key === "contact" ? (contactReady ? "Tus datos ya están guardados." : "Déjanos tus datos para guardar y enviarte el resultado.") : "";
+      const title = key === "contact" ? (contactReady ? "Tu propuesta está lista" : "¿A dónde enviamos tu propuesta?") : M.question(sv, key).title;
+      const subtitle = key === "contact" && contactReady ? "Tus datos ya están guardados." : "";
       return '<section class="r4-diag" aria-labelledby="r4-titulo"><div class="r4-wrap">' + R.stepGuide(1) +
-        '<div class="r4-grid"><form class="r4-card r4-form-card m5-qcard" id="r4Datos" novalidate><header class="r4-head"><h1 id="r4-titulo">' + title + '</h1><p class="r5-c04-bajada">' + subtitle + '</p>' + suggestedBiz +
+        '<div class="r4-grid"><form class="r4-card r4-form-card m5-qcard" id="r4Datos" novalidate><header class="r4-head"><h1 id="r4-titulo">' + esc(title) + '</h1><p class="r5-c04-bajada">' + subtitle + '</p>' + suggestedBiz +
         '<div class="r5-q-progress" aria-live="polite"><span>Paso ' + progress + ' de ' + totalSteps + '</span><span class="r5-q-progress-track"><i style="width:' + Math.min(100, Math.round(progress / totalSteps * 100)) + '%"></i></span></div></header>' +
         '<div class="r5-single-question" aria-live="polite">' + question + '</div>' +
         '<p class="m4-form-msg r4-msg" role="status" aria-live="polite"></p>' +
-        '<div class="m5-actions r4-acciones">' + (backKey ? '<button type="button" class="m5-link" data-r4-step-back data-r4-back-group="' + backGroup + '">← Anterior</button>' : '') + '<button type="button" class="m5-btn r3-main" data-a="next" data-r4-next>' + nextLabel + ' →</button><button type="button" class="m5-btn m5-btn--ghost" data-m7-open="ayuda">Preguntar al asistente</button></div>' +
-        '</form>' + resumen(sv) + '<div class="r5-mobile-final-action"><button type="button" class="m5-btn r3-main" data-a="next" data-r4-next>' + nextLabel + ' →</button></div></div></div></section>';
+        '<div class="m5-actions r4-acciones"><button type="button" class="m5-btn r3-main af-primary" data-a="next" data-r4-next>' + nextLabel + '</button>' + (backKey ? '<button type="button" class="m5-link" data-r4-step-back data-r4-back-group="' + backGroup + '">Anterior</button>' : '') + '</div>' +
+        '</form>' + (R.buyerFor(sv) ? '<details class="af-fold"><summary>Tu selección</summary>' + resumen(sv) + '</details>' : '') + '</div></div></section>';
     }
     // Estado de muestra (solo para dibujar): el negocio conocido con sus sugerencias, sin tocar el estado guardado.
     function muestra(s, biz) {
@@ -14966,9 +15040,9 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
     }
     function guia() {
       const id = actual();
-      if (!/^C(04|05|06|10)$/.test(id)) return null;
-      if (camino() === "solucion") return { pasos: ["Tu solución", "Propuesta", "Confirmar"], actual: id === "C04" ? 1 : id === "C06" ? 3 : 2 };
-      return { pasos: ["Productos", "Tu negocio", "Propuesta", "Confirmar"], actual: ({ C10: 1, C04: 2, C05: 3, C06: 4 })[id] };
+      if (!/^C(04|05|06|09|10)$/.test(id)) return null;
+      if (id !== 'C10' && camino() === "solucion") return { pasos: ["Tu negocio", "Propuesta", "Confirmar", "Portal"], actual: ({ C04: 1, C05: 2, C06: 3, C09: 4 })[id] };
+      return { pasos: ["Productos", "Tu negocio", "Propuesta", "Confirmar", "Portal"], actual: ({ C10: 1, C04: 2, C05: 3, C06: 4, C09: 5 })[id] };
     }
 
     // ---------- Máquina: la calcula el cuestionario ----------
@@ -15071,16 +15145,15 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
       let etiqueta = d.done ? "Continuar a tu propuesta" : "Continuar con mis datos";
       if (cam === "solucion") etiqueta = s.proposal ? "Volver a tu propuesta" : "Volver a tu solución";
       const n = items.length, cuenta = n + (n === 1 ? " producto" : " productos");
-      const resumen = n ? '<span class="r5-barra-k">Mi cotización · ' + cuenta + '</span><span class="r5-barra-n"><b>' + money(q.total) + '</b><span class="r5-barra-ver" aria-hidden="true">Ver</span></span>' : '<span class="r5-barra-k">Pack de partida</span><span class="r5-barra-n">Disponible para elegir</span>';
-      const etiquetaRes = n ? "Mi cotización: " + cuenta + ", total " + money(q.total) + ". Ver detalle" : "Pack de partida disponible para elegir";
-      return '<div class="r5-barra" role="region" aria-label="Tu selección y siguiente paso"><button type="button" class="r5-barra-res" data-r5-carro-abrir aria-controls="r5-carro" aria-expanded="' + (C.ui.r5Hoja ? "true" : "false") + '" aria-label="' + esc(etiquetaRes) + '">' + resumen + '</button><button type="button" id="m9-continue" class="m5-btn r3-main" data-m9-continue data-r3-continue>' + etiqueta + " →</button></div>";
+      const resumen = n ? '<span class="r5-barra-k">Mi cotización</span><span class="r5-barra-n"><b>' + money(q.total) + '</b></span>' : '<span class="r5-barra-k">Mi cotización</span>';
+      const etiquetaRes = n ? "Mi cotización: " + cuenta + ", total " + money(q.total) + ". Ver detalle" : "Ver mi cotización";
+      return '<div class="r5-barra" role="region" aria-label="Tu selección y siguiente paso"><button type="button" class="r5-barra-res" data-r5-carro-abrir aria-controls="r5-carro" aria-expanded="' + (C.ui.r5Hoja ? "true" : "false") + '" aria-label="' + esc(etiquetaRes) + '">' + resumen + '</button><button type="button" id="m9-continue" class="m5-btn r3-main af-primary" data-m9-continue data-r3-continue>' + etiqueta + '</button></div>';
     }
     function catalogo() {
-      const original = M.get(), s = muestraNegocio(original), offer = R.buyerFor(s), c = carro(), cam = camino(original);
-      const volver = cam === "solucion" ? '<button type="button" class="r5-volver" data-m9-continue data-r5-volver>← ' + (s.proposal ? "Volver a tu propuesta" : "Volver a tu solución") + "</button>" : "";
-      return '<section class="r3-catalog m9-catalog m5-wrap r5-cat" aria-labelledby="r3-catalog-title">' + R.stepGuide(1) + volver +
-        '<header class="r3-catalog-heading"><span class="r3-kicker">Productos y precios netos referenciales</span><h1 id="r3-catalog-title">Café en grano e insumos para tu negocio</h1><p class="r5-brandline">Elige el pack o ajusta productos. Precios netos; IVA no incluido.</p></header>' +
-        barra(s, offer, c) + '<div class="r5-cat-grid"><div class="r5-cat-main">' + bannerMaquina(s, offer) + bloquePack(s, offer, c) + bloqueMas(offer, c) + "</div>" + carroHTML(s, offer, c) + '</div><div class="r5-final-action"><p>¿Listo con tu selección?</p><button type="button" class="m5-btn r3-main" data-m9-continue data-r3-continue>' + (s.diag && s.diag.done ? "Continuar a tu propuesta" : "Continuar con mis datos") + ' →</button></div></section>';
+      const original = M.get(), s = muestraNegocio(original), offer = R.buyerFor(s), c = carro();
+      return '<section class="r3-catalog m9-catalog m5-wrap r5-cat" aria-labelledby="r3-catalog-title">' + R.stepGuide(1) +
+        '<header class="r3-catalog-heading"><h1 id="r3-catalog-title">Café e insumos para tu negocio</h1><p class="r5-brandline">Precios netos referenciales. IVA no incluido.</p></header>' +
+        barra(s, offer, c) + '<div class="r5-cat-grid"><div class="r5-cat-main">' + bloquePack(s, offer, c) + bloqueMas(offer, c) + '<details class="af-fold"><summary>Máquina en comodato</summary>' + bannerMaquina(s, offer) + '</details></div>' + carroHTML(s, offer, c) + '</div><div class="r5-final-action"><button type="button" class="m5-btn r3-main af-primary" data-m9-continue data-r3-continue>' + (camino(original) === 'solucion' ? (s.proposal ? 'Volver a tu propuesta' : 'Volver a tu solución') : s.diag?.done ? 'Continuar a tu propuesta' : 'Continuar con mis datos') + '</button></div></section>';
     }
     K.catalogHTML = function () { return R.displayBuyerHTML(catalogo()); };
 
@@ -15172,13 +15245,13 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
         setTimeout(function () { pulso(".r5-barra-n"); aviso("Quitaste el pack de partida.", { label: "Deshacer", fn: function () { restaurar(antes); } }); }, 0);
         return;
       }
-      // El carrito del encabezado abre «Mi cotización» (hoja en celular); fuera del catálogo, lleva al catálogo con la hoja abierta.
+      // «Mi cotización» abre el mismo detalle desde el encabezado y el catálogo.
       if (t.closest("[data-m9-basket-open]")) {
-        if (actual() === "C10") { e.preventDefault(); e.stopImmediatePropagation(); if (ancho()) abrirHoja(true); else { const a = document.getElementById("r5-carro"); if (a) { a.scrollIntoView({ block: "nearest", behavior: "smooth" }); pulso("#r5-carro"); } } return; }
-        C.ui.r5Hoja = ancho() && K.lines().length > 0; return;
+        if (actual() === "C10") { e.preventDefault(); e.stopImmediatePropagation(); abrirHoja(true); return; }
+        C.ui.r5Hoja = true; return;
       }
-      if (t.closest("[data-r5-ver-carro]")) { e.preventDefault(); if (ancho()) abrirHoja(true); else { const a = document.getElementById("r5-carro"); if (a) { a.scrollIntoView({ block: "nearest", behavior: "smooth" }); pulso("#r5-carro"); } } return; }
-      if (t.closest("[data-r5-carro-abrir]")) { e.preventDefault(); if (ancho()) abrirHoja(!C.ui.r5Hoja); else pulso("#r5-carro"); return; }
+      if (t.closest("[data-r5-ver-carro]")) { e.preventDefault(); abrirHoja(true); return; }
+      if (t.closest("[data-r5-carro-abrir]")) { e.preventDefault(); abrirHoja(!C.ui.r5Hoja); return; }
       if (t.closest("[data-r5-carro-cerrar]")) { e.preventDefault(); abrirHoja(false); return; }
       // Agregar y cambiar cantidades: lo hace el catálogo; aquí se muestra qué cambió.
       const suma = t.closest("[data-m9-add],[data-r3-qty]");
@@ -15234,7 +15307,7 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
       // La hoja usa la zona segura inferior; la barra deja de cubrir el contenido.
       const barraEl = document.querySelector(".r5-barra");
       if (barraEl && ancho()) document.documentElement.style.setProperty("--r5-barra-h", Math.round(barraEl.getBoundingClientRect().height) + "px");
-      document.body.classList.toggle("r5-hoja-on", id === "C10" && Boolean(C.ui.r5Hoja) && ancho());
+      document.body.classList.toggle("r5-hoja-on", id === "C10" && Boolean(C.ui.r5Hoja));
       if (id === "C05") {
         const cta = document.querySelector('.mcp-acc [data-a="accept-prop"]'), target = document.querySelector(".m5-prop-head");
         if (cta && target && !target.querySelector("[data-r5-top-accept]")) { const copy = cta.cloneNode(true); copy.removeAttribute("id"); copy.dataset.r5TopAccept = ""; copy.classList.add("r5-flow-cta"); target.appendChild(copy); }
@@ -22584,17 +22657,17 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
     const items = data.productos.map(item => '<li><b>' + esc(item.producto) + '</b> \u00b7 ' + esc(item.formato) + '</li>').join('');
     return '<div data-r7-basket-output class="r7-start-basket"><h3>Canasta de inicio \u00b7 ' + esc(data.negocio) + '</h3><p><b>Consumo orientativo:</b> ' + esc(data.consumoOrientativo) + '; orientaci\u00f3n de equipo, no promedio observado.</p><ul>' + items + '</ul><p><b>Equipo:</b> ' + esc(data.maquina) + ' en comodato, con compra de insumos. <b>Acompa\u00f1amiento:</b> instalaci\u00f3n y capacitaci\u00f3n por confirmar.</p><p class="r7-muted">Canasta orientativa; cantidades, m\u00ednimo, disponibilidad, compatibilidad y entrega por confirmar.</p></div>';
   };
-  const startGuide = (id,offer) => '<details class="r7-portal-box r7-start-guide" data-r7-start-guide><summary>Cómo armamos tu propuesta</summary>' +
+  const startGuide = offer => '<details class="r7-portal-box r7-start-guide af-fold" data-r7-start-guide data-af-fold="diagnostic"><summary>Cómo armamos tu propuesta</summary>' +
     '<p>Las respuestas sugieren una máquina; el equipo confirma las condiciones antes de contratar.</p>' +
-    renderStartBasket(offer && offer.id) +
+    renderStartBasket(offer && offer.id) + '<button type="button" class="m5-link" data-m7-open="ayuda">Preguntar al asistente</button>' +
     '</details>';
   const decorateC04 = html => {
     if (html.indexOf('data-r7-start-guide') >= 0) return html;
-    const introAt = html.indexOf('class="r5-c04-bajada"');
-    if (introAt < 0) return html;
-    const end = html.indexOf('</p>',introAt);
+    const form = html.indexOf('id="r4Datos"');
+    if (form < 0) return html;
+    const end = html.indexOf('</form>',form);
     if (end < 0) return html;
-    return html.slice(0,end + 4) + startGuide('r7-c04-start',currentOffer()) + html.slice(end + 4);
+    return html.slice(0,end) + startGuide(currentOffer()) + html.slice(end);
   };
   const questionizeFirstHeading = element => {
     const heading = element.querySelector('h2');
@@ -22689,7 +22762,7 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
     });
     const pack = catalog.querySelector('.r5-pack-card');
     if (pack && !pack.querySelector('.r7-initial-note')) {
-      const totalNode = pack.querySelector('.r5-pack-total .r3-total dd');
+      const totalNode = pack.querySelector('.r3-pack-total .r3-total dd');
       const total = moneyNode(totalNode);
       const dl = pack.querySelector('.r5-pack-total');
       if (dl && total) dl.insertAdjacentHTML('beforeend',vatBreakdown(total,false));
@@ -22703,6 +22776,29 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
       full.className = 'r7-quote-full';
       full.innerHTML = '<summary>¿Qué incluye la cotización completa de octubre?</summary><p>Una cotización específica de octubre de 2026 suma $1.331.220 netos en insumos y $160.000 netos en kit y filtro: $1.491.220 netos, más $283.332 de IVA, total $1.774.552. Es una compra inicial de referencia para ese caso, no un precio universal ni una mensualidad.</p>';
       note.insertAdjacentElement('afterend',full);
+      const card = pack.closest('.r5-pack');
+      const heading = card.querySelector('header');
+      heading.querySelector('.r3-kicker')?.remove();
+      heading.querySelector('p')?.remove();
+      heading.querySelector('h2').textContent = 'Pack de partida';
+      const detail = document.createElement('details');
+      detail.className = 'af-fold af-pack-details';
+      detail.dataset.afFold = 'pack';
+      detail.innerHTML = '<summary>Qué incluye el pack</summary>';
+      const lead = document.createElement('div');
+      lead.className = 'af-pack-lead';
+      if (totalNode) lead.innerHTML = '<p class="af-total"><strong>' + esc(totalNode.textContent) + '</strong> <span>Neto + IVA</span></p>';
+      const photo = pack.querySelector('.r3-pack-lines img');
+      if (photo) {
+        const preview = photo.cloneNode(true);
+        preview.classList.add('af-pack-photo');
+        preview.removeAttribute('loading');
+        card.prepend(preview);
+      }
+      lead.append(pack.querySelector('.r5-pack-acc'));
+      pack.prepend(lead, detail);
+      detail.append(...pack.querySelectorAll('.r3-pack-top, .r3-pack-lines, .r3-pack-total, .r7-initial-note, .r7-quote-full, .r5-reference'));
+      pack.querySelector('.r5-sello')?.remove();
     }
     const cart = catalog.querySelector('.r5-carro');
     if (cart && !cart.querySelector('.r7-cart-note')) {
@@ -22729,6 +22825,7 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
       if (featuredCard && !catalog.querySelector('[data-r7-feature-product]')) {
         const feature = document.createElement('details');
         feature.className = 'r7-feature-product r7-feature-fold';
+        feature.dataset.afFold = 'complements';
         const recommendations = recommendationsFor(currentOffer() || 'restaurante');
         const cupRecommendation = recommendations.find(item => item.id.indexOf('vaso-marca-') === 0);
         const vanillaRecommendation = recommendations.find(item => item.productoId === 'vanilla');
@@ -22753,6 +22850,7 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
       }
       const fold = document.createElement('details');
       fold.className = 'r7-fold r7-product-fold';
+      fold.dataset.afFold = 'products';
       fold.dataset.r7Fold = 'catalogo-productos';
       const summary = document.createElement('summary');
       summary.innerHTML = '<span class="r7-summary-heading" role="heading" aria-level="2">¿Qué productos puedo agregar a mi cotización?</span>';
@@ -22816,11 +22914,8 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
   const ensureCurrentC04Guide = () => {
     if (!document.body || document.body.dataset.current !== 'C04') return;
     const form = document.getElementById('r4Datos');
-    const intro = form && form.querySelector('.r5-c04-bajada');
-    if (!intro || form.querySelector('[data-r7-start-guide]')) return;
-    const template = document.createElement('template');
-    template.innerHTML = startGuide('r7-c04-start-live',currentOffer());
-    if (template.content.firstElementChild) intro.insertAdjacentElement('afterend',template.content.firstElementChild);
+    if (!form || form.querySelector('[data-r7-start-guide]')) return;
+    form.insertAdjacentHTML('beforeend',startGuide(currentOffer()));
   };
   document.addEventListener('change',event => {
     const select = event.target.closest && event.target.closest('[data-r7-business-select]');
@@ -26273,7 +26368,7 @@ body[data-current="C09"] .r3-stock-inline .m5-link{min-height:44px;padding:0 2px
 body[data-current="C09"] .r3-stock-note{margin:6px 0 0;font:500 12px/1.4 var(--font);color:#5f5f5f}
 body[data-current="C09"] #m4-main{padding-bottom:24px!important}
 .r5-c04-bajada:empty{display:none}
-</style><link rel="stylesheet" href="crm/crm-v2.css"><script src="crm/crm-v2.js" defer></script>
+</style><link rel="stylesheet" href="crm/crm-v2.css?v=20261119-af"><script src="crm/crm-v2.js?v=20261119-af" defer></script>
 <style id="postcompra-17nov">
 /* 17-nov · Postcompra: aviso «Correo enviado», correo simulado de marca y reposición. Marca: negro, blanco, gris neutro y amarillo #F3C900. */
 #mcm-toast{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:10050;display:flex;justify-content:center;padding:0 16px;pointer-events:none;box-sizing:border-box}
@@ -26443,4 +26538,4 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
   }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && overlayEl && !overlayEl.hidden) closeMail(); });
 })();
-</script></body></html>
+</script><link rel="stylesheet" href="recursos/marca/composicion-af.css?v=20261119-1"></body></html>

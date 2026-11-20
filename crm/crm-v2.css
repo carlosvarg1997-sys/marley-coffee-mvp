@@ -458,4 +458,30 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 .crm2-replenish { display: grid; gap: 4px; margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--crm2-line); }
 .crm2-page-head h1 { margin: 0; }
 .crm2-page-head > p { margin: 4px 0 0; color: var(--crm2-muted); font-size: 14px; }
+
+/* Tareas prioritarias de Hoy */
+.crm2-approval-queue { border-top: 3px solid var(--crm2-role-strong); box-shadow: none; }
+.crm2-approval-queue .crm2-row { border-radius: 0; background: #fff; }
+.crm2-queue-empty { margin: 8px 0; padding: 8px 0; color: var(--crm2-muted); }
+.crm2-draft-block { border-top: 3px solid var(--crm2-role-strong); box-shadow: none; }
+.crm2-draft-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 16px; }
+.crm2-draft-controls label { display: grid; gap: 4px; font-size: 14px; }
+.crm2-draft-controls select { min-height: 44px; padding: 8px; border: 1px solid #747474; background: #fff; color: var(--crm2-ink); }
+.crm2-draft-preview { margin-top: 24px; padding: 16px 0 0; border-top: 1px solid var(--crm2-line); }
+.crm2-draft-preview > :is(h3,p) { margin: 0 0 8px; }
+.crm2-draft-preview p { max-width: 64ch; line-height: 1.5; }
+.crm2-draft-preview a { display: inline-flex; align-items: center; min-height: 44px; color: var(--crm2-role-strong); text-decoration: underline; }
+.crm2-draft-state { color: var(--crm2-role-strong); font-weight: 700; }
+.crm2-followup-review { padding: 16px 0; border-top: 1px solid var(--crm2-line); }
+.crm2-followup-review p { margin: 0 0 8px; }
+.crm2-followup-review .crm2-row-actions { margin-top: 8px; }
+.crm2-draft-preview:focus, .crm2-followup-review:focus, .crm2-approval:focus { outline: 2px solid var(--crm2-role-strong); outline-offset: 4px; }
+#crm-v2-root .crm2-btn--primary { color: #f7be00; border-color: #111; background: #111; border-radius: 0; }
+#crm-v2-root .crm2-btn--primary:disabled { color: #555; border-color: #aaa; background: #eee; }
+.crm2-actionbar [data-c2='recommend-account'] { min-width: min-content; }
+#crm-v2-root .crm2-main a[href] { min-height: 44px; }
+#crm-v2-root .crm2-fold a[data-c2-go] { display: inline-flex; align-items: center; }
+@media (max-width: 767px) {
+  .crm2-actionbar [data-c2='recommend-account'] { flex: 0 1 auto; }
+}
 /* 17-nov (Claude): colores por flujo intactos; el tinte de Ventas y el amarillo suave se aclaran para que no se lean como crema (pedido de Carlitos) */

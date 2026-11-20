@@ -907,3 +907,34 @@ html body p,html body li{font-size:16px!important}
 html body .nm-btn{min-height:44px!important;font-size:16px!important;padding:11px 16px!important}
 html body .nm-seccion{padding-top:36px!important;padding-bottom:36px!important}
 }
+
+/* 19-nov · Una entrada a la propuesta y lectura por capas. */
+body.nm { --nm-hueso: #fff; --ld-af-body: system-ui, sans-serif; }
+.nm :is(p, .nm-nota, .nm-lead, .ld-ficha__etiqueta) { font-family: var(--ld-af-body); }
+.ld-hero { min-height: clamp(350px, 70svh, 520px); }
+.ld-hero__contenido { padding-block: 40px; }
+.ld-hero__texto .nm-lead { max-width: 44ch; }
+.ld-hero__texto .nm-h1::after, .nm-seccion .nm-h2::after {
+  content: ''; display: block; width: 64px; height: 4px; margin: 8px 0 16px;
+  background: linear-gradient(90deg, #5e7e29 33.33%, #f7be00 33.33% 66.66%, #b33a2d 66.66%);
+}
+.nm-seccion .nm-h2 { text-align: center; text-wrap: balance; }
+.nm-seccion .nm-h2::after { margin-inline: auto; }
+html body.nm .nm-btn { border-radius: 0; box-shadow: none; text-transform: uppercase; letter-spacing: .035em; }
+html body.nm .nm-btn:not(.nm-btn--linea) { background: #111; color: #f7be00; border-color: #111; }
+html body.nm .ld-hero .nm-btn:not(.nm-btn--linea) { border-color: #f7be00; }
+html body.nm .nm-btn--linea { background: transparent; }
+.ld-af-more { border-top: 1px solid #555; }
+.ld-af-more > summary { display: flex; align-items: center; min-height: 44px; padding-block: 8px; cursor: pointer; list-style: none; }
+.ld-af-more > summary::-webkit-details-marker { display: none; }
+.ld-af-more > summary::after { content: '+'; margin-left: 8px; color: #f7be00; }
+.ld-af-more[open] > summary::after { content: '−'; }
+.ld-af-more[open] { padding-bottom: 24px; }
+.ld-af-more .ld-barra__action { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-start; gap: 8px 16px; }
+.ld-af-more .ld-reading-guide { padding-inline: 0 !important; }
+@media (max-width: 560px) {
+  .ld-hero { min-height: 0; }
+  .ld-hero__contenido { padding-block: 40px 24px; }
+  html body.nm .ld-hero h1 { font-size: 28px !important; }
+  html body.nm .nm-h2 { font-size: 22px !important; }
+}
