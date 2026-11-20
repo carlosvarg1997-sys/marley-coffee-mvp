@@ -1,0 +1,538 @@
+[
+  {
+    "name": "C01",
+    "viewport": "1280x551",
+    "first": 38,
+    "total": 49,
+    "headings": [
+      "Marley Coffee Chile"
+    ],
+    "controls": 20,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C02",
+    "viewport": "1280x551",
+    "first": 65,
+    "total": 79,
+    "headings": [
+      "Café para empresas con máquina en comodato"
+    ],
+    "controls": 20,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C03",
+    "viewport": "1280x551",
+    "first": 47,
+    "total": 69,
+    "headings": [
+      "Guarda tu avance"
+    ],
+    "controls": 9,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C04",
+    "viewport": "1280x551",
+    "first": 34,
+    "total": 46,
+    "headings": [
+      "¿Qué tipo de negocio tienes?"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C05",
+    "viewport": "1280x551",
+    "first": 30,
+    "total": 42,
+    "headings": [
+      "Revisa tu propuesta"
+    ],
+    "controls": 6,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C06",
+    "viewport": "1280x551",
+    "first": 38,
+    "total": 50,
+    "headings": [
+      "Propuesta confirmada"
+    ],
+    "controls": 10,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C07",
+    "viewport": "1280x551",
+    "first": 47,
+    "total": 69,
+    "headings": [
+      "Guarda tu avance"
+    ],
+    "controls": 9,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C08",
+    "viewport": "1280x551",
+    "first": 44,
+    "total": 61,
+    "headings": [
+      "Café para tu negocio"
+    ],
+    "controls": 19,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C09",
+    "viewport": "1280x551",
+    "first": 39,
+    "total": 66,
+    "headings": [
+      "Mi portal",
+      "Confirmación de pedido · PED-MC-HOR-2050-01"
+    ],
+    "controls": 12,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C10",
+    "viewport": "1280x551",
+    "first": 45,
+    "total": 90,
+    "headings": [
+      "Café e insumos para tu negocio"
+    ],
+    "controls": 13,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C11",
+    "viewport": "1280x551",
+    "first": 54,
+    "total": 74,
+    "headings": [
+      "Elige una máquina en comodato"
+    ],
+    "controls": 9,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-empresas",
+    "viewport": "1280x551",
+    "first": 38,
+    "total": 171,
+    "headings": [
+      "Café para empresas"
+    ],
+    "controls": 13,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-cafeterias",
+    "viewport": "1280x551",
+    "first": 33,
+    "total": 175,
+    "headings": [
+      "Café para cafeterías"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-conveniencia",
+    "viewport": "1280x551",
+    "first": 36,
+    "total": 179,
+    "headings": [
+      "Café para tiendas"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-eventos-catering",
+    "viewport": "1280x551",
+    "first": 35,
+    "total": 177,
+    "headings": [
+      "Café para eventos"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-hoteles",
+    "viewport": "1280x551",
+    "first": 33,
+    "total": 174,
+    "headings": [
+      "Café para hoteles"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-oficinas",
+    "viewport": "1280x551",
+    "first": 33,
+    "total": 176,
+    "headings": [
+      "Café para oficinas"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-panaderias",
+    "viewport": "1280x551",
+    "first": 33,
+    "total": 181,
+    "headings": [
+      "Café para panaderías"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-restaurantes",
+    "viewport": "1280x551",
+    "first": 33,
+    "total": 175,
+    "headings": [
+      "Café para restaurantes"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "Hoy-ventas",
+    "viewport": "1280x551",
+    "first": 79,
+    "total": 83,
+    "headings": [
+      "Atender hoy",
+      "Hoy"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "Hoy-marketing",
+    "viewport": "1280x551",
+    "first": 55,
+    "total": 63,
+    "headings": [
+      "Campañas",
+      "Hoy"
+    ],
+    "controls": 12,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "Hoy-jefatura",
+    "viewport": "1280x551",
+    "first": 49,
+    "total": 52,
+    "headings": [
+      "Resumen",
+      "Hoy"
+    ],
+    "controls": 12,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C01",
+    "viewport": "390x844",
+    "first": 35,
+    "total": 35,
+    "headings": [
+      "Marley Coffee Chile"
+    ],
+    "controls": 8,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C02",
+    "viewport": "390x844",
+    "first": 55,
+    "total": 67,
+    "headings": [
+      "Café para empresas con máquina en comodato"
+    ],
+    "controls": 11,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C03",
+    "viewport": "390x844",
+    "first": 52,
+    "total": 67,
+    "headings": [
+      "Guarda tu avance"
+    ],
+    "controls": 9,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C04",
+    "viewport": "390x844",
+    "first": 44,
+    "total": 44,
+    "headings": [
+      "¿Qué tipo de negocio tienes?"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C05",
+    "viewport": "390x844",
+    "first": 40,
+    "total": 40,
+    "headings": [
+      "Revisa tu propuesta"
+    ],
+    "controls": 6,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C06",
+    "viewport": "390x844",
+    "first": 44,
+    "total": 48,
+    "headings": [
+      "Propuesta confirmada"
+    ],
+    "controls": 9,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C07",
+    "viewport": "390x844",
+    "first": 52,
+    "total": 67,
+    "headings": [
+      "Guarda tu avance"
+    ],
+    "controls": 9,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C08",
+    "viewport": "390x844",
+    "first": 37,
+    "total": 49,
+    "headings": [
+      "Café para tu negocio"
+    ],
+    "controls": 11,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C09",
+    "viewport": "390x844",
+    "first": 46,
+    "total": 66,
+    "headings": [
+      "Mi portal",
+      "Confirmación de pedido · PED-MC-HOR-2050-01"
+    ],
+    "controls": 12,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C10",
+    "viewport": "390x844",
+    "first": 74,
+    "total": 90,
+    "headings": [
+      "Café e insumos para tu negocio"
+    ],
+    "controls": 13,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "C11",
+    "viewport": "390x844",
+    "first": 60,
+    "total": 72,
+    "headings": [
+      "Elige una máquina en comodato"
+    ],
+    "controls": 9,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-empresas",
+    "viewport": "390x844",
+    "first": 57,
+    "total": 171,
+    "headings": [
+      "Café para empresas"
+    ],
+    "controls": 13,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-cafeterias",
+    "viewport": "390x844",
+    "first": 61,
+    "total": 175,
+    "headings": [
+      "Café para cafeterías"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-conveniencia",
+    "viewport": "390x844",
+    "first": 64,
+    "total": 179,
+    "headings": [
+      "Café para tiendas"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-eventos-catering",
+    "viewport": "390x844",
+    "first": 70,
+    "total": 177,
+    "headings": [
+      "Café para eventos"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-hoteles",
+    "viewport": "390x844",
+    "first": 61,
+    "total": 174,
+    "headings": [
+      "Café para hoteles"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-oficinas",
+    "viewport": "390x844",
+    "first": 61,
+    "total": 176,
+    "headings": [
+      "Café para oficinas"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-panaderias",
+    "viewport": "390x844",
+    "first": 61,
+    "total": 181,
+    "headings": [
+      "Café para panaderías"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "landing-restaurantes",
+    "viewport": "390x844",
+    "first": 68,
+    "total": 175,
+    "headings": [
+      "Café para restaurantes"
+    ],
+    "controls": 14,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "Hoy-ventas",
+    "viewport": "390x844",
+    "first": 73,
+    "total": 73,
+    "headings": [
+      "Atender hoy",
+      "Hoy"
+    ],
+    "controls": 12,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "Hoy-marketing",
+    "viewport": "390x844",
+    "first": 52,
+    "total": 52,
+    "headings": [
+      "Campañas",
+      "Hoy"
+    ],
+    "controls": 10,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "name": "Hoy-jefatura",
+    "viewport": "390x844",
+    "first": 42,
+    "total": 42,
+    "headings": [
+      "Resumen",
+      "Hoy"
+    ],
+    "controls": 10,
+    "overflow": false,
+    "errors": []
+  }
+]

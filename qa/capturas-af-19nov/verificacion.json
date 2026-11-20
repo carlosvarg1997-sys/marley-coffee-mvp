@@ -1,0 +1,574 @@
+{
+  "status": "PASS",
+  "clickCount": 92,
+  "unresponsive": 0,
+  "guidedTest": "PASS a 1280×551 y 390×844",
+  "seo": [
+    "index.html",
+    "prototipo.html",
+    "blog-empresas.html",
+    "guia-servicio-cafe.html",
+    "captacion/landing/cafeterias.html",
+    "captacion/landing/conveniencia.html",
+    "captacion/landing/empresas.html",
+    "captacion/landing/eventos-catering.html",
+    "captacion/landing/hoteles.html",
+    "captacion/landing/oficinas.html",
+    "captacion/landing/panaderias.html",
+    "captacion/landing/restaurantes.html"
+  ],
+  "audit": [
+    {
+      "viewport": "1280x551",
+      "route": "C01",
+      "label": "EMPRESAS",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C02",
+      "label": "AYÚDAME A ELEGIR UNA MÁQUINA",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C04",
+      "label": "CONTINUAR",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C04",
+      "label": "Hotel",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C05",
+      "label": "Insumos y condiciones",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C05",
+      "label": "CONFIRMAR MI PROPUESTA",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C06",
+      "label": "Alta de prueba",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C06",
+      "label": "SIMULAR FIRMA DE CONTRATO",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C06",
+      "label": "Pedir ayuda",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C06",
+      "label": "Recomendar",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C09",
+      "label": "CONFIRMAR PEDIDO",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C09",
+      "label": "CONFIRMAR QUE LLEGÓ",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C09",
+      "label": "Simular avance de tiempo",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C09",
+      "label": "REPETIR PEDIDO",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C09",
+      "label": "CONFIRMAR REPOSICIÓN",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C09",
+      "label": "VOLVER AL PORTAL",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C03",
+      "label": "Formato del correo y el celular",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C07",
+      "label": "VER MIS PRÓXIMOS PASOS",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C08",
+      "label": "QUIERO ESTO EN MI HOTEL",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C10",
+      "label": "MI COTIZACIÓN",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C10",
+      "label": "Cerrar",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C10",
+      "label": "Qué incluye el pack",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "C10",
+      "label": "¿Qué productos puedo agregar a mi cotización?",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R00",
+      "label": "Ventas\nAtender oportunidades, clientes y propuestas",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R01",
+      "label": "Picada El Sur\nRevisar reposición\nReposición\nSin compra hace 127 días; su ciclo medio es 23 días.",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R04",
+      "label": "Recomendar",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R04",
+      "label": "Guardar invitación",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R05",
+      "label": "Referidos\nBeneficio por referido · Hotel Altos del Parque",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R07",
+      "label": "Pedir información",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R05",
+      "label": "Recuperación\nCarolina Muñoz",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R05",
+      "label": "Permisos\nPablo Herrera\nFalta permiso",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R07",
+      "label": "Revisar permiso",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R11",
+      "label": "Generar borrador",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R11",
+      "label": "Confirmar borrador",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R02",
+      "label": "Referidos",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R03",
+      "label": "Picada El Sur\nRestaurante · La Florida\nReposición · cuenta en riesgo\nToca reponer",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R06",
+      "label": "Más información",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R08",
+      "label": "Más información",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R09",
+      "label": "Más información",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R10",
+      "label": "Picada El Sur\nRestaurante · La Florida\nReposición · cuenta en riesgo\nToca reponer",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R12",
+      "label": "Carolina Muñoz\nRestaurante Mar Abierto · Llegó por Campaña Hoteles y Restaurantes Oriente · Permiso sí\nMQL · dato de prueba\nInterés 73/100 · Valor 60/100",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R13",
+      "label": "Ver piezas y contactos",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R14",
+      "label": "Hotel Altos del Parque\nIncidencia técnica · Recibido\nPostventa\nTomás Ibarra · Ventas",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R15",
+      "label": "Hotel Altos del Parque\nIncidencia técnica · Recibido\nPostventa\nTomás Ibarra · Ventas",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R16",
+      "label": "Responder solicitud",
+      "response": true
+    },
+    {
+      "viewport": "1280x551",
+      "route": "R17",
+      "label": "Prioridad de este rol",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C01",
+      "label": "EMPRESAS",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C02",
+      "label": "AYÚDAME A ELEGIR UNA MÁQUINA",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C04",
+      "label": "CONTINUAR",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C04",
+      "label": "Hotel",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C05",
+      "label": "Insumos y condiciones",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C05",
+      "label": "CONFIRMAR MI PROPUESTA",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C06",
+      "label": "Alta de prueba",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C06",
+      "label": "SIMULAR FIRMA DE CONTRATO",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C06",
+      "label": "Pedir ayuda",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C06",
+      "label": "Recomendar",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C09",
+      "label": "CONFIRMAR PEDIDO",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C09",
+      "label": "CONFIRMAR QUE LLEGÓ",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C09",
+      "label": "Simular avance de tiempo",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C09",
+      "label": "REPETIR PEDIDO",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C09",
+      "label": "CONFIRMAR REPOSICIÓN",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C09",
+      "label": "VOLVER AL PORTAL",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C03",
+      "label": "Formato del correo y el celular",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C07",
+      "label": "VER MIS PRÓXIMOS PASOS",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C08",
+      "label": "QUIERO ESTO EN MI HOTEL",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C10",
+      "label": "MI COTIZACIÓN",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C10",
+      "label": "Cerrar",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C10",
+      "label": "Qué incluye el pack",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "C10",
+      "label": "¿Qué productos puedo agregar a mi cotización?",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R00",
+      "label": "Ventas\nAtender oportunidades, clientes y propuestas",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R01",
+      "label": "Picada El Sur\nRevisar reposición\nReposición\nSin compra hace 127 días; su ciclo medio es 23 días.",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R04",
+      "label": "Recomendar",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R04",
+      "label": "Guardar invitación",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R05",
+      "label": "Referidos\nBeneficio por referido · Hotel Altos del Parque",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R07",
+      "label": "Pedir información",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R05",
+      "label": "Recuperación\nCarolina Muñoz",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R05",
+      "label": "Permisos\nPablo Herrera\nFalta permiso",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R07",
+      "label": "Revisar permiso",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R11",
+      "label": "Generar borrador",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R11",
+      "label": "Confirmar borrador",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R02",
+      "label": "Referidos",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R03",
+      "label": "Picada El Sur\nRestaurante · La Florida\nReposición · cuenta en riesgo\nToca reponer",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R06",
+      "label": "Más información",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R08",
+      "label": "Más información",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R09",
+      "label": "Más información",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R10",
+      "label": "Picada El Sur\nRestaurante · La Florida\nReposición · cuenta en riesgo\nToca reponer",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R12",
+      "label": "Carolina Muñoz\nRestaurante Mar Abierto · Llegó por Campaña Hoteles y Restaurantes Oriente · Permiso sí\nMQL · dato de prueba\nInterés 73/100 · Valor 60/100",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R13",
+      "label": "Ver piezas y contactos",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R14",
+      "label": "Hotel Altos del Parque\nIncidencia técnica · Recibido\nPostventa\nTomás Ibarra · Ventas",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R15",
+      "label": "Hotel Altos del Parque\nIncidencia técnica · Recibido\nPostventa\nTomás Ibarra · Ventas",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R16",
+      "label": "Responder solicitud",
+      "response": true
+    },
+    {
+      "viewport": "390x844",
+      "route": "R17",
+      "label": "Prioridad de este rol",
+      "response": true
+    }
+  ]
+}
