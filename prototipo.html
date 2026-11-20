@@ -6785,7 +6785,7 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
   }
   // Guía de pasos (C03, C04, C05, C06 y C09): va en el flujo del documento, nunca fija, para no tapar contenido en celular.
   const GUIA_PASOS = ['1 · Tu negocio', '2 · Tu propuesta', '3 · Confirmar', '4 · Tu portal'];
-  const stepper = (n0) => { const r5 = window.R5 && window.R5.guia ? window.R5.guia(n0) : null; const pasos = r5 ? r5.pasos.map((t, i) => (i + 1) + ' · ' + t) : GUIA_PASOS; const n = r5 ? r5.actual : n0; return `<nav class="mcp-guia-wrap mcp-guia-wrap--steps-${pasos.length}" aria-label="Guía de pasos, paso ${n} de ${pasos.length}"><ol class="mcp-guia">${pasos.map((t, i) => { const k = i + 1; const cls = k < n ? 'done' : k === n ? 'now' : ''; return `<li class="${cls}"${k === n ? ' aria-current="step"' : ''}>${k < n ? `<span class="mcp-ok" aria-hidden="true">${icon('check', 14)}</span>` : ''}<span>${esc(t)}</span></li>`; }).join('')}</ol></nav>`; };
+  const stepper = (n0, route) => { const r5 = window.R5 && window.R5.guia ? window.R5.guia(route) : null; const pasos = r5 ? r5.pasos.map((t, i) => (i + 1) + ' · ' + t) : GUIA_PASOS; const n = r5 ? r5.actual : n0; return `<nav class="mcp-guia-wrap mcp-guia-wrap--steps-${pasos.length}" aria-label="Guía de pasos, paso ${n} de ${pasos.length}"><ol class="mcp-guia">${pasos.map((t, i) => { const k = i + 1; const cls = k < n ? 'done' : k === n ? 'now' : ''; return `<li class="${cls}"${k === n ? ' aria-current="step"' : ''}>${k < n ? `<span class="mcp-ok" aria-hidden="true">${icon('check', 14)}</span>` : ''}<span>${esc(t)}</span></li>`; }).join('')}</ol></nav>`; };
 
   // ---------- C02 · Empresas ----------
   function svcPrice(sv) { return 'Por cotizar'; }
@@ -7030,10 +7030,11 @@ ${inicio && note ? `<p class="m5-cta-note a1-next-step">${note}</p>` : ''}
     const b2bPayNotice = `<div class="m5-b2b-pay" style="margin:10px 0;padding:8px 12px;border-left:3px solid var(--y,#e5a93c);font-size:14px;line-height:1.4"><p style="margin:0"><b>Antes de formalizar:</b> El equipo valida precio, disponibilidad, pago e instalación. Aquí no hay contrato, pedido ni cobro.</p></div>`;
     const done = `<div class="m5-done" role="status"><span class="m5-done-ic">${icon('check', 24)}</span><div><b>Propuesta confirmada</b><p>Tu elección quedó registrada. El equipo continúa la validación por correo.</p><div class="m5-actions"><button type="button" class="m5-btn m5-btn--sm" data-go="C06">Ver confirmación y siguiente paso</button></div></div></div>`;
     const acciones = `${b2bPayNotice}<div class="mcp-acc"><button type="button" class="m5-btn m5-btn--lg" data-a="accept-prop">Siguiente: confirmar mi propuesta ${icon('arrow', 18)}</button><button type="button" class="m5-btn m5-btn--ghost" data-a="talk">Hablar con un ejecutivo</button><button type="button" class="m5-btn m5-btn--ghost" data-a="save-later">Guardar y seguir después</button></div>`;
-    return shell(`<style>@media (max-width:600px){.mcp-acc{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mcp-acc .m5-btn--lg{grid-column:1/-1}}</style><section class="m5-sec m5-sec--tight m5-gray m5-propsec"><div class="m5-wrap">${stepper(2)}
-<div class="m5-prop-head"><h1>Revisa tu propuesta</h1><p class="m5-lead m5-prop-copy">Máquina, insumos y condiciones. Confirma cuando estés listo.</p></div>
-${machineNote}${minNote}${sent}${propuestaBloques(s, q)}
-${accepted ? done : acciones}
+    return shell(`<style>@media (max-width:600px){.mcp-acc{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mcp-acc .m5-btn--lg{grid-column:1/-1}}</style><section class="m5-sec m5-sec--tight m5-gray m5-propsec"><div class="m5-wrap">${stepper(2, 'C05')}
+<div class="m5-prop-head"><h1>Revisa tu propuesta</h1><p class="m5-lead m5-prop-copy">Revisa el total antes de confirmar.</p></div>
+${machineNote}${minNote}${sent}<details class="premium-proposal-details"><summary>Máquina, insumos y condiciones</summary>${propuestaBloques(s, q)}${accepted ? '' : acciones}</details>
+${accepted ? done : ''}
+<p class="premium-quote-help"><button type="button" class="m5-link" data-m7-open="ayuda" aria-haspopup="dialog">Te ayudamos a decidir</button></p>
 </div></section>`);
   }
 
@@ -8668,7 +8669,7 @@ window.M7Chat = (() => {
   const route = () => (location.hash || '#C01').slice(1).split('?')[0];
   const operator = () => /^R\d{2}$/.test(route()) && route() !== 'R00';
   const canOperate = () => operator() && M.get().role === 'ventas';
-  const allowed = () => /^C0[2-9]$/.test(route()) || operator();
+  const allowed = () => /^C0[1-9]$/.test(route()) || operator();
   // El historial de postventa se identifica por cuenta y punto de atención.
   const activeAccount = () => {
     const s = M.get();
@@ -8951,7 +8952,7 @@ window.M7Chat = (() => {
     rendering=false;
     if(showLast){const last=pane.querySelector('.m7-thread article:last-child');last?.scrollIntoView({block:'start',behavior:'auto'});}
   }
-  function launcher(){let b=document.getElementById('m7-launcher');if(operator()){b?.remove();return;}if(!allowed()){b?.remove();return;}if(!b){b=document.createElement('button');b.id='m7-launcher';b.type='button';b.className='m7-launcher';b.dataset.m7Open='ayuda';b.setAttribute('aria-haspopup','dialog');document.body.appendChild(b);}b.textContent=operator()?'Atención del contacto':route()==='C09'?'Ayuda y postventa':'Te ayudamos a decidir';b.hidden=Boolean(pane);}
+  function launcher(){let b=document.getElementById('m7-launcher');if(route()==='C01'||operator()){b?.remove();return;}if(!allowed()){b?.remove();return;}if(!b){b=document.createElement('button');b.id='m7-launcher';b.type='button';b.className='m7-launcher';b.dataset.m7Open='ayuda';b.setAttribute('aria-haspopup','dialog');document.body.appendChild(b);}b.textContent=operator()?'Atención del contacto':route()==='C09'?'Ayuda y postventa':'Te ayudamos a decidir';b.hidden=Boolean(pane);}
   function panelClick(ev) {
     const target=ev.target?.nodeType===3?ev.target.parentElement:ev.target;const b=target?.closest?.('[data-m7]');if(!b||!pane?.contains(b)||b.disabled)return;
     ev.preventDefault();ev.stopPropagation();const a=b.dataset.m7;if(a==='close')return close();if(context().otherClient)return;
@@ -10709,7 +10710,7 @@ const assetURL=(value)=>MARLEY_ASSETS[value]||value;
   }
 function home() {
   const logo = ARTIFACT_MODE === 'wireframes' ? '<span class="b2c-wordmark">MARLEY COFFEE</span>' : '<img class="marley-logo b2c-logo" src="' + assetURL(MARLEY_LOGO) + '" alt="Marley Coffee" width="116" height="66">';
-  const main = '<main class="app-main b2c-main"><h1 class="b2c-sr-only">Marley Coffee Chile</h1><section class="b2c-hero" aria-labelledby="b2c-hero-title"><div class="b2c-hero-copy"><span class="b2c-hero-kicker">MARLEY COFFEE · CATÁLOGO</span><h2 id="b2c-hero-title">Keep On Moving</h2><p class="b2c-hero-subtitle">Café orgánico en grano · 227 g</p><p class="b2c-hero-copyline">Explora el catálogo Marley Coffee.</p><a class="b2c-hero-cta" href="https://www.marleycoffee.cl/cafe-organico-grano-entero-keep-on-moving-227g/p" target="_blank" rel="noopener">Ver el producto <span aria-hidden="true">→</span></a></div><a class="b2c-hero-product" href="https://www.marleycoffee.cl/cafe-organico-grano-entero-keep-on-moving-227g/p" target="_blank" rel="noopener" aria-label="Ver Keep On Moving, café orgánico en grano de 227 gramos"><img src="recursos/productos/catalog/grano.webp" alt="Bolsa Marley Coffee Keep On Moving, café orgánico en grano de 227 gramos" width="720" height="720" fetchpriority="high"></a></section><button type="button" class="b2c-chat" data-b2c-demo="Chat Online"><span aria-hidden="true">●</span> Chat Online</button><details class="b2c-coffee-club"><summary>Únete al Marley Coffee Club</summary><div class="b2c-club-body" hidden><div class="b2c-club-heading"><span>ÚNETE AL MARLEY</span><h2>COFFEE CLUB</h2><p>Recibe descuentos especiales y noticias sobre todo lo que hacemos. En este club siempre habrá mucho cafecito, música y sustentabilidad.</p></div><form id="b2cNewsletter" class="b2c-newsletter"><label class="b2c-sr-only" for="b2cName">Nombre</label><input id="b2cName" name="name" placeholder="Nombre" autocomplete="name"><label class="b2c-sr-only" for="b2cEmail">Correo electrónico</label><input id="b2cEmail" name="email" type="email" placeholder="Correo electrónico" autocomplete="email"><button type="submit">SUSCRÍBETE</button><label class="b2c-consent"><input type="checkbox" name="consent"><span>He leído y acepto los términos y condiciones, así como la política de privacidad y la política de cookies.</span></label></form></div></details></main>';
+  const main = '<main class="app-main b2c-main"><h1 class="b2c-sr-only">Marley Coffee Chile</h1><section class="b2c-hero" aria-labelledby="b2c-hero-title"><div class="b2c-hero-copy"><span class="b2c-hero-kicker">MARLEY COFFEE · CATÁLOGO</span><h2 id="b2c-hero-title">Keep On Moving</h2><p class="b2c-hero-subtitle">Café orgánico en grano · 227 g</p><a class="b2c-hero-cta" href="https://www.marleycoffee.cl/cafe-organico-grano-entero-keep-on-moving-227g/p" target="_blank" rel="noopener">Ver el producto <span aria-hidden="true">→</span></a></div><a class="b2c-hero-product" href="https://www.marleycoffee.cl/cafe-organico-grano-entero-keep-on-moving-227g/p" target="_blank" rel="noopener" aria-label="Ver Keep On Moving, café orgánico en grano de 227 gramos"><img src="recursos/productos/catalog/grano.webp" alt="Bolsa Marley Coffee Keep On Moving, café orgánico en grano de 227 gramos" width="720" height="720" fetchpriority="high"></a></section><button type="button" class="b2c-chat" data-m7-open="ayuda" aria-haspopup="dialog">Te ayudamos a decidir</button><details class="b2c-coffee-club"><summary>Únete al Marley Coffee Club</summary><div class="b2c-club-body" hidden><div class="b2c-club-heading"><span>ÚNETE AL MARLEY</span><h2>COFFEE CLUB</h2><p>Recibe descuentos especiales y noticias sobre todo lo que hacemos. En este club siempre habrá mucho cafecito, música y sustentabilidad.</p></div><form id="b2cNewsletter" class="b2c-newsletter"><label class="b2c-sr-only" for="b2cName">Nombre</label><input id="b2cName" name="name" placeholder="Nombre" autocomplete="name"><label class="b2c-sr-only" for="b2cEmail">Correo electrónico</label><input id="b2cEmail" name="email" type="email" placeholder="Correo electrónico" autocomplete="email"><button type="submit">SUSCRÍBETE</button><label class="b2c-consent"><input type="checkbox" name="consent"><span>He leído y acepto los términos y condiciones, así como la política de privacidad y la política de cookies.</span></label></form></div></details></main>';
   const footer = '<footer class="b2c-footer"><div class="b2c-footer-brand"><a href="https://www.marleycoffee.cl/" target="_blank" rel="noopener">' + logo + '</a><p>Oficinas: Av. México 515, Recoleta.<br>Santiago de Chile.</p><a href="mailto:servicioalcliente@marleycoffee.cl">servicioalcliente@marleycoffee.cl</a><p>Comercial Dicalla S.A.</p><div class="b2c-socials"><a href="https://www.instagram.com/marleycoffee.chile/?igshid=ZDdkNTZiNTM%3D" target="_blank" rel="noopener" aria-label="Instagram">IG</a><a href="https://www.facebook.com/MarleyCoffeeChile?_rdc=2&_rdr" target="_blank" rel="noopener" aria-label="Facebook">f</a><a href="https://www.youtube.com/channel/UCCXl3ToU2ebqnjiqNynbhtQ" target="_blank" rel="noopener" aria-label="YouTube">▶</a><a href="https://www.tiktok.com/@marleycoffee.chile" target="_blank" rel="noopener" aria-label="TikTok">♪</a><a href="https://www.linkedin.com/company/marleycoffeechile/" target="_blank" rel="noopener" aria-label="LinkedIn">in</a></div></div><div class="b2c-footer-column"><h2>ENLACES</h2><a href="https://www.marleycoffee.cl/historia" target="_blank" rel="noopener">Historia</a><a href="https://www.marleycoffee.cl/valores-de-la-marca" target="_blank" rel="noopener">Valores de marca</a><a href="https://coffeemarleycl.vteximg.com.br/arquivos/Bases%20de%20concurso%20MC%20-%20Experiencia%20MC%20HRC%20.pdf" target="_blank" rel="noopener">Experiencia Marley Coffee y Hard Rock Cafe</a><a href="https://www.marleycoffee.cl/cyberday" target="_blank" rel="noopener">Cyberday</a><a href="https://www.marleycoffee.cl/cyber-monday" target="_blank" rel="noopener">Cyber Monday</a><a href="https://app.reforestemos.org/empresa/marley-coffee" target="_blank" rel="noopener">Fundación Reforestemos</a></div><div class="b2c-footer-column"><h2>PRODUCTOS</h2><a href="https://www.marleycoffee.cl/cafe" target="_blank" rel="noopener">Café</a><a href="https://www.marleycoffee.cl/te---infusiones" target="_blank" rel="noopener">Té e infusiones</a><a href="https://www.marleycoffee.cl/accesorios" target="_blank" rel="noopener">Accesorios</a><a href="https://www.marleycoffee.cl/regala-marley" target="_blank" rel="noopener">Guía de regalos</a><h2>ASISTENCIA</h2><a href="https://www.marleycoffee.cl/contactanos" target="_blank" rel="noopener">Contáctanos</a><a href="https://www.marleycoffee.cl/blog" target="_blank" rel="noopener">Blog</a><a href="https://marleycoffee.ines.cl/canaldenunciasmarleycoffee/formulario/" target="_blank" rel="noopener">Canal de denuncias</a><a href="https://www.marleycoffee.cl/seguir-pedido" target="_blank" rel="noopener">Sigue tu pedido</a></div><div class="b2c-footer-column"><h2>OTROS ENLACES</h2><a href="https://www.marleycoffee.cl/politica-privacidad" target="_blank" rel="noopener">Política de privacidad y protección de datos</a><a href="https://www.marleycoffee.cl/terminos-y-condiciones" target="_blank" rel="noopener">Términos y condiciones</a><a href="https://www.marleycoffee.cl/preguntas-frecuentes" target="_blank" rel="noopener">Preguntas frecuentes</a><a href="https://www.marleycoffee.cl/politica-cookies" target="_blank" rel="noopener">Política de cookies</a><h2>CERTIFICACIONES</h2><div class="b2c-certifications">OU Kosher · USDA Organic · Reforestemos</div></div><div class="b2c-copyright">Copyright © 2025 Marley Coffee. All Rights Reserved. Developed By <a href="https://cetrik.com/" target="_blank" rel="noopener">cetrik</a></div></footer>';
   return main + footer;
 }
@@ -11822,6 +11823,15 @@ window.M7BuyerCRM = (() => {
   D.ROLE_ACCESS = D.ROLE_ACCESS || {};
   D.ROLE_ACCESS.R17 = roles.slice();
 
+  function repaintBuyerCrm() {
+    if (currentRoute() !== 'R17') return;
+    setTimeout(() => {
+      if (currentRoute() !== 'R17') return;
+      if (window.MarleyCRM2?.render) window.MarleyCRM2.render();
+      else window.MarleyApp?.render?.();
+    }, 0);
+  }
+
   function loadData() {
     if (data) return Promise.resolve(data);
     if (!loadPromise) loadPromise = fetch(new URL('captacion/crm/compradores.json', location.href), { cache: 'no-store' }).then((response) => {
@@ -11829,9 +11839,9 @@ window.M7BuyerCRM = (() => {
       return response.json();
     }).then((value) => {
       data = value;
-      if (currentRoute() === 'R17') setTimeout(() => window.MarleyApp?.render?.(), 0);
+      repaintBuyerCrm();
       return data;
-    }).catch((error) => { loadError = error.message || 'No se pudo leer compradores.json.'; if (currentRoute() === 'R17') setTimeout(() => window.MarleyApp?.render?.(), 0); throw error; });
+    }).catch((error) => { loadError = error.message || 'No se pudo leer compradores.json.'; repaintBuyerCrm(); throw error; });
     return loadPromise;
   }
   function buyerFromContact(contact, s) {
@@ -13343,7 +13353,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
   }
   function stepGuide(stage) {
     let names = ["Tu negocio", "Tu propuesta", "Confirmar", "Tu portal"];
-    const r5 = window.R5 && window.R5.guia ? window.R5.guia(stage) : null; if (r5) { names = r5.pasos; stage = r5.actual; }
+    const r5 = window.R5 && window.R5.guia ? window.R5.guia() : null; if (r5) { names = r5.pasos; stage = r5.actual; }
     return '<nav class="r3-step-guide" aria-label="Recorrido de ' + names.length + ' etapas"><ol>' + names.map(function (name, i) { const n = i + 1; return '<li class="' + (n === stage ? "is-current" : n < stage ? "is-done" : "") + '"' + (n === stage ? ' aria-current="step"' : "") + '><span>' + n + '</span><b>' + name + '</b></li>'; }).join("") + "</ol></nav>";
   }
   function fmtFor(line) { return line && line.d ? line.d : "Formato a confirmar"; }
@@ -13595,6 +13605,11 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const s = M.get(), offer = buyerFor(s);
     let html = decoratePriceLists(ensureGuide(C.__r3Original.C05(), 2));
     html = proposalQuoteBlocks(html, s, offer);
+    if (s.proposal) {
+      const quote = quotationFor(s, offer);
+      const total = '<p class="premium-quote-total"><span>Total neto referencial</span><strong>' + money(quote.total) + '</strong><span>+ IVA</span></p>';
+      html = html.replace(/<p class="m5-lead m5-prop-copy">[^<]*<\/p>/, lead => lead + total);
+    }
     return displayBuyerHTML(html);
   }
   function c06Wrap() {
@@ -13837,35 +13852,45 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const total = Number(order.total) || orderTotal(items);
     return '<section class="r3-order-focus r3-repeat-done" aria-labelledby="r3-repeat-done-title"><span class="r3-kicker">Reposición confirmada</span><h2 id="r3-repeat-done-title">Reposición confirmada</h2><p class="r3-order-folio">Folio nuevo <span>' + esc(id) + '</span></p><p class="r3-order-note" role="status">Te enviamos la confirmación a tu correo de prueba.' + (mail ? ' <button type="button" class="m5-link" data-mc-mail="' + esc(mail.id) + '">Ver correo</button>' : '') + '</p><ul class="r3-history-lines">' + rowItems(items.slice(0, 3), { stock: true }) + '</ul>' + (items.length > 3 ? '<p class="r3-price-note">Y ' + (items.length - 3) + ' productos más en el detalle del pedido.</p>' : '') + '<div class="r3-history-total"><span>Total neto referencial</span><b>' + money(total) + '</b></div><div class="r3-order-actions"><button type="button" class="m5-btn r3-main" data-r3-back-portal>Volver al portal</button></div></section>';
   }
-  function orderFocusHTML(s, c) {
+  function orderFocusHTML(s, c, canRecommend) {
     const orders = c.orders || [], order = orders[orders.length - 1];
     if (order && repeatDoneId && orders.some((o) => o.id === repeatDoneId)) return repeatDoneHTML(s, c, repeatDoneId);
     if (order && repeatOpenKey === order.id && order.receivedAt && order.replenishDue) return repeatSummaryHTML(s, c, order);
     if (order) {
       const received = Boolean(order.receivedAt), due = Boolean(received && order.replenishDue), readyToReceive = Boolean(order.waitPassed && !received), progress = received ? 100 : readyToReceive ? 68 : 34;
       const title = due ? 'Toca reponer' : received ? 'Recibido' : readyToReceive ? 'Tu pedido va en camino' : 'Tu pedido está confirmado';
-      const items = order.items || [], visible = items.slice(0, 3), extra = items.slice(3);
+      const items = order.items || [];
       // Una sola acción principal según el momento: «Confirmar que llegó» mientras va en camino; después, «Repetir pedido».
       const mainAction = received
         ? (due ? '<button type="button" class="m5-btn r3-main" data-r3-repeat-summary="' + esc(order.id) + '">Repetir pedido</button>' : '')
         : '<button type="button" class="m5-btn r3-main" data-r3-confirm-received="' + esc(order.id) + '">Confirmar que llegó</button>';
       const sideAction = received
         ? (due ? '' : '<button type="button" class="m5-link" data-r3-advance-time="' + esc(order.id) + '">Simular avance de tiempo</button>')
-        : readyToReceive ? '' : '<button type="button" class="m5-link" data-r3-advance-wait="' + esc(order.id) + '">Simular avance de espera</button>';
-      const progressCopy = due ? 'La reposición ya está lista. Revisa las cantidades y confirma cuando corresponda.' : received ? 'Marcaste la recepción en esta prueba. La próxima reposición se activa cuando pase el tiempo de la prueba.' : readyToReceive ? 'La etapa de espera de prueba terminó. Confirma la recepción cuando corresponda.' : 'La espera se representa en esta prueba; no indica una fecha ni un plazo real.';
+        : readyToReceive ? '' : '<button type="button" class="m5-link" data-r3-advance-wait="' + esc(order.id) + '">Simular espera</button>';
+      const progressCopy = due ? 'Revisa las cantidades de tu próxima reposición.' : received ? 'La reposición se activa al avanzar el tiempo simulado.' : readyToReceive ? 'Terminó la espera simulada. Confirma la recepción.' : 'Espera simulada. Despacho por confirmar.';
+      const support = '<div class="premium-order-support"><button type="button" class="m5-link" data-r3-scroll="r3-help">Ayuda y postventa</button>' + (canRecommend ? '<button type="button" class="m5-link" data-r3-scroll="r3-recommend">Recomendar</button>' : '') + '</div>';
       const editor = repeatOpenKey === order.id ? '<div class="r3-repeat-modal" role="dialog" aria-modal="true" aria-labelledby="r3-repeat-title"><div class="r3-repeat-modal-panel"><button type="button" class="r3-repeat-close" data-r3-repeat-close aria-label="Cerrar">Cerrar</button><h3 id="r3-repeat-title">Ajustar repetición</h3>' + repeatFormHTML({ key: order.id, items: order.items || [] }) + '</div></div>' : '';
       const complementSource = received ? order.id : order.sourceOrderId;
       const complements = orderComplementsHTML(s, c, items, complementSource);
-      return '<section class="r3-order-focus" aria-labelledby="r3-order-focus-title"><div class="r3-order-head"><h2 id="r3-order-focus-title">' + title + '</h2><p class="r3-order-folio">Folio <span>' + esc(order.id) + '</span></p></div><div class="r3-order-progress" role="progressbar" aria-label="Avance simulado del pedido" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress + '"><span style="width:' + progress + '%"></span></div><ol class="r3-order-steps"><li class="is-done">Confirmado</li><li class="' + (readyToReceive || received ? 'is-done' : 'is-current') + '">En espera</li><li class="' + (received ? 'is-done' : '') + '">Recibido</li></ol><div class="r3-order-actions">' + mainAction + sideAction + '</div><p class="r3-order-note" role="status">' + progressCopy + '</p><ul class="r3-history-lines">' + rowItems(visible, { stock: true }) + '</ul>' + (extra.length ? '<details class="r3-order-details"><summary>Ver ' + extra.length + ' productos más</summary><ul class="r3-history-lines">' + rowItems(extra, { stock: true }) + '</ul></details>' : '') + orderStockHTML(items) + complements + '<div class="r3-history-total"><span>Total neto referencial</span><b>' + money(order.total || orderTotal(items)) + '</b></div><p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p><div class="r3-order-actions r3-order-actions--close">' + mainAction + '</div>' + orderEmailHTML(s, order) + (received ? window.M4Journey.npsHTML(c) : '') + editor + '</section>';
+      const currentStage = received ? 2 : 1;
+      const steps = ['Confirmado', 'En espera', 'Recibido'].map((label, index) => {
+        const state = index === currentStage ? 'is-current' : index < currentStage ? 'is-done' : '';
+        return '<li class="' + state + '"' + (index === currentStage ? ' aria-current="step"' : '') + '><span>' + label + '</span></li>';
+      }).join('');
+      return '<section class="r3-order-focus" aria-labelledby="r3-order-focus-title"><div class="r3-order-head"><h2 id="r3-order-focus-title">' + title + '</h2><p class="r3-order-folio">Folio <span>' + esc(order.id) + '</span></p></div><div class="r3-order-progress" role="progressbar" aria-label="Avance simulado del pedido" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress + '"><span style="width:' + progress + '%"></span></div><ol class="r3-order-steps">' + steps + '</ol><div class="r3-order-actions">' + mainAction + sideAction + '</div>' + support + '<p class="r3-order-note" role="status">' + progressCopy + '</p><div class="r3-history-total"><span>Total neto referencial</span><b>' + money(order.total || orderTotal(items)) + '</b></div>' + (items.length ? orderItemsDetailsHTML(items, mainAction) : '') + complements + orderEmailHTML(s, order) + (received ? window.M4Journey.npsHTML(c) : '') + editor + '</section>';
     }
-    const offer = buyerFor(s), items = window.M4Journey.baseItems(s), visible = items.slice(0, 3), extra = items.slice(3), total = orderTotal(items) + DATA.prices.kit.precio + DATA.prices.filter.precio;
+    const offer = buyerFor(s), items = window.M4Journey.baseItems(s), total = orderTotal(items) + DATA.prices.kit.precio + DATA.prices.filter.precio;
     const ready = window.__r3RealNotice !== null && window.__r3RealNotice !== undefined ? Boolean(window.__r3RealNotice) : Boolean(c.replenishmentNotice);
     const intro = ready ? 'El aviso está listo. Revisa el pack sugerido y confirma o ajusta tu selección.' : 'El pack de partida y sus precios quedan visibles mientras esperas el aviso de reposición.';
     const actions = ready
       ? '<div class="r3-order-actions"><button type="button" class="m5-btn r3-main" data-cycle-action="confirm-order">Confirmar pedido</button><a class="m5-link" href="#C10" data-go="C10">Ajustar productos</a></div>'
       : '<a class="m5-btn r3-main" href="#C10" data-go="C10">Revisar productos</a>';
-    return '<section class="r3-order-focus" aria-labelledby="r3-order-focus-title"><span class="r3-kicker">Tu pedido</span><h2 id="r3-order-focus-title">' + (ready ? 'Preparar reposición' : 'Pack de partida') + '</h2><p class="r3-order-note">' + intro + '</p>' + (offer ? '<p class="r3-order-note">Productos y máquina recomendada se revisan por separado.</p>' : '') + '<ul class="r3-history-lines">' + rowItems(visible, { stock: true }) + '</ul>' + (extra.length ? '<details class="r3-order-details"><summary>Ver ' + extra.length + ' productos más</summary><ul class="r3-history-lines">' + rowItems(extra, { stock: true }) + '</ul></details>' : '') + orderStockHTML(items) + orderComplementsHTML(s, c, items, null) + '<div class="r3-history-total"><span>Pack, kit y filtro · neto referencial</span><b>' + money(total) + '</b></div><p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p>' + actions + '</section>';
+    return '<section class="r3-order-focus" aria-labelledby="r3-order-focus-title"><span class="r3-kicker">Tu pedido</span><h2 id="r3-order-focus-title">' + (ready ? 'Preparar reposición' : 'Pack de partida') + '</h2><p class="r3-order-note">' + intro + '</p>' + (offer ? '<p class="r3-order-note">Productos y máquina recomendada se revisan por separado.</p>' : '') + '<div class="r3-history-total"><span>Pack, kit y filtro · neto referencial</span><b>' + money(total) + '</b></div>' + actions + orderItemsDetailsHTML(items) + orderComplementsHTML(s, c, items, null) + '</section>';
   }
+  function orderItemsDetailsHTML(items, closeAction = '') {
+    return '<details class="r3-order-details premium-order-details"><summary>Productos y precios (' + items.length + ')</summary><ul class="r3-history-lines">' + rowItems(items, { stock: true }) + '</ul>' + orderStockHTML(items) + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p>' + (closeAction ? '<div class="r3-order-actions r3-order-actions--close">' + closeAction + '</div>' : '') + '</details>';
+  }
+
   function customPortal(s) {
     const c = s.customerCycle || {}, old = originalAccountHTML(s);
     const inboxSection = (old.match(/<section class="m5-cycle" aria-labelledby="m5-cycle-inbox-title">[\s\S]*?<\/section>/) || [""])[0];
@@ -13877,8 +13902,8 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const tracking = (timelineBody || inboxSection) ? '<details class="m5-cycle-details r3-secondary-details"><summary>Estado y línea de tiempo</summary>' + timelineBody + inboxSection + '</details>' : "";
     const head = '<section class="m5-cycle-head r3-portal-head"><div class="m5-wrap"><span class="m5-kick m5-kick--light">Mi portal · ' + esc(offer && offer.id === "oficina" ? "Oficinas" : c.business || "cuenta de empresa") + '</span><h1>' + esc(c.company || "Tu cuenta") + '</h1></div></section>';
     const hasRecords = Boolean((c.tickets || []).length || (c.visits || []).length || (c.contacts || []).length);
-    const followup = '<div class="r3-case-followup' + (hasRecords ? '' : ' r3-no-records') + '">' + supportHTML(c, s) + '<div class="r3-record-followup">' + recordsHTML(c, s) + rec + '</div></div>';
-    return displayBuyerHTML(head + '<div class="m5-wrap mcp-portal2 r3-portal" style="padding:20px 0 48px">' + orderFocusHTML(s, c) + (offer ? portalOfferHTML(offer) : '') + tracking + '<details class="m5-cycle-details r3-secondary-details r3-support-fold"><summary>Ayuda y postventa</summary>' + followup + '</details><details class="m5-cycle-details r3-secondary-details"><summary>Historial</summary>' + historyHTML(s, c) + '</details></div>');
+    const followup = '<div class="r3-case-followup' + (hasRecords ? '' : ' r3-no-records') + '">' + supportHTML(c, s) + '<div class="r3-record-followup">' + recordsHTML(c, s) + '</div></div>';
+    return displayBuyerHTML(head + '<div class="m5-wrap mcp-portal2 r3-portal" style="padding:20px 0 48px">' + orderFocusHTML(s, c, Boolean(rec)) + (offer ? portalOfferHTML(offer) : '') + tracking + '<details class="m5-cycle-details r3-secondary-details r3-support-fold"><summary>Ayuda y postventa</summary><button type="button" class="m5-link" data-m7-open="ayuda" aria-haspopup="dialog">Te ayudamos a decidir</button>' + followup + '</details>' + rec + '<details class="m5-cycle-details r3-secondary-details"><summary>Historial</summary>' + historyHTML(s, c) + '</details></div>');
   }
   window.M4Journey.accountHTML = customPortal;
   const originalC09 = C.__r3Original.C09 || C.SCREENS.C09;
@@ -13929,7 +13954,10 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
         const element = document.getElementById(id);
         let detail = element?.closest("details");
         while (detail) { detail.open = true; detail = detail.parentElement?.closest("details") || null; }
-        element?.scrollIntoView({ behavior: "smooth", block: "start" });
+        const focusTarget = element?.matches("details") ? element.querySelector("summary") : element?.querySelector("h2");
+        if (focusTarget?.matches("h2")) focusTarget.tabIndex = -1;
+        focusTarget?.focus({ preventScroll: true });
+        element?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
         return;
       }
       if (target.hasAttribute("data-r3-advance-wait")) {
@@ -14964,8 +14992,7 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
       if (j.productsAt) return "productos";
       return actual() === "C04" ? "solucion" : "productos";
     }
-    function guia() {
-      const id = actual();
+    function guia(id = actual()) {
       if (!/^C(04|05|06|10)$/.test(id)) return null;
       if (camino() === "solucion") return { pasos: ["Tu solución", "Propuesta", "Confirmar"], actual: id === "C04" ? 1 : id === "C06" ? 3 : 2 };
       return { pasos: ["Productos", "Tu negocio", "Propuesta", "Confirmar"], actual: ({ C10: 1, C04: 2, C05: 3, C06: 4 })[id] };
@@ -26443,4 +26470,4 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
   }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && overlayEl && !overlayEl.hidden) closeMail(); });
 })();
-</script></body></html>
+</script><link rel="stylesheet" href="recursos/marca/piloto-premium.css"></body></html>
