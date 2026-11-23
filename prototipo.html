@@ -6398,10 +6398,12 @@ window.M5UI = (() => {
   }
   function camFrame(el, vh) {
     const d = el.closest('[data-driver]') || el; const r = d.getBoundingClientRect();
-    if (r.top < vh * 3 && r.bottom > -vh) { camLoad(el.dataset.cam); camWarm(el); }
-    if (r.bottom < -vh * 0.5 || r.top > vh * 1.8) return false;
+    const compact = d.classList.contains('r3-c02-machine');
+    if (!r.height || (document.body.dataset.current === 'C02' && !window.scrollY)) return false;
+    if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) return false;
     const key = el.dataset.cam; const c = D.SCENES[key].cam; const set = camLoad(key);
-    const target = progressOf(d);
+    camWarm(el);
+    const target = compact ? clamp((vh * .8 - r.top) / (vh * .65), 0, 1) : progressOf(d);
     if (d._sp == null) d._sp = target;
     const diff = target - d._sp; d._sp = Math.abs(diff) < 0.0004 ? target : d._sp + diff * 0.12;
     if (!set.ready) return true;
@@ -6481,6 +6483,9 @@ window.M5UI = (() => {
   const schedule = () => { if (!raf) raf = requestAnimationFrame(frame); };
   addEventListener('scroll', schedule, { passive: true });
   addEventListener('resize', schedule);
+  document.addEventListener('toggle', event => {
+    if (event.target.matches('details[data-r7-fold="maquinas"]') && event.target.open) schedule();
+  }, true);
   document.addEventListener('visibilitychange', schedule);
 
   // ---------- Apariciones ----------
@@ -6827,7 +6832,7 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
 <section class="ux-strip" aria-label="Cómo funciona"><h2 class="r5-strip-title">¿Cómo funciona?</h2><div class="ux-strip-inner"><div class="ux-strip-item"><b class="ux-number">01</b><div><h3>Elige cómo empezar</h3><span>Ayuda, máquina o pack.</span></div></div><div class="ux-strip-item"><b class="ux-number">02</b><div><h3>Cuéntanos de tu negocio</h3><span>Cuéntanos cómo sirves.</span></div></div><div class="ux-strip-item"><b class="ux-number">03</b><div><h3>Revisa tu propuesta</h3><span>Revisa y pide seguimiento.</span></div></div></div></section>
 <section class="ux-section" id="insumos"><div class="ux-wrap"><div class="ux-cafe-card"><div><span class="ux-eyebrow">Café e insumos</span><h2>¿Qué café e insumos puedo pedir?</h2><p class="r5-brandline">Elige café e insumos para tu negocio.</p><p>Elige una selección sugerida y ajústala, o selecciona tus productos uno por uno.</p></div><button type="button" class="m5-btn" data-m9-open>Ver productos y selecciones ${icon('arrow',18)}</button></div></div></section>
 <section class="ux-section" id="negocios" aria-labelledby="h-negocios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Para cada forma de servir</span><h2 id="h-negocios">¿Qué necesita tu tipo de negocio?</h2></div></div><div class="m5-buyer-groups" aria-label="Categorías de negocio">${tabs}</div>
-<div class="ux-buyer-panel" id="panel-biz" aria-live="polite">${V.WF()?'<div class="m5-ph ux-buyer-photo" role="img" aria-label="Servicio de café">Imagen del negocio</div>':`<img class="ux-buyer-photo" src="${biz==='Hotel'?'recursos/legado/hotel-automatica-concept-v3.webp':D.SCENES[B.scene].fin}" alt="Servicio de café para ${esc(article(biz))}" loading="eager" decoding="sync">`}<div class="ux-buyer-copy"><span class="ux-eyebrow" style="color:#F3C900">${esc(biz === 'OCS' ? 'Oficinas' : biz)}</span><h3><span class="r5-business-h3-line">Café para ${{Hotel: 'hoteles', Restaurante: 'restaurantes', Cafetería: 'cafeterías', 'Eventos o catering': 'eventos', Oficinas: 'oficinas', Conveniencia: 'tiendas de conveniencia', Panadería: 'panaderías'}[biz] || 'negocios'}</span>${esc(B.h)}</h3><p>${esc(B.p)}</p><button type="button" class="m5-btn" data-a="quote-biz" data-v="${esc(biz)}">Elegir productos ${icon('arrow',18)}</button></div></div></div></section>
+<div class="ux-buyer-panel" id="panel-biz" aria-live="polite">${V.WF()?'<div class="m5-ph ux-buyer-photo" role="img" aria-label="Servicio de café">Imagen del negocio</div>':`<img class="ux-buyer-photo" src="${biz==='Hotel'?'recursos/legado/hotel-automatica-portada.webp':D.SCENES[B.scene].fin}" alt="Servicio de café para ${esc(article(biz))}" loading="lazy" decoding="async" fetchpriority="low">`}<div class="ux-buyer-copy"><span class="ux-eyebrow" style="color:#F3C900">${esc(biz === 'OCS' ? 'Oficinas' : biz)}</span><h3><span class="r5-business-h3-line">Café para ${{Hotel: 'hoteles', Restaurante: 'restaurantes', Cafetería: 'cafeterías', 'Eventos o catering': 'eventos', Oficinas: 'oficinas', Conveniencia: 'tiendas de conveniencia', Panadería: 'panaderías'}[biz] || 'negocios'}</span>${esc(B.h)}</h3><p>${esc(B.p)}</p><button type="button" class="m5-btn" data-a="quote-biz" data-v="${esc(biz)}">Elegir productos ${icon('arrow',18)}</button></div></div></div></section>
 <section class="ux-section ux-machine-scroll" id="maquinas" data-driver><div class="ux-wrap ux-machine-scroll-stage"><div class="ux-machine-visual">${V.cam('barras',{label:'Animación de las máquinas Marley Coffee'})}</div><div class="ux-cafe-card"><div><span class="ux-eyebrow">Máquina en comodato</span><span class="ux-machine-caption" data-machine-caption role="status" aria-live="polite" aria-atomic="true">Máquina Bar</span><h2>¿Qué máquina de café me prestan en comodato?</h2><h3 class="r5-machine-answer">${esc(D.MACHINES[B.machine].name)}: ${esc(D.MACHINES[B.machine].kind)}</h3><p class="r5-brandline">Una máquina para tu forma de servir.</p><p>${esc(D.MACHINES[B.machine].line)}</p><p>Prestamos la máquina; compras insumos cada mes y te orientamos según tu operación.</p></div><button type="button" class="m5-btn" data-a="quote">Armar mi solución ${icon('arrow',18)}</button></div></div></section>
 <section class="ux-section" id="servicios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Más para tu negocio</span><h2>Servicios y experiencias.</h2></div><p>Agrega lo que te interese a tu propuesta.</p></div><details class="m5-more"><summary>Explorar servicios disponibles</summary>${bento}</details><p class="m5-cta-note">Servicios y condiciones sujetos a confirmación.</p><details class="m5-more"><summary>¿Creas contenido sobre café o gastronomía?</summary><p>Conversemos sobre una posible colaboración.</p><button type="button" class="m5-btn m5-btn--ghost" data-a="creator-interest">Conversar sobre una alianza</button></details></div></section>
 <section class="ux-section ux-faq" id="faq"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Estamos para ayudarte</span><h2>Preguntas frecuentes.</h2></div></div><div>${faq}</div></div></section>
@@ -6937,7 +6942,7 @@ ${inicio && note ? `<p class="m5-cta-note a1-next-step">${note}</p>` : ''}
     ${previousAnswers}
     <div class="m5-chat-pair"><div class="m5-chat-msg"><small>Asistente Marley · paso ${i + 1}</small><h1>${esc(copy.title)}</h1><p>${esc(copy.help)}</p></div></div>
   </div><div class="m5-chat-options">${body}</div>
-  <div class="m5-actions" style="margin-top:18px"><button type="button" class="m5-btn" data-a="next" ${ready ? '' : 'disabled'}>${i === n - 1 ? 'Ver mi propuesta' : 'Continuar'} ${icon('arrow', 18)}</button>${i > 0 ? `<button type="button" class="m5-link" data-a="back">${icon('back', 16)} Anterior</button>` : ''}<button type="button" class="m5-btn m5-btn--ghost" data-m7-open="ayuda">Preguntar al asistente</button></div>
+  <div class="m5-actions" style="margin-top:18px"><button type="button" class="m5-btn" data-a="next" ${ready ? '' : 'disabled'}>${i === n - 1 ? 'Ver mi propuesta' : 'Continuar'} ${icon('arrow', 18)}</button>${i > 0 ? `<button type="button" class="m5-link" data-a="back">${icon('back', 16)} Anterior</button>` : ''}<button type="button" class="m5-btn m5-btn--ghost" data-m7-open="ayuda">Te ayudamos a decidir</button></div>
   <div style="margin-top:16px">${V.lm('LM3', { light: true, title: 'Propuesta preliminar al terminar', text: directMachine ? 'Conservamos tu elección y ajustamos el consumo.' : 'Verás equipo sugerido, consumo orientativo y productos por cotizar.' })}</div>
 </div>
 <aside class="m5-aside" aria-label="Tu negocio"><h2>Vamos armando</h2><ul class="m5-kv">${summary}</ul>${m ? `<div class="m5-mini-machine" style="margin-top:14px">${V.machineImg(mk)}<div><b>${esc(m.name)}</b><small>${machineLabel}</small></div></div>` : ''}<p style="font-size:12.5px;color:#bdbdbd;margin:12px 0 0">Con esto tu ejecutiva llega con la propuesta pensada.</p></aside></div></section>`);
@@ -7031,7 +7036,7 @@ ${inicio && note ? `<p class="m5-cta-note a1-next-step">${note}</p>` : ''}
     const done = `<div class="m5-done" role="status"><span class="m5-done-ic">${icon('check', 24)}</span><div><b>Propuesta confirmada</b><p>Tu elección quedó registrada. El equipo continúa la validación por correo.</p><div class="m5-actions"><button type="button" class="m5-btn m5-btn--sm" data-go="C06">Ver confirmación y siguiente paso</button></div></div></div>`;
     const acciones = `${b2bPayNotice}<div class="mcp-acc"><button type="button" class="m5-btn m5-btn--lg" data-a="accept-prop">Siguiente: confirmar mi propuesta ${icon('arrow', 18)}</button><button type="button" class="m5-btn m5-btn--ghost" data-a="talk">Hablar con un ejecutivo</button><button type="button" class="m5-btn m5-btn--ghost" data-a="save-later">Guardar y seguir después</button></div>`;
     return shell(`<style>@media (max-width:600px){.mcp-acc{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mcp-acc .m5-btn--lg{grid-column:1/-1}}</style><section class="m5-sec m5-sec--tight m5-gray m5-propsec"><div class="m5-wrap">${stepper(2, 'C05')}
-<div class="m5-prop-head"><h1>Revisa tu propuesta</h1><p class="m5-lead m5-prop-copy">Revisa el total antes de confirmar.</p></div>
+<div class="m5-prop-head"><h1>Revisa tu propuesta</h1><p class="m5-lead m5-prop-copy">Máquina en comodato.</p></div>
 ${machineNote}${minNote}${sent}<details class="premium-proposal-details"><summary>Máquina, insumos y condiciones</summary>${propuestaBloques(s, q)}${accepted ? '' : acciones}</details>
 ${accepted ? done : ''}
 <p class="premium-quote-help"><button type="button" class="m5-link" data-m7-open="ayuda" aria-haspopup="dialog">Te ayudamos a decidir</button></p>
@@ -7052,7 +7057,7 @@ ${accepted ? done : ''}
     const queued = Boolean(s.consultation || L.consultationRequested || L.contactRequestedAt);
     const biz = bizOf(s); const sc = sceneOf(s);
     const title = accepted ? 'Propuesta confirmada' : queued ? 'Consulta recibida' : 'Tu propuesta está lista';
-    const sub = accepted ? 'El equipo revisa tu selección y confirmará las condiciones.' : queued ? 'La consulta quedó registrada; tu propuesta sigue pendiente.' : 'Revísala y confirma si te sirve; el equipo valida las condiciones.';
+    const sub = accepted ? 'Tu ejecutivo validará las condiciones.' : queued ? 'La propuesta sigue pendiente.' : 'Revísala antes de confirmar.';
     const review = (s.reviewTasks || []).find((item) => item.subject === M.reviewSubject(s));
     const reviewText = {
       en_revision: 'El equipo está revisando tu selección.',
@@ -7063,8 +7068,8 @@ ${accepted ? done : ''}
     const cyclePanel = window.M4Journey?.enabled(s) ? window.M4Journey.contractPanelHTML(s) : '';
     const estado = accepted || queued ? 'En revisión por tu ejecutivo' : 'Sin confirmar';
     const aviso = accepted ? 'La propuesta confirmada se sigue viendo desde el portal.' : queued ? 'Tu consulta quedó registrada. Tu propuesta todavía no está confirmada.' : 'Tu propuesta todavía no está confirmada.';
-    const cierre = `<div class="mcp-cierre"><div class="m5-card mcp-cierre-card"><span class="m5-kick">Folio y estado</span><dl class="mcp-dl"><div><dt>Folio</dt><dd><b>${esc(folioCliente(s))}</b></dd></div><div><dt>Estado</dt><dd>${esc(estado)}</dd></div><div><dt>Revisión del equipo</dt><dd>${esc(reviewText)}</dd></div><div><dt>Quién te responde y cuándo</dt><dd>Tu ejecutivo de Marley Coffee Empresas. Recibes un acuse ahora; el plazo de respuesta lo confirma tu ejecutivo.</dd></div></dl><div class="mcp-acc">${accepted ? `<button type="button" class="m5-btn m5-btn--lg" data-go="C09">Siguiente: ir a mi portal ${icon('arrow', 18)}</button>` : `<button type="button" class="m5-btn m5-btn--lg" data-go="C05">Siguiente: revisar mi propuesta ${icon('arrow', 18)}</button>`}</div><p class="m5-cta-note">${esc(aviso)}</p></div>${cyclePanel}</div>`;
-    return shell(`<div class="m5-wrap" style="padding-top:18px">${stepper(3)}</div><section class="m5-portal-head">${V.film(sc, { mode: 'still', still: 'fin', label: 'Imagen de ' + article(biz) })}<div class="m5-wrap"><div><span class="m5-kick m5-kick--light">Tu solicitud · N.º ${esc(folioCliente(s))}</span><h1>${esc(title)}</h1><h2 class="r5-question" style="color:#fff">¿Qué sigue?</h2><p class="r5-answer" style="color:#ddd;margin:8px 0 0">${esc(sub)}</p></div></div></section>
+    const cierre = `<div class="mcp-cierre"><div class="m5-card mcp-cierre-card"><span class="m5-kick">Folio y estado</span><dl class="mcp-dl"><div><dt>Folio</dt><dd><b>${esc(folioCliente(s))}</b></dd></div><div><dt>Estado</dt><dd>${esc(estado)}</dd></div></dl><details class="premium-review"><summary>Quién te responde y cuándo</summary><dl class="mcp-dl"><div><dt>Revisión del equipo</dt><dd>${esc(reviewText)}</dd></div></dl><p>Tu ejecutivo de Marley Coffee Empresas. Recibes un acuse ahora; el plazo de respuesta lo confirma tu ejecutivo.</p></details><div class="mcp-acc">${accepted ? `<button type="button" class="m5-btn m5-btn--lg" data-go="C09">Siguiente: ir a mi portal ${icon('arrow', 18)}</button>` : `<button type="button" class="m5-btn m5-btn--lg" data-go="C05">Siguiente: revisar mi propuesta ${icon('arrow', 18)}</button>`}</div><p class="m5-cta-note">${esc(aviso)}</p></div>${cyclePanel}</div>`;
+    return shell(`<div class="m5-wrap" style="padding-top:18px">${stepper(3)}</div><section class="m5-portal-head">${V.film(sc, { mode: 'still', still: 'fin', label: 'Imagen de ' + article(biz) })}<div class="m5-wrap"><div><h1>${esc(title)}</h1><p class="r5-answer" style="color:#ddd;margin:8px 0 0">${esc(sub)}</p></div></div></section>
 <div class="m5-wrap" style="padding-top:24px;padding-bottom:48px">${cierre}<p class="m5-sup">Simulación de prueba: los correos y registros se muestran en este archivo. No se realizan envíos reales.</p></div>`);
   }
 
@@ -7121,7 +7126,7 @@ ${accepted ? done : ''}
     const cur = order.find((c) => c.k === ui.expK) || order[0];
     const priorOtherBusiness = Boolean(s.proposal && s.answers?.negocio && s.answers.negocio !== cur.biz);
     const tabs = order.map((c) => `<button type="button" class="m5-tab" data-a="exp-tab" data-v="${c.k}" aria-pressed="${c.k === cur.k}">${esc(c.t)}</button>`).join('');
-    return shell(`<section class="m5-exp-intro"><div class="m5-wrap"><div class="m5-exp-title"><span class="m5-kick m5-kick--light m5-seo-line">Casos Marley Coffee</span><h1>Café para tu negocio</h1></div><div class="m5-exp-side"><p class="m5-lead">Elige un rubro y mira una idea de atención; no son clientes reales.</p></div></div></section>
+    return shell(`<section class="m5-exp-intro"><div class="m5-wrap"><div class="m5-exp-title"><span class="m5-kick m5-kick--light m5-seo-line">Casos Marley Coffee</span><h1>Café para tu negocio</h1></div><div class="m5-exp-side"><p class="m5-lead">Elige un rubro y explora un caso ilustrativo.</p></div></div></section>
 <section class="m5-stage" id="m5-exp" aria-labelledby="h-exp">
   <div class="m5-stage-pin">
     <div class="m5-stage-copy">
@@ -7130,9 +7135,9 @@ ${accepted ? done : ''}
         <div class="m5-stage-beat m5-cap">
           <h2 id="h-exp"><span class="m5-tag m5-tag--sm m5-seo-line">${esc(cur.t)}</span>${esc(cur.h)}</h2>
           <p class="m5-lead">${esc(cur.p)}</p>
-          <details class="m5-case-includes"><summary>${esc(cur.t)} · lo que incluye la idea</summary><ul class="m5-exp-kit">${cur.kit.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></details>
-          ${priorOtherBusiness ? `<p class="m5-fine">Ya tienes una propuesta para ${esc(article(s.answers.negocio))}. Puedes retomarla sin cambiar los datos de ese negocio.</p>` : ''}
+          ${priorOtherBusiness ? `<p class="m5-fine">Ya tienes una propuesta para ${esc(article(s.answers.negocio))}. Puedes retomarla con sus datos guardados.</p>` : ''}
           <div class="m5-actions"><button type="button" class="m5-btn" data-a="${priorOtherBusiness ? 'case-resume' : 'quote-biz'}" data-v="${esc(cur.biz)}">${esc(priorOtherBusiness ? 'Retomar mi propuesta' : D.BUSINESS[cur.biz].cta)} ${icon('arrow', 18)}</button></div>
+          <details class="m5-case-includes"><summary>${esc(cur.t)} · lo que incluye la idea</summary><ul class="m5-exp-kit">${cur.kit.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></details>
         </div>
       </div>
     </div>
@@ -13392,8 +13397,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     if (!offer) return "";
     const s5 = M.get(), mk5 = (window.R5 && window.R5.maquina(s5, offer)) || offer.maquina;
     const machine = DATA.offer.maquinas[mk5] || {};
-    const photo = machine.foto || (D.MACHINES[mk5] && D.MACHINES[mk5].img) || machinePhoto(offer);
-    return '<article class="mcp-bloque r3-proposal-machine" aria-labelledby="mcp-b1"><h2 id="mcp-b1">1 · Tu máquina</h2><div class="r3-proposal-machine-row"><img src="' + esc(photo) + '" alt="' + esc(machine.nombre || mk5) + '" loading="lazy"><div><b>' + esc(machine.nombre || mk5) + '</b><p>' + esc(machine.tipo || "Tipo a confirmar") + ' · Capacidad por confirmar' + '</p><p>' + esc(DATA.offer.modalidad_maquina) + '</p></div></div>' + (window.R5 ? '<p class="r5-porque">' + esc(window.R5.porque(s5, mk5, offer)) + '</p><p class="r5-enlaces"><a href="#C04" data-go="C04">Cambiar respuestas</a><a href="#C11" data-go="C11">Ver otras máquinas</a></p>' : "") + '</article>';
+    return '<article class="mcp-bloque r3-proposal-machine" aria-labelledby="mcp-b1"><h2 id="mcp-b1">1 · Tu máquina</h2><div class="r3-proposal-machine-row"><div><b>' + esc(machine.nombre || mk5) + '</b><p>' + esc(machine.tipo || "Tipo a confirmar") + ' · Capacidad por confirmar' + '</p><p>' + esc(DATA.offer.modalidad_maquina) + '</p></div></div>' + (window.R5 ? '<p class="r5-porque">' + esc(window.R5.porque(s5, mk5, offer)) + '</p><p class="r5-enlaces"><a href="#C04" data-go="C04">Cambiar respuestas</a><a href="#C11" data-go="C11">Ver otras máquinas</a></p>' : "") + '</article>';
   }
   function proposalQuoteBlocks(html, s, offer) {
     const quote = quotationFor(s, offer), label = quote.selected ? "Insumos" : "Productos del pack", totalLabel = quote.selected ? "Total neto antes de instalar" : "Total del pack de partida";
@@ -13409,7 +13413,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const label = quote.selected ? "Insumos" : "Productos del pack", totalLabel = quote.selected ? "Total neto antes de instalar" : "Total del pack de partida";
     const rows = quote.items.map(quotationLineHTML).join("");
     const unknownNote = quote.unknown ? '<p class="r3-price-note">Los productos sin precio canónico se confirman con tu ejecutivo; el total mostrado considera solo las líneas con precio.</p>' : "";
-    return '<section class="r3-offer-card r3-proposal-confirmation" aria-label="Propuesta para ' + esc(offer.negocio) + '"><div class="r3-offer-machine"><img class="r3-machine-photo" src="' + esc(photo) + '" alt="' + esc(machine.nombre || offer.maquina) + '" loading="lazy"><div><span class="r3-kicker">Máquina recomendada</span><h3>' + esc(machine.nombre || offer.maquina) + '</h3><p>' + esc(machine.tipo || "Tipo a confirmar") + ' · Capacidad por confirmar' + '</p></div></div><p class="r3-buyer-message">' + esc(offer.mensaje) + '</p><p class="r4-c06-total"><span>' + totalLabel + '</span><b>' + money(quote.total) + '</b></p><details class="r4-c06-detalle"><summary>Ver productos y precios (' + quote.items.length + ')</summary><ul class="mcp-lista r3-c06-line-list">' + rows + '</ul><dl class="r3-proposal-totals"><div><dt>' + label + '</dt><dd>' + money(quote.subtotal) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>' + totalLabel + '</dt><dd>' + money(quote.total) + '</dd></div></dl>' + unknownNote + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p>' + quotationReferenceHTML() + '</details></section>';
+    return '<section class="r3-offer-card r3-proposal-confirmation" aria-label="Propuesta para ' + esc(offer.negocio) + '"><div class="r3-offer-machine"><img class="r3-machine-photo" src="' + esc(photo) + '" alt="' + esc(machine.nombre || offer.maquina) + '" loading="lazy"><div><span class="r3-kicker">Máquina recomendada</span><h3>' + esc(machine.nombre || offer.maquina) + '</h3></div></div><p class="r4-c06-total"><span>' + totalLabel + '</span><b>' + money(quote.total) + '</b></p><details class="r4-c06-detalle"><summary>Ver productos y precios (' + quote.items.length + ')</summary><p>' + esc(machine.tipo || "Tipo a confirmar") + ' · Capacidad por confirmar</p><p class="r3-buyer-message">' + esc(offer.mensaje) + '</p><ul class="mcp-lista r3-c06-line-list">' + rows + '</ul><dl class="r3-proposal-totals"><div><dt>' + label + '</dt><dd>' + money(quote.subtotal) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>' + totalLabel + '</dt><dd>' + money(quote.total) + '</dd></div></dl>' + unknownNote + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p>' + quotationReferenceHTML() + '</details></section>';
   }
   function offerCard(offer, cls) {
     if (!offer) return "";
@@ -13480,20 +13484,21 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const offer = buyerFor(M.get()), m = offer && D.MACHINES[offer.maquina], lines = offer ? keyLines(offer) : DATA.prices.lines.slice(0, 3);
     const packSum = lines.reduce(function (sum, line) { return sum + line.precio; }, 0), firstTotal = packSum + DATA.prices.kit.precio + DATA.prices.filter.precio;
     const recommendation = offer ? recommendationText("Recomendado", offer) : "Selección para tu negocio";
-    const pack = '<article class="r3-pack-card"><div class="r3-pack-top"><span class="r3-recommended">' + esc(recommendation) + '</span><h2>Tu pack de partida</h2><p>Productos clave de la cotización, con formatos y precios visibles.</p></div><ul class="r3-pack-lines">' + lines.map(function (line) { return '<li>' + lineImage(line) + '<span><b>' + esc(line.t) + '</b><small>' + esc(fmtFor(line)) + '</small></span><strong>' + money(line.precio) + '</strong></li>'; }).join("") + '</ul><dl class="r3-pack-total"><div><dt>Productos del pack</dt><dd>' + money(packSum) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>Total del pack de partida</dt><dd>' + money(firstTotal) + '</dd></div></dl><button type="button" class="m5-btn m5-btn--ghost r3-pack-choose" data-r3-pack="recommended">Elegir este pack</button>' + quotationReferenceHTML() + '</article>';
+    const pack = '<article class="r3-pack-card"><div class="r3-pack-top"><span class="r3-recommended">' + esc(recommendation) + '</span><h2>Tu pack de partida</h2><p>Incluye productos, kit y filtro.</p></div><ul class="r3-pack-lines">' + lines.map(function (line) { return '<li>' + lineImage(line) + '<span><b>' + esc(line.t) + '</b><small>' + esc(fmtFor(line)) + '</small></span><strong>' + money(line.precio) + '</strong></li>'; }).join("") + '</ul><dl class="r3-pack-total"><div><dt>Productos del pack</dt><dd>' + money(packSum) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>Total del pack de partida</dt><dd>' + money(firstTotal) + '</dd></div></dl><button type="button" class="m5-btn m5-btn--ghost r3-pack-choose" data-r3-pack="recommended">Elegir este pack</button>' + quotationReferenceHTML() + '</article>';
     const machine = offer && m ? '<section class="r3-machine-recommendation"><img src="' + esc(machinePhoto(offer)) + '" alt="' + esc(m.name) + '" loading="lazy"><div><span class="r3-kicker">' + esc(recommendationText("Máquina recomendada", offer)) + '</span><b>' + esc(m.name) + '</b><small>' + esc(m.format) + ' · modelo y disponibilidad a confirmar</small></div><a href="#C11" data-go="C11">Ver máquinas</a></section>' : "";
     const productList = DATA.prices.lines.map(function (line) { return '<article class="r3-product-card">' + lineImage(line, "r3-product-photo") + '<div><b>' + esc(line.t) + '</b><small>' + esc(fmtFor(line)) + '</small><strong>' + money(line.precio) + '</strong></div><button type="button" class="m5-btn m5-btn--ghost" data-m9-add="' + esc(line.catalogId) + '">Agregar</button></article>'; }).join("");
-    return '<section class="r3-catalog m9-catalog m5-wrap" aria-labelledby="r3-catalog-title">' + stepGuide(1) + r4NextBar() + '<header class="r3-catalog-heading"><span class="r3-kicker">Productos y precios netos referenciales</span><h1 id="r3-catalog-title">Elige tu pack o tus productos</h1><p>Revisa fotos, formatos y precios por línea. La compatibilidad y las cantidades se confirman con tu ejecutivo.</p></header>' + machine + '<section class="r3-packs" aria-labelledby="r3-pack-heading"><div class="r3-section-heading"><div><span class="r3-kicker">Por dónde empezar</span><h2 id="r3-pack-heading">Pack recomendado</h2></div></div>' + pack + '</section>' + catalogCartHTML() + '<details class="r3-catalog-products" id="r3-products"><summary>Ver todos los productos (' + DATA.prices.lines.length + ')</summary><div class="r3-product-grid">' + productList + '</div></details></section>';
+    return '<section class="r3-catalog m9-catalog m5-wrap" aria-labelledby="r3-catalog-title">' + stepGuide(1) + r4NextBar() + '<header class="r3-catalog-heading"><span class="r3-kicker">Productos y precios netos referenciales</span><h1 id="r3-catalog-title">Elige tu pack o tus productos</h1><p>Tu ejecutivo confirma cantidades y compatibilidad.</p></header>' + machine + '<section class="r3-packs" aria-labelledby="r3-pack-heading"><div class="r3-section-heading"><div><span class="r3-kicker">Por dónde empezar</span><h2 id="r3-pack-heading">Pack recomendado</h2></div></div>' + pack + '</section>' + catalogCartHTML() + '<details class="r3-catalog-products" id="r3-products"><summary>Ver todos los productos (' + DATA.prices.lines.length + ')</summary><div class="r3-product-grid">' + productList + '</div></details></section>';
   }
   function machinesHTML() {
-    const offer = buyerFor(M.get()), chosen = window.M9Catalog.journey().machine;
+    const offer = buyerFor(M.get()), selection = window.M9Catalog.journey().machine;
+    const chosen = Object.hasOwn(D.MACHINES, selection) ? selection : null;
     const offerLines = offer ? keyLines(offer) : [];
     const productsTotal = offerLines.reduce(function (sum, line) { return sum + line.precio; }, 0);
     const fixedTotal = DATA.prices.kit.precio + DATA.prices.filter.precio;
     const startingTotal = productsTotal + fixedTotal;
     const machineKeys = Object.keys(DATA.offer.maquinas);
     const recommendedKey = offer && (((window.R5 && window.R5.recomendada(M.get(), offer)) || offer.maquina) || "");
-    const primaryKey = chosen || recommendedKey || machineKeys[0];
+    const primaryKey = chosen || (machineKeys.includes(recommendedKey) ? recommendedKey : machineKeys[0]);
     const machineCard = function (key) {
       const m = D.MACHINES[key], businesses = DATA.offer.buyers.filter(function (b) { return b.maquina === key; }).map(buyerLabel).join(" \u00b7 "), recommended = offer && ((window.R5 && window.R5.recomendada(M.get(), offer)) || offer.maquina) === key;
       return '<article class="r3-machine-card ' + (recommended ? "is-recommended" : "") + (chosen === key ? " is-selected" : "") + '">' + machineImage(key, m.name) + '<div class="r3-machine-card-body">' + (recommended ? '<span class="r3-recommended">' + esc(recommendationText("Recomendada", offer)) + '</span>' : "") + '<h3>' + esc(m.name) + '</h3><p><b>Para qui\u00e9n:</b> ' + esc(businesses || "Uso por confirmar con tu ejecutivo") + '</p><p><b>Qu\u00e9 prepara:</b> ' + esc(m.format) + '</p><p>' + esc(m.line) + '</p><button type="button" class="m5-btn m5-btn--ghost" data-m10-machine="' + esc(key) + '" aria-pressed="' + (chosen === key ? "true" : "false") + '">' + (chosen === key ? "Seleccionada" : "Elegir m\u00e1quina") + '</button></div></article>';
@@ -13505,10 +13510,8 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       ? '<details class="r3-conditions"><summary><span><b>Pack de partida</b><small>Productos, kit y filtro · ' + money(startingTotal) + '</small></span></summary><div class="r3-conditions-body"><span class="r3-kicker">Tu pack de partida</span><ul class="r3-pack-lines r3-condition-lines">' + offerLines.map(function (line) { return '<li>' + lineImage(line) + '<span><b>' + esc(line.t) + '</b><small>' + esc(fmtFor(line)) + '</small></span><strong>' + money(line.precio) + '</strong></li>'; }).join("") + '</ul><dl class="r3-pack-total"><div><dt>Productos del pack</dt><dd>' + money(productsTotal) + '</dd></div><div><dt>Kit de instalaci\u00f3n y filtro</dt><dd>' + money(fixedTotal) + '</dd></div><div class="r3-total"><dt>Total del pack de partida</dt><dd>' + money(startingTotal) + '</dd></div></dl>' + quotationReferenceHTML() + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p></div></details>'
       : '<section class="r3-conditions"><h2>¿Qué incluye el pack de partida?</h2>' + quotationReferenceHTML() + '<a class="m5-link" href="#C02" data-go="C02">Elegir un negocio</a></section>';
     const cardLabel = chosen ? (chosen === recommendedKey ? "Máquina recomendada" : "Máquina elegida") : "Máquina recomendada";
-    return '<section class="r3-machines m5-wrap" aria-labelledby="r3-machines-title">' + stepGuide(1) + '<header class="r3-catalog-heading"><span class="r3-kicker">Máquina en comodato</span><h1 id="r3-machines-title">Revisa la máquina para tu negocio</h1><p>Compara la máquina y el pack de productos por separado.</p></header><section class="r3-machine-primary" aria-label="' + esc(cardLabel) + '"><span class="r3-kicker">' + esc(cardLabel) + '</span>' + primaryMachine + '</section>' + machineOptions + conditions + '<div class="r3-next-machine"><button type="button" class="m5-btn r3-main" data-m10-finish>Continuar a packs y productos</button></div></section>';
+    return '<section class="r3-machines m5-wrap" aria-labelledby="r3-machines-title">' + stepGuide(1) + '<header class="r3-catalog-heading"><span class="r3-kicker">Máquina en comodato</span><h1 id="r3-machines-title">Revisa la máquina para tu negocio</h1><p>Compara las opciones antes de elegir.</p></header><section class="r3-machine-primary" aria-label="' + esc(cardLabel) + '"><span class="r3-kicker">' + esc(cardLabel) + '</span>' + primaryMachine + '</section>' + machineOptions + conditions + '<div class="r3-next-machine"><button type="button" class="m5-btn r3-main" data-m10-finish>Continuar a packs y productos</button></div></section>';
   }
-  window.M9Catalog.catalogHTML = catalogHTML;
-  window.M9Catalog.machinesHTML = machinesHTML;
   function ensureGuide(html, stage) {
     if (html.indexOf("r3-step-guide") >= 0 || html.indexOf("mcp-guia") >= 0) return html;
     const pos = html.indexOf("<section"); if (pos < 0) return stepGuide(stage) + html;
@@ -13536,30 +13539,25 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     };
     let hero = getSection(originalStart, 'hero');
     hero = hero
-      .replace('<span class="ux-eyebrow">Marley Coffee Empresas</span>', '')
+      .replace('<p class="r5-brandline">Café para empresas que mueve tu negocio.</p>', '')
       .replace(/<p>(?:<strong>)?No necesitas saber qué máquina elegir\.(?:<\/strong>)?[\s\S]*?<\/p>/,
         '<p>Cuéntanos cómo sirves el café y te orientamos.</p>');
     const strip = getSection('<section class="ux-strip"', 'strip').replace(/<\/section>$/, '<div class="ux-wrap ux-cta-close" aria-label="Siguiente paso"><button type="button" class="m5-btn r3-main" data-m10-unknown>Ayúdame a elegir una máquina</button><button type="button" class="m5-link" data-m9-open>Ver packs y productos</button></div></section>');
-    const coffee = getSection('<section class="ux-section" id="insumos"', 'coffee').replace(/<\/section>$/, '<div class="ux-wrap ux-cta-close" aria-label="Siguiente paso"><button type="button" class="m5-btn r3-main" data-m9-open>Ver productos y selecciones</button></div></section>');
+    const coffee = getSection('<section class="ux-section" id="insumos"', 'coffee').replace(/<\/section>$/, '<div class="ux-wrap ux-cta-close" aria-label="Siguiente paso"><button type="button" class="m5-btn r3-main" data-m9-open>Ver packs y productos</button></div></section>');
     const business = getSection('<section class="ux-section" id="negocios"', 'business');
     let machine = getSection('<section class="ux-section ux-machine-scroll" id="maquinas"', 'machine');
     let services = getSection('<section class="ux-section" id="servicios"', 'services');
     let faq = getSection('<section class="ux-section ux-faq" id="faq"', 'faq');
-    machine = machine.replace(/<div class="ux-machine-visual">[\s\S]*?<div class="ux-cafe-card">/, '<div class="ux-cafe-card">')
-      .replace(' id="maquinas" data-driver>', ' id="maquinas">')
-      .replace('class="ux-section ux-machine-scroll"', 'class="ux-section ux-machine-scroll r3-c02-machine"')
+    machine = machine.replace('class="ux-section ux-machine-scroll"', 'class="ux-section ux-machine-scroll r3-c02-machine"')
       .replace('class="ux-wrap ux-machine-scroll-stage"', 'class="ux-wrap ux-machine-scroll-stage r3-c02-machine-wrap"');
-    machine = machine.replace(/<\/section>$/, '<div class="ux-wrap ux-cta-close" aria-label="Siguiente paso"><button type="button" class="m5-btn r3-main" data-a="quote">Armar mi solución</button></div></section>');
     const serviceWrap = '<div class="ux-wrap">', serviceEnd = services.lastIndexOf('</div></section>');
     const serviceInsideStart = services.indexOf(serviceWrap) + serviceWrap.length;
     const serviceInside = services.slice(serviceInsideStart, serviceEnd);
     const serviceFoldAt = serviceInside.indexOf('<details class="m5-more">');
     const serviceHead = serviceInside.slice(0, serviceFoldAt);
     const serviceRest = serviceInside.slice(serviceFoldAt);
-    const eyebrow = (serviceHead.match(/<span class="ux-eyebrow">([\s\S]*?)<\/span>/) || [null, 'Más para tu negocio'])[1];
-    const title = (serviceHead.match(/<h2>([\s\S]*?)<\/h2>/) || [null, 'Servicios y experiencias.'])[1];
     const description = (serviceHead.match(/<p>([\s\S]*?)<\/p>/) || [null, 'Agrega lo que te interese a tu propuesta.'])[1];
-    services = services.slice(0, serviceInsideStart) + '<details class="r3-services-fold"><summary><h2>¿Qué más puedo sumar a mi negocio?</h2><span class="r5-brandline">Servicios y experiencias.</span><small>' + description + '</small></summary><div class="r3-services-fold-body">' + serviceRest + '</div></details>' + services.slice(serviceEnd);
+    services = services.slice(0, serviceInsideStart) + '<details class="r3-services-fold"><summary><h2>Servicios y experiencias</h2></summary><div class="r3-services-fold-body"><p>' + description + '</p>' + serviceRest + '</div></details>' + services.slice(serviceEnd);
     const faqWrap = '<div class="ux-wrap">', faqInsideStart = faq.indexOf(faqWrap) + faqWrap.length, faqEndInside = faq.lastIndexOf('</div></section>');
     const firstQuestion = faq.indexOf('<details>', faqInsideStart);
     const questions = faq.slice(firstQuestion, faqEndInside).replace(/<\/div>\s*$/, "");
@@ -13571,7 +13569,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const faqItem = function (q) { return q.replace('<details>', '<details class="r5-faq-item">'); };
     faq = faq.slice(0, faqInsideStart) + '<div class="ux-head"><span class="ux-eyebrow">Estamos para ayudarte</span><h2>Preguntas frecuentes</h2></div><div class="r5-faq-content">' + items.slice(0, 4).map(faqItem).join("") + '<button type="button" class="r5-faq-more" data-r5-faq-more aria-expanded="false">Ver más preguntas</button><div class="r5-faq-hidden" hidden>' + items.slice(4).map(faqItem).join("") + '</div></div>' + faq.slice(faqEndInside);
     const faqClose = faq.lastIndexOf('</section>');
-    const ctaEnd = '<div class="r3-c02-end-actions" aria-label="Siguiente paso"><p>¿Qué quieres revisar ahora?</p><div class="r5-dos-caminos"><button type="button" class="m5-btn r3-c02-main" data-m9-open>Ver packs y productos</button><button type="button" class="m5-btn r5-btn-claro" data-m10-unknown>Ayúdame a elegir una máquina</button></div></div>';
+    const ctaEnd = '<div class="r3-c02-end-actions" aria-label="Siguiente paso"><div class="r5-dos-caminos"><button type="button" class="m5-btn r3-c02-main" data-m9-open>Ver packs y productos</button><button type="button" class="m5-btn r5-btn-claro" data-m10-unknown>Ayúdame a elegir una máquina</button></div></div>';
     faq = faq.slice(0, faqClose) + ctaEnd + faq.slice(faqClose);
     const pair = '<div class="r3-c02-product-pair" aria-label="Café y máquina">' + coffee + machine + '</div>';
     return html.slice(0, heroStart) + hero + business + strip + pair + services + faq + html.slice(faqEnd);
@@ -13602,17 +13600,21 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     });
   }
   function c05Wrap() {
+    if (!DATA) return C.__r3Original.C05();
     const s = M.get(), offer = buyerFor(s);
     let html = decoratePriceLists(ensureGuide(C.__r3Original.C05(), 2));
     html = proposalQuoteBlocks(html, s, offer);
     if (s.proposal) {
       const quote = quotationFor(s, offer);
-      const total = '<p class="premium-quote-total"><span>Total neto referencial</span><strong>' + money(quote.total) + '</strong><span>+ IVA</span></p>';
+      const machine = (offer && window.R5?.maquina(s, offer)) || s.proposal.machine || s.quote?.machine || offer?.maquina;
+      const image = Object.hasOwn(D.MACHINES, machine) ? machineImage(machine) : '';
+      const total = '<div class="premium-quote-highlight">' + image + '<p class="premium-quote-total"><span>Total neto referencial</span><strong>' + money(quote.total) + '</strong><span>+ IVA</span></p></div>';
       html = html.replace(/<p class="m5-lead m5-prop-copy">[^<]*<\/p>/, lead => lead + total);
     }
     return displayBuyerHTML(html);
   }
   function c06Wrap() {
+    if (!DATA) return C.__r3Original.C06();
     const s = M.get(), offer = buyerFor(s);
     let html = decoratePriceLists(ensureGuide(C.__r3Original.C06(), 3));
     if (offer) html = html.replace('<div class="m5-wrap" style="padding-top:24px;padding-bottom:48px">', '<div class="m5-wrap r3-c06-offer" style="padding-top:24px;padding-bottom:48px">' + proposalConfirmationCard(s, offer));
@@ -13892,6 +13894,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
   }
 
   function customPortal(s) {
+    if (!DATA) return originalAccountHTML(s);
     const c = s.customerCycle || {}, old = originalAccountHTML(s);
     const inboxSection = (old.match(/<section class="m5-cycle" aria-labelledby="m5-cycle-inbox-title">[\s\S]*?<\/section>/) || [""])[0];
     const recSection = (old.match(/<section class="m5-cycle" aria-labelledby="mcp-rec-j">[\s\S]*?<\/section>/) || [""])[0];
@@ -13909,7 +13912,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
   const originalC09 = C.__r3Original.C09 || C.SCREENS.C09;
   C.SCREENS.C09 = function () {
     const s = M.get(), c = s.customerCycle;
-    if (!c || !window.M4Journey.enabled(s)) return originalC09();
+    if (!DATA || !c || !window.M4Journey.enabled(s)) return originalC09();
     const oldSigned = c.contractSignedAt, oldNotice = c.replenishmentNotice;
     window.__r3RealNotice = Boolean(oldNotice); c.contractSignedAt = oldSigned || "R3-portal-render"; c.replenishmentNotice = true;
     try { return ensureGuide(originalC09(), 4).replaceAll("Contrato simulado firmado", "Cuenta en seguimiento").replaceAll("Contrato simulado", "Cuenta en seguimiento"); }
@@ -14069,6 +14072,8 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     if (form) updateRepeatTotal(form);
   });
   function install() {
+    window.M9Catalog.catalogHTML = catalogHTML;
+    window.M9Catalog.machinesHTML = machinesHTML;
     window.MC_R3 = { prices: DATA.prices, offers: DATA.offer, buyerFor: buyerFor, rowItems: rowItems };
     bindR3();
     const lastRender = window.MarleyApp && window.MarleyApp.render;
@@ -14273,7 +14278,7 @@ body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
     }
     function resumen(s) {
       const offer = R.buyerFor(s);
-      if (!offer) return '<aside class="r4-card r4-resumen" aria-label="Tu selección"><span class="r4-eyebrow">Tu selección</span><p>Elige tu negocio para ver tu pack recomendado.</p></aside>';
+      if (!offer) return '<details class="r4-card r4-resumen"><summary>Tu selección</summary><p>Elige tu negocio para ver tu pack recomendado.</p></details>';
       const data = R.data(), mk = (window.R5 && window.R5.maquina(s, offer)) || offer.maquina, mm = data.offer.maquinas[mk] || {}, m = D.MACHINES[mk] || {}, q = R.quotationFor(s, offer);
       const total = q.selected ? "Total neto antes de instalar" : "Total del pack de partida";
       return '<aside class="r4-card r4-resumen" aria-label="Tu solución hasta ahora"><span class="r4-eyebrow">Tu solución hasta ahora</span>' +
@@ -14327,7 +14332,7 @@ body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
         '<div class="r5-q-progress" aria-live="polite"><span>Paso ' + progress + ' de ' + totalSteps + '</span><span class="r5-q-progress-track"><i style="width:' + Math.min(100, Math.round(progress / totalSteps * 100)) + '%"></i></span></div></header>' +
         '<div class="r5-single-question" aria-live="polite">' + question + '</div>' +
         '<p class="m4-form-msg r4-msg" role="status" aria-live="polite"></p>' +
-        '<div class="m5-actions r4-acciones">' + (backKey ? '<button type="button" class="m5-link" data-r4-step-back data-r4-back-group="' + backGroup + '">← Anterior</button>' : '') + '<button type="button" class="m5-btn r3-main" data-a="next" data-r4-next>' + nextLabel + ' →</button><button type="button" class="m5-btn m5-btn--ghost" data-m7-open="ayuda">Preguntar al asistente</button></div>' +
+        '<div class="m5-actions r4-acciones">' + (backKey ? '<button type="button" class="m5-link" data-r4-step-back data-r4-back-group="' + backGroup + '">← Anterior</button>' : '') + '<button type="button" class="m5-btn r3-main" data-a="next" data-r4-next>' + nextLabel + ' →</button><button type="button" class="m5-btn m5-btn--ghost" data-m7-open="ayuda">Te ayudamos a decidir</button></div>' +
         '</form>' + resumen(sv) + '<div class="r5-mobile-final-action"><button type="button" class="m5-btn r3-main" data-a="next" data-r4-next>' + nextLabel + ' →</button></div></div></div></section>';
     }
     // Estado de muestra (solo para dibujar): el negocio conocido con sus sugerencias, sin tocar el estado guardado.
@@ -15057,7 +15062,7 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
     }
     function bannerMaquina(s, offer) {
       const mk = maquina(s, offer);
-      if (!mk) return '<section class="r5-maq r5-maq--vacia" aria-label="Tu máquina en comodato"><div><span class="r5-k">Tu máquina en comodato</span><b>¿Qué máquina te presta Marley?</b><small>Te la calculamos con 4 preguntas sobre tu forma de servir.</small></div><div class="r5-maq-acc"><button type="button" data-m10-unknown>Ayúdame a elegir una máquina</button><a href="#C11" data-go="C11">Ver máquinas</a></div></section>';
+      if (!mk) return '<section class="r5-maq r5-maq--vacia" aria-label="Tu máquina en comodato"><div><span class="r5-k">Máquina en comodato</span></div><div class="r5-maq-acc"><button type="button" data-m10-unknown>Ayúdame a elegir una máquina</button><a href="#C11" data-go="C11">Ver máquinas</a></div></section>';
       const f = fichaMaquina(mk), a = s.answers || {};
       const calcular = respondido(a) && s.diag && s.diag.done ? '<a href="#C04" data-go="C04">Cambiar respuestas</a>' : '<button type="button" data-m10-unknown>Calcular con mis respuestas</button>';
       return '<section class="r5-maq" aria-label="Tu máquina en comodato" data-r5-maq="' + esc(mk) + '"><img src="' + esc(f.foto) + '" alt="' + esc(f.nombre) + '" loading="lazy" width="64" height="64"><div><span class="r5-k">Tu máquina en comodato</span><b>' + esc(f.nombre) + "</b><small>" + esc(porque(s, mk, offer)) + '</small></div><div class="r5-maq-acc">' + calcular + '<a href="#C11" data-go="C11">Ver máquinas</a></div></section>';
@@ -15069,8 +15074,8 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
       const boton = elegido
         ? '<button type="button" class="m5-btn r5-btn-hecho" aria-pressed="true" data-r5-ver-carro><span class="r5-chk" aria-hidden="true">✓</span>&nbsp;Pack en tu cotización</button><button type="button" class="r5-link" data-r5-pack-quitar>Quitar el pack</button>'
         : '<button type="button" class="m5-btn r3-pack-choose" data-r3-pack="recommended">Elegir este pack</button>';
-      return '<section class="r5-bloque r5-pack" aria-labelledby="r5-pack-t"><header><span class="r3-kicker">Tu pack de partida</span><h2 id="r5-pack-t">¿Con qué productos parte mi pedido?</h2><p>Pack sugerido para empezar; puedes cotizar otros insumos.</p></header>' +
-        '<article class="r3-pack-card r5-pack-card' + (elegido ? " is-elegido" : "") + '" data-r5-pack>' + (elegido ? '<span class="r5-sello">✓ Elegido</span>' : "") + '<div class="r3-pack-top"><span class="r3-recommended">' + esc(recomendado) + '</span></div><ul class="r3-pack-lines">' + filas + '</ul><dl class="r3-pack-total"><div><dt>Productos del pack</dt><dd>' + money(suma) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>Total del pack</dt><dd>' + money(suma + fijo()) + "</dd></div></dl>" +
+      return '<section class="r5-bloque r5-pack" aria-labelledby="r5-pack-t"><header><h2 id="r5-pack-t">Tu pack de partida</h2></header>' +
+        '<article class="r3-pack-card r5-pack-card' + (elegido ? " is-elegido" : "") + '" data-r5-pack>' + (elegido ? '<span class="r5-sello">✓ Elegido</span>' : "") + '<p class="premium-pack-net"><b>' + money(suma + fijo()) + '</b> neto · incluye kit y filtro</p><details class="premium-pack-breakdown"><summary>Productos y precios (' + pack.length + ')</summary><p>' + esc(recomendado) + '</p><ul class="r3-pack-lines">' + filas + '</ul><dl class="r3-pack-total"><div><dt>Productos del pack</dt><dd>' + money(suma) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r3-total"><dt>Total del pack</dt><dd>' + money(suma + fijo()) + "</dd></div></dl></details>" +
         '<div class="r5-pack-acc">' + boton + '</div><details class="r3-quote-reference r5-reference"><summary>Referencia · cotización Marley · 19-oct-2026</summary><p>La cotización completa de Marley del 19-oct-2026, con todas las líneas, suma ' + money(DATA.prices.totals && DATA.prices.totals.antes_de_instalar || 1491220) + " neto con kit y filtro.</p></details></article></section>";
     }
     function bloqueMas(offer, c) {
@@ -15089,16 +15094,16 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
       const q = R.quotationFor(s, offer);
       const cuerpo = items.length
         ? '<ul class="r5-carro-lista">' + filas + '</ul><dl><div><dt>Productos</dt><dd>' + money(q.subtotal) + '</dd></div><div><dt>Kit de instalación y filtro</dt><dd>' + money(DATA.prices.kit.precio + DATA.prices.filter.precio) + '</dd></div><div class="r5-total"><dt>Total neto antes de instalar</dt><dd>' + money(q.total) + "</dd></div></dl>"
-        : '<p class="r5-carro-vacio">Aún no eliges productos. Si sigues así, tu propuesta parte con el pack de partida (' + money(q.total) + ").</p>";
+        : '<p class="r5-carro-vacio">Pack sugerido: ' + money(q.total) + " neto.</p>";
       return (abierto ? '<button type="button" class="r5-hoja-fondo" data-r5-carro-cerrar aria-label="Cerrar Mi cotización" tabindex="-1"></button>' : "") +
-        '<aside class="r5-carro' + (abierto ? " is-abierto" : "") + '" id="r5-carro" aria-labelledby="r5-carro-t"' + (abierto ? ' role="dialog" aria-modal="true"' : "") + '><div class="r5-carro-cab"><h2 id="r5-carro-t" tabindex="-1">Mi cotización</h2><button type="button" class="r5-carro-cerrar" data-r5-carro-cerrar>Cerrar</button></div>' + cuerpo + '<p class="r5-nota">' + esc(DATA.prices.nota_cliente) + "</p></aside>";
+        '<aside class="r5-carro' + (abierto ? " is-abierto" : "") + '" id="r5-carro" aria-labelledby="r5-carro-t"' + (abierto ? ' role="dialog" aria-modal="true"' : "") + '><div class="r5-carro-cab"><h2 id="r5-carro-t" tabindex="-1">Mi cotización</h2><button type="button" class="r5-carro-cerrar" data-r5-carro-cerrar>Cerrar</button></div>' + cuerpo + '<details class="premium-cart-terms"><summary>Precios e IVA</summary><p class="r5-nota">' + esc(DATA.prices.nota_cliente) + "</p></details></aside>";
     }
     function barra(s, offer, c) {
       const items = K.lines(), q = R.quotationFor(s, offer), d = s.diag || {}, cam = camino(s);
       let etiqueta = d.done ? "Continuar a tu propuesta" : "Continuar con mis datos";
       if (cam === "solucion") etiqueta = s.proposal ? "Volver a tu propuesta" : "Volver a tu solución";
       const n = items.length, cuenta = n + (n === 1 ? " producto" : " productos");
-      const resumen = n ? '<span class="r5-barra-k">Mi cotización · ' + cuenta + '</span><span class="r5-barra-n"><b>' + money(q.total) + '</b><span class="r5-barra-ver" aria-hidden="true">Ver</span></span>' : '<span class="r5-barra-k">Pack de partida</span><span class="r5-barra-n">Disponible para elegir</span>';
+      const resumen = n ? '<span class="r5-barra-k">Mi cotización · ' + cuenta + '</span><span class="r5-barra-n"><b>' + money(q.total) + '</b><span class="r5-barra-ver" aria-hidden="true">Ver</span></span>' : '<span class="r5-barra-k">Pack de partida</span><span class="r5-barra-n">Ver cotización</span>';
       const etiquetaRes = n ? "Mi cotización: " + cuenta + ", total " + money(q.total) + ". Ver detalle" : "Pack de partida disponible para elegir";
       return '<div class="r5-barra" role="region" aria-label="Tu selección y siguiente paso"><button type="button" class="r5-barra-res" data-r5-carro-abrir aria-controls="r5-carro" aria-expanded="' + (C.ui.r5Hoja ? "true" : "false") + '" aria-label="' + esc(etiquetaRes) + '">' + resumen + '</button><button type="button" id="m9-continue" class="m5-btn r3-main" data-m9-continue data-r3-continue>' + etiqueta + " →</button></div>";
     }
@@ -15106,7 +15111,7 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
       const original = M.get(), s = muestraNegocio(original), offer = R.buyerFor(s), c = carro(), cam = camino(original);
       const volver = cam === "solucion" ? '<button type="button" class="r5-volver" data-m9-continue data-r5-volver>← ' + (s.proposal ? "Volver a tu propuesta" : "Volver a tu solución") + "</button>" : "";
       return '<section class="r3-catalog m9-catalog m5-wrap r5-cat" aria-labelledby="r3-catalog-title">' + R.stepGuide(1) + volver +
-        '<header class="r3-catalog-heading"><span class="r3-kicker">Productos y precios netos referenciales</span><h1 id="r3-catalog-title">Café en grano e insumos para tu negocio</h1><p class="r5-brandline">Elige el pack o ajusta productos. Precios netos; IVA no incluido.</p></header>' +
+        '<header class="r3-catalog-heading"><h1 id="r3-catalog-title">Elige café e insumos</h1><p class="r5-brandline">Precios netos; IVA no incluido.</p></header>' +
         barra(s, offer, c) + '<div class="r5-cat-grid"><div class="r5-cat-main">' + bannerMaquina(s, offer) + bloquePack(s, offer, c) + bloqueMas(offer, c) + "</div>" + carroHTML(s, offer, c) + '</div><div class="r5-final-action"><p>¿Listo con tu selección?</p><button type="button" class="m5-btn r3-main" data-m9-continue data-r3-continue>' + (s.diag && s.diag.done ? "Continuar a tu propuesta" : "Continuar con mis datos") + ' →</button></div></section>';
     }
     K.catalogHTML = function () { return R.displayBuyerHTML(catalogo()); };
@@ -22611,17 +22616,17 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
     const items = data.productos.map(item => '<li><b>' + esc(item.producto) + '</b> \u00b7 ' + esc(item.formato) + '</li>').join('');
     return '<div data-r7-basket-output class="r7-start-basket"><h3>Canasta de inicio \u00b7 ' + esc(data.negocio) + '</h3><p><b>Consumo orientativo:</b> ' + esc(data.consumoOrientativo) + '; orientaci\u00f3n de equipo, no promedio observado.</p><ul>' + items + '</ul><p><b>Equipo:</b> ' + esc(data.maquina) + ' en comodato, con compra de insumos. <b>Acompa\u00f1amiento:</b> instalaci\u00f3n y capacitaci\u00f3n por confirmar.</p><p class="r7-muted">Canasta orientativa; cantidades, m\u00ednimo, disponibilidad, compatibilidad y entrega por confirmar.</p></div>';
   };
-  const startGuide = (id,offer) => '<details class="r7-portal-box r7-start-guide" data-r7-start-guide><summary>Cómo armamos tu propuesta</summary>' +
+  const startGuide = (id,offer) => '<details class="r7-portal-box r7-start-guide" data-r7-start-guide><summary>Sobre tu propuesta</summary>' +
     '<p>Las respuestas sugieren una máquina; el equipo confirma las condiciones antes de contratar.</p>' +
     renderStartBasket(offer && offer.id) +
     '</details>';
   const decorateC04 = html => {
     if (html.indexOf('data-r7-start-guide') >= 0) return html;
-    const introAt = html.indexOf('class="r5-c04-bajada"');
-    if (introAt < 0) return html;
-    const end = html.indexOf('</p>',introAt);
-    if (end < 0) return html;
-    return html.slice(0,end + 4) + startGuide('r7-c04-start',currentOffer()) + html.slice(end + 4);
+    const formStart = html.indexOf('id="r4Datos"');
+    if (formStart < 0) return html;
+    const formEnd = html.indexOf('</form>', formStart);
+    if (formEnd < 0) return html;
+    return html.slice(0, formEnd) + startGuide('r7-c04-start', currentOffer()) + html.slice(formEnd);
   };
   const questionizeFirstHeading = element => {
     const heading = element.querySelector('h2');
@@ -22742,7 +22747,7 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
       const note = document.createElement('p');
       note.className = 'r7-cart-note r7-muted';
       note.textContent = 'Valores netos. El IVA se detalla en la propuesta. La compra inicial no es mensual; reposición, mínimo y frecuencia se cotizan por separado.';
-      cart.appendChild(note);
+      (cart.querySelector('.premium-cart-terms') || cart).appendChild(note);
     }
     const grid = catalog.querySelector('.r5-cat-grid');
     if (grid && !grid.querySelector('#r7-pilot')) {
@@ -22843,11 +22848,8 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
   const ensureCurrentC04Guide = () => {
     if (!document.body || document.body.dataset.current !== 'C04') return;
     const form = document.getElementById('r4Datos');
-    const intro = form && form.querySelector('.r5-c04-bajada');
-    if (!intro || form.querySelector('[data-r7-start-guide]')) return;
-    const template = document.createElement('template');
-    template.innerHTML = startGuide('r7-c04-start-live',currentOffer());
-    if (template.content.firstElementChild) intro.insertAdjacentElement('afterend',template.content.firstElementChild);
+    if (!form || form.querySelector('[data-r7-start-guide]')) return;
+    form.insertAdjacentHTML('beforeend', startGuide('r7-c04-start-live', currentOffer()));
   };
   document.addEventListener('change',event => {
     const select = event.target.closest && event.target.closest('[data-r7-business-select]');
@@ -26300,7 +26302,7 @@ body[data-current="C09"] .r3-stock-inline .m5-link{min-height:44px;padding:0 2px
 body[data-current="C09"] .r3-stock-note{margin:6px 0 0;font:500 12px/1.4 var(--font);color:#5f5f5f}
 body[data-current="C09"] #m4-main{padding-bottom:24px!important}
 .r5-c04-bajada:empty{display:none}
-</style><link rel="stylesheet" href="crm/crm-v2.css"><script src="crm/crm-v2.js" defer></script>
+</style>
 <style id="postcompra-17nov">
 /* 17-nov · Postcompra: aviso «Correo enviado», correo simulado de marca y reposición. Marca: negro, blanco, gris neutro y amarillo #F3C900. */
 #mcm-toast{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:10050;display:flex;justify-content:center;padding:0 16px;pointer-events:none;box-sizing:border-box}
@@ -26470,4 +26472,21 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
   }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && overlayEl && !overlayEl.hidden) closeMail(); });
 })();
-</script><link rel="stylesheet" href="recursos/marca/piloto-premium.css"></body></html>
+</script><link rel="stylesheet" href="recursos/marca/piloto-premium.css?v=20261123">
+<script id="marley-crm-v2-loader">
+(() => {
+  let requested = false;
+  function loadCrm() {
+    if (requested || !/^#R(?:0\d|1[0-7])(?:\?|$)/.test(location.hash)) return;
+    requested = true;
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = 'crm/crm-v2.css?v=20261123';
+    const script = document.createElement('script');
+    script.src = 'crm/crm-v2.js?v=20261123';
+    document.head.append(style, script);
+  }
+  window.addEventListener('hashchange', loadCrm);
+  loadCrm();
+})();
+</script></body></html>

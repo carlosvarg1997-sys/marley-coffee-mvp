@@ -260,12 +260,14 @@
       }else if(phase==='final'){
         session=window.MCPrueba.finishSession(getSession());
         root.replaceChildren(el('p','mc-kicker','Sesión cerrada'),el('h1','mc-h1','Gracias por participar'));
-        root.append(el('p','mc-lead',session.sus_completo?`Tu resultado de usabilidad es ${session.sus_score} de 100.`:'No pudimos calcular el resultado de usabilidad porque falt? al menos una respuesta.'));
+        root.append(el('p','mc-lead',session.sus_completo?`Tu resultado de usabilidad es ${session.sus_score} de 100.`:'El puntaje de usabilidad queda pendiente cuando se omite alguna de sus preguntas.'));
         root.append(el('p','mc-note',`Código de participante: ${session.participante}. Siguiente código sugerido: ${window.MCPrueba.nextParticipant(session.participante)}.`));
         root.append(el('a','mc-btn','Volver a la consola'));root.lastElementChild.href='inicio.html';
       }
     };
+    let questionKeys;
     const renderQuestions=()=>{
+      if(questionKeys)document.removeEventListener('keydown',questionKeys);
       if(index>=questions.length){finishPhase();return;}
       currentQuestion=questions[index];currentMoment=phase;currentStage='';questionStartedAt=Date.now();
       const q=currentQuestion,row=getResponse(phase,'',q.id);
@@ -281,7 +283,7 @@
       const status=el('p','mc-note mc-note--error','');status.id='question-status';status.hidden=true;panel.append(status);
       const actions=el('div','mc-question-actions');const back=el('button','mc-btn','Volver');back.type='button';back.disabled=index===0;back.addEventListener('click',()=>{if(index>0){index--;renderQuestions();}});
       const actionRight=el('div','mc-row');const next=el('button','mc-btn mc-btn--primary',index===questions.length-1?'Terminar bloque':'Continuar');next.type='button';next.addEventListener('click',()=>{if(!validateQuestion())return;saveCurrent(false);index++;renderQuestions();});actionRight.append(next);actions.append(back,actionRight);panel.append(actions);root.append(panel);window.scrollTo(0,0);
-      const handler=(event)=>{
+      questionKeys=(event)=>{
         if(event.key==='Enter'&&event.target?.tagName!=='TEXTAREA'&&!event.shiftKey){event.preventDefault();next.click();return;}
         const target=event.target;
         const isTextEntry=target?.tagName==='TEXTAREA'||(target?.tagName==='INPUT'&&!['radio','checkbox'].includes(target.type));
@@ -289,9 +291,7 @@
           const n=Number(event.key);const choices=[...fields.querySelectorAll('input[type=radio]')];if(choices[n-1]){choices[n-1].checked=true;choices[n-1].dispatchEvent(new Event('change',{bubbles:true}));}
         }
       };
-      document.addEventListener('keydown',handler,{once:false});
-      const clearHandler=()=>document.removeEventListener('keydown',handler);
-      next.addEventListener('click',clearHandler,{once:true});back.addEventListener('click',clearHandler,{once:true});skip.addEventListener('click',clearHandler,{once:true});
+      document.addEventListener('keydown',questionKeys);
     };
     const startPhase=()=>{
       questions=window.MCPrueba.phaseQuestions(bank,phase,session);

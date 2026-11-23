@@ -1,12 +1,11 @@
-/* Piloto del 20-nov: última hoja del comprador. Solo articula C01, C05 y C09 sobre la composición de 204ffb2. */
-body:is([data-current="C01"], [data-current="C05"], [data-current="C09"]) {
+/* Marley Empresas · última hoja del portal. Espacios, lectura y estados sobre la composición publicada. */
+body[data-current^="C"] {
   --pilot-title: "Festivo", "Pressura", Arial, sans-serif;
   --pilot-copy: "Pressura", Arial, sans-serif;
   --pilot-line: #dedede;
   --pilot-ink: #171717;
   --pilot-green: #355221;
   --pilot-ochre: #785b00;
-  --pilot-red: #9b3028;
 }
 
 body:is([data-current="C01"], [data-current="C05"], [data-current="C09"])
@@ -79,13 +78,27 @@ body[data-current="C05"] .m4.m5 .m5-prop-head .m5-prop-copy {
   font: 400 15px/1.55 var(--pilot-copy);
 }
 body[data-current="C05"] .m5-prop-head .premium-quote-total {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 8px;
-  margin: 16px 0 0;
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  margin: 0;
   font: 400 15px/1.5 var(--pilot-copy);
 }
+body[data-current="C05"] .premium-quote-highlight {
+  display: grid;
+  grid-template-columns: minmax(104px, 208px) minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  margin-top: 16px;
+}
+body[data-current="C05"] .premium-quote-highlight .r3-machine-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 176px;
+  object-fit: contain;
+}
+body[data-current="C05"] .r3-proposal-machine-row { grid-template-columns: minmax(0, 1fr); }
 body[data-current="C05"] .premium-quote-total strong {
   color: var(--pilot-ink);
   font-size: 1.6rem;
@@ -122,11 +135,6 @@ body[data-current="C09"] .premium-order-support { display: flex; flex-wrap: wrap
 body[data-current="C09"] .r3-order-focus .premium-order-support .m5-link {
   min-height: 44px;
   padding: 0;
-  color: var(--pilot-red);
-  font-family: var(--pilot-copy);
-  border-bottom-color: transparent;
-  text-decoration: underline;
-  text-underline-offset: .2em;
 }
 body[data-current="C09"] .r3-order-focus .r3-order-note {
   max-width: 65ch;
@@ -163,7 +171,6 @@ body[data-current="C09"] .r3-order-focus :is(.premium-order-details, .r3-order-e
   background: transparent;
 }
 body[data-current="C09"] .r3-portal > .r3-recommend-details { margin: 0; }
-body[data-current="C09"] .r3-portal > :is(.r3-recommend-details, .r3-support-fold) > summary { color: var(--pilot-red); }
 body[data-current="C09"] .r3-portal :is(.r3-order-focus, .m5-cycle-details, .r3-recommend-details, .r3-portal-offer) { scroll-margin-top: 76px; }
 
 body[data-current="C05"] .premium-proposal-details > summary,
@@ -175,7 +182,111 @@ body[data-current="C09"] .r3-portal :is(.premium-order-details, .r3-order-comple
   font: 700 14px/1.35 var(--pilot-copy);
   cursor: pointer;
 }
-body[data-current="C09"] .r3-portal > .r3-recommend-details > summary { color: var(--pilot-red); }
+
+/* Los pasos de una tarea y los casos se desplazan junto con su contenido. */
+html body:is([data-current="C03"], [data-current="C04"], [data-current="C05"], [data-current="C08"]) .m4.m5 .m5-top,
+html body[data-current="C03"] .m4.m5 .m5-split-media {
+  position: relative !important;
+  top: auto !important;
+}
+html body:is([data-current="C04"], [data-current="C08"]) #m7-launcher:not([hidden]) {
+  position: static !important;
+  margin: 8px 16px 16px auto;
+}
+body[data-current="C04"] #m7-launcher,
+body[data-current="C06"] .mcp-cierre-card .m5-kick { display: none !important; }
+body[data-current="C04"] .r4-resumen > summary { min-height: 44px; align-content: center; cursor: pointer; }
+
+body[data-current^="C"] .m4.m5 #m4-main :is(h1, h2, h3) {
+  letter-spacing: -.015em;
+  text-wrap: balance;
+}
+body:is([data-current="C02"], [data-current="C04"], [data-current="C06"], [data-current="C10"], [data-current="C11"])
+  .m4.m5 #m4-main .m5-btn { letter-spacing: .065em; }
+body:is([data-current="C04"], [data-current="C10"]) .m4.m5 .r3-step-guide li { cursor: default; }
+body[data-current="C04"] .m4.m5 .r3-step-guide li.is-current { border-bottom: 3px solid #f3c900 !important; }
+body[data-current="C10"] .m4.m5 .r3-step-guide li.is-current { border-bottom: 3px solid #c2a000 !important; }
+
+body[data-current="C02"] .m4.m5 .ux-hero-copy .ux-eyebrow { display: block !important; letter-spacing: .075em; }
+body[data-current="C02"] .m4.m5 .ux-hero-copy h1 { line-height: 1.1 !important; }
+body[data-current="C02"] .m4.m5 .r3-c02-end-actions { margin-block: 16px 0; padding-block: 16px 0; }
+body[data-current="C02"] .m4.m5 #negocios .ux-buyer-copy p { margin-bottom: 16px; }
+body[data-current="C02"] .m4.m5 .r3-c02-product-pair > .ux-section { min-height: 0 !important; }
+body[data-current="C02"] .m4.m5 .r3-c02-product-pair .ux-cafe-card {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 16px !important;
+}
+body[data-current="C02"] .m4.m5 .r3-c02-machine-wrap {
+  display: grid !important;
+  grid-template: auto auto / minmax(0, 1fr);
+  gap: 8px;
+  height: auto !important;
+  min-height: 0 !important;
+}
+body[data-current="C02"] .m4.m5 .r3-c02-machine .ux-machine-visual {
+  height: auto;
+  min-height: 0;
+  max-height: 240px;
+  aspect-ratio: 16 / 9;
+}
+@media (min-width: 768px) {
+  body[data-current="C02"] .m4.m5 .ux-hero-scroll > .ux-hero-stage {
+    height: clamp(340px, 52svh, 370px) !important;
+    min-height: 0 !important;
+  }
+  body[data-current="C02"] .m4.m5 #negocios .ux-buyer-photo {
+    min-height: 208px !important;
+    max-height: 260px !important;
+  }
+  body[data-current="C02"] .m4.m5 .ux-cta-close { margin-block: 8px 0 !important; }
+}
+
+body[data-current="C06"] .m4.m5 .m5-portal-head .r5-flow-cta {
+  background: #f3c900 !important;
+  border-color: #f3c900 !important;
+  color: #171717 !important;
+}
+body[data-current="C06"] .m4.m5 .mcp-cierre-card .premium-review {
+  margin: 8px 0;
+  border-block: 1px solid var(--pilot-line);
+}
+body[data-current="C06"] .premium-review summary,
+body[data-current="C10"] :is(.premium-pack-breakdown, .premium-cart-terms) > summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+}
+body[data-current="C06"] .premium-review dl { margin: 0 0 12px; }
+
+body[data-current="C08"] .m4.m5 .m5-exp-intro { padding-block: 24px 16px; }
+body[data-current="C08"] .m4.m5 .m5-stage-pin { height: auto !important; min-height: 0 !important; }
+body[data-current="C08"] .m4.m5 .m5-stage-tabs { margin-bottom: 12px; }
+body[data-current="C08"] .m4.m5 .m5-stage-beat h2 { line-height: 1.1; }
+body[data-current="C08"] .m4.m5 .m5-stage-beat .m5-actions { margin-top: 16px; }
+body[data-current="C08"] .m4.m5 .m5-case-includes { margin-top: 12px; }
+
+body[data-current="C10"] .m4.m5 .r7-pilot { border-color: #dedede !important; }
+body[data-current="C10"] .r5-cat .r5-carro .premium-cart-terms { border-top: 1px solid var(--pilot-line); }
+body[data-current="C10"] .r5-cat .r5-carro .premium-cart-terms p { padding-block: 0 12px; }
+body[data-current="C10"] .r5-cat .premium-pack-breakdown { margin: 8px 0; border-top: 1px solid var(--pilot-line); }
+body[data-current="C10"] .r5-cat .premium-pack-net { margin: 0 0 8px; font-variant-numeric: tabular-nums; }
+
+/* R09 del CRM anterior: los objetivos y el modo de lectura permanecen juntos en móvil. */
+@media (max-width: 767px) {
+  body[data-current="R09"] .m4-crm-main .r6-r09-col > .r6-r09-card { margin-block: 0; }
+  body[data-current="R09"] .m4-crm-main :is(.r6-r09, .r6-r09-cols, .r6-r09-col) { gap: 4px; }
+  body[data-current="R09"] .m4-crm-main .r6-r09-card { padding-block: 6px; }
+  body[data-current="R09"] .m4-crm-main .r6-r09-preview { gap: 4px; }
+  body[data-current="R09"] .m4-crm-main .r6-r09-card-h { margin-bottom: 0; }
+  body[data-current="R09"] .m4-crm-main .r6-r09-note { margin-block: 2px 0; }
+  body[data-current="R09"] .m4-crm-main .r6-r09-det { margin-bottom: 0; }
+  body[data-current="C08"] .m4.m5 .m5-stage-media { height: clamp(176px, 25svh, 232px) !important; }
+}
+@media (max-width: 560px) {
+  body[data-current="C05"] .premium-quote-highlight { grid-template-columns: minmax(84px, 40%) minmax(0, 1fr); gap: 16px; }
+  body[data-current="C05"] .premium-quote-highlight .r3-machine-photo { max-height: 126px; }
+}
 
 @media (hover: hover) {
   body[data-current="C01"] .b2c-hero-cta:hover { background: #ffdc22; }

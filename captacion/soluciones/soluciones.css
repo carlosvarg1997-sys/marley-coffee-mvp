@@ -313,10 +313,12 @@ details:not([open]) > :not(summary){display:none!important}
 
 /* El rubro vive en el antetítulo; el h1 debe llevar la idea en una o dos líneas. */
 .sol-page .sol-hero .ct-display-word{display:none}
-.sol-page .sol-hero .nm-h1{max-width:18ch;font-size:clamp(2.3rem,4vw,3.2rem);line-height:1.04;text-wrap:balance}
+.sol-page .sol-hero .nm-h1{max-width:18ch;font-size:clamp(2.3rem,4vw,3.2rem);line-height:1.1;letter-spacing:-.015em;text-wrap:balance}
 .sol-page .ct-content h2{margin-top:44px;margin-bottom:14px}
 .sol-page .sol-disclosure{margin:10px 0;border:1px solid var(--nm-linea);border-radius:9px;background:var(--nm-carbon)}
 .sol-page .sol-disclosure>summary{min-height:48px;padding:12px 15px;line-height:1.4}
+.sol-page .ct-answer h3{max-width:65ch;font-size:16px;line-height:1.5}
+.sol-page .ct-answer .nm-btn,.ct-article .ct-next .nm-btn{letter-spacing:.065em}
 @media(max-width:560px){
  .sol-page .sol-hero .nm-h1{max-width:19ch;padding-inline:15px;font-size:clamp(1.9rem,7.8vw,2.45rem);line-height:1.06}
  .sol-page .ct-content h2{margin-top:34px;margin-bottom:12px}

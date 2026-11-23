@@ -460,11 +460,10 @@
   }
   function renderWelcome() {
     app.innerHTML = '<section class="ag-screen">' + brandMarkup()
-      + '<p class="ag-kicker">Prueba autoguiada</p><h1 class="ag-title">Empieza la prueba</h1>'
+      + '<h1 class="ag-title">Empieza la prueba</h1>'
       + '<p class="ag-note"><strong>Prototipo académico (Duoc UC).</strong> No es un sitio oficial de Marley Coffee.</p>'
-      + '<p class="ag-lede"><strong>Elige un camino y recórrelo con tareas:</strong> responde unas preguntas y descarga tu informe.</p>'
-      + '<ol class="ag-steps"><li><span><strong>Eliges el camino</strong> y respondes las preguntas iniciales.</span></li><li><span><strong>Recorres el sitio o el CRM</strong> con tareas breves. Cada tarea se cierra con «Terminé esta tarea» y una tarjeta corta.</span></li><li><span><strong>Respondes las preguntas finales</strong> y descargas tus resultados.</span></li></ol>'
-      + '<div class="ag-card"><h2>Antes de empezar</h2><p><strong>Nada se envía:</strong> tus respuestas quedan en este navegador hasta que descargues el informe. <strong>Tú decides si lo envías.</strong></p>'
+      + '<p class="ag-lede">Recorre el sitio o el CRM. Pulsa <strong>«Terminé esta tarea»</strong> para contar cómo te fue.</p>'
+      + '<div class="ag-card"><h2>Antes de empezar</h2><p>Tus respuestas quedan en este navegador. Al final puedes descargar y compartir tu informe.</p>'
       + '<p style="margin-top:12px"><a class="ag-consent-links" href="' + KIT_URL.href + 'Consentimiento_informado.md" target="_blank" rel="noopener">Leer el consentimiento completo</a></p>'
       + '<label class="ag-check"><input id="consent-check" type="checkbox"' + (state.consentimiento?.aceptado?' checked':'') + '><span>Acepto participar</span></label>'
       + '<div class="ag-actions"><button id="welcome-next" type="button" class="ag-btn ag-btn--primary"' + (state.consentimiento?.aceptado?'':' disabled') + '>Continuar</button></div>'
@@ -1074,7 +1073,7 @@
       + '<div class="ag-kpi"><strong>' + (state.umux_score==null?'—':String(state.umux_score).replace('.',',')) + '</strong><span>UMUX-Lite (0–100)</span></div>'
       + '<div class="ag-kpi"><strong>' + formatDuration(totalDuration()) + '</strong><span>Tiempo total</span></div></div>'
       + '<section class="ag-result-section"><h2>Descargas del recorrido</h2><p><strong>' + available.length + ' disponibles</strong> · <strong>' + tapped.length + ' seleccionadas</strong></p></section>'
-      + '<section class="ag-result-section"><h2>Próximo paso</h2><p><strong>Envía el informe</strong> a quien te invitó a la prueba.</p></section>'
+      + '<p>Comparte el PDF con quien te invitó a la prueba.</p>'
       + '<div class="ag-result-actions"><button id="download-pdf" class="ag-btn ag-btn--primary" type="button">Descargar informe PDF</button>'
       + '<button id="download-json" class="ag-btn" type="button">Descargar datos (JSON)</button>'
       + '<button id="download-csv" class="ag-btn" type="button">Descargar tareas (CSV)</button>'

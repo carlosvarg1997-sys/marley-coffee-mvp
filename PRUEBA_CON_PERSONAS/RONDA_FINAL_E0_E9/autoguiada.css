@@ -344,3 +344,5 @@ h1,h2,h3 { overflow-wrap:anywhere; }
 /* 17-nov: «Prefiero no responder» como opción explícita (consentimiento), discreta y con toque de 44 px */
 .ag-skip-opt{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:6px;color:#555;font-size:14px;cursor:pointer}
 .ag-skip-opt input{width:18px;height:18px}
+.ag-screen .ag-title{letter-spacing:-.015em;line-height:1.1;text-wrap:balance}
+.ag-screen .ag-lede,.ag-screen .ag-card>p{max-width:65ch;line-height:1.5}

@@ -150,6 +150,8 @@
   const video = $('[data-hero-video]');
   if (video) {
     const movil = matchMedia('(max-width: 760px)').matches;
+    let recorrida = window.scrollY > 0;
+    let enVista = true;
     video.muted = true; video.loop = true; video.playsInline = true;
     video.autoplay = true;
     video.setAttribute('muted', ''); video.setAttribute('autoplay', '');
@@ -161,17 +163,33 @@
       video.load();
     };
     const reproducir = () => {
-      if (preferenciaMovimiento.matches || movimientoForzadoOff || medioEstatico) { posterQuieto(); return; }
-      if (!video.src) video.src = movil ? video.dataset.srcM : video.dataset.srcD;
+      if (preferenciaMovimiento.matches || movimientoForzadoOff || medioEstatico) {
+        if (video.hasAttribute('src')) posterQuieto();
+        return;
+      }
+      if (!recorrida || !enVista) { video.pause(); return; }
+      if (!video.hasAttribute('src')) video.src = movil ? video.dataset.srcM : video.dataset.srcD;
       const intento = video.play();
-      if (intento && typeof intento.catch === 'function') intento.catch(posterQuieto);
+      if (intento && typeof intento.catch === 'function') intento.catch((error) => {
+        if (error.name !== 'AbortError') posterQuieto();
+      });
     };
     video.addEventListener('playing', () => video.classList.add('es-activo'));
     video.addEventListener('error', posterQuieto);
-    if (sinMovimiento || medioEstatico) posterQuieto(); else reproducir();
-    const cambioMovimiento = (evento) => evento.matches || movimientoForzadoOff || medioEstatico ? posterQuieto() : reproducir();
-    if (typeof preferenciaMovimiento.addEventListener === 'function') preferenciaMovimiento.addEventListener('change', cambioMovimiento);
-    else if (typeof preferenciaMovimiento.addListener === 'function') preferenciaMovimiento.addListener(cambioMovimiento);
+    if (!movimientoForzadoOff && !medioEstatico) {
+      if (!recorrida) window.addEventListener('scroll', () => {
+        recorrida = true;
+        reproducir();
+      }, { passive: true, once: true });
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(([entrada]) => {
+          enVista = entrada.isIntersecting;
+          reproducir();
+        });
+        observer.observe(video);
+      } else reproducir();
+      preferenciaMovimiento.addEventListener('change', reproducir);
+    }
   }
 
   /* ---------- Aparición suave: el contenido existe aunque no corra ---------- */

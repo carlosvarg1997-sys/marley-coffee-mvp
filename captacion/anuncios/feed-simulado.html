@@ -593,7 +593,7 @@
           <a class="ad-tap" id="ad-link" href="#">
             <div class="ad-media">
               <div class="ad-video-slot">
-                <video class="ad-video" id="ad-video" autoplay muted loop playsinline preload="metadata"></video>
+                <video class="ad-video" id="ad-video" muted loop playsinline preload="none"></video>
                 <img class="ad-video-poster" id="ad-video-poster" src="" alt="">
               </div>
               <div class="ad-creative-slot">
@@ -721,12 +721,19 @@
       video.poster=posterPath;
       posterFallback.src=posterPath;
       posterFallback.alt=profile.metaAlt;
-      const reduceMotion=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-      if(!reduceMotion){
-        video.src=videoPath;
-        const p=video.play();
-        if(p&&typeof p.catch==='function')p.catch(()=>{});
-      }
+      const reduceMotion=window.matchMedia('(prefers-reduced-motion:reduce)');
+      let videoVisible=false;
+      const updateAdVideo=()=>{
+        if(reduceMotion.matches||!videoVisible){video.pause();return;}
+        if(!video.hasAttribute('src'))video.src=videoPath;
+        video.play()?.catch(()=>{});
+      };
+      const adObserver=new IntersectionObserver(([entry])=>{
+        videoVisible=entry.isIntersecting;
+        updateAdVideo();
+      },{threshold:.15});
+      adObserver.observe(video.parentElement);
+      reduceMotion.addEventListener('change',updateAdVideo);
 
       document.body.dataset.red=red;
       document.body.dataset.perfil=requested in profiles?requested:'restaurante';

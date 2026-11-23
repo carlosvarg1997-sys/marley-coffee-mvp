@@ -483,7 +483,7 @@
       const badge = isLead ? priorityLabel(item) : isReferralAccount ? 'Referido' : (accountNeedsReorder(item) ? 'Reposición' : 'En riesgo');
       const company = isLead ? companyName(item) : item.business || 'Cuenta';
       return row(isLead ? contactName(item) : item.name, isLead ? `${entry.label} · ${company}` : entry.label, meta, action, badge);
-    }, 'Ver el resto') : empty('Nada urgente por ahora', 'La cola se actualiza con traspasos, ciclos de compra y postventa.');
+    }, 'Ver todas las prioridades') : empty('Nada urgente por ahora', 'Aquí aparecen traspasos, reposiciones y casos de postventa.');
     const responseBody = waiting.length ? limitedList(waiting, item => row(item.name || item.accountName || 'Contacto', `${item.channel || 'Canal por confirmar'} · ${item.date ? fmtDate(item.date) : 'Seguimiento registrado'}`, item.status || 'Esperando respuesta', `data-c2="open-lead" data-id="${esc(item.leadId || item.id)}"`, 'Esperan respuesta')) : `<div class="crm2-inline-note">Las conversaciones y propuestas viven en la ficha del contacto.</div>`;
     return block('A atender hoy', '', queueBody) + `<details class="crm2-fold"><summary>Referidos nuevos</summary>${referralNewBody()}</details><details class="crm2-fold"><summary>Esperan respuesta</summary>${responseBody}</details>`;
   }
@@ -524,7 +524,7 @@
     const sales = salesInPeriod();
     const sql = leads().filter(lead => statusOfLead(lead).startsWith('SQL')).length;
     const mql = leads().filter(isMql).length;
-    const leadBody = ready.length ? limitedList(ready, lead => row(contactName(lead), companyName(lead), `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, permissionShort(lead)), 'Ver todos los leads', 2) : empty('No hay un lead listo para pasar', 'La calificación requiere contacto identificado, negocio B2B, permiso y 40 puntos de interés.');
+    const leadBody = ready.length ? limitedList(ready, lead => row(contactName(lead), companyName(lead), `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, permissionShort(lead)), 'Ver todos los leads') : empty('No hay un lead listo para pasar', 'La calificación requiere contacto identificado, negocio B2B, permiso y 40 puntos de interés.');
     const returnedBody = returned.length ? limitedList(returned, lead => row(contactName(lead), `${companyName(lead)} · ${sourceOf(lead)}`, `Motivo: ${progressFor(lead).motivoDevolucion || progressFor(lead).motivo || 'revisar ficha'}`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, 'Devuelto por Ventas')) : `<div class="crm2-inline-note">Sin devoluciones pendientes.</div>`;
     const referralBody = referralRequests.length ? `<div class="crm2-list">${limitedList(referralRequests, item => { const lead = leadById(item.leadId) || {}; return row(contactName(lead), `${companyName(lead)} · ${item.reason}`, item.status, `data-c2="open-lead" data-id="${esc(item.leadId)}"`, 'Referido'); }, 'Ver todos los referidos')}</div>` : '';
     return marketingDraftBlock() + block('Para pasar a Ventas', '', leadBody) + `<details class="crm2-fold"><summary>Traspaso y ventas</summary><div class="crm2-fold-body"><p>${mql} MQL · ${sql} SQL aceptados</p><p>Ventas del período de prueba <b>${money(sales)}</b></p>${returnedBody}${referralBody}</div></details>`;

@@ -211,9 +211,9 @@ details:not([open]) > :not(summary){display:none!important}
 
 /* Composición de lectura: títulos cortos, un solo acento y cierre con acción. */
 .ct-article:not(.sol-page) .ct-editorial-head .ct-display-word{display:none}
-.ct-article:not(.sol-page) .ct-editorial-head .nm-h1{max-width:19ch;font-size:clamp(2rem,4vw,3.1rem);line-height:1.04}
+.ct-article:not(.sol-page) .ct-editorial-head .nm-h1{max-width:19ch;font-size:clamp(2rem,4vw,3.1rem);line-height:1.1;letter-spacing:-.015em;text-wrap:balance}
 .ct-article:not(.sol-page) .ct-editorial-head{padding-block:32px 24px}
-.ct-article:not(.sol-page) .ct-editorial-head .ct-hero-cta-reason{max-width:46ch;margin:12px 0 8px}
+.ct-article:not(.sol-page) .ct-editorial-head .ct-hero-cta-reason{max-width:55ch;margin:12px 0 8px;font-size:16px;line-height:1.5}
 .ct-article:not(.sol-page) .ct-content h2{margin:40px 0 16px}
 .ct-article:not(.sol-page) .ct-content h3{margin:16px 0 8px}
 .ct-article:not(.sol-page) .ct-question-block+.ct-question-block{margin-top:32px}
