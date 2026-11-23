@@ -230,6 +230,14 @@ body[data-current="C02"] .m4.m5 .r3-c02-machine .ux-machine-visual {
   max-height: 240px;
   aspect-ratio: 16 / 9;
 }
+body[data-current="C02"] .m4.m5 #faq .r5-faq-item {
+  margin-block: 4px !important;
+  padding-block: 0 !important;
+}
+body[data-current="C02"] .m4.m5 #faq .r5-faq-item > summary {
+  min-height: 44px;
+  padding-block: 8px !important;
+}
 @media (min-width: 768px) {
   body[data-current="C02"] .m4.m5 .ux-hero-scroll > .ux-hero-stage {
     height: clamp(340px, 52svh, 370px) !important;

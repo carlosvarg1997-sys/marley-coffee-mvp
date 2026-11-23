@@ -13567,7 +13567,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       else if (depth > 0 && --depth === 0) items.push(questions.slice(itemStart, tag.lastIndex));
     }
     const faqItem = function (q) { return q.replace('<details>', '<details class="r5-faq-item">'); };
-    faq = faq.slice(0, faqInsideStart) + '<div class="ux-head"><span class="ux-eyebrow">Estamos para ayudarte</span><h2>Preguntas frecuentes</h2></div><div class="r5-faq-content">' + items.slice(0, 4).map(faqItem).join("") + '<button type="button" class="r5-faq-more" data-r5-faq-more aria-expanded="false">Ver más preguntas</button><div class="r5-faq-hidden" hidden>' + items.slice(4).map(faqItem).join("") + '</div></div>' + faq.slice(faqEndInside);
+    faq = faq.slice(0, faqInsideStart) + '<div class="ux-head"><h2>Preguntas frecuentes</h2></div><div class="r5-faq-content">' + items.slice(0, 4).map(faqItem).join("") + '<button type="button" class="r5-faq-more" data-r5-faq-more aria-expanded="false">Ver más preguntas</button><div class="r5-faq-hidden" hidden>' + items.slice(4).map(faqItem).join("") + '</div></div>' + faq.slice(faqEndInside);
     const faqClose = faq.lastIndexOf('</section>');
     const ctaEnd = '<div class="r3-c02-end-actions" aria-label="Siguiente paso"><div class="r5-dos-caminos"><button type="button" class="m5-btn r3-c02-main" data-m9-open>Ver packs y productos</button><button type="button" class="m5-btn r5-btn-claro" data-m10-unknown>Ayúdame a elegir una máquina</button></div></div>';
     faq = faq.slice(0, faqClose) + ctaEnd + faq.slice(faqClose);
