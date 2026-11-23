@@ -144,4 +144,5 @@ async function run() {
   console.table(results.filter(row => row.channel === 'chrome' && row.viewport === '1280x551'));
 }
 
-run().catch(error => { console.error(error); process.exitCode = 1; });
+module.exports = { metrics };
+if (require.main === module) run().catch(error => { console.error(error); process.exitCode = 1; });

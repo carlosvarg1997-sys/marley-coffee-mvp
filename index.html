@@ -14278,7 +14278,7 @@ body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
     }
     function resumen(s) {
       const offer = R.buyerFor(s);
-      if (!offer) return '<details class="r4-card r4-resumen"><summary>Tu selección</summary><p>Elige tu negocio para ver tu pack recomendado.</p></details>';
+      if (!offer) return '<details class="r4-card r4-resumen"><summary>Selección</summary><p>Elige tu negocio para ver tu pack recomendado.</p></details>';
       const data = R.data(), mk = (window.R5 && window.R5.maquina(s, offer)) || offer.maquina, mm = data.offer.maquinas[mk] || {}, m = D.MACHINES[mk] || {}, q = R.quotationFor(s, offer);
       const total = q.selected ? "Total neto antes de instalar" : "Total del pack de partida";
       return '<aside class="r4-card r4-resumen" aria-label="Tu solución hasta ahora"><span class="r4-eyebrow">Tu solución hasta ahora</span>' +
@@ -22616,7 +22616,7 @@ body[data-current="C10"] .r7-muted{font-size:12px!important}
     const items = data.productos.map(item => '<li><b>' + esc(item.producto) + '</b> \u00b7 ' + esc(item.formato) + '</li>').join('');
     return '<div data-r7-basket-output class="r7-start-basket"><h3>Canasta de inicio \u00b7 ' + esc(data.negocio) + '</h3><p><b>Consumo orientativo:</b> ' + esc(data.consumoOrientativo) + '; orientaci\u00f3n de equipo, no promedio observado.</p><ul>' + items + '</ul><p><b>Equipo:</b> ' + esc(data.maquina) + ' en comodato, con compra de insumos. <b>Acompa\u00f1amiento:</b> instalaci\u00f3n y capacitaci\u00f3n por confirmar.</p><p class="r7-muted">Canasta orientativa; cantidades, m\u00ednimo, disponibilidad, compatibilidad y entrega por confirmar.</p></div>';
   };
-  const startGuide = (id,offer) => '<details class="r7-portal-box r7-start-guide" data-r7-start-guide><summary>Sobre tu propuesta</summary>' +
+  const startGuide = (id,offer) => '<details class="r7-portal-box r7-start-guide" data-r7-start-guide><summary>Cómo cotizamos</summary>' +
     '<p>Las respuestas sugieren una máquina; el equipo confirma las condiciones antes de contratar.</p>' +
     renderStartBasket(offer && offer.id) +
     '</details>';

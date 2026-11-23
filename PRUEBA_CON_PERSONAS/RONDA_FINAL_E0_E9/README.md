@@ -40,10 +40,10 @@ El CRM contiene una muestra sintética con fuentes «Orgánico (Google)» y de c
 La prueba autoguiada sirve para que cada persona recorra el prototipo por su cuenta. No requiere consola ni envío de datos en línea.
 
 1. Abre `prueba.html`, acepta participar y elige A (búsqueda), B (Meta, LinkedIn o Google) o C (equipo interno). En A y B, elige el tipo de negocio; en C, el área de trabajo.
-2. Responde las preguntas iniciales. El cuestionario tiene 6 preguntas para caminos externos y 4 para el equipo interno; puedes omitir cualquiera.
+2. Responde las preguntas iniciales. Hay 3 preguntas para caminos externos y 2 para el equipo interno. Puedes usar «Prefiero no responder».
 3. Recorre las tareas que aparecen en la barra de prueba junto al sitio o CRM. Después de cada tarea, registra si la lograste, qué tan fácil fue y un comentario opcional. La página conserva el avance si se recarga.
-4. En caminos externos, responde las dos pausas. Antes de seguir, la prueba muestra «3 días después» y «Un mes después»; el avance se habilita cuando el recorrido confirma que la propuesta o el contrato de prueba están listos. En C, hay una pausa después de la primera tarea.
-5. Responde el bloque final: 9 preguntas externas o 7 internas. El puntaje de usabilidad es UMUX-Lite (0–100); la ficha ficticia de E3 se usa solo dentro del prototipo y no se incluye en los archivos.
+4. Las preguntas de cada etapa aparecen al cerrar la tarea. En caminos externos, «3 días después» y «Un mes después» se habilitan cuando la propuesta o el contrato de prueba están listos.
+5. Responde el bloque final. Hay 5 preguntas externas o 4 internas. El puntaje de usabilidad es UMUX-Lite (0–100). La ficha ficticia de E3 se usa dentro del prototipo y queda fuera de los archivos.
 6. En resultados, descarga el informe PDF, los datos JSON y el CSV de tareas. El PDF reúne camino, tareas, respuestas, pausas, saltos, descargas observadas y páginas visitadas; no incluye nombre, correo ni teléfono.
 7. Nada se envía automáticamente. Tú decides si compartes el informe con quien te invitó. Descarga el PDF para guardar el resultado; si necesitas repetir antes, pulsa «Empezar de cero» y confirma. Se borra el avance de esa prueba y se limpian los datos temporales del prototipo, pero no los archivos descargados ni las respuestas de otras sesiones.
 

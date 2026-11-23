@@ -204,6 +204,9 @@ body[data-current^="C"] .m4.m5 #m4-main :is(h1, h2, h3) {
 body:is([data-current="C02"], [data-current="C04"], [data-current="C06"], [data-current="C10"], [data-current="C11"])
   .m4.m5 #m4-main .m5-btn { letter-spacing: .065em; }
 body:is([data-current="C04"], [data-current="C10"]) .m4.m5 .r3-step-guide li { cursor: default; }
+body[data-current="C04"] .m4.m5 .r3-step-guide ol:has(> li:nth-child(3):last-child) {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
 body[data-current="C04"] .m4.m5 .r3-step-guide li.is-current { border-bottom: 3px solid #f3c900 !important; }
 body[data-current="C10"] .m4.m5 .r3-step-guide li.is-current { border-bottom: 3px solid #c2a000 !important; }
 
