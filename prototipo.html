@@ -4757,7 +4757,7 @@ window.M4D = (() => {
     { area: 'Calificar', cliente: 'Marca 3 pasos: su negocio, su local y cómo sirve', hoy: 'CRM con 40 %* de fichas completas; sin puntaje ni zona', agente: 'Calificación y Orquestador', solo: 'Puntaje con zona; asigna la ejecutiva de la comuna', persona: 'La ejecutiva acepta el SQL', sis: ['crm', 'crmActual'], kpi: 'K07, K08' },
     { area: 'Vender', cliente: 'Revisa su propuesta con asesoría en el chat; confirma o envía su consulta al equipo con respuesta por correo', hoy: 'Contacto por correo o teléfono sin contexto ni plazo', agente: 'Ventas (arma la propuesta al instante) y bot de bienvenida', solo: 'Arma la propuesta con catálogo y stock; le sugiere a la ejecutiva qué ofrecer', persona: 'La ejecutiva confirma el precio real, resuelve dudas y cierra', sis: ['canales', 'vtex', 'crm'], kpi: 'K04, K05, K09' },
     { area: 'Almacenar y preparar', cliente: 'Acepta la propuesta o repite su pedido', hoy: '82 %* de las reposiciones por ejecutivo, correo o mensajería', agente: 'Logística', solo: 'Consulta inventario, reserva stock y crea el pedido', persona: 'Logística confirma lo que no calza', sis: ['vtex', 'erp'], kpi: 'K11, K18, K19' },
-    { area: 'Distribuir', cliente: 'Ve su despacho en Mi cuenta', hoy: '48 h en la RM y 72 a 96 h en regiones; OTIF 92 %*', agente: 'Logística', solo: 'Propone ruta y día según la comuna', persona: 'Una persona promete la fecha', sis: ['courier', 'erp'], kpi: 'K16, K17, K20' },
+    { area: 'Distribuir', cliente: 'Ve su despacho en Mi cuenta', hoy: '48 h en la RM y 72 a 96 h en regiones', agente: 'Logística', solo: 'Propone ruta y día según la comuna', persona: 'Una persona promete la fecha', sis: ['courier', 'erp'], kpi: 'K16, K17, K20' },
     { area: 'Cobrar y facturar', cliente: 'Paga según su condición vigente', hoy: 'Checkout para personas: sin RUT, giro ni orden de compra', agente: 'Orquestador (avisa a Finanzas)', solo: 'Arma el alta con RUT y giro; emite la factura al despachar', persona: 'Finanzas valida la condición de pago vigente', sis: ['vtex', 'pagos', 'erp', 'sii'], kpi: 'K25, K26' },
     { area: 'Postventa y recompra', cliente: 'Recompra, reporta una falla o recomienda', hoy: 'Retención 86 %*; reclamos por falta de visibilidad del pedido y fallas', agente: 'Postventa', solo: 'Sugiere recompra por frecuencia, avisa (LM5) y propone referidos', persona: 'El ejecutivo de cuenta y la jefatura deciden', sis: ['tickets', 'crm', 'vtex'], kpi: 'K12, K15, K21, K27' }
   ];
@@ -7326,7 +7326,7 @@ ${card('Recompras sugeridas', `<ul class="m4-rows">${due.map((a) => `<li class="
 ${card('Lo que hicieron los agentes', `<ol class="m4-feed">${feed}</ol>`, `<button type="button" class="m4-link-btn" data-go="R07">Ver red de agentes ${icon('arrow', 16)}</button>`)}`, { sub: `Ejecutiva Zona Oriente · ${new Date(M.now()).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}` });
   }
   function r01mkt() {
-    const ls = leads(); const bySource = {}; ls.forEach((l) => { const k = l.source.replace(/ \(.*\)/, ''); bySource[k] = (bySource[k] || 0) + 1; });
+    const ls = leads(); const bySource = {}; ls.forEach((l) => { const k = String(l.source || 'Sin origen').replace(/ \(.*\)/, ''); bySource[k] = (bySource[k] || 0) + 1; });
     const max = Math.max(...Object.values(bySource));
     const mql = ls.filter((l) => l.stage === 'MQL').length;
     const sql = ls.filter((l) => l.stage === 'SQL').length;
@@ -7544,7 +7544,7 @@ ${card('Lead magnets del recorrido', `${lmList(lmLead(l).map(([id, on]) => [id, 
     const seg = ['Nuevo', 'Ocasional', 'Frecuente'].map((k) => { const list = accs.filter((a) => a.st.segment === k); return { k, n: list.length, share: sales ? Math.round((sum(list, cur) / sales) * 100) : 0 }; });
     const freq = accs.length ? Math.round(accs.reduce((x, a) => x + (a.st.freqDays || 0), 0) / accs.length) : 0;
     const refs = accs.filter((a) => a.referral).length;
-    const mini = [['Ticket promedio*', D.fmtCLP(sales / Math.max(1, nOrders))], ['MQL actuales', mql], ['Contacto → SQL', ls.length ? Math.round((sql / ls.length) * 100) + ' %' : '—'], ['Referidos', refs], ['Frecuencia promedio', freq ? 'Cada ' + freq + ' días' : '—'], ['Reposición digital', '18 %* (línea base)'], ['Retención', '86 %* (línea base)'], ['OTIF', '92 %* (línea base)'], ['NRR', 'Por levantar']];
+    const mini = [['Ticket promedio*', D.fmtCLP(sales / Math.max(1, nOrders))], ['MQL actuales', mql], ['Contacto → SQL', ls.length ? Math.round((sql / ls.length) * 100) + ' %' : '—'], ['Referidos', refs], ['Frecuencia promedio', freq ? 'Cada ' + freq + ' días' : '—'], ['Reposición digital', '18 %* (línea base)'], ['Retención', '86 %* (línea base)'], ['OTIF', '92 % (simulación)'], ['NRR', 'Por levantar']];
     const periods = [[7, '7 días'], [30, '30 días'], [90, '90 días']].map(([d, l]) => `<button type="button" class="m4-seg ${days === d ? 'is-on' : ''}" data-a="r5-period" data-v="${d}" aria-pressed="${days === d}">${l}</button>`).join('');
     const zsel = `<label class="m4-inline-field"><span>Zona</span><select data-a="r5-zone" aria-label="Filtrar por zona"><option value="todas">Todas</option>${Object.values(D.ZONES).map((z) => `<option value="${z.id}" ${zf === z.id ? 'selected' : ''}>${esc(z.name)}</option>`).join('')}</select></label>`;
     const feed = agentFeed(s).slice(0, 5).map(agentItem).join('');
@@ -7834,7 +7834,7 @@ ${card('Productos y servicios a sugerir', `<ul class="m5-suggest">${suggestFor(a
   function r11() {
     const s = M.get(); const ls = leads(); const accs = accounts(); const mql = ls.filter((l) => l.stage === 'MQL').length; const sql = ls.filter((l) => l.stage === 'SQL').length;
     const active = accs.filter((a) => a.st.in90 > 0).length; const refs = accs.filter((a) => a.lm.LM7).length; const lm5 = accs.filter((a) => a.lm.LM5).length;
-    const bySource = {}; ls.forEach((l) => { const k = l.source.replace(/ \(.*\)/, ''); bySource[k] = (bySource[k] || 0) + 1; }); const max = Math.max(...Object.values(bySource));
+    const bySource = {}; ls.forEach((l) => { const k = String(l.source || 'Sin origen').replace(/ \(.*\)/, ''); bySource[k] = (bySource[k] || 0) + 1; }); const max = Math.max(...Object.values(bySource));
     const reach = LM_LEAD.map((id) => [id, ls.filter((l) => lmLead(l)[LM_LEAD.indexOf(id)][1]).length]);
     const drops = reach.slice(1).map(([id, v], i) => [reach[i][0], id, reach[i][1] - v]).sort((a, b) => b[2] - a[2]); const d0 = drops[0];
     const fly = flywheelSVG({ atraer: `${ls.length} contactos`, inter: `${mql} MQL · ${sql} SQL`, deleitar: `${active} activos · ${refs} ref.` });
@@ -7875,7 +7875,7 @@ ${card('Carga y tiempos por persona', `<div class="m4-table-wrap"><table class="
     const accs = accounts(); const counts = {}; accs.forEach((a) => { const k = MACH_BY_BIZ[a.business]; counts[k] = (counts[k] || 0) + 1; });
     const routes = Object.values(D.ZONES).map((z, i) => { const n = accs.filter((a) => zoneOfComuna(a.comuna)?.id === z.id).length; return `<tr><td><b>${esc(z.name)}</b><small>${esc(D.EXECS[z.exec].name)}</small></td><td>${esc(z.route)}</td><td class="num">${n + (i % 3)}</td><td class="num">${[96, 93, 90, 94, 85][i]} %*</td></tr>`; }).join('');
     const maint = accs.slice(0, 4).map((a, i) => `<li>${icon('clock', 16)} <b>${esc(a.name)}</b> · máquina ${esc(D.MACHINES[MACH_BY_BIZ[a.business]].name)} · en ${[3, 6, 9, 13][i]} días</li>`).join('');
-    return shell('R15', 'Operación', `<div class="m4-kpis m4-kpis--6">${kpi('OTIF', '92 %*', 'Línea base del caso')}${kpi('Despachos esta semana', 23, 'Escenario')}${kpi('Máquinas instaladas', accs.length, 'Clientes del escenario')}${kpi('Mantenciones (14 días)', 4)}${kpi('Tickets técnicos abiertos', 2, 'Sin conexión al CRM hoy*')}${kpi('Stock crítico', 'Pods', 'Cobertura estimada: 9 días')}</div>
+    return shell('R15', 'Operación', `<div class="m4-kpis m4-kpis--6">${kpi('OTIF', '92 % (simulación)', 'Simulación del prototipo')}${kpi('Despachos esta semana', 23, 'Escenario')}${kpi('Máquinas instaladas', accs.length, 'Clientes del escenario')}${kpi('Mantenciones (14 días)', 4)}${kpi('Tickets técnicos abiertos', 2, 'Sin conexión al CRM hoy*')}${kpi('Stock crítico', 'Pods', 'Cobertura estimada: 9 días')}</div>
 <div class="m4-grid-2">${card('Rutas y entregas a tiempo', `<div class="m4-table-wrap"><table class="m4-table"><thead><tr><th>Zona</th><th>Ruta</th><th class="num">Despachos</th><th class="num">A tiempo</th></tr></thead><tbody>${routes}</tbody></table></div>`)}
 ${card('Parque de máquinas', `<ul class="m4-hbars">${D.MACHINE_ORDER.map((k) => `<li><span>${esc(D.MACHINES[k].name)}</span>${bar(((counts[k] || 0) / accs.length) * 100, 'fin')}<b>${counts[k] || 0}</b></li>`).join('')}</ul><h3 class="m4-sub">Próximas mantenciones</h3><ul class="m5-suggest">${maint}</ul>`)}</div><p class="m4-fine">* Líneas base del caso (Duoc UC, 2026) y datos ficticios. El sistema de tickets se conecta por API o webhook (por confirmar).</p>`, { sub: 'Despachos, máquinas, mantenciones y servicio técnico (solo jefatura)' });
   }
@@ -13599,6 +13599,8 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       return start + body + '<p class="mcp-nota">' + esc(DATA.prices.nota_cliente) + "</p><p class=\"r3-quote-reference\">Referencia: la cotización completa de Marley del 19-oct-2026, con todas las líneas, suma $1.491.220 neto con kit y filtro</p>" + end;
     });
   }
+  // Total neto de la propuesta: el mismo que muestran C05 y «Mi cotización». El agente y el CRM lo leen de aquí.
+  window.MC_TOTAL_PROPUESTA = function (s) { s = s || M.get(); return DATA ? quotationFor(s, buyerFor(s)).total : null; };
   function c05Wrap() {
     if (!DATA) return C.__r3Original.C05();
     const s = M.get(), offer = buyerFor(s);
@@ -26489,4 +26491,9 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
   window.addEventListener('hashchange', loadCrm);
   loadCrm();
 })();
-</script></body></html>
+</script>
+<link rel="stylesheet" href="recursos/agente/agente.css">
+<script src="recursos/agente/agente-motor.js"></script>
+<script src="recursos/agente/agente-cliente.js"></script>
+<script src="crm/crm-carga.js"></script>
+</body></html>
