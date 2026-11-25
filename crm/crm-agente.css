@@ -1,0 +1,184 @@
+/* crm-agente.css · Barra «Pídele al agente» del CRM (subagente B).
+   Usa los tokens por rol de crm-v2.css (--crm2-role-*). Amarillo solo en la decisión importante (aprobar y enviar, confirmar). */
+.crm-agente {
+  --ag-accent: var(--crm2-role-accent, #5c3d80);
+  --ag-strong: var(--crm2-role-strong, #41265f);
+  --ag-tint: var(--crm2-role-tint, #f2ecf7);
+  --ag-line: var(--crm2-role-line, #d2c2e0);
+  --ag-ink: #171717;
+  --ag-muted: #5d5d5d;
+  --ag-yellow: #f3c900;
+  --ag-note: #3b5b7a;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 16px 18px 18px;
+  border: 1px solid var(--ag-line);
+  border-left: 4px solid var(--ag-accent);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ag-ink);
+  font: 15px/1.45 var(--crm2-font, Arial, sans-serif);
+}
+.crm-agente *,
+.crm-agente *::before,
+.crm-agente *::after { box-sizing: border-box; }
+.crm-agente :focus-visible { outline: 3px solid var(--ag-strong); outline-offset: 2px; }
+
+.crm-agente-head { margin: 0 0 12px; }
+.crm-agente-eyebrow { margin: 0 0 4px; color: var(--ag-accent); font-size: 12px; font-weight: 700; letter-spacing: .075em; line-height: 1.25; }
+.crm-agente-titulo { margin: 0; color: var(--ag-strong); font-size: 21px; line-height: 1.15; }
+.crm-agente-sub { margin: 6px 0 0; color: var(--ag-muted); font-size: 14px; }
+
+.crm-agente-form { margin: 0 0 10px; }
+.crm-agente-label { display: block; margin: 0 0 6px; color: var(--ag-muted); font-size: 13px; font-weight: 700; }
+.crm-agente-campo { display: flex; gap: 8px; align-items: stretch; }
+.crm-agente-campo input {
+  flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 9px 12px;
+  border: 1px solid #9c9c9c; border-radius: 8px; background: #fff; color: var(--ag-ink); font: inherit;
+}
+.crm-agente-enviar {
+  min-height: 44px; padding: 9px 16px; border: 1px solid var(--ag-strong); border-radius: 8px;
+  background: var(--ag-strong); color: #fff; font: inherit; font-weight: 700; cursor: pointer;
+}
+.crm-agente-enviar:hover { filter: brightness(1.08); }
+
+.crm-agente-sugerencias,
+.crm-agente-chips,
+.crm-agente-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.crm-agente-sugerencias { margin: 0 0 12px; }
+.crm-agente-chip {
+  min-height: 44px; padding: 8px 14px; border: 1px solid var(--ag-accent); border-radius: 999px;
+  background: var(--ag-tint); color: var(--ag-strong); font: inherit; font-size: 14px; font-weight: 700; text-align: left; cursor: pointer;
+}
+.crm-agente-chip:hover { filter: brightness(.97); }
+
+.crm-agente-avisos { display: grid; gap: 8px; }
+.crm-agente-avisos:empty { display: none; }
+.crm-agente-avisos-t { margin: 0; color: var(--ag-strong); font-size: 14px; }
+.crm-agente-avisos-t b {
+  display: inline-block; min-width: 22px; margin-left: 6px; padding: 0 6px; border-radius: 999px;
+  background: var(--ag-accent); color: #fff; font-size: 12px; text-align: center;
+}
+.crm-agente-aviso {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center;
+  padding: 10px 12px; border: 1px solid var(--ag-line); border-left: 4px solid var(--ag-accent); border-radius: 8px; background: var(--ag-tint);
+}
+.crm-agente-aviso p { grid-column: 1; margin: 0; font-weight: 700; }
+.crm-agente-aviso small { grid-column: 1; color: var(--ag-muted); font-size: 12px; }
+.crm-agente-aviso .crm-agente-btn { grid-column: 2; grid-row: 1 / span 2; }
+
+.crm-agente-hilo { display: grid; gap: 12px; max-height: 66vh; overflow: auto; margin-top: 12px; padding: 2px; }
+.crm-agente-hilo:empty { display: none; }
+.crm-agente-vacio { margin: 0; color: var(--ag-muted); font-size: 14px; }
+.crm-agente-escribe { margin: 0; color: var(--ag-muted); font-style: italic; }
+.crm-agente-tu { margin: 0; color: var(--ag-muted); font-size: 14px; }
+.crm-agente-tu b { margin-right: 6px; color: var(--ag-strong); }
+.crm-agente-resp { display: grid; gap: 10px; min-width: 0; padding: 12px; border: 1px solid var(--ag-line); border-radius: 10px; background: #fff; }
+
+.crm-agente-tarjeta { min-width: 0; padding: 10px 12px; border: 1px solid #e3e3e3; border-radius: 8px; background: #fafafa; }
+.crm-agente-tarjeta h3 { margin: 0 0 6px; color: var(--ag-strong); font-size: 15px; line-height: 1.25; }
+.crm-agente-tarjeta > p { margin: 0 0 6px; }
+.crm-agente-tarjeta.crm-agente-ok { border-color: var(--ag-line); background: var(--ag-tint); }
+.crm-agente-tarjeta.crm-agente-alerta { border-left: 4px solid var(--ag-accent); }
+.crm-agente-tarjeta.crm-agente-confirmar { border-color: var(--ag-accent); background: #fff; }
+.crm-agente-tarjeta.crm-agente-borrador { background: #fff; }
+.crm-agente-tarjeta.is-enviado { border-left: 4px solid var(--ag-ink); }
+.crm-agente-tarjeta.is-descartado { opacity: .75; }
+.crm-agente-lead { margin: 0; color: var(--ag-strong); font-weight: 700; }
+.crm-agente-nota { margin: 4px 0 0; color: var(--ag-muted); font-size: 13px; }
+.crm-agente-texto-fijo { margin: 6px 0 0; padding: 8px 10px; border-radius: 6px; background: #fff; white-space: pre-wrap; font-size: 14px; }
+
+.crm-agente-dl { display: grid; gap: 6px; margin: 0; }
+.crm-agente-dl > div { display: grid; grid-template-columns: minmax(120px, 34%) minmax(0, 1fr); gap: 8px; }
+.crm-agente-dl dt { color: var(--ag-muted); font-size: 13px; font-weight: 700; }
+.crm-agente-dl dd { margin: 0; overflow-wrap: anywhere; }
+.crm-agente-lista { margin: 0; padding-left: 18px; }
+.crm-agente-lista li { margin: 0 0 6px; overflow-wrap: anywhere; }
+.crm-agente-lista small { color: var(--ag-muted); font-size: 12px; }
+.crm-agente-canasta li { display: grid; gap: 2px; }
+.crm-agente-canasta li span { color: var(--ag-muted); font-size: 13px; }
+.crm-agente-pendientes li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; list-style: none; margin-left: -18px; padding: 8px 0; border-bottom: 1px solid #e6e6e6; }
+.crm-agente-pendientes li small { grid-column: 1; }
+.crm-agente-pendientes li .crm-agente-btn { grid-column: 2; grid-row: 1 / span 2; }
+
+.crm-agente-puntajes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.crm-agente-puntaje { min-width: 0; padding: 10px 12px; border: 1px solid #e3e3e3; border-radius: 8px; background: #fff; }
+.crm-agente-puntaje b { display: block; color: var(--ag-strong); font-size: 30px; line-height: 1; }
+.crm-agente-puntaje b small { color: var(--ag-muted); font-size: 14px; }
+.crm-agente-puntaje > span { display: block; margin: 4px 0 6px; color: var(--ag-muted); font-size: 13px; }
+.crm-agente-puntaje ul { margin: 0; padding-left: 18px; font-size: 13px; }
+.crm-agente-puntaje li { margin: 0 0 3px; }
+
+.crm-agente-chat { margin: 0 0 6px; padding: 0; list-style: none; display: grid; gap: 6px; }
+.crm-agente-chat li { font-size: 14px; }
+.crm-agente-chat b { color: var(--ag-strong); margin-right: 4px; }
+.crm-agente-chat li::before { content: none; }
+
+.crm-agente-acciones { margin-top: 8px; }
+.crm-agente-btn {
+  min-height: 44px; padding: 9px 14px; border: 1px solid var(--ag-strong); border-radius: 8px;
+  background: #fff; color: var(--ag-strong); font: inherit; font-weight: 700; line-height: 1.2; cursor: pointer;
+}
+.crm-agente-btn:hover { filter: brightness(.97); }
+.crm-agente-btn--ok { border-color: var(--ag-ink); background: var(--ag-yellow); color: var(--ag-ink); }
+.crm-agente-btn--mini { min-height: 44px; padding: 6px 12px; font-size: 14px; }
+
+.crm-agente-campo-solo { display: grid; gap: 4px; margin-top: 8px; color: var(--ag-muted); font-size: 13px; font-weight: 700; }
+.crm-agente-campo-solo select,
+.crm-agente-campo-solo textarea {
+  width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid #9c9c9c; border-radius: 8px;
+  background: #fff; color: var(--ag-ink); font: inherit; font-weight: 400;
+}
+.crm-agente-campo-solo textarea { resize: vertical; }
+
+.crm-agente-niveles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 2px 0 0; }
+.crm-agente-nivel { min-width: 0; padding: 8px 10px; border: 1px solid #d9d9d9; border-radius: 8px; background: #fff; font-size: 13px; line-height: 1.35; }
+.crm-agente-nivel b { display: block; margin-bottom: 2px; color: var(--ag-muted); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+.crm-agente-nivel[data-nivel="regla"] { border-left: 4px solid var(--ag-ink); }
+.crm-agente-nivel[data-nivel="ia"] { border-color: var(--ag-line); background: var(--ag-tint); }
+.crm-agente-nivel[data-nivel="persona"] { border-left: 4px solid var(--ag-yellow); }
+.crm-agente-registrado { grid-column: 1 / -1; margin: 0; color: var(--ag-muted); font-size: 12px; }
+
+.crm-agente-timeline { min-width: 0; padding: 10px 12px; border: 1px solid var(--ag-line); border-radius: 8px; background: #fff; }
+.crm-agente-timeline > header h3 { margin: 0; color: var(--ag-strong); font-size: 15px; }
+.crm-agente-timeline > header p { margin: 2px 0 8px; color: var(--ag-muted); font-size: 13px; }
+.crm-agente-resumen-chat { margin: 0 0 8px; font-size: 14px; }
+.crm-agente-tl { display: grid; gap: 8px; max-height: 300px; margin: 0; padding: 0; overflow: auto; list-style: none; }
+.crm-agente-tl-item { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 10px; align-items: start; }
+.crm-agente-tl-item b { font-size: 13px; }
+.crm-agente-tl-item p { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.crm-agente-tl-item small { color: var(--ag-muted); font-size: 12px; }
+.crm-agente-tl-vacio { color: var(--ag-muted); font-size: 14px; }
+.crm-agente-canal {
+  display: inline-block; padding: 2px 8px; border: 1px solid var(--ag-line); border-radius: 999px;
+  background: var(--ag-tint); color: var(--ag-strong); font-size: 12px; font-weight: 700; text-align: center;
+}
+.crm-agente-tl-item[data-canal="web"] .crm-agente-canal { border-color: #cfcfcf; background: #f4f4f4; color: var(--ag-ink); }
+.crm-agente-tl-item[data-canal="whatsapp"] .crm-agente-canal { border-color: var(--ag-accent); background: var(--ag-tint); color: var(--ag-strong); }
+.crm-agente-tl-item[data-canal="correo"] .crm-agente-canal { border-color: #a9bccf; background: #eef3f8; color: var(--ag-note); }
+.crm-agente-tl-item[data-canal="nota"] .crm-agente-canal { border-color: #d0d0d0; background: #fff; color: var(--ag-muted); }
+
+.crm-agente-ficha { margin: 0; }
+.crm-agente-ficha > .crm-agente-eyebrow { margin-bottom: 8px; }
+.crm-agente-registro { margin-top: 12px; color: var(--ag-muted); font-size: 13px; }
+.crm-agente-registro > summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: var(--ag-strong); font-weight: 700; }
+.crm-agente-reg { margin: 4px 0 0; padding-left: 18px; }
+.crm-agente-reg li { margin: 0 0 6px; overflow-wrap: anywhere; }
+.crm-agente-reg [data-nivel="persona"] { font-weight: 700; color: var(--ag-ink); }
+
+@media (max-width: 760px) {
+  .crm-agente { padding: 14px 12px 16px; }
+  .crm-agente-campo { flex-direction: column; }
+  .crm-agente-niveles { grid-template-columns: 1fr; }
+  .crm-agente-puntajes { grid-template-columns: 1fr; }
+  .crm-agente-dl > div { grid-template-columns: 1fr; gap: 2px; }
+  .crm-agente-tl-item { grid-template-columns: 1fr; gap: 4px; }
+  .crm-agente-aviso { grid-template-columns: 1fr; }
+  .crm-agente-aviso .crm-agente-btn { grid-column: 1; grid-row: auto; justify-self: start; }
+  .crm-agente-pendientes li { grid-template-columns: 1fr; }
+  .crm-agente-pendientes li .crm-agente-btn { grid-column: 1; grid-row: auto; justify-self: start; }
+  .crm-agente-hilo { max-height: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .crm-agente * { transition: none !important; animation: none !important; }
+}
