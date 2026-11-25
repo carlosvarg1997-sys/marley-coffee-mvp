@@ -56,12 +56,19 @@
       buscar: function (t) { return nucleo() ? nucleo().datos.buscar(t) : []; },
       recomendacion: function (x) { return nucleo() ? nucleo().datos.recomendacion(x) : null; }
     },
+    // Espera de una persona (Soporte o Ventas): «esperando-persona» o «persona-unida», o null si no hay ninguna.
+    espera: {
+      estado: function (cuentaId) { return nucleo() ? nucleo().espera.estado(cuentaId) : { estado: null, traspaso: null }; }
+    },
     estado: {
       get: function () { return nucleo() ? nucleo().estado.get() : leerLocal(); },
       guardar: function (e) { return nucleo() ? nucleo().estado.guardar(e) : e; },
       registrar: function (a) { return nucleo() ? nucleo().estado.registrar(a) : null; }
     },
-    canales: { enviar: function (o) { return nucleo() ? nucleo().canales.enviar(o) : { ok: false, motivo: "El motor aún no está cargado." }; } },
+    canales: {
+      enviar: function (o) { return nucleo() ? nucleo().canales.enviar(o) : { ok: false, motivo: "El motor aún no está cargado." }; },
+      permiso: function (cuentaId, canal) { return nucleo()?.canales.permiso(cuentaId, canal); }
+    },
     eventos: {
       on: function (tipo, fn) {
         if (nucleo()) return nucleo().eventos.on(tipo, fn);

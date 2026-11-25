@@ -39,11 +39,27 @@ Si el comprador no da sus datos, el paso 2 se hace con **Fernanda Rojas** y el p
 
 Para cada tarea registra si la logró, si pidió ayuda, facilidad del 1 al 7 y qué hizo o dijo al dudar. Deja que explore primero y anota la ayuda que diste. Pregúntale al final qué acción esperaba encontrar.
 
+## Enlaces en vivo
+
+- [Prueba autoguiada en vivo](https://carlosvarg1997-sys.github.io/marley-coffee-mvp/prueba.html)
+- [Consola de moderación en vivo](https://carlosvarg1997-sys.github.io/marley-coffee-mvp/PRUEBA_CON_PERSONAS/RONDA_FINAL_E0_E9/inicio.html)
+
+En el sitio, cada tarea de la prueba autoguiada se cierra con un CTA. Pulsarlo abre el cuestionario de esa tarea; al guardarlo, el sitio sigue su camino.
+
+| Tarea | CTA que la cierra |
+|---|---|
+| T1 | El primer CTA que lleva a «Cuéntanos de tu negocio» |
+| T2 | «Aceptar mi pack» |
+| T3 | «Ir a mi portal» |
+| T4 | «Retomar mi propuesta» o «Firmar contrato (simulación)» en el portal si ya aceptaste el pack |
+| T5 | «Confirmar repetición» |
+| T6 | «Enviar» de Ayuda, o «Enviar recomendación» |
+
 ## Cómo abrirla y guardar el informe
 
 1. En el computador donde corre el prototipo, abre [Prueba autoguiada](http://127.0.0.1:8896/prueba.html). Para compradores, elige **Buscando en Google** o **Desde un anuncio** y su tipo de negocio. Para el CRM, elige **Equipo interno de Marley** y el área.
 2. Si vas a moderar solo C04 y C09, abre la [consola](http://127.0.0.1:8896/PRUEBA_CON_PERSONAS/RONDA_FINAL_E0_E9/inicio.html). Deja C04 en la primera pregunta. Para preparar C09, completa un diagnóstico ficticio, confirma la propuesta y registra la firma de prueba. Entra al portal y confirma el pedido del escenario. Usa la misma etapa del pedido para todas las personas y anótala en el registro.
-3. En la prueba autoguiada, pulsa **Terminé esta tarea**. Completa el resultado y la facilidad o marca **Prefiero no responder** donde corresponda. En una sesión corta, pulsa **Terminar la prueba** después de la última tarea observada y completa las preguntas finales. Si la barra de tareas está plegada, abre su flecha para ver esa opción.
+3. En la prueba autoguiada, cada tarea se cierra con el botón del sitio que la cierra (ver la tabla de arriba). Al apretarlo aparece el cuestionario de esa tarea, y solo ahí se responde: completa el resultado y la facilidad, o marca **Prefiero no responder** donde corresponda, y guarda. Si no encuentras cómo seguir, pulsa **No encuentro cómo seguir** en la franja de tarea. En una sesión corta, abre **Ver instrucción** y pulsa **Terminar la prueba** después de la última tarea observada, y completa las preguntas finales.
 4. En resultados, pulsa **Descargar informe PDF**. Guarda también el **JSON** y el **CSV de tareas** si vas a comparar las sesiones. Revisa que los tres archivos lleven el mismo código. Para una sesión moderada, abre **Respuestas y exportación**, filtra por participante y guarda el resumen CSV y el JSON junto con tus notas.
 5. Para la siguiente persona, usa **Empezar de cero** después de guardar los archivos. La opción **Reiniciar datos** de la consola limpia el prototipo y conserva las respuestas de investigación anteriores.
 

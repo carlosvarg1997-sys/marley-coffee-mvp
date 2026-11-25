@@ -1,8 +1,21 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const { chromium } = require('./playwright-system-chrome.cjs');
 const { useLegacyCrm } = require('./legacy-crm-contract.cjs');
 
-const base = process.argv[2] || 'http://127.0.0.1:8879/';
+// La base puede ser una subcarpeta (https://…/marley-coffee-mvp/): termina siempre en «/» para que las rutas relativas no salgan de ella.
+function baseDe(raw) {
+  const url = new URL(raw);
+  url.search = '';
+  url.hash = '';
+  if (/\.html?$/i.test(url.pathname)) url.pathname = url.pathname.replace(/[^/]*$/, '');
+  if (!url.pathname.endsWith('/')) url.pathname += '/';
+  return url.href;
+}
+const base = baseDe(process.argv[2] || 'http://127.0.0.1:8879/');
+// Capturas e informe fuera del repositorio (carpeta de evidencia del encargo del 25-nov).
+const EVIDENCIA = process.env.A1_FINAL_A8_R3_OUT || 'C:/Users/HP/Documents/Codex/2026-11-15/ten/work/marley-ux-final-25nov-evidencia/F/a1-final-a8-r3';
 const routeList = [
   ...Array.from({ length: 15 }, (_, i) => `C${String(i + 1).padStart(2, '0')}`),
   ...Array.from({ length: 18 }, (_, i) => `R${String(i).padStart(2, '0')}`),
@@ -24,6 +37,9 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function route(page, hash) {
   const role = roleFor(hash);
   await page.evaluate(({ hash, role }) => {
+    // Con el ejemplo cargado, C04 reanuda el catálogo en curso y pasa a C10: C04 se entra sin ese estado y el ejemplo vuelve en la ruta siguiente.
+    if (hash === 'C04') { window.M4?.reset?.(); window.__ejemploPendiente = true; }
+    else if (window.__ejemploPendiente) { window.M4?.loadExample?.(); window.__ejemploPendiente = false; }
     if (window.M4?.setRole) window.M4.setRole(role);
     window.MarleyApp.go(hash, { evaluation: true });
   }, { hash, role });
@@ -54,7 +70,7 @@ async function main() {
       const reason = request.failure()?.errorText || '';
       if (new URL(request.url()).origin === new URL(base).origin && reason !== 'net::ERR_ABORTED') errors.push({ type: 'requestfailed', url: request.url(), message: reason });
     });
-    await page.goto(new URL('/index.html', base).toString(), { waitUntil: 'domcontentloaded' });
+    await page.goto(new URL('index.html', base).toString(), { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => Boolean(window.M4 && window.MarleyApp && window.M4D), null, { timeout: 10000 });
     await page.evaluate(() => window.M4.loadExample());
 
@@ -112,7 +128,7 @@ async function main() {
             const r = element.getBoundingClientRect();
             return { selector: element.id || (typeof element.className === 'string' ? element.className : element.tagName), position: getComputedStyle(element).position, top: r.top, bottom: r.bottom, left: r.left, right: r.right, text: (element.innerText || '').trim().replace(/\s+/g, ' ').slice(0, 55) };
           });
-          const mainCta = hash === 'C08' ? document.querySelector('#m5-exp :is([data-a="quote-biz"], [data-a="case-resume"])')
+          const mainCta = hash === 'C08' ? document.querySelector('#m4-main [data-cta-principal="caso-comercial"]')
             : hash === 'C14' ? [...document.querySelectorAll('button,a')].find((e) => e.innerText.trim().toLocaleLowerCase('es-CL') === 'añadir a mi propuesta')
               : hash === 'C15' ? [...document.querySelectorAll('button,a')].find((e) => e.innerText.trim().toLocaleLowerCase('es-CL') === 'revisar soporte') : null;
           const h1 = [...document.querySelectorAll('h1')].find(visible);
@@ -139,6 +155,10 @@ async function main() {
             support: support ? { color: targetColor, background } : null,
           };
         }, { hash, viewportHeight: viewport.height });
+        if (viewport.width === 390 && ['C01', 'C03', 'C08', 'R01'].includes(hash)) {
+          fs.mkdirSync(EVIDENCIA, { recursive: true });
+          await page.screenshot({ path: path.join(EVIDENCIA, `${hash}-390x844.png`) });
+        }
         if (viewport.width < 768 && touchRoutes.has(hash) && data.small.length) touchFailures.push({ width: viewport.width, hash, controls: data.small });
         if (data.fixed.length && overlayRoutes.includes(hash) || data.fixed.length && ['R01', 'R02'].includes(hash)) overlayFailures.push({ width: viewport.width, hash, fixed: data.fixed });
         if (['C08', 'C14', 'C15'].includes(hash)) firstFold.push({ width: viewport.width, hash, h1: data.h1, cta: data.cta });
@@ -189,17 +209,19 @@ async function main() {
     const loginContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
     await useLegacyCrm(loginContext);
     const loginPage = await loginContext.newPage();
-    await loginPage.goto(new URL('/index.html#R00', base).toString(), { waitUntil: 'domcontentloaded' });
+    await loginPage.goto(new URL('index.html#R00', base).toString(), { waitUntil: 'domcontentloaded' });
     const login = loginPage.locator('form[data-a="crm-login"]');
     await login.locator('#m4Pass').fill('incorrecta');
     await login.locator('#m4User').fill('paula.diaz');
     await login.locator('button[type="submit"]').click();
     loginError = await login.locator('[role="alert"]').innerText();
+    fs.mkdirSync(EVIDENCIA, { recursive: true });
+    await loginPage.screenshot({ path: path.join(EVIDENCIA, 'R00-error-login-390x844.png'), fullPage: true });
     await loginContext.close();
 
     const videoContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'no-preference' });
     const videoPage = await videoContext.newPage();
-    await videoPage.goto(new URL('/index.html#C02', base).toString(), { waitUntil: 'domcontentloaded' });
+    await videoPage.goto(new URL('index.html#C02', base).toString(), { waitUntil: 'domcontentloaded' });
     await videoPage.waitForFunction(() => Boolean(window.M4 && window.MarleyApp), null, { timeout: 10000 });
     await wait(450);
     const videoInitial = await videoPage.evaluate(() => {
@@ -228,6 +250,8 @@ async function main() {
       m9Background, videoInitial, videoAfterScroll,
     };
     process.stdout.write(JSON.stringify(output, null, 2) + '\n');
+    fs.mkdirSync(EVIDENCIA, { recursive: true });
+    fs.writeFileSync(path.join(EVIDENCIA, 'informe.json'), JSON.stringify(output, null, 2) + '\n');
     assert.equal(output.status, 'PASS', 'final A8 checks pass across mobile routes');
   } finally { await browser.close(); }
 }

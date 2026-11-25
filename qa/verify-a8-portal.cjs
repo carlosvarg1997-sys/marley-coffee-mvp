@@ -6,13 +6,23 @@ const path = require('node:path');
 const { chromium } = require('./playwright-system-chrome.cjs');
 
 const root = path.resolve(__dirname, '..');
-const base = process.argv[2] || 'http://127.0.0.1:8878/';
+// La base puede ser una subcarpeta (https://…/marley-coffee-mvp/): termina siempre en «/» para que las rutas relativas no salgan de ella.
+function baseDe(raw) {
+  const url = new URL(raw);
+  url.search = '';
+  url.hash = '';
+  if (/\.html?$/i.test(url.pathname)) url.pathname = url.pathname.replace(/[^/]*$/, '');
+  if (!url.pathname.endsWith('/')) url.pathname += '/';
+  return url.href;
+}
+const base = baseDe(process.argv[2] || 'http://127.0.0.1:8878/');
 const hashes = [
   ...Array.from({ length: 15 }, (_, i) => `C${String(i + 1).padStart(2, '0')}`),
   ...Array.from({ length: 17 }, (_, i) => `R${String(i).padStart(2, '0')}`),
 ];
 const viewports = [{ width: 390, height: 844 }, { width: 1280, height: 551 }, { width: 1440, height: 900 }];
-const outputDir = process.env.A8_VERIFY_OUT || path.join(root, 'EVIDENCIA_10NOV');
+// Las capturas van fuera del repositorio (carpeta de evidencia del encargo del 25-nov).
+const outputDir = process.env.A8_VERIFY_OUT || 'C:/Users/HP/Documents/Codex/2026-11-15/ten/work/marley-ux-final-25nov-evidencia/F/a8-portal';
 const evidenceHashes = new Set(['C01', 'C02', 'C03', 'C08', 'C10', 'R02', 'R06', 'R16', 'R17']);
 
 function roleFor(hash) {
@@ -25,7 +35,9 @@ function roleFor(hash) {
 async function collect(page, expectedHash, viewport) {
   const role = roleFor(expectedHash);
   await page.evaluate(({ expectedHash, role }) => {
-    if (window.M4?.loadExample) window.M4.loadExample();
+    // Con el ejemplo cargado, C04 reanuda el catálogo en curso y pasa a C10 (la app lo hace así): C04 se entra sin ese estado.
+    if (expectedHash === 'C04') window.M4?.reset?.();
+    else if (window.M4?.loadExample) window.M4.loadExample();
     if (window.M4?.setRole) window.M4.setRole(role);
     if (window.MarleyApp?.go) window.MarleyApp.go(expectedHash, { evaluation: true });
   }, { expectedHash, role });
@@ -96,7 +108,7 @@ async function main() {
           // Al cambiar hash una imagen lazy de la vista anterior puede cancelarse sin indicar un fallo del sitio.
           if (new URL(request.url()).origin === new URL(base).origin && message !== 'net::ERR_ABORTED') errors.push({ viewport: viewport.width, type: 'requestfailed', url: request.url(), message });
         });
-        await page.goto(new URL('/index.html', base).toString(), { waitUntil: 'domcontentloaded' });
+        await page.goto(new URL('index.html', base).toString(), { waitUntil: 'domcontentloaded' });
         await page.waitForFunction(() => Boolean(window.M4 && window.MarleyApp && window.M4D), null, { timeout: 10000 });
         for (const hash of hashes) results.push(await collect(page, hash, viewport));
         // R17 es la integración por comprador posterior al conjunto de 32 rutas revisadas por A8.

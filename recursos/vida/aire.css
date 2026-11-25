@@ -1,0 +1,13 @@
+@media(min-width:768px){:is(.m4-client #m4-main,.b2c-main)>*{padding-inline:32px!important}#crm-v2-root .crm2-sidebar>*{margin-inline:8px!important}#m7-launcher.m7-launcher{right:32px!important}}
+@media(max-width:767px){:is(.m4-client #m4-main,.b2c-main)>*,.b2c-footer{padding-inline:20px!important}#crm-v2-root :is(.crm2-main,.crm2-topbar,.crm2-sidebar){padding-inline:20px!important}#crm-v2-root .crm2-content{padding-inline:0!important}.m4-client .m5-stage-tabs{flex-wrap:wrap!important}.m4-client .r3-step-guide ol{grid-template-columns:1fr 1fr!important}}
+@scope (.m4-client){
+#m4-main>*{box-sizing:border-box}
+#m4-main>*+*,#m4-main :is(.m5-buyer-groups,.m5-stage-beats,.m5-stage-beats>*+*,.m5-exp-side,.m5-exp-side>*+*,.m5-actions,.r5-pack-acc,.r7-initial-note,details,.r3-c02-end-actions),#panel-biz{margin-top:24px!important}
+#m4-main>section+section,.r5-bloque{margin-top:40px!important}
+#m4-main .ux-strip{padding-block:12px!important}
+:is(#m4-main details>summary,.m5-top summary,.r7-fold>summary,.r7-initial-note){padding:12px!important}
+}
+#crm-v2-root :is(.crm2-fold,.crm-agente-sugerencias,.crm-kpi__bloque,.crm-kpi__avance,.crm-tablero__objetivos,.crm2-content>*+*){margin-top:24px!important}
+#crm-v2-root .crm2-content>section+section{margin-top:40px!important}
+:is(.m4-client,#crm-v2-root) :is([class*=badge],[class*=__fase],.m5-tag){padding:8px!important;line-height:1.5!important}
+@media(prefers-reduced-motion:reduce){:is(button,a,[role=button]):hover{transform:none!important}}

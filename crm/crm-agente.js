@@ -12,7 +12,7 @@
   const HOY = { R01: 'ventas', R11: 'marketing', R05: 'jefatura' };
   const ROLES = ['ventas', 'marketing', 'jefatura'];
   const CANAL = { web: 'Chat web', whatsapp: 'WhatsApp', correo: 'Correo', nota: 'Nota' };
-  const ROL_TXT = { ventas: 'Ventas', marketing: 'Marketing', jefatura: 'Jefatura', comprador: 'Comprador', cliente: 'Comprador', bot: 'Asistente del sitio', agente: 'Agente', ejecutiva: 'Ejecutiva', sistema: 'Sistema' };
+  const ROL_TXT = { ventas: 'Ventas', marketing: 'Marketing', jefatura: 'Jefatura', comprador: 'Comprador', cliente: 'Comprador', bot: 'Asistente del sitio', agente: 'Agente', ejecutiva: 'Ejecutiva', sistema: 'Sistema', persona: 'Persona del equipo' };
   const PERMISO_TXT = { yes: 'Permiso de promoción registrado', no: 'Sin permiso de promoción', reply: 'Solo puede responder su solicitud', unknown: 'Permiso por confirmar' };
   const NIVEL_TXT = { regla: 'Regla sin IA', ia: 'Sugerencia de IA', persona: 'Decisión de persona' };
   const ETIQUETA_EVENTO = { diag_completo: 'Completó el diagnóstico', diag_personalizado: 'Usó el diagnóstico personalizado' };
@@ -332,12 +332,17 @@
     leadsDe().forEach(l => {
       const hay = norm(`${l.id} ${contactoDe(l)} ${empresaDe(l)} ${l.business || ''} ${l.comuna || ''}`);
       const emp = norm(empresaDe(l));
-      const exacto = Boolean(emp && q.includes(emp)) || Boolean(norm(l.id) && q.includes(norm(l.id)));
+      const id = norm(l.id);
+      const contacto = norm(l.name || l.contactName);
+      const frase = ` ${q} `;
+      const exacto = id && frase.includes(` ${id} `) ? 30
+        : contacto.includes(' ') && frase.includes(` ${contacto} `) ? 20
+        : emp && frase.includes(` ${emp} `) ? 10 : 0;
       const aciertos = toks.reduce((a, t) => a + (hay.includes(t) ? 1 : 0), 0);
       // Los nombres distintivos deben estar todos: «Hotel Inexistente» no trae el lead de otro hotel.
       const distOk = distintivos.length ? distintivos.every(t => hay.includes(t)) : aciertos > 0;
       if (!exacto && !distOk) return;
-      const s = (exacto ? 10 : 0) + aciertos;
+      const s = exacto + aciertos;
       if (s > sc) { sc = s; mejor = l; }
     });
     // Sin un nombre que coincida no se elige otro lead: antes el buscador del motor traía a cualquiera (p. ej. MC-HOR-2040).
@@ -400,7 +405,7 @@
     const maq = cotizacionDe(l)?.maquina || 'una máquina para tu negocio';
     const vol = l.volumen ? `, ${String(l.volumen).toLowerCase()} tazas al día` : '';
     const cierre = canal === 'web' ? 'Te respondemos por este mismo chat.' : 'Te escribimos por ese mismo canal.';
-    return `Hola ${nombre}, soy ${String(ex.name || 'una persona del equipo').split(' ')[0]}, ${String(ex.role || 'de Ventas').toLowerCase()} de Marley Coffee. Revisé tu interés en ${maq} para ${empresaDe(l)}${vol}. Ya te asignamos a una persona de nuestro equipo para revisar tu propuesta y resolver tus dudas. ¿Te acomoda una llamada esta semana? ${cierre}`;
+    return `Hola ${nombre}, soy ${primerNombreCRM(ex.name) || 'una persona del equipo'}, ejecutiva de ${zonaDe(ex)} de Marley Coffee. Revisé tu interés en ${maq} para ${empresaDe(l)}${vol}. Ya te asignamos a una persona de nuestro equipo para revisar tu propuesta y resolver tus dudas. ¿Te acomoda una llamada esta semana? ${cierre}`;
   }
   const destinoDe = (l, canal) => (canal === 'correo' ? (l.email || contactoDe(l)) : canal === 'whatsapp' ? (l.phone || contactoDe(l)) : 'Chat del portal');
 
@@ -432,20 +437,20 @@
     });
     let tr = null;
     mutarAgente(st => {
-      tr = { id: uid('TR'), leadId: l.id, de: 'marketing', a: 'ventas', dueno: ex.name, zona: ex.role, resumen, estado: 'pendiente', canal: canal.sugerido, ts: ahora() };
+      tr = { id: uid('TR'), leadId: l.id, de: 'marketing', a: 'ventas', dueno: ex.name, zona: zonaDe(ex), resumen, estado: 'pendiente', canal: canal.sugerido, ts: ahora() };
       st.traspasos.unshift(tr);
-      avisar(st, 'ventas', `Marketing pasó a ${empresaDe(l)}. Dueño por zona: ${ex.name} (${ex.role}).`, { leadId: l.id, traspasoId: tr.id, tipo: 'traspaso' });
+      avisar(st, 'ventas', `Marketing pasó a ${empresaDe(l)}. Dueño por zona: ${duenoTexto(l, ex)}.`, { leadId: l.id, traspasoId: tr.id, tipo: 'traspaso' });
       anotar(st, 'marketing', 'regla:mql-verificado', mql.lista.map(c => (c.ok ? 'sí' : 'no')).join(' · '), 'Sin IA: criterios de MQL', 'regla', 'Regla del CRM');
-      anotar(st, 'marketing', 'traspaso:resumen', `dueño por zona: ${ex.name}`, recorta(resumen, 140), 'ia', 'Agente (resumen)');
+      anotar(st, 'marketing', 'traspaso:resumen', `dueño por zona: ${duenoTexto(l, ex)}`, recorta(resumen, 140), 'ia', 'Agente (resumen)');
       anotar(st, 'marketing', 'traspaso:confirmar', `lead ${l.id}`, 'Pedido de Marketing', 'persona', userDe('marketing'));
     });
     try { window.MarleyAgente?.eventos?.emitir?.('traspaso', { leadId: l.id, dueno: ex.name, traspasoId: tr.id }); } catch (_) { /* opcional */ }
     S.foco.marketing = l.id;
-    const cuerpo = `${filas([['Dueño por zona', `${ex.name} · ${ex.role}`], ['Estado', 'Pendiente de Ventas · visible en su Hoy'], ['Resumen', resumen]])}`;
+    const cuerpo = `${filas([['Dueño por zona', duenoTexto(l, ex)], ['Estado', 'Pendiente de Ventas · visible en su Hoy'], ['Resumen', resumen]])}`;
     const html = tarjeta('Traspaso creado para Ventas', cuerpo, 'crm-agente-ok') +
       niveles({
         regla: `MQL: cumple ${mql.lista.filter(c => c.ok).length} de 4 (contacto, B2B, permiso e interés).`,
-        ia: `Resumen del traspaso y mensaje redactados; dueño asignado por la comuna (${l.comuna || 'sin comuna'}).`,
+        ia: `Resumen del traspaso y mensaje redactados; dueño por zona: ${duenoTexto(l, ex)}.`,
         persona: 'Marketing pidió pasarlo y aprueba el mensaje antes de enviarlo.',
         registro: 'criterios MQL, resumen, dueño y aprobación de Marketing'
       });
@@ -1025,6 +1030,7 @@
     if (fichaEl.parentNode !== cont) cont.appendChild(fichaEl);
   }
   function sincronizar() {
+    sincronizarPanel();
     const host = document.getElementById(ROOT_ID);
     const ruta = (location.hash || '#R00').slice(1).split('?')[0];
     if (host && !host.hidden && ruta === 'R04') { quitarBarra(); sincronizarFicha(host); return; }
@@ -1066,6 +1072,526 @@
       });
   }
 
-  window.MarleyCRMAgente = { version: VERSION, procesar, sincronizar, rol: () => S.rol };
+  // ---------- Panel del agente en todas las pestañas del CRM (botón y panel que no tapan los CTA) ----------
+  // Tareas (correo, contactar, visita, avisar) con borrador editable, ajustes, envío en segundo plano,
+  // conversaciones en espera y su toma. Solo este módulo y la barra escriben acciones del CRM; el motor interpreta.
+  const PN = { hilo: [], borradores: {}, avisos: [], abierto: false, escribiendo: 0, rol: null };
+  let panelEl = null, pnCuerpoEl = null, pnLanzEl = null, pnContEl = null, pnHiloEl = null, pnEsperaEl = null, pnAvisoEl = null, pnSugEl = null, pnFormEl = null, pnInputEl = null, pnRegEl = null;
+  const ETIQ_TAREA = { correo: 'Correo', contactar: 'WhatsApp', visita: 'Visita (nota interna)', avisar: 'Aviso al equipo' };
+  const MOTIVO_ESP = { falla: 'Falla o reclamo de la máquina', precio: 'Precio especial o crédito', persona: 'Pide hablar con una persona' };
+  const pnRolActual = () => { const r = rolM4(); return ROLES.includes(r) ? r : null; };
+  const pnUsuario = rol => (rol === 'ventas' ? (d4().ROLE_MENUS?.ventas?.user || 'Paula Díaz') : userDe(rol));
+  const pnAtiende = rol => (rol === 'ventas' ? (d4().ROLE_MENUS?.ventas?.user || 'Ventas') : 'una persona de Soporte');
+  const zonaDe = ex => (ex && d4().ZONES && d4().ZONES[ex.zone] ? d4().ZONES[ex.zone].name : (ex?.role || 'Zona por confirmar'));
+  const primerNombreCRM = n => String(n || '').trim().split(/\s+/)[0] || '';
+  const sinComuna = x => !x || !x.comuna || x.comuna === 'Sin comuna';
+  // Dueño por zona: el mismo texto en el traspaso y en la firma del borrador (la zona es la misma).
+  const duenoTexto = (x, ex) => `${ex.name} · ${zonaDe(ex)}${sinComuna(x) ? ' (sin comuna: asignado por zona por defecto)' : ' (comuna ' + x.comuna + ')'}`;
+  function refDe(id) {
+    const k = String(id ?? '');
+    if (!k) return null;
+    const l = leadPorId(k) || leadsDe().find(x => claves(x).includes(k)) || null;
+    if (l) return { lead: l, cuenta: null, key: String(l.id) };
+    const a = cuentasDe().find(x => String(x.id) === k) || null;
+    return a ? { lead: null, cuenta: a, key: String(a.id) } : null;
+  }
+  function infoDe(ref) {
+    if (!ref) return null;
+    if (ref.lead) {
+      const l = ref.lead;
+      return { key: ref.key, x: l, contacto: contactoDe(l), saludo: primerNombreCRM(contactoDe(l)), empresa: empresaDe(l), email: l.email || '', telefono: l.phone || '', ejecutiva: ejecutivoDe(l), maquina: cotizacionDe(l)?.maquina || 'una máquina para tu negocio' };
+    }
+    const a = ref.cuenta;
+    return { key: ref.key, x: a, contacto: a.name || 'la cuenta', saludo: '', empresa: a.name || 'la cuenta', email: '', telefono: '', ejecutiva: ejecutivoDe(a), maquina: 'una máquina para tu negocio' };
+  }
+  // Permiso de canal: con clientes, solo por los canales con permiso registrado (la misma regla que el motor).
+  function permisoPara(info, canal) {
+    const porCanal = window.MarleyAgente?.canales?.permiso?.(info.key, canal);
+    if (typeof porCanal === 'boolean') return porCanal;
+    const c = (leerAgente().consentimientos || {})[info.key] || {};
+    return c[canal] === true && c.baja !== true;
+  }
+  function textoInicial(b) {
+    const i = b.info, ex = i.ejecutiva || {};
+    const saludo = i.saludo ? `Hola ${i.saludo}, ` : 'Hola, ';
+    const firma = `— ${ex.name || 'Equipo de Marley'}, ${zonaDe(ex)}`;
+    if (b.tipo === 'correo') return `${saludo}te escribo de Marley Coffee Empresas. Revisamos tu propuesta de ${b.maquina} para ${i.empresa}. ${primerNombreCRM(ex.name) || 'Una persona de tu zona'} puede resolver tus dudas y ajustar lo que necesites, sin compromiso. Si no quieres recibir más mensajes, responde BAJA.\n${firma}`;
+    if (b.tipo === 'contactar') return `${saludo}soy ${primerNombreCRM(ex.name) || 'del equipo'} de Marley Coffee. ¿Te acomoda que revisemos tu propuesta de ${b.maquina} para ${i.empresa}? Respondo por este mismo chat.\n${firma}`;
+    if (b.tipo === 'visita') return `Visita a ${i.empresa}: proponer ${b.horario}. Ejecutiva a cargo: ${ex.name || 'por confirmar'}, ${zonaDe(ex)}.`;
+    return `${b.destinoNombre}: ${b.usuario} te pide que ${b.recado}. Cuenta: ${i.empresa}${i.contacto && i.contacto !== i.empresa ? ' (' + i.contacto + ')' : ''}.`;
+  }
+  const dividirFirma = t => { const ls = String(t || '').split('\n'); const i = ls.findIndex(l => /^— /.test(l)); return i >= 0 ? { cuerpo: ls.slice(0, i).join(' ').trim(), firma: ls.slice(i).join('\n') } : { cuerpo: String(t || '').trim(), firma: '' }; };
+  const unirFirma = (cuerpo, firma) => (firma ? `${cuerpo}\n${firma}` : cuerpo);
+  const sentencias = t => String(t).split(/(?<=[.!?])\s+/).filter(Boolean);
+  // Ajustes sobre el texto que la persona ve y puede editar: «más corto», «más formal», «más cercano», «agrega …».
+  function ajustarTexto(texto, ajuste, valor) {
+    const { cuerpo, firma } = dividirFirma(texto);
+    let nuevo = cuerpo;
+    if (ajuste === 'corto') {
+      const s = sentencias(cuerpo);
+      if (s.length >= 3) nuevo = [s[0], s[1], s[s.length - 1]].join(' ');
+      nuevo = nuevo.replace(/,?\s*sin compromiso/i, '').replace(/\s{2,}/g, ' ').trim();
+      if (nuevo === cuerpo) nuevo = cuerpo.replace(/\s*Respondo por este mismo chat\.?/, '');
+    }
+    if (ajuste === 'formal') {
+      nuevo = nuevo.replace(/^Hola\s+([^,]+),/, 'Estimado/a $1,').replace(/^Hola,/, 'Estimado/a,')
+        .replace(/\bte escribo\b/g, 'le escribo').replace(/\btu propuesta\b/g, 'su propuesta').replace(/\btus dudas\b/g, 'sus dudas')
+        .replace(/\bajustar lo que necesites\b/g, 'ajustar lo que requiera').replace(/\bpuedes\b/g, 'puede')
+        .replace(/\bno quieres\b/g, 'no desea').replace(/\bresponde BAJA\b/g, 'responda BAJA').replace(/\bte acomoda\b/g, 'le acomoda')
+        .replace(/\bRespondo\b/g, 'Quedo atento').replace(/\bsoy\b/g, 'soy');
+      if (nuevo === cuerpo) nuevo = cuerpo.replace(/\.?$/, '. Quedamos atentos.');
+    }
+    if (ajuste === 'cercano') {
+      nuevo = nuevo.replace(/^Estimado\/a\s+([^,]+),/, '¡Hola $1!').replace(/^Estimado\/a,/, '¡Hola!')
+        .replace(/^Hola\s+([^,]+),/, '¡Hola $1!').replace(/\ble escribo\b/g, 'te escribo').replace(/\bsu propuesta\b/g, 'tu propuesta')
+        .replace(/\bsus dudas\b/g, 'tus dudas').replace(/\bpuede resolver\b/g, 'puede ayudarte a resolver').replace(/\bno desea\b/g, 'no quieres')
+        .replace(/\bresponda BAJA\b/g, 'responde BAJA');
+      if (nuevo === cuerpo) nuevo = '¡Hola! ' + cuerpo;
+    }
+    if (ajuste === 'agrega' && valor) {
+      const extra = String(valor).trim().replace(/[.\s]+$/, '');
+      if (extra) {
+        const s = sentencias(nuevo);
+        const frase = extra.charAt(0).toUpperCase() + extra.slice(1) + '.';
+        const i = s.findIndex(x => /\bBAJA\b/.test(x));
+        if (i >= 0) s.splice(i, 0, frase); else s.push(frase);
+        nuevo = s.join(' ');
+      }
+    }
+    return unirFirma(nuevo, firma);
+  }
+  // Tolera errores de tipeo en palabras de 5 letras o más (una letra de diferencia; dos en las muy largas).
+  function distanciaCRM(a, b) {
+    let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const cur = [i];
+      for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+  const tieneAlguna = (t, palabras) => t.split(' ').some(w => palabras.some(p => w === p || (p.length >= 5 && w.length >= 4 && distanciaCRM(w, p) <= (p.length >= 8 ? 2 : 1))));
+  function parseTarea(texto) {
+    const t = norm(texto);
+    if (tieneAlguna(t, ['avisa', 'avisale', 'avisar', 'dile', 'digale', 'recuerdale'])) return 'avisar';
+    if (tieneAlguna(t, ['visita', 'visitar']) || (tieneAlguna(t, ['agenda', 'agendar']) && tieneAlguna(t, ['visita', 'reunion', 'cita']))) return 'visita';
+    if (tieneAlguna(t, ['whatsapp', 'wasap', 'guasap'])) return 'contactar';
+    const correo = tieneAlguna(t, ['correo', 'mail', 'email']);
+    if (correo && tieneAlguna(t, ['manda', 'mandale', 'mandar', 'envia', 'enviale', 'enviar', 'escribe', 'escribele', 'escribir'])) return 'correo';
+    if (tieneAlguna(t, ['llama', 'llamale', 'llamar', 'contacta', 'contactale', 'contactar'])) return 'contactar';
+    if (correo) return 'correo';
+    return null;
+  }
+  function parseAjuste(texto) {
+    const t = norm(texto);
+    if (tieneAlguna(t, ['corto', 'breve', 'resumelo'])) return { tipo: 'corto' };
+    if (tieneAlguna(t, ['formal'])) return { tipo: 'formal' };
+    if (tieneAlguna(t, ['cercano', 'calido', 'amable'])) return { tipo: 'cercano' };
+    const m = String(texto || '').match(/^\s*(\S+)\s+(.+)$/);
+    if (m && tieneAlguna(norm(m[1]), ['agrega', 'agregale', 'anade', 'suma', 'incluye'])) return { tipo: 'agrega', valor: m[2] };
+    return null;
+  }
+  function destinoRol(texto) {
+    const t = norm(texto);
+    if (/marketing/.test(t)) return 'marketing';
+    if (/jefatura|gerencia|jefe/.test(t)) return 'jefatura';
+    return 'ventas';
+  }
+  const nombreDestino = rol => (rol === 'ventas' ? `${pnAtiende('ventas')} (Ventas)` : (rol === 'marketing' ? 'Marketing' : 'Jefatura'));
+  function recadoDe(texto) {
+    const m = String(texto || '').match(/\bque\s+(.+)$/i);
+    return m ? m[1].replace(/\s+/g, ' ').trim().slice(0, 140) : 'revises la cuenta y la llames';
+  }
+  function buscarRef(texto) {
+    const l = buscarLead(texto);
+    if (l) return refDe(l.id);
+    const palabras = norm(texto).split(' ').filter(w => w.length >= 3 && !STOP.has(w) && !GENERICAS.has(w) && !/^(manda|mandale|correo|envia|enviale|avisa|avisale|llama|llamale|visita|agenda|agendar|escribe|escribele|contacta|whatsapp|mail|email|sobre|para|cuenta|hotel|que|con|sus|propuesta|llame|mañana|manana)$/.test(w));
+    if (!palabras.length) return null;
+    const hit = cuentasDe().find(x => { const h = norm(`${x.name || ''} ${x.business || ''}`); return palabras.some(w => h.includes(w)); });
+    return hit ? refDe(hit.id) : null;
+  }
+  const borradorAbierto = () => Object.values(PN.borradores).filter(b => b.estado === 'editando').pop() || null;
+  const esperasAbiertas = () => leerAgente().traspasos.filter(t => t.espera && t.estado === 'esperando').sort((a, b) => (Number(b.ts) || 0) - (Number(a.ts) || 0));
+  function abrirPanel() { if (!PN.abierto) { PN.abierto = true; renderLanzador(); } }
+  function avisoPanel(texto) { PN.avisos.push(texto); if (PN.avisos.length > 6) PN.avisos.splice(0, PN.avisos.length - 6); }
+  // Escribe en la conversación del cliente lo que el equipo toma o envía (lo ve el portal y la línea de tiempo).
+  function avisarCliente(cuentaId) { try { window.MarleyAgente?.eventos?.emitir?.('mensaje', { cuentaId: String(cuentaId) }); } catch (_) { /* opcional */ } }
+
+  // Tarea desde un botón de E (data-crm-agente-tarea) o desde texto: arma el borrador con los datos de la cuenta.
+  function abrirTarea(tipo, cuentaId, texto) {
+    const info = infoDe(refDe(cuentaId));
+    if (!info) { PN.hilo.push({ tipo: 'agente', html: tarjeta('Sin cuenta', '<p>No encuentro esa cuenta en el registro. Escribe su nombre o usa un botón de la lista.</p>', 'crm-agente-alerta') }); renderPanel(); return; }
+    const rol = pnRolActual() || 'ventas';
+    abrirPanel();
+    const b = { id: uid('BR'), tipo, info, estado: 'editando', maquina: info.maquina, horario: '', destino: 'ventas', destinoNombre: '', usuario: pnUsuario(rol), recado: '', rol };
+    if (tipo === 'visita') { const sl = slotsVisita()[0]; b.horario = sl ? sl.etiqueta : 'la próxima semana'; }
+    if (tipo === 'avisar') { b.destino = destinoRol(texto || ''); b.destinoNombre = nombreDestino(b.destino); b.recado = recadoDe(texto || ''); }
+    b.texto = textoInicial(b);
+    PN.borradores[b.id] = b;
+    PN.hilo.push({ tipo: 'agente', html: `<p>Armé el borrador de <b>${esc(ETIQ_TAREA[tipo])}</b> con los datos de ${esc(info.empresa)}. Edítalo aquí mismo o pide ajustes: «más corto», «más formal», «más cercano» o «agrega …». «Envíalo» lo manda en segundo plano.</p>` });
+    PN.hilo.push({ tipo: 'agente', borradorId: b.id });
+    mutarAgente(st => anotar(st, rol, 'tarea:' + tipo, `cuenta ${info.empresa}`, 'Borrador armado con los datos de la cuenta', 'ia', 'Agente'));
+    renderPanel(); renderLanzador();
+    if (panelEl && panelEl.isConnected) { try { panelEl.scrollIntoView({ block: 'nearest' }); } catch (_) { /* vista opcional */ } }
+    const ta = pnHiloEl && pnHiloEl.querySelector(`[data-crm-agente-texto="${b.id}"]`);
+    if (ta) { try { ta.focus({ preventScroll: true }); } catch (_) { /* foco opcional */ } }
+  }
+  function ajustarBorrador(b, aj) {
+    const ta = pnHiloEl ? pnHiloEl.querySelector(`[data-crm-agente-texto="${b.id}"]`) : null;
+    if (ta) b.texto = ta.value;
+    b.texto = ajustarTexto(b.texto, aj.tipo, aj.valor);
+    const etiqueta = { corto: 'más corto', formal: 'más formal', cercano: 'más cercano', agrega: 'con lo que agregaste' }[aj.tipo] || 'como lo pediste';
+    PN.hilo.push({ tipo: 'agente', html: `<p>Listo: lo dejé ${esc(etiqueta)}. Revísalo aquí y envíalo cuando quieras.</p>` });
+    return null;
+  }
+  function descartarBorrador(id) {
+    const b = PN.borradores[id];
+    if (!b || b.estado !== 'editando') return;
+    b.estado = 'descartado';
+    const rol = pnRolActual() || 'ventas';
+    mutarAgente(st => anotar(st, rol, 'borrador:descartar', recorta(b.texto, 80), 'Borrador descartado', 'persona', pnUsuario(rol)));
+    PN.hilo.push({ tipo: 'agente', html: '<p>Borrador descartado. No se envió nada.</p>' });
+    renderPanel(); renderRegistroPanel();
+  }
+  // «Envíalo»: sin permiso del cliente no sale nada (regla sin IA). Con permiso, se envía en segundo plano.
+  function enviarBorrador(id) {
+    const b = PN.borradores[id];
+    if (!b || b.estado !== 'editando') return;
+    const rol = pnRolActual() || 'ventas';
+    if (b.tipo === 'correo' || b.tipo === 'contactar') {
+      const canal = b.tipo === 'correo' ? 'correo' : 'whatsapp';
+      if (!permisoPara(b.info, canal)) {
+        b.estado = 'bloqueado';
+        mutarAgente(st => anotar(st, rol, 'regla:sin-permiso-' + canal, `Sin permiso de ${canal === 'correo' ? 'correo' : 'WhatsApp'} registrado`, 'No se envía: primero se pide el permiso', 'regla', 'Regla del CRM'));
+        avisoPanel(`No se envió: ${b.info.contacto} no tiene permiso de ${canal === 'correo' ? 'correo' : 'WhatsApp'} registrado.`);
+        PN.hilo.push({ tipo: 'agente', html: tarjeta('Sin permiso del cliente', `<p>Con clientes solo se envía por los canales con permiso. ${esc(b.info.contacto)} no lo tiene para ${canal === 'correo' ? 'correo' : 'WhatsApp'}.</p>`, 'crm-agente-alerta') });
+        renderPanel(); renderAviso(); renderRegistroPanel();
+        return;
+      }
+    }
+    b.estado = 'enviando';
+    avisoPanel('Enviando en segundo plano: puedes seguir trabajando.');
+    renderPanel(); renderAviso();
+    setTimeout(() => terminarEnvio(id), 600 + Math.round(Math.random() * 300));
+  }
+  function terminarEnvio(id) {
+    const b = PN.borradores[id];
+    if (!b || b.estado !== 'enviando') return;
+    const rol = pnRolActual() || b.rol || 'ventas';
+    const quien = pnUsuario(rol);
+    const info = b.info;
+    let aviso = '';
+    if (b.tipo === 'correo' || b.tipo === 'contactar') {
+      const canal = b.tipo === 'correo' ? 'correo' : 'whatsapp';
+      const r = enviarSimulado({ canal, cuentaId: info.key, para: canal === 'correo' ? (info.email || info.contacto) : (info.telefono || info.contacto), texto: b.texto, aprobadoPor: quien });
+      if (!r || r.ok === false) { b.estado = 'editando'; avisoPanel(`No se envió: ${r && r.motivo ? r.motivo : 'falta el permiso del contacto'}.`); renderPanel(); renderAviso(); return; }
+      b.estado = 'enviado';
+      aviso = `${canal === 'correo' ? 'Correo' : 'WhatsApp'} enviado a ${info.contacto} (${info.empresa}).`;
+      const otro = rol === 'ventas' ? 'marketing' : 'ventas';
+      mutarAgente(st => {
+        anotar(st, rol, 'borrador:' + b.tipo, `datos de la cuenta y permiso de ${canal}`, 'Borrador armado por el agente', 'ia', 'Agente');
+        anotar(st, rol, 'regla:permiso-' + canal, 'Consentimiento del contacto registrado', 'Con clientes, solo por canales con permiso', 'regla', 'Regla del CRM');
+        anotar(st, rol, 'envio:' + canal, recorta(b.texto, 90), 'Texto aprobado y enviado por la persona', 'persona', quien);
+        avisar(st, otro, `${quien} envió un ${canal === 'correo' ? 'correo' : 'WhatsApp'} a ${info.contacto} (${info.empresa}).`, { leadId: info.key, tipo: 'envio' });
+      });
+    } else if (b.tipo === 'visita') {
+      b.estado = 'enviado';
+      aviso = `Visita propuesta a ${info.empresa} registrada en la línea de tiempo.`;
+      mutarAgente(st => {
+        st.conversaciones[info.key] = (st.conversaciones[info.key] || []).concat([{ canal: 'nota', rol, texto: b.texto, ts: ahora(), aprobadoPor: quien }]);
+        anotar(st, rol, 'visita:proponer', `horario ${b.horario}`, 'Nota interna para la ejecutiva de la zona', 'persona', quien);
+      });
+    } else {
+      b.estado = 'enviado';
+      aviso = `Aviso enviado a ${nombreDestino(b.destino)}: aparece en su Hoy.`;
+      mutarAgente(st => {
+        avisar(st, b.destino, b.texto, { leadId: info.key, tipo: 'aviso' });
+        anotar(st, rol, 'aviso:' + b.destino, recorta(b.recado, 90), 'Aviso que la persona revisó y envió', 'persona', quien);
+      });
+    }
+    avisoPanel(aviso);
+    PN.hilo.push({ tipo: 'agente', html: `<p>${esc(aviso)}</p>` });
+    avisarCliente(info.key);
+    renderPanel(); renderAviso(); renderEspera(); renderLanzador(); renderRegistroPanel(); refrescarHilo();
+    sincronizar();
+  }
+  // «Tomar conversación»: la persona se une; el cliente lo ve en su chat con el resumen de lo que juntó el agente.
+  function tomarConversacion(id) {
+    const rol = pnRolActual() || 'ventas';
+    const quien = pnAtiende(rol);
+    let tr = null;
+    mutarAgente(st => {
+      tr = st.traspasos.find(t => t.id === id) || null;
+      if (!tr || tr.estado !== 'esperando') { tr = null; return; }
+      tr.estado = 'tomada'; tr.tomadoPor = quien; tr.tomadoRol = rol; tr.tomadoEn = ahora();
+      const k = String(tr.leadId);
+      st.conversaciones[k] = (st.conversaciones[k] || []).concat([{ canal: 'web', rol: 'persona', autor: quien, texto: `${quien} se unió a la conversación. Ya tiene tu resumen: ${tr.resumen || 'puedes seguir desde donde quedaste'}.`, ts: ahora(), tipo: 'union' }]);
+      anotar(st, rol, 'conversacion:tomar', recorta(tr.resumen, 110), 'Tomar la conversación en espera con lo que juntó el agente', 'persona', quien);
+    });
+    if (!tr) { avisoPanel('Esa conversación ya no está en espera.'); renderAviso(); renderEspera(); return; }
+    const info = infoDe(refDe(tr.leadId));
+    avisoPanel(`Tomaste la conversación de ${info ? info.empresa : 'la cuenta'}. ${quien} se une en el chat del cliente.`);
+    PN.hilo.push({ tipo: 'agente', html: tarjeta('Conversación tomada', `<p>${esc(quien)} ya está en el chat del cliente, con el resumen de lo que juntó el agente.</p>${filas([['Resumen', recorta(tr.resumen, 240)]])}`, 'crm-agente-ok') });
+    avisarCliente(tr.leadId);
+    renderPanel(); renderAviso(); renderEspera(); renderLanzador(); renderRegistroPanel();
+    sincronizar();
+  }
+  // Acción de la barra o de sus tarjetas (aprobar, pasar a Ventas…) ejecutada desde el panel; su resultado se muestra aquí.
+  function accionarPanel(acc, id, btn) {
+    const rol = pnRolActual();
+    if (!rol) return;
+    S.rol = rol;
+    const viejos = new Set(S.hilo[rol] || []);
+    try { accionar(acc, id, btn); } catch (err) { avisoPanel('No pude completar esa acción. Nada se cambió.'); }
+    const nuevos = (S.hilo[rol] || []).filter(x => !viejos.has(x)).reverse();
+    nuevos.forEach(x => PN.hilo.push({ tipo: 'agente', html: x.html || '', borradorId: x.borradorId || null }));
+    renderPanel(); renderAviso(); renderEspera(); renderLanzador(); renderRegistroPanel(); refrescarHilo();
+  }
+  // Respuesta del panel a texto libre: ajustes y envío del borrador abierto, tareas y consultas (con el motor de la barra).
+  function responderPanel(texto) {
+    const rol = pnRolActual();
+    if (!rol) return { html: tarjeta('Elige tu rol', '<p>Entra con un rol del CRM para usar al agente.</p>') };
+    const t = norm(texto);
+    const abierto = borradorAbierto();
+    const aj = parseAjuste(texto);
+    if (abierto && aj) { ajustarBorrador(abierto, aj); return null; }
+    if (abierto && /\b(enviala|enviarla|envialo|enviarlo|mandala|mandalo|envialas|enviaselo)\b/.test(t)) { enviarBorrador(abierto.id); return null; }
+    if (abierto && /\b(descarta|descartalo|descartarlo|cancela|olvidalo)\b/.test(t)) { descartarBorrador(abierto.id); return null; }
+    if (/(conversacion|chat)\w*[^.?]*\b(en espera|esperando)\b|\b(en espera|esperando)\b[^.?]*(conversacion|chat)|\btoma\w*\s+(la\s+)?(conversacion|chat)\b/.test(t)) {
+      const lista = esperasAbiertas();
+      if (!lista.length) return { html: tarjeta('Nada en espera', '<p>No hay conversaciones esperando a una persona.</p>') };
+      return { html: tarjeta('En espera', `<p>${lista.length} conversación(es) esperando a una persona. Están arriba: toma una con «Tomar conversación».</p>`) };
+    }
+    const tarea = parseTarea(texto);
+    if (tarea) {
+      const ref = buscarRef(texto);
+      if (!ref) return { html: tarjeta('¿Qué cuenta?', '<p>No encuentro esa cuenta. Escribe su nombre tal como aparece en el CRM.</p>') };
+      abrirTarea(tarea, ref.key, texto);
+      return null;
+    }
+    const intent = interpretar(t);
+    S.usoFoco = false;
+    let r = ejecutar(rol, intent, texto);
+    if (r === null) r = respuestaMotor(rol, texto);
+    if (r && r.hecho) return { html: tarjeta('Hecho', '<p>Listo. Quedó en el registro.</p>') };
+    if (r && typeof r === 'object') return { html: r.html || '', borradorId: r.borradorId || null };
+    return { html: String(r || '') };
+  }
+  function procesarPanel(texto) {
+    const limpio = String(texto || '').replace(/\s+/g, ' ').trim().slice(0, 240);
+    if (!limpio || !pnRolActual()) return;
+    abrirPanel();
+    PN.hilo.push({ tipo: 'usuario', texto: limpio });
+    PN.escribiendo += 1;
+    renderPanel();
+    setTimeout(() => {
+      PN.escribiendo -= 1;
+      let out = null;
+      try { out = responderPanel(limpio); } catch (err) { out = { html: tarjeta('No pude completar esto', `<p>${esc(err && err.message ? err.message : 'Error inesperado')}. Nada se cambió en el registro.</p>`, 'crm-agente-alerta') }; }
+      if (out) PN.hilo.push({ tipo: 'agente', html: out.html || '', borradorId: out.borradorId || null });
+      PN.hilo = PN.hilo.slice(-30);
+      renderPanel(); renderAviso(); renderEspera(); renderLanzador(); renderRegistroPanel();
+    }, 400 + Math.round(Math.random() * 500));
+  }
+  // Muestra «escribiendo…» 400 a 900 ms antes de la acción (botones de E y ajustes).
+  function conEspera(fn) {
+    PN.escribiendo += 1;
+    renderPanel();
+    setTimeout(() => {
+      PN.escribiendo -= 1;
+      try { fn(); } catch (err) { PN.hilo.push({ tipo: 'agente', html: tarjeta('No pude completar esto', `<p>${esc(err && err.message ? err.message : 'Error inesperado')}. Nada se cambió en el registro.</p>`, 'crm-agente-alerta') }); }
+      renderPanel(); renderAviso(); renderEspera(); renderLanzador(); renderRegistroPanel();
+    }, 400 + Math.round(Math.random() * 500));
+  }
+
+  // ----- Pintado -----
+  function burbujaBorrador(b) {
+    const info = b.info;
+    const editable = b.estado === 'editando';
+    const canal = b.tipo === 'correo' ? 'correo' : (b.tipo === 'contactar' ? 'whatsapp' : null);
+    const permiso = canal ? (permisoPara(info, canal) ? 'Permiso de ' + (canal === 'correo' ? 'correo' : 'WhatsApp') + ' registrado' : 'Sin permiso: no se envía') : 'Nota interna: no sale al cliente';
+    const estadoTxt = { enviando: 'Enviando en segundo plano…', enviado: 'Enviado', bloqueado: 'Bloqueado: falta permiso', descartado: 'Descartado' }[b.estado] || '';
+    const para = b.tipo === 'avisar' ? `para ${b.destinoNombre}` : `para ${info.contacto} (${info.empresa})`;
+    return `<div class="crm-agente-burbuja crm-agente-burbuja--agente crm-agente-burbuja--borrador" data-crm-agente-burbuja="agente" data-crm-agente-borrador="${esc(b.id)}" data-tipo="${esc(b.tipo)}" data-estado="${esc(b.estado)}">
+      <p class="crm-agente-canal"><b>Borrador · ${esc(ETIQ_TAREA[b.tipo])}</b> · ${esc(para)}</p>
+      <label class="crm-agente-sr" for="crm-agente-txt-${esc(b.id)}">Texto del borrador</label>
+      <textarea id="crm-agente-txt-${esc(b.id)}" class="crm-agente-texto-borrador" data-crm-agente-texto="${esc(b.id)}" rows="5"${editable ? '' : ' disabled'}>${esc(b.texto)}</textarea>
+      <div class="crm-agente-ajustes" role="group" aria-label="Ajustes del borrador">
+        <button type="button" class="crm-agente-chip" data-crm-agente-ajuste="corto" data-id="${esc(b.id)}"${editable ? '' : ' disabled'}>Más corto</button>
+        <button type="button" class="crm-agente-chip" data-crm-agente-ajuste="formal" data-id="${esc(b.id)}"${editable ? '' : ' disabled'}>Más formal</button>
+        <button type="button" class="crm-agente-chip" data-crm-agente-ajuste="cercano" data-id="${esc(b.id)}"${editable ? '' : ' disabled'}>Más cercano</button>
+      </div>
+      <div class="crm-agente-decision">
+        <button type="button" class="crm-agente-btn crm-agente-btn--ok" data-crm-agente-accion="enviar" data-id="${esc(b.id)}"${editable ? '' : ' disabled'}>Envíalo</button>
+        <button type="button" class="crm-agente-btn" data-crm-agente-accion="descartar" data-id="${esc(b.id)}"${editable ? '' : ' disabled'}>Descartar</button>
+        ${estadoTxt ? `<span class="crm-agente-estado-b" data-crm-agente-estado-b>${esc(estadoTxt)}</span>` : ''}
+      </div>
+      <dl class="crm-agente-niveles-b">
+        <div><dt>Regla sin IA</dt><dd>${esc(permiso)}</dd></div>
+        <div><dt>Sugerencia de IA</dt><dd>Borrador con los datos de la cuenta; puedes editarlo y pedir ajustes.</dd></div>
+        <div><dt>Decisión de persona</dt><dd>${editable ? 'La decides tú con «Envíalo» o «Descartar».' : 'Decidida por una persona.'}</dd></div>
+      </dl>
+    </div>`;
+  }
+  function renderPanel() {
+    if (!pnHiloEl) return;
+    const partes = PN.hilo.map(it => {
+      if (it.borradorId && PN.borradores[it.borradorId]) return burbujaBorrador(PN.borradores[it.borradorId]);
+      if (it.borradorId && S.borradores[it.borradorId]) return `<div class="crm-agente-burbuja crm-agente-burbuja--agente" data-crm-agente-burbuja="agente">${borradorHtml(S.borradores[it.borradorId])}</div>`;
+      if (it.tipo === 'usuario') return `<div class="crm-agente-burbuja crm-agente-burbuja--usuario" data-crm-agente-burbuja="usuario"><p>${esc(it.texto)}</p></div>`;
+      return `<div class="crm-agente-burbuja crm-agente-burbuja--agente" data-crm-agente-burbuja="agente">${it.html || ''}</div>`;
+    });
+    if (PN.escribiendo > 0) partes.push('<p class="crm-agente-escribe" data-crm-agente-escribe role="status">escribiendo…</p>');
+    pnHiloEl.innerHTML = partes.join('') || '<p class="crm-agente-vacio">Pídele algo al agente: «mándale un correo a…», «avísale a Ventas que llame mañana a…», o toca una tarea de la lista.</p>';
+    pnHiloEl.scrollTop = pnHiloEl.scrollHeight;
+  }
+  function renderSugPanel() {
+    if (!pnSugEl) return;
+    const rol = pnRolActual();
+    pnSugEl.innerHTML = rol ? sugerenciaTexto(rol).map(t => `<button type="button" class="crm-agente-chip" data-crm-agente-sugerencia="${esc(t)}">${esc(t)}</button>`).join('') : '';
+  }
+  function renderEspera() {
+    if (!pnEsperaEl) return;
+    const lista = esperasAbiertas();
+    pnEsperaEl.hidden = lista.length === 0;
+    if (!lista.length) { pnEsperaEl.innerHTML = ''; return; }
+    pnEsperaEl.innerHTML = `<h3 class="crm-agente-espera-t">Conversaciones en espera <b>${lista.length}</b></h3>` + lista.map(t => {
+      const d = (t.espera && t.espera.datos) || {};
+      const info = infoDe(refDe(t.leadId));
+      const empresa = info ? info.empresa : 'Cuenta';
+      const juntado = t.espera.tema === 'falla'
+        ? `Foto: ${d.foto === 'si' ? 'sí (simulada)' : (d.foto === 'no' ? 'no la tiene ahora' : 'pendiente')} · Horario: ${d.horario || 'pendiente'} · Dirección: ${d.direccion || 'pendiente'}`
+        : (t.espera.tema === 'precio' ? `Condición: ${d.detalle || 'pendiente'} · Cuándo: ${d.cuando || 'pendiente'}` : `Lo que necesita: ${d.detalle || 'sin detalle'}`);
+      return `<article class="crm-agente-espera-item" data-crm-espera-id="${esc(t.id)}">
+        <p><b>${esc(empresa)}</b> · ${esc(MOTIVO_ESP[t.espera.tema] || 'Consulta')} · espera a ${esc(t.a === 'ventas' ? 'Ventas' : 'Soporte')}</p>
+        <p class="crm-agente-nota">Lo que juntó el agente: ${esc(juntado)}.</p>
+        <button type="button" class="crm-agente-btn crm-agente-btn--ok" data-crm-agente-accion="tomar-conversacion" data-id="${esc(t.id)}">Tomar conversación</button>
+      </article>`;
+    }).join('');
+  }
+  function renderLanzador() {
+    if (!pnLanzEl) return;
+    const rol = pnRolActual();
+    const notif = rol ? (leerAgente().notificaciones[rol] || []).filter(n => !n.leida).length : 0;
+    const total = esperasAbiertas().length + notif;
+    const txt = total ? String(total) : '';
+    if (pnContEl.textContent !== txt) pnContEl.textContent = txt;
+    pnContEl.hidden = !total;
+    pnContEl.setAttribute('aria-label', total ? `${total} pendientes del agente` : '');
+    pnLanzEl.setAttribute('aria-expanded', PN.abierto ? 'true' : 'false');
+    pnCuerpoEl.hidden = !PN.abierto;
+  }
+  function renderAviso() {
+    if (!pnAvisoEl) return;
+    const ult = PN.avisos.slice(-2);
+    pnAvisoEl.hidden = !ult.length;
+    pnAvisoEl.innerHTML = ult.map(a => `<span class="crm-agente-aviso-p">${esc(a)}</span>`).join('');
+  }
+  function renderRegistroPanel() {
+    if (!pnRegEl) return;
+    const reg = leerAgente().registro.slice(-6).reverse();
+    pnRegEl.innerHTML = reg.length
+      ? `<ol class="crm-agente-reg">${reg.map(r => `<li><b>${esc(ROL_TXT[r.rol] || r.rol)}</b> · ${esc(r.accion)} · <span data-nivel="${esc(r.nivel)}">${esc(NIVEL_TXT[r.nivel] || r.nivel)}</span> · dato: ${esc(recorta(r.datoUsado, 70))} · decidió: ${esc(r.decidio)} <small>${esc(hora(r.ts))}</small></li>`).join('')}</ol>`
+      : '<p>Aún no hay acciones registradas.</p>';
+  }
+
+  // ----- Construcción y montaje (E vuelve a pintar #crm-v2-root en cada ruta: el panel se vuelve a poner) -----
+  function construirPanel() {
+    if (panelEl) return;
+    panelEl = document.createElement('section');
+    panelEl.id = 'crm-agente-chat';
+    panelEl.className = 'crm-agente crm-agente-chat';
+    panelEl.setAttribute('aria-label', 'Agente del CRM');
+    panelEl.innerHTML = `
+      <button type="button" class="crm-agente-lanzador" data-crm-agente-accion="alternar" aria-expanded="false" aria-controls="crm-agente-chat-cuerpo">
+        <span class="crm-agente-lanzador-txt"><b>Agente del CRM</b> · pídele una tarea o una consulta</span>
+        <span class="crm-agente-lanzador-n" data-crm-agente-contador hidden></span>
+      </button>
+      <div id="crm-agente-chat-cuerpo" class="crm-agente-cuerpo" hidden>
+        <div class="crm-agente-espera" data-crm-espera hidden></div>
+        <div class="crm-agente-hilo-chat" data-crm-agente-hilo-chat aria-live="polite" aria-relevant="additions"></div>
+        <p class="crm-agente-avisos-chat" data-crm-aviso role="status" aria-live="polite" hidden></p>
+        <div class="crm-agente-sugerencias-chat" data-crm-agente-sugerencias-chat role="group" aria-label="Sugerencias"></div>
+        <form class="crm-agente-form-chat" data-crm-agente-form-chat autocomplete="off">
+          <label class="crm-agente-sr" for="crm-agente-chat-entrada">Pídele algo al agente</label>
+          <div class="crm-agente-campo">
+            <input id="crm-agente-chat-entrada" type="text" maxlength="240" placeholder="Escribe una tarea o consulta" aria-describedby="crm-agente-chat-ejemplo">
+            <button type="submit" class="crm-agente-enviar">Enviar</button>
+          </div>
+          <p id="crm-agente-chat-ejemplo" class="crm-agente-ejemplo">Ejemplo: «Mándale un correo a Hotel Altos del Parque».</p>
+        </form>
+        <details class="crm-agente-registro"><summary>Registro del agente</summary><div data-crm-agente-registro-chat></div></details>
+      </div>`;
+    pnLanzEl = panelEl.querySelector('.crm-agente-lanzador');
+    pnContEl = panelEl.querySelector('[data-crm-agente-contador]');
+    pnCuerpoEl = panelEl.querySelector('.crm-agente-cuerpo');
+    pnEsperaEl = panelEl.querySelector('[data-crm-espera]');
+    pnHiloEl = panelEl.querySelector('[data-crm-agente-hilo-chat]');
+    pnAvisoEl = panelEl.querySelector('[data-crm-aviso]');
+    pnSugEl = panelEl.querySelector('[data-crm-agente-sugerencias-chat]');
+    pnFormEl = panelEl.querySelector('[data-crm-agente-form-chat]');
+    pnInputEl = panelEl.querySelector('#crm-agente-chat-entrada');
+    pnRegEl = panelEl.querySelector('[data-crm-agente-registro-chat]');
+    panelEl.addEventListener('click', onPanelClick);
+    panelEl.addEventListener('input', ev => {
+      const ta = ev.target && ev.target.closest ? ev.target.closest('[data-crm-agente-texto]') : null;
+      if (ta && PN.borradores[ta.dataset.crmAgenteTexto]) PN.borradores[ta.dataset.crmAgenteTexto].texto = ta.value;
+    });
+    pnFormEl.addEventListener('submit', ev => { ev.preventDefault(); const v = pnInputEl.value; pnInputEl.value = ''; procesarPanel(v); });
+    renderSugPanel(); renderRegistroPanel(); renderLanzador();
+  }
+  function onPanelClick(ev) {
+    const t = ev.target && ev.target.nodeType === 3 ? ev.target.parentElement : ev.target;
+    if (!t || !t.closest) return;
+    const sug = t.closest('[data-crm-agente-sugerencia]');
+    if (sug && panelEl.contains(sug)) { ev.preventDefault(); procesarPanel(sug.dataset.crmAgenteSugerencia); return; }
+    const aj = t.closest('[data-crm-agente-ajuste]');
+    if (aj && panelEl.contains(aj)) {
+      ev.preventDefault();
+      const b = PN.borradores[aj.dataset.id];
+      if (b && b.estado === 'editando') conEspera(() => ajustarBorrador(b, { tipo: aj.dataset.crmAgenteAjuste }));
+      return;
+    }
+    const btn = t.closest('[data-crm-agente-accion]');
+    if (!btn || !panelEl.contains(btn)) return;
+    ev.preventDefault();
+    const acc = btn.dataset.crmAgenteAccion, id = btn.dataset.id || '';
+    if (acc === 'alternar') { PN.abierto = !PN.abierto; renderLanzador(); return; }
+    if (acc === 'enviar') { enviarBorrador(id); renderPanel(); return; }
+    if (acc === 'descartar') { descartarBorrador(id); return; }
+    if (acc === 'tomar-conversacion') { conEspera(() => tomarConversacion(id)); return; }
+    accionarPanel(acc, id, btn);
+  }
+  // Sitio del panel: justo después de la barra del «Hoy» (si la hay) o al principio del contenido de la ruta R.
+  function sincronizarPanel() {
+    const host = document.getElementById(ROOT_ID);
+    const ruta = (location.hash || '#R00').slice(1).split('?')[0];
+    const contenido = host && !host.hidden ? host.querySelector('.crm2-content') : null;
+    const rol = pnRolActual();
+    if (!contenido || !rol || !/^R\d{2}$/.test(ruta)) { quitarPanel(); return; }
+    construirPanel();
+    if (PN.rol !== rol) { PN.rol = rol; PN.hilo = []; PN.borradores = {}; PN.avisos = []; PN.abierto = false; renderSugPanel(); renderRegistroPanel(); }
+    const antes = barEl && barEl.parentNode === contenido ? barEl : null;
+    const bien = antes ? panelEl.previousElementSibling === antes : contenido.firstElementChild === panelEl;
+    if (panelEl.parentNode !== contenido || !bien) {
+      contenido.insertBefore(panelEl, antes ? antes.nextSibling : contenido.firstChild);
+      renderLanzador(); renderEspera(); renderAviso();
+    }
+  }
+  function quitarPanel() { if (panelEl && panelEl.parentNode) panelEl.parentNode.removeChild(panelEl); }
+  // Botones de E: [data-crm-agente-tarea="correo|contactar|visita|avisar"][data-cuenta-id] (delegación en document).
+  document.addEventListener('click', ev => {
+    const t = ev.target && ev.target.nodeType === 3 ? ev.target.parentElement : ev.target;
+    const b = t && t.closest ? t.closest('[data-crm-agente-tarea]') : null;
+    if (!b || !pnRolActual()) return;
+    const tipo = b.dataset.crmAgenteTarea;
+    if (!ETIQ_TAREA[tipo]) return;
+    ev.preventDefault();
+    if (!panelEl || !panelEl.isConnected) sincronizarPanel();
+    const cuenta = b.dataset.cuentaId || '';
+    conEspera(() => abrirTarea(tipo, cuenta));
+  });
+
+  window.MarleyCRMAgente = { version: VERSION, procesar, sincronizar, rol: () => S.rol, panel: { abrirTarea: (tipo, id) => conEspera(() => abrirTarea(tipo, id)), tomar: tomarConversacion } };
   arrancar();
 })();

@@ -36,6 +36,8 @@
   const clonar = (o) => JSON.parse(JSON.stringify(o));
   const fmt = (n) => (Number.isFinite(Number(n)) && n !== null ? '$' + String(Math.round(Number(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : 'Por confirmar');
   const primerNombre = (n) => String(n || '').trim().split(/\s+/)[0] || '';
+  // Comuna real del lead: «Sin comuna» no es una comuna (el dueño sale por zona por defecto).
+  const comunaReal = (c) => (c && c !== 'Sin comuna' ? String(c) : '');
   const seguro = (fn, respaldo = null) => { try { const v = fn(); return v === undefined ? respaldo : v; } catch (_) { return respaldo; } };
 
   function distancia(a, b) {
@@ -247,8 +249,12 @@
     return m;
   }
   function consentimientoDe(cuentaId) {
-    const c = leerEstado().consentimientos[String(cuentaId)] || {};
-    return { whatsapp: c.whatsapp === true, correo: c.correo === true, baja: c.baja === true };
+    const idCuenta = String(cuentaId);
+    const c = leerEstado().consentimientos[idCuenta] || {};
+    const s = estadoProto(), lead = s.lead;
+    const esSuSolicitud = lead && [lead.id, s.customerCycle?.accountId].some(id => id && String(id) === idCuenta);
+    const correoSolicitud = Boolean(esSuSolicitud && lead.consent === true && lead.email && s.proposal?.status === 'aceptada');
+    return { whatsapp: c.baja !== true && c.whatsapp === true, correo: c.baja !== true && (c.correo === true || c.correo == null && correoSolicitud), baja: c.baja === true };
   }
   function fijarConsentimiento(cuentaId, canal, valor) {
     const e = leerEstado();
@@ -336,7 +342,10 @@
     let cuentaId = c.cuentaId ? String(c.cuentaId) : (lado === 'cliente' ? (s.lead && s.lead.id) || CLIENTE_LOCAL : (s.sel || 'sin-cuenta'));
     // En el portal (C09) el chat habla de la misma cuenta que muestra el portal: ahí se repiten sus pedidos.
     const cuentaPortal = cuentasCRM().find((a) => a.id === s.demoAccountId) || cuentasCRM()[0] || null;
-    if (lado === 'cliente' && ruta === 'C09' && cuentaPortal) cuentaId = String(cuentaPortal.id);
+    if (lado === 'cliente' && ruta === 'C09') {
+      if (s.customerCycle && s.lead?.id) cuentaId = String(s.lead.id);
+      else if (cuentaPortal) cuentaId = String(cuentaPortal.id);
+    }
     return { lado, rol, cuentaId, ruta };
   }
   // Si el comprador ya tiene lead, su conversación previa (cliente-local) pasa a su cuenta.
@@ -370,6 +379,9 @@
     { id: 'referido', frases: ['recomendar a', 'recomendar marley', 'referir', 'referido', 'conocido', 'otro negocio', 'otro hotel', 'otra cafeteria', 'otro restaurante', 'otra oficina', 'un amigo'] },
     { id: 'contacto', frases: ['whatsapp', 'wasap', 'correo', 'email', 'mail', 'escribeme', 'mandame', 'enviame', 'escribanme'] },
     { id: 'repetir', frases: ['repite', 'repetir', 'mismo pedido', 'volver a pedir', 'reponer', 'reposicion', 'repeticion', 'pedir de nuevo'] },
+    { id: 'incluye', frases: ['que incluye', 'que incluyen', 'que trae', 'que contiene', 'que lleva', 'que viene en', 'incluye'] },
+    { id: 'firma', frases: ['como firmo', 'firmar contrato', 'contrato firmado', 'firmar', 'firmo', 'firma'] },
+    { id: 'horario', frases: ['cambiar el horario', 'cambiar horario', 'horario de entrega', 'hora de entrega', 'cambiar la hora', 'manana o tarde', 'en la manana', 'en la tarde', 'dia de entrega', 'horario'] },
     { id: 'estado', frases: ['estado', 'en que va', 'donde esta', 'seguimiento', 'mi pedido', 'pedido', 'cuando llega', 'va en camino'] },
     { id: 'despacho', frases: ['despachan', 'despacho', 'regiones', 'fuera de santiago', 'plazo de entrega', 'entrega', 'envio a'] },
     { id: 'comodato', frases: ['comodato', 'en que consiste', 'como funciona el', 'modelo de negocio', 'que es el comodato'] },
@@ -410,8 +422,8 @@
   }
 
   function ayudaCliente() {
-    return msg('Puedo resolver dudas con información aprobada, recomendarte una máquina con tres o cuatro preguntas, ajustar tu propuesta, revisar tu pedido, repetirlo, abrir una solicitud de soporte o pasar tu caso a una persona con un resumen.', [
-      chip('maquina', 'Recomiéndame una máquina'), chip('productos', 'Ver productos y precios'), chip('estado', 'Estado de mi pedido'), chip('persona', 'Hablar con una persona'),
+    return msg('Puedo decirte dónde va tu pedido, qué incluye, cómo firmas el contrato, cómo repites y cambiar el horario de entrega. También resuelvo dudas con información aprobada y recomiendo una máquina. Si hay una falla o un precio especial, te paso con una persona y sigo contigo mientras llega.', [
+      chip('estado', 'Estado de mi pedido'), chip('incluye', 'Qué incluye mi pedido'), chip('firma', 'Cómo firmo el contrato'), chip('horario', 'Cambiar horario de entrega'), chip('maquina', 'Recomiéndame una máquina'), chip('persona', 'Hablar con una persona'),
     ]);
   }
 
@@ -504,6 +516,7 @@
 
   // Pedidos del comprador: los de su cuenta (la que muestra el portal, C09) o, si no hay cuenta, los del estado de M4.
   function pedidosDeComprador(c, s) {
+    if (s.customerCycle && String(s.lead?.id) === String(c?.cuentaId)) return s.customerCycle.orders || [];
     const acc = cuentasCRM().find((a) => String(a.id) === String(c && c.cuentaId));
     if (acc && Array.isArray(acc.orders) && acc.orders.length) return acc.orders;
     return Array.isArray(s.orders) ? s.orders : (s.order ? [s.order] : []);
@@ -515,7 +528,8 @@
       return { pedido: o, texto: `Tu último pedido (${o.id || 'sin folio'}) está en estado «${o.status || 'en proceso'}». El equipo confirma precio, disponibilidad y despacho.` };
     }
     if (s.proposal && s.proposal.status === 'aceptada') {
-      return { pedido: null, texto: 'Tu propuesta fue aceptada. Ahora coordinamos la instalación con tu ejecutiva; la fecha la confirma el equipo.' };
+      const etapa = s.customerCycle?.replenishmentNotice ? 'En preparación' : s.customerCycle?.contractSignedAt ? 'Contrato firmado' : 'Confirmado';
+      return { pedido: null, texto: `Tu pedido está en la etapa «${etapa}». Puedes seguirlo en «Mi pedido». El equipo confirma la fecha de instalación.` };
     }
     if (s.proposal) {
       return { pedido: null, texto: `Tu propuesta está ${s.proposal.status === 'enviada' ? 'enviada al equipo' : 'lista para revisar'}. Cuando la aceptes, el seguimiento aparece aquí.` };
@@ -538,15 +552,196 @@
     return partes.join('\n');
   }
 
-  function derivarCliente(s, cuentaId, destino, motivo) {
-    const resumen = resumenClienteTexto(s, motivo);
-    const etiqueta = destino === 'soporte' ? 'Soporte' : 'Ventas';
+  // ---------- Espera de una persona: el agente sigue atendiendo mientras llega (Soporte o Ventas) ----------
+  // El traspaso con «espera» queda en estado «esperando» hasta que alguien del equipo la toma («tomada»).
+  const PASOS_ESPERA = { falla: ['foto', 'horario', 'direccion'], precio: ['detalle', 'cuando'], persona: [] };
+  const DESTINO_ESPERA = { falla: 'soporte', precio: 'ventas', persona: 'ventas' };
+  const MOTIVO_ESPERA = { falla: 'Falla o reclamo de la máquina', precio: 'Precio especial o crédito', persona: 'Pide hablar con una persona' };
+  const HORARIO_OPC = { manana: 'En la mañana', tarde: 'En la tarde', flex: 'Me acomoda cualquiera' };
+  const CUANDO_OPC = { semana: 'Esta semana', mes: 'Este mes', averiguo: 'Solo averiguo' };
+  const PENDIENTE = { foto: 'la foto de la falla', horario: 'el horario de la visita', direccion: 'la dirección del local', detalle: 'lo que necesitas', cuando: 'cuándo te escriben' };
+  const NO_ES_DATO = ['cierre', 'saludo', 'ayuda', 'baja', 'trampa'];
+  const INTENCION_PERSONA = ['persona', 'soporte', 'negociar', 'persona_ventas'];
+  const PESTANAS = { pedido: 'Mi pedido', repetir: 'Repetir pedido', ayuda: 'Ayuda y postventa', recomendar: 'Recomendar' };
+  const quienAtiende = (t) => (t && t.tomadoPor) || 'una persona de Soporte';
+  const quienEspera = (t) => (t && t.a === 'ventas' ? 'una persona de Ventas' : 'una persona de Soporte');
+  function esperaDe(cuentaId) {
+    const k = String(cuentaId);
+    const lista = leerEstado().traspasos.filter((t) => t.espera && String(t.leadId) === k && t.de === 'cliente');
+    return lista.length ? lista[lista.length - 1] : null;
+  }
+  // Lo que ve el comprador: «esperando-persona» (falta alguien) o «persona-unida» (ya la atiende el equipo).
+  function estadoEspera(cuentaId) {
+    const t = esperaDe(cuentaId);
+    if (!t) return { estado: null, traspaso: null };
+    if (t.estado === 'esperando') return { estado: 'esperando-persona', traspaso: t };
+    if (t.estado === 'tomada') return { estado: 'persona-unida', traspaso: t };
+    return { estado: null, traspaso: t };
+  }
+  function nombreCuenta(cuentaId, s) {
+    const acc = cuentasCRM().find((a) => String(a.id) === String(cuentaId));
+    if (acc) return acc.business ? `${acc.name} (${acc.business})` : acc.name;
+    const l = s && s.lead ? s.lead : null;
+    return (l && (l.company || l.name)) || 'el comprador';
+  }
+  function resumenEspera(t, cuenta) {
+    const esp = t.espera || {};
+    const d = esp.datos || {};
+    const partes = [`${MOTIVO_ESPERA[esp.tema] || 'Consulta'} de ${cuenta}.`];
+    if (esp.tema === 'falla') partes.push(`Foto: ${d.foto === 'si' ? 'sí (simulada)' : d.foto === 'no' ? 'no la tiene ahora' : 'pendiente'}.`, `Horario: ${d.horario || 'pendiente'}.`, `Dirección: ${d.direccion || 'pendiente'}.`);
+    if (esp.tema === 'precio') partes.push(`Condición que busca: ${d.detalle || 'pendiente'}.`, `Cuándo: ${d.cuando || 'pendiente'}.`);
+    if (esp.tema === 'persona' && d.detalle) partes.push(`Lo que necesita: ${d.detalle}.`);
+    return partes.join(' ');
+  }
+  function filasEspera(esp) {
+    const d = esp.datos || {};
+    if (esp.tema === 'falla') return [['Motivo', MOTIVO_ESPERA.falla], ['Foto', d.foto === 'si' ? 'Sí (simulada)' : d.foto === 'no' ? 'No la tiene ahora' : 'Pendiente'], ['Horario', d.horario || 'Pendiente'], ['Dirección', d.direccion || 'Pendiente']];
+    if (esp.tema === 'precio') return [['Motivo', MOTIVO_ESPERA.precio], ['Condición que busca', d.detalle || 'Pendiente'], ['Cuándo', d.cuando || 'Pendiente']];
+    return [['Motivo', MOTIVO_ESPERA.persona], ['Lo que necesita', d.detalle || 'Sin detalle']];
+  }
+  function preguntaEspera(esp) {
+    const paso = esp.paso;
+    if (paso === 'foto') return msg('¿Puedes mandarme una foto de la falla? Así la persona llega con lo que necesita. Es una simulación: no se sube ninguna imagen real.', [chip('espera:foto:si', 'Adjuntar foto (simulación)'), chip('espera:foto:no', 'No tengo foto ahora')]);
+    if (paso === 'horario') return msg('¿En qué horario te acomoda que te visiten?', Object.keys(HORARIO_OPC).map((k) => chip('espera:horario:' + k, HORARIO_OPC[k])));
+    if (paso === 'direccion') return msg('¿En qué dirección está el local? Escríbela aquí; la persona la necesita para llegar.');
+    if (paso === 'detalle') return msg(esp.tema === 'precio' ? 'Cuéntame en una frase qué condición buscas. No prometo precios: lo revisa Ventas.' : 'Cuéntame en una frase qué necesitas que resuelva la persona.');
+    if (paso === 'cuando') return msg('¿Cuándo te acomoda que te escriban?', Object.keys(CUANDO_OPC).map((k) => chip('espera:cuando:' + k, CUANDO_OPC[k])));
+    return null;
+  }
+  function recordatorioEspera(t) {
+    return msg(`Sigo contigo mientras llega ${quienEspera(t)}. Nos falta ${PENDIENTE[t.espera.paso] || 'un dato'}.`, [chip('espera:seguir', 'Seguir con eso')]);
+  }
+  function iniciarEspera(c, s, tema, acciones) {
+    const destino = DESTINO_ESPERA[tema];
+    const pasos = PASOS_ESPERA[tema].slice();
+    const cuenta = nombreCuenta(c.cuentaId, s);
+    const folio = tema === 'falla' ? 'SOP-' + ahora().toString(36).slice(-5).toUpperCase() : null;
+    const esp = { tema, pasos, paso: pasos[0] || null, datos: {}, folio };
     const t = traspasoNuevo({
-      leadId: cuentaId, de: 'cliente', a: 'ventas', tipo: destino === 'soporte' ? 'soporte' : 'venta',
-      resumen, estado: 'asignado', aviso: `${etiqueta}: ${motivo} · ${(s.lead && s.lead.name) || 'contacto sin nombre'}`,
+      leadId: c.cuentaId, de: 'cliente', a: destino, tipo: tema === 'falla' ? 'soporte' : 'venta', estado: 'esperando', espera: esp,
+      resumen: '', aviso: `${destino === 'soporte' ? 'Soporte' : 'Ventas'}: ${MOTIVO_ESPERA[tema].toLowerCase()} · ${cuenta}`,
     });
-    registrar({ ts: t.ts, rol: 'comprador', accion: 'derivar-' + destino, datoUsado: 'Resumen de la conversación y de la propuesta', sugerencia: 'Derivar a una persona', nivel: 'persona', decidio: 'comprador' });
-    return t;
+    const e = leerEstado();
+    const tr = e.traspasos.find((x) => x.id === t.id);
+    if (tr) { tr.resumen = resumenEspera(tr, cuenta); guardarEstado(e); }
+    registrar({ ts: t.ts, rol: 'comprador', accion: 'derivar-' + destino, datoUsado: MOTIVO_ESPERA[tema], sugerencia: 'Derivar a una persona y seguir atendiendo', nivel: 'regla', decidio: 'comprador' });
+    acciones.push({ tipo: 'espera', tema, destino, traspasoId: t.id, folio });
+    const intro = {
+      falla: `Lamento la falla${folio ? ' (solicitud ' + folio + ')' : ''}. Te paso con una persona de Soporte; mientras llega, sigo contigo.`,
+      precio: 'Los precios especiales y el crédito los revisa una persona de Ventas; yo no los puedo ofrecer. Te paso con una persona; mientras llega, sigo contigo.',
+      persona: 'Te paso con una persona de Ventas. Ya tiene tu resumen: no tienes que repetir nada. Mientras llega, sigo contigo.',
+    }[tema];
+    const mensajes = [msg(intro, [])];
+    if (pasos.length && tr) mensajes.push(preguntaEspera(tr.espera));
+    return res(mensajes, acciones, reg('Derivación a una persona con resumen', 'Derivar y seguir atendiendo', 'regla'));
+  }
+  // Lee la respuesta del comprador para el paso pendiente. Chip («espera:…») o texto tolerante; null si no responde ese paso.
+  function valorPaso(paso, opcion, texto) {
+    if (opcion) {
+      const [tipo, a, b] = String(opcion).split(':');
+      if (tipo !== 'espera') return null;
+      if (paso === 'foto' && a === 'foto') return b === 'si' ? 'si' : (b === 'no' ? 'no' : null);
+      if (paso === 'horario' && a === 'horario') return HORARIO_OPC[b] || null;
+      if (paso === 'cuando' && a === 'cuando') return CUANDO_OPC[b] || null;
+      return null;
+    }
+    const t = sinTildes(texto || '').trim();
+    if (!t) return null;
+    if (paso === 'foto') {
+      if (/\b(no tengo|sin foto|no puedo|no la tengo|ahora no|no hay)\b/.test(t) || /^no\b/.test(t)) return 'no';
+      if (/\b(foto|imagen|adjunt|te la mando|te la envio|listo)\b/.test(t) || /^(si|ok|dale|claro)\b/.test(t)) return 'si';
+      return null;
+    }
+    if (paso === 'horario') {
+      if (/manana/.test(t)) return HORARIO_OPC.manana;
+      if (/tarde/.test(t)) return HORARIO_OPC.tarde;
+      if (/cualquier|flexib|acomoda|da igual|lo que sea/.test(t)) return HORARIO_OPC.flex;
+      return null;
+    }
+    if (paso === 'cuando') {
+      if (/semana/.test(t)) return CUANDO_OPC.semana;
+      if (/\bmes\b/.test(t)) return CUANDO_OPC.mes;
+      if (/averig|mirando|pronto|solo ver|todavia no/.test(t)) return CUANDO_OPC.averiguo;
+      return null;
+    }
+    const it = detectar(t, INTENCIONES_CLIENTE);
+    if (NO_ES_DATO.includes(it)) return null;
+    if (paso === 'direccion') return t.length >= 6 && /[a-z]/.test(t) ? String(texto).trim().slice(0, 160) : null;
+    if (paso === 'detalle') return t.length >= 4 ? String(texto).trim().slice(0, 200) : null;
+    return null;
+  }
+  function avanzarEspera(c, s, t, paso, valor, acciones) {
+    const e = leerEstado();
+    const tr = e.traspasos.find((x) => x.id === t.id);
+    if (!tr || !tr.espera) return null;
+    tr.espera.datos[paso] = valor;
+    tr.espera.paso = tr.espera.pasos[tr.espera.pasos.indexOf(paso) + 1] || null;
+    tr.resumen = resumenEspera(tr, nombreCuenta(c.cuentaId, s));
+    guardarEstado(e);
+    emitir('traspaso', tr);
+    if (tr.espera.paso) return res([preguntaEspera(tr.espera)], acciones, reg('Dato que dio el comprador: ' + paso, 'Pedir el siguiente dato', 'regla'));
+    registrar({ ts: ahora(), rol: 'comprador', accion: 'espera-resumen', datoUsado: tr.resumen, sugerencia: 'Esperar a la persona con el resumen', nivel: 'persona', decidio: 'comprador' });
+    const lo = tr.espera.tema === 'falla' ? `${quienEspera(tr)} verá tu resumen (falla, foto, horario y dirección); no tienes que repetirlo` : `${quienEspera(tr)} verá tu resumen con la condición que buscas; no prometo precios`;
+    return res([msg(`Listo: ya tengo lo necesario. ${lo.charAt(0).toUpperCase() + lo.slice(1)}. Mientras llega, sigo contigo.`, [chip('estado', 'Ver el estado'), chip('ayuda', 'Hacer otra consulta')], [{ tipo: 'ficha', titulo: 'Resumen para la persona', filas: filasEspera(tr.espera) }])], acciones, reg('Resumen de la conversación', 'Esperar a la persona con el resumen', 'persona'));
+  }
+  // Con una espera abierta: primero los pasos que pidió la persona; luego, la conversación normal (el agente sigue atendiendo).
+  function responderConEspera(c, s, t, texto, opcion, acciones) {
+    const esp = t.espera || {};
+    const reg0 = (datoUsado, nivel = 'regla') => reg(datoUsado, 'Respuesta aprobada del prototipo', nivel);
+    const it = !opcion && texto ? detectar(texto, INTENCIONES_CLIENTE) : (opcion || null);
+    const pidePersona = INTENCION_PERSONA.includes(it);
+    if (opcion && String(opcion).indexOf('espera:') === 0) {
+      const [, a] = String(opcion).split(':');
+      if (a === 'seguir') return esp.paso ? res([preguntaEspera(esp)], acciones, reg0('Dato pendiente de la persona')) : res([msg('Ya tengo lo necesario. Mientras llega la persona, sigo contigo.', [chip('ayuda', 'Hacer otra consulta')])], acciones, reg0('Resumen completo'));
+      if (t.estado !== 'esperando' || !esp.paso) return res([msg('Esa respuesta ya no hace falta. Sigo contigo.', [chip('ayuda', 'Ver opciones')])], acciones, reg0('Respuesta de espera no vigente'));
+      const v = valorPaso(esp.paso, opcion, '');
+      if (v === null) return res([preguntaEspera(esp)], acciones, reg0('Opción no reconocida'));
+      return avanzarEspera(c, s, t, esp.paso, v, acciones);
+    }
+    if (t.estado === 'tomada') {
+      if (pidePersona) return res([msg(`Ya te atiende ${quienAtiende(t)}. Tu mensaje queda en la conversación.`, [chip('ayuda', 'Hacer otra consulta')])], acciones, reg0('Persona ya en la conversación', 'persona'));
+      return null;
+    }
+    if (esp.paso) {
+      const v = valorPaso(esp.paso, opcion, texto);
+      if (v !== null) return avanzarEspera(c, s, t, esp.paso, v, acciones);
+    }
+    if (pidePersona) {
+      return res([msg(`Ya tienes ${quienEspera(t)} en camino. Sigo contigo: ${esp.paso ? 'nos falta ' + (PENDIENTE[esp.paso] || 'un dato') + '.' : 'tu resumen ya está listo.'}`, esp.paso ? [chip('espera:seguir', 'Seguir con eso')] : [chip('ayuda', 'Hacer otra consulta')])], acciones, reg0('Solicitud abierta: no se duplica'));
+    }
+    return null;
+  }
+  // Horario de entrega: el cambio queda solicitado; Logística confirma el día y la hora (no se prometen).
+  function preguntaHorario() {
+    return msg('Puedo dejar solicitado el cambio de horario de entrega. ¿En qué franja te acomoda?', [chip('horario:manana', 'En la mañana'), chip('horario:tarde', 'En la tarde'), chip('ayuda', 'Cancelar')]);
+  }
+  function solicitarHorario(c, s, franja, acciones) {
+    const etiqueta = franja === 'tarde' ? 'la tarde' : 'la mañana';
+    const t = traspasoNuevo({ leadId: c.cuentaId, de: 'cliente', a: 'ventas', tipo: 'horario', estado: 'solicitud', resumen: `Cambio de horario de entrega pedido por el comprador: ${etiqueta}. Logística confirma día y hora según la ruta de la zona.`, aviso: `Cambio de horario de entrega (${etiqueta}): confirmar con Logística` });
+    acciones.push({ tipo: 'horario', franja, traspasoId: t.id });
+    registrar({ ts: t.ts, rol: 'comprador', accion: 'cambio-horario', datoUsado: 'Franja elegida por el comprador', sugerencia: 'Confirmar con Logística antes de prometer la hora', nivel: 'persona', decidio: 'comprador' });
+    return res([msg(`Dejé solicitado el cambio a ${etiqueta}. Logística confirma el día y la hora exacta según la ruta de tu zona; no te prometo un horario que todavía no esté confirmado.`, [chip('estado', 'Ver el estado'), chip('ayuda', 'Hacer otra consulta')], [{ tipo: 'folio', folio: t.id, estado: 'Solicitud registrada', siguiente: 'Logística confirma el día y la hora.' }])], acciones, reg('Franja elegida por el comprador', 'Solicitud de horario', 'persona'));
+  }
+  function respuestaIncluye(c, s, acciones, reg0) {
+    const pedidos = pedidosDeComprador(c, s);
+    if (pedidos.length) {
+      const o = pedidos[pedidos.length - 1];
+      const filas = (o.items || []).map((i) => [nombreProducto(i.p), `${i.qty} u.`]);
+      return res([msg(`Tu pedido ${o.id || ''} incluye los productos de la lista y la máquina en comodato. Antes de instalar se paga la carga base de referencia.`, [chip('estado', 'Ver el estado'), chip('repetir', 'Repetir mi pedido'), chip('carga', 'Cuánto es la carga base')], [{ tipo: 'ficha', titulo: 'Lo que incluye tu pedido', filas: filas.length ? filas : [['Productos', 'Sin detalle en el registro']] }, tarjetaCargaBase()])], acciones, reg0('Pedido del comprador y carga base del prototipo'));
+    }
+    if (s.proposal) return res([msg('Tu propuesta incluye la máquina en comodato y los insumos de referencia. Antes de instalar se paga la carga base de referencia.', [chip('propuesta', 'Ver mi propuesta'), chip('carga', 'Cuánto es la carga base')], [tarjetaCargaBase()])], acciones, reg0('Propuesta del comprador y carga base'));
+    return res([msg('Todavía no hay un pedido ni una propuesta. Cuando armes tu propuesta, te muestro qué incluye.', [chip('maquina', 'Recomiéndame una máquina')])], acciones, reg0('Sin pedido ni propuesta'));
+  }
+  function respuestaFirma(c, s, acciones, reg0) {
+    const hay = pedidosDeComprador(c, s).length > 0 || Boolean(s.proposal && s.proposal.status === 'aceptada');
+    if (!hay) return res([msg('Todavía no hay un contrato para firmar. Cuando aceptes tu pack o tu propuesta, el contrato de comodato aparece en «Mi pedido».', [chip('propuesta', 'Ver mi propuesta'), chip('ayuda', 'Hacer otra consulta')])], acciones, reg0('Contrato aún no disponible'));
+    return res([msg('Puedes firmar el contrato de comodato desde «Mi pedido», con el botón «Firmar contrato (simulación)». Abre el resumen con los textos del contrato y, al firmar, la franja de llegada avanza. Es una simulación: no firmas nada real.', [chip('ir:pedido', 'Ir a Mi pedido'), chip('ayuda', 'Hacer otra consulta')])], acciones, reg0('Textos de comodato del prototipo'));
+  }
+  // Navegación del portal: el agente pide a la página que abra la pestaña (acción «ir-pestana»).
+  function irPestana(p, acciones, reg0) {
+    if (!PESTANAS[p]) return res([msg('Esa pestaña ya no está disponible. Elige otra opción.', [chip('ayuda', 'Ver opciones')])], acciones, reg0('Pestaña no vigente'));
+    acciones.push({ tipo: 'ir-pestana', pestana: p });
+    return res([msg(`Te llevo a «${PESTANAS[p]}».`, [chip('ayuda', 'Hacer otra consulta')])], acciones, reg0('Pestaña del portal'));
   }
 
   // Si hay una captura de datos en curso, sus respuestas van primero; lo demás sigue por el camino normal.
@@ -564,21 +759,36 @@
       salida.mensajes.push(preguntaCaptura(cap, s));
       return salida;
     }
-    return responderClienteNormal(c, s, texto, opcion, acciones, reg0);
+    // Con una persona en camino (o en la conversación), la espera manda; si no responde, sigue la conversación normal.
+    const espera = esperaDe(c.cuentaId);
+    const viva = espera && (espera.estado === 'esperando' || espera.estado === 'tomada') ? espera : null;
+    if (viva) {
+      const previa = responderConEspera(c, s, viva, texto, opcion, acciones);
+      if (previa) return previa;
+    }
+    const salida = responderClienteNormal(c, s, texto, opcion, acciones, reg0);
+    if (viva && viva.estado === 'esperando' && viva.espera.paso) salida.mensajes.push(recordatorioEspera(viva));
+    return salida;
   }
   function responderClienteNormal(c, s, texto, opcion, acciones, reg0) {
     if (opcion) return despacharOpcionCliente(c, s, opcion, acciones, reg0);
     // «Repetir» gana sobre «pedido»: «quiero repetir mi último pedido» no es una consulta de estado.
-    const it = /\b(repet|reposic|reponer|volver a pedir|pedir de nuevo)/.test(sinTildes(texto)) ? 'repetir' : detectar(texto, INTENCIONES_CLIENTE);
+    const it = /\b(repet|repit|reposic|repon|volver a pedir|pedir de nuevo)/.test(sinTildes(texto)) ? 'repetir' : detectar(texto, INTENCIONES_CLIENTE);
     switch (it) {
       case 'trampa':
         return res([msg('No comparto costos internos ni datos de otros clientes. Puedo ayudarte con lo publicado: productos, carga base y tu propuesta.', [chip('productos', 'Ver productos y precios'), chip('propuesta', 'Ver mi propuesta')])], acciones, reg0('Regla de privacidad y de precios publicados'));
       case 'negociar':
-        return res([msg('Los precios especiales, los descuentos y el crédito los revisa una persona de Ventas; yo no los puedo ofrecer. ¿Quieres que pase tu caso con un resumen?', [chip('persona_ventas', 'Sí, pásalo a Ventas'), chip('propuesta', 'Seguir con mi propuesta')])], acciones, reg0('Regla: excepciones solo con una persona'));
+        return iniciarEspera(c, s, 'precio', acciones);
       case 'baja':
         return bajaCliente(c, s, acciones);
       case 'soporte':
-        return abrirSoporte(c, s, acciones);
+        return iniciarEspera(c, s, 'falla', acciones);
+      case 'incluye':
+        return respuestaIncluye(c, s, acciones, reg0);
+      case 'firma':
+        return respuestaFirma(c, s, acciones, reg0);
+      case 'horario':
+        return res([preguntaHorario()], acciones, reg0('Franja de entrega del comprador', 'Pedir franja y confirmar con Logística', 'regla'));
       case 'persona':
         return pedirDatosOPasar(c, s, 'persona', 'Quiero hablar con una persona', acciones);
       case 'referido':
@@ -655,10 +865,7 @@
   }
 
   function abrirSoporte(c, s, acciones) {
-    const folio = 'SOP-' + ahora().toString(36).slice(-5).toUpperCase();
-    const t = derivarCliente(s, c.cuentaId, 'soporte', 'solicitud de soporte ' + folio);
-    acciones.push({ tipo: 'soporte', folio, estado: 'abierta', traspasoId: t.id });
-    return res([msg(`Abrí la solicitud de soporte ${folio} en esta prueba. Soporte la revisa con una persona; no tengo un plazo confirmado para la respuesta.`, [chip('estado', 'Ver el estado'), chip('ayuda', 'Hacer otra consulta')], [{ tipo: 'folio', folio, estado: 'Abierta', siguiente: 'Una persona del equipo revisa el caso.' }])], acciones, reg('Solicitud de soporte registrada', 'Abrir soporte', 'persona'));
+    return iniciarEspera(c, s, 'falla', acciones);
   }
 
   function ofrecerReferido(acciones) {
@@ -725,10 +932,10 @@
   function ofrecerRepetir(c, s, acciones) {
     const pedidos = pedidosDeComprador(c, s);
     if (!pedidos.length) {
-      return res([msg('Todavía no hay un pedido para repetir en esta prueba. Cuando aceptes una propuesta, podrás repetir tu pedido desde aquí.', [chip('propuesta', 'Ver mi propuesta'), chip('persona', 'Hablar con una persona')])], acciones, reg('Pedidos del comprador', 'regla'));
+      return res([msg('Cuando confirmes que tu primer pedido llegó, abre «Repetir pedido» para ajustar cantidades y confirmar. Puedes revisar su estado en «Mi pedido».', [chip('estado', 'Ver el estado'), chip('ir:repetir', 'Ir a Repetir pedido')])], acciones, reg('Pedidos del comprador', 'regla'));
     }
     const o = pedidos[pedidos.length - 1];
-    return res([msg('Puedo registrar una solicitud para repetir tu último pedido. No hay cobro ni fecha comprometida: el equipo confirma precio, disponibilidad y despacho antes de que sea una compra.', [chip('repetir:confirmar', 'Confirmar la solicitud'), chip('ayuda', 'Cancelar')], [{ tipo: 'ficha', titulo: 'Repetir pedido', filas: [['Pedido', o.id || 'último pedido'], ['Estado', o.status || '—']] }])], acciones, reg('Último pedido del comprador', 'Repetir pedido con confirmación', 'persona'));
+    return res([msg('Repetir es un toque: en «Repetir pedido» ajustas las cantidades y confirmas. Puedo registrar la solicitud para repetir tu último pedido. No hay cobro ni fecha comprometida: el equipo confirma precio, disponibilidad y despacho antes de que sea una compra.', [chip('repetir:confirmar', 'Confirmar la solicitud'), chip('ir:repetir', 'Ir a Repetir pedido'), chip('ayuda', 'Cancelar')], [{ tipo: 'ficha', titulo: 'Repetir pedido', filas: [['Pedido', o.id || 'último pedido'], ['Estado', o.status || '—']] }])], acciones, reg('Último pedido del comprador', 'Repetir pedido con confirmación', 'persona'));
   }
 
   function despacharOpcionCliente(c, s, opcion, acciones, reg0) {
@@ -749,10 +956,14 @@
     if (opcion === 'persona') return pedirDatosOPasar(c, s, 'persona', 'Quiero hablar con una persona', acciones);
     if (opcion === 'persona_ventas') {
       if (puedeCapturar(c) && !identificadoEstado(s)) return iniciarCaptura(c, s, 'persona', acciones);
-      const t = derivarCliente(s, c.cuentaId, 'ventas', 'El comprador pidió hablar con una persona');
-      acciones.push({ tipo: 'derivar', a: 'ventas', traspasoId: t.id });
-      return res([msg('Listo. Ventas recibe tu caso con el resumen; no repites nada. Una persona te responde por el canal que elegiste; no tengo un horario confirmado.', [chip('estado', 'Ver el estado'), chip('ayuda', 'Hacer otra consulta')], [{ tipo: 'ficha', titulo: 'Caso enviado a Ventas', filas: [['Estado', 'Asignado a tu ejecutiva de zona'], ['Resumen', 'Incluye tus respuestas y tu propuesta']] }])], acciones, reg('Resumen enviado a Ventas', 'Derivar a una persona', 'persona'));
+      return iniciarEspera(c, s, 'persona', acciones);
     }
+    if (tipo === 'ir') return irPestana(a, acciones, reg0);
+    if (opcion === 'incluye') return respuestaIncluye(c, s, acciones, reg0);
+    if (opcion === 'firma') return respuestaFirma(c, s, acciones, reg0);
+    if (opcion === 'horario') return res([preguntaHorario()], acciones, reg0('Franja de entrega del comprador', 'Pedir franja y confirmar con Logística', 'regla'));
+    if (tipo === 'horario' && a) return solicitarHorario(c, s, a, acciones);
+    if (tipo === 'espera') return res([msg('Esa respuesta ya no hace falta. Sigo contigo.', [chip('ayuda', 'Ver opciones')])], acciones, reg0('Respuesta de espera no vigente'));
     if (opcion === 'ajustar') return res([msg('¿Qué quieres cambiar?', [chip('ajustar:maquina', 'Cambiar máquina'), chip('ajustar:tazas', 'Cambiar tazas al día')])], acciones, reg0('Pregunta de ajuste'));
     if (tipo === 'ajustar' && a === 'maquina') return res([msg('¿Qué máquina prefieres?', ['bar', 'pods', 'oficina', 'cafe_al_paso'].map((m) => chip('ajustar:m:' + m, nombreMaquina(m))))], acciones, reg0('Lista de máquinas'));
     if (tipo === 'ajustar' && a === 'm') return cambiarMaquina(c, s, b, acciones);
@@ -1232,7 +1443,7 @@
     const cotizo = lead.origen === 'sitio' ? 'estuviste revisando una propuesta' : 'pediste información';
     const negocio = NEGOCIO_FRASE[lead.negocio] || 'tu negocio';
     const eje = lead.ejecutiva || 'una ejecutiva de tu zona';
-    const texto = `${nombre ? 'Hola ' + nombre + ', ' : 'Hola, '}te escribe el equipo de Marley Coffee Empresas. Vimos que ${cotizo} para ${negocio}${lead.comuna ? ' en ' + lead.comuna : ''}. ${eje} puede revisarla contigo y responder tus dudas, sin compromiso. Si no quieres recibir más mensajes, responde BAJA.`;
+    const texto = `${nombre ? 'Hola ' + nombre + ', ' : 'Hola, '}te escribe el equipo de Marley Coffee Empresas. Vimos que ${cotizo} para ${negocio}${comunaReal(lead.comuna) ? ' en ' + comunaReal(lead.comuna) : ''}. ${eje} puede revisarla contigo y responder tus dudas, sin compromiso. Si no quieres recibir más mensajes, responde BAJA.`;
     const canal = lead.canal === 'correo' ? 'correo' : (lead.canal === 'llamada' ? 'whatsapp' : 'web');
     return { canal, texto };
   }
@@ -1323,11 +1534,11 @@
     const ejecutiva = lead.ejecutiva || 'la ejecutiva de zona';
     const resumen = [
       `Lead ${lead.nombre || 'sin nombre'}${lead.empresa ? ' · ' + lead.empresa : ''} (${lead.id})`,
-      `Negocio: ${NEGOCIO_ETIQUETA[lead.negocio] || lead.negocio || 'sin dato'}${lead.comuna ? ' · ' + lead.comuna : ''}`,
+      `Negocio: ${NEGOCIO_ETIQUETA[lead.negocio] || lead.negocio || 'sin dato'}${comunaReal(lead.comuna) ? ' · ' + comunaReal(lead.comuna) : ' · sin comuna (zona por defecto)'}`,
       `Interés ${lead.puntajes.interes ? lead.puntajes.interes.puntaje : '—'}/100 · valor ${lead.puntajes.valor ? lead.puntajes.valor.puntaje : '—'}/100`,
       `Origen: ${lead.fuente || 'sin dato'}${lead.campana && lead.campana !== lead.fuente ? ' · campaña ' + lead.campana : ''}`,
       `Canal preferido: ${lead.canal || 'sin dato'}`,
-      `Dueño por zona: ${ejecutiva}${lead.zona ? ' (' + lead.zona + ')' : ''}`,
+      `Dueño por zona: ${ejecutiva}${lead.zona ? ' (' + lead.zona + ')' : ''}${comunaReal(lead.comuna) ? '' : ' · sin comuna: zona por defecto'}`,
     ].join('\n');
     const borrador = mensajeBorrador(lead);
     const estadoBorrador = consentimientoDe(cuentaId)[borrador.canal] === true || borrador.canal === 'web' ? 'pendiente-aprobacion' : 'bloqueado-sin-consentimiento';
@@ -1519,8 +1730,9 @@
     version: VERSION,
     motor: { responder },
     datos,
+    espera: { estado: estadoEspera, de: esperaDe },
     estado: { get: leerEstado, guardar: guardarEstado, registrar },
-    canales: { enviar },
+    canales: { enviar, permiso: (cuentaId, canal) => consentimientoDe(cuentaId)[canal] === true },
     eventos,
   };
 

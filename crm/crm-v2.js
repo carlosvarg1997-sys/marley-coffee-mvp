@@ -9,8 +9,9 @@
   const DATA_KEY = 'crm2';
   const NAV = {
     ventas: [
-      ['R01', 'Hoy', 'home'], ['R02', 'Contactos', 'people'],
-      ['R03', 'Clientes', 'building'], ['R08', 'Propuestas', 'file']
+      ['R01', 'Hoy', 'home'], ['R02', 'Traspasos y leads', 'people'],
+      ['R03', 'Cuentas', 'building'], ['R10', 'Volver a pedir', 'clock'],
+      ['R08', 'Propuestas', 'file']
     ],
     marketing: [
       ['R11', 'Hoy', 'home'], ['R12', 'Leads', 'people'],
@@ -18,26 +19,27 @@
     ],
     jefatura: [
       ['R05', 'Hoy', 'home'], ['R07', 'Por aprobar', 'check'],
-      ['R06', 'Metas y canales', 'chart'], ['R14', 'Equipo y operación', 'building']
+      ['R06', 'Metas y canales', 'chart'], ['R14', 'Equipo', 'people'],
+      ['R15', 'Operación', 'building']
     ]
   };
   const ROUTE = {
     R00: { role: null, page: 'entry', menu: null, title: 'Ingreso al CRM' },
     R01: { role: 'ventas', page: 'salesToday', menu: 'R01', title: 'Hoy' },
-    R02: { role: 'ventas', page: 'salesContacts', menu: 'R02', title: 'Contactos' },
-    R03: { role: 'ventas', page: 'salesClients', menu: 'R03', title: 'Clientes' },
+    R02: { role: 'ventas', page: 'salesContacts', menu: 'R02', title: 'Traspasos y leads' },
+    R03: { role: 'ventas', page: 'salesClients', menu: 'R03', title: 'Cuentas' },
     R04: { role: null, page: 'detail', menu: null, title: 'Ficha del cliente' },
     R05: { role: 'jefatura', page: 'managerSummary', menu: 'R05', title: 'Resumen' },
     R06: { role: 'jefatura', page: 'managerGoals', menu: 'R06', title: 'Metas y canales' },
     R07: { role: 'jefatura', page: 'managerApprovals', menu: 'R07', title: 'Por aprobar' },
     R08: { role: 'ventas', page: 'salesQuotes', menu: 'R08', title: 'Propuestas' },
     R09: { role: 'jefatura', page: 'managerGoals', menu: 'R06', title: 'Puntaje y metas' },
-    R10: { role: 'ventas', page: 'salesClients', menu: 'R03', title: 'Reposición' },
+    R10: { role: 'ventas', page: 'salesReorder', menu: 'R10', title: 'Volver a pedir' },
     R11: { role: 'marketing', page: 'marketingToday', menu: 'R11', title: 'Hoy' },
     R12: { role: 'marketing', page: 'marketingLeads', menu: 'R12', title: 'Leads' },
     R13: { role: 'marketing', page: 'marketingCampaigns', menu: 'R13', title: 'Campañas' },
-    R14: { role: 'jefatura', page: 'managerTeam', menu: 'R14', title: 'Equipo y operación' },
-    R15: { role: 'jefatura', page: 'managerOperations', menu: 'R14', title: 'Operación' },
+    R14: { role: 'jefatura', page: 'managerTeam', menu: 'R14', title: 'Equipo' },
+    R15: { role: 'jefatura', page: 'managerOperations', menu: 'R15', title: 'Operación' },
     R16: { role: 'marketing', page: 'marketingRecover', menu: 'R16', title: 'Recuperar' },
     R17: { role: null, page: 'buyerCRM', menu: 'R14', title: 'CRM por comprador' }
   };
@@ -388,20 +390,25 @@
     const priority = priorityLabel(lead);
     const sub = `${companyName(lead)} · ${source}${mode === 'marketing' ? ` · ${permissionShort(lead)}` : ''}`;
     const meta = mode === 'marketing' ? `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100` : `${priority} · ${valueLabel(lead)}`;
-    return row(contactName(lead), sub, meta, `data-c2="open-lead" data-id="${id}"`, stage);
+    // Tareas de la prueba interna: abrir un contacto de búsqueda (C-V1) o un referido (C-V6) es el cierre de esa tarea.
+    const tarea = mode !== 'sales' ? '' : /Google|búsqueda|orgánic/i.test(String(source)) ? ' data-cierra-tarea="C-V1"' : isReferral(lead) ? ' data-cierra-tarea="C-V6"' : '';
+    return row(contactName(lead), sub, meta, `data-c2="open-lead" data-id="${id}"${tarea}`, stage);
   }
   function accountRow(account, mode = 'client') {
     const stats = accountStats(account);
     const meta = mode === 'reorder' ? (accountNeedsReorder(account) ? 'Toca reponer' : (stats.freqDays ? `Ciclo · ${stats.freqDays} días` : 'Ciclo por calcular')) : mode === 'risk' ? riskShort(account) : `Última compra · ${stats.lastAgo == null ? 'sin dato' : `hace ${stats.lastAgo} días`}`;
     const stateLabel = appState().replenishments?.[account.id]?.status || (mode === 'risk' ? 'En riesgo' : accountNeedsReorder(account) && accountAtRisk(account) ? 'Reposición · cuenta en riesgo' : accountNeedsReorder(account) ? 'Reposición por revisar' : accountAtRisk(account) ? 'En riesgo' : 'Cliente activo');
-    return row(account.name || 'Cuenta sin nombre', `${account.business || 'Negocio sin dato'} · ${account.comuna || 'Comuna sin dato'}`, meta, `data-c2="open-account" data-id="${esc(account.id)}"`, stateLabel);
+    // Tarea C-V5: abrir una cuenta en riesgo es el cierre de esa tarea.
+    const tarea = mode === 'risk' ? ' data-cierra-tarea="C-V5"' : '';
+    return row(account.name || 'Cuenta sin nombre', `${account.business || 'Negocio sin dato'} · ${account.comuna || 'Comuna sin dato'}`, meta, `data-c2="open-account" data-id="${esc(account.id)}"${tarea}`, stateLabel);
   }
   const permissionShort = item => permission(item).key === 'yes' ? 'Permiso sí' : permission(item).key === 'no' ? 'Sin permiso' : permission(item).key === 'reply' ? 'Solo respuesta solicitada' : 'Permiso por confirmar';
   function titleSub(route, role) {
     const map = {
       salesToday: ['Hoy', ''],
-      salesContacts: ['Contactos', ''],
-      salesClients: ['Clientes', ''],
+      salesContacts: ['Traspasos y leads', ''],
+      salesClients: ['Cuentas', ''],
+      salesReorder: ['Volver a pedir', ''],
       salesQuotes: ['Propuestas', ''],
       marketingToday: ['Hoy', ''],
       marketingChannels: ['Ventas y origen', ''],
@@ -411,7 +418,7 @@
       managerSummary: ['Hoy', ''],
       managerApprovals: ['Por aprobar', ''],
       managerGoals: ['Metas y canales', ''],
-      managerTeam: ['Equipo y operación', ''],
+      managerTeam: ['Equipo', ''],
       managerOperations: ['Operación', ''],
       buyerCRM: ['CRM por comprador', ''],
       detail: ['Ficha', '']
@@ -424,7 +431,7 @@
     const roleCard = (role, dest, description) => `<button type="button" class="crm2-role-card" data-c2="choose-role" data-role="${role}"><span class="crm2-role-icon">${icon(role === 'ventas' ? 'people' : role === 'marketing' ? 'campaign' : 'chart')}</span><span><b>${esc(roleTitle(role))}</b><small>${esc(description)}</small></span><span class="crm2-role-arrow">${icon('arrow')}</span></button>`;
     return `<main class="crm2-entry"><div class="crm2-entry-panel"><div class="crm2-entry-brand">${icon('coffee')}<span>MARLEY COFFEE</span><small>CRM interno</small><img class="crm2-entry-visual" src="recursos/productos/keep-on-moving-grano.webp" alt="Café Marley Coffee Keep on Moving"></div><p class="crm2-eyebrow">INGRESO DE TRABAJADORES</p><h1>¿Qué necesitas hacer?</h1><p>Abre la vista de tu rol para empezar por la tarea de hoy.</p><div class="crm2-role-list">${roleCard('ventas','R01','Atender oportunidades, clientes y propuestas')}${roleCard('marketing','R11','Revisar leads, permisos y campañas')}${roleCard('jefatura','R05','Ver resultados y decisiones pendientes')}</div><p class="crm2-entry-note">Prototipo de evaluación · no valida cuentas reales.</p></div></main>`;
   }
-  function shell(route, role, title, subtitle, content, actionbar = '') {
+  function shell(route, role, title, subtitle, content, actionbar = '', cta = '') {
     const activeRoute = menuRouteFor(route, role);
     const menu = NAV[role] || [];
     const nav = menu.map(([id, label, glyph]) => `<a class="crm2-nav-link ${activeRoute === id ? 'is-active' : ''}" href="#${id}" data-c2-go="${id}" ${activeRoute === id ? 'aria-current="page"' : ''}>${icon(glyph)}<span>${esc(label)}</span></a>`).join('');
@@ -443,7 +450,7 @@
       </aside>
       <div class="crm2-workspace">
         <header class="crm2-topbar"><div class="crm2-mobile-brand"><span class="crm2-brand-mark">M</span><b>${esc(roleTitle(role))}</b></div><div class="crm2-search-wrap">${icon('search')}<input type="search" data-c2-search placeholder="Buscar" aria-label="Buscar contacto o cuenta" autocomplete="off"><div class="crm2-search-results" data-c2-search-results hidden></div></div><button class="crm2-alerts" type="button" data-c2-go="${role === 'jefatura' ? 'R07' : role === 'marketing' ? 'R16' : 'R01'}" aria-label="Ver avisos">${icon('bell')}<span>Avisos</span><b>${alertCount(role)}</b></button></header>
-        <main class="crm2-main"><header class="crm2-page-head"><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}</header><div class="crm2-content">${content}</div></main>
+        <main class="crm2-main"><header class="crm2-page-head"><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}${cta ? `<div class="crm2-page-cta">${cta}</div>` : ''}</header><div class="crm2-content">${content}${cta ? `<div class="crm2-cierre" data-crm2-cierre>${cta}</div>` : ''}</div></main>
       </div>
       ${actionbar}
       <div class="crm2-toast-host" data-crm2-toast aria-live="polite" aria-atomic="true"></div>
@@ -484,7 +491,9 @@
       const item = entry.item;
       const isLead = entry.kind === 'lead';
       const isReferralAccount = entry.kind === 'referral-account';
-      const action = isLead ? `data-c2="open-lead" data-id="${esc(item.id)}"` : `data-c2="open-account" data-id="${esc(item.id)}"`;
+      // Tarea C-V6 (referido): abrir la recomendación es el cierre de esa tarea.
+      const tarea = entry.kind === 'referral-account' || entry.label === 'Revisar referido' ? ' data-cierra-tarea="C-V6"' : '';
+      const action = (isLead ? `data-c2="open-lead" data-id="${esc(item.id)}"` : `data-c2="open-account" data-id="${esc(item.id)}"`) + tarea;
       const meta = isLead ? sourceOf(item) : isReferralAccount ? item.referral : riskReason(item);
       const badge = isLead ? priorityLabel(item) : isReferralAccount ? 'Referido' : (accountNeedsReorder(item) ? 'Reposición' : 'En riesgo');
       const company = isLead ? companyName(item) : item.business || 'Cuenta';
@@ -502,18 +511,23 @@
     const options = [...new Set(leads().map(sourceOf))].filter(Boolean).sort();
     const filters = `<div class="crm2-filterbar"><label>Origen<select data-c2-filter="origin"><option value="">Todos</option>${options.map(item => `<option ${item === f.origin ? 'selected' : ''} value="${esc(item)}">${esc(item)}</option>`).join('')}</select></label><button class="crm2-chip-button ${f.referred ? 'is-selected' : ''}" type="button" data-c2="toggle-referrals">Referidos</button></div>`;
     const contacts = source.length ? limitedList(source, lead => leadRow(lead,'sales'), 'Ver todos los contactos') : empty('No hay contactos en este filtro','Cambia el origen o revisa el buscador.');
-    return block('Contactos y origen', 'Encuentra el primer contacto, la campaña y la prioridad sin abrir varias pantallas.', filters + `<div class="crm2-list">${contacts}</div>`) + buyerCrmLink();
+    const passedList = sortedNewest(passedLeads());
+    const traspasos = passedList.length ? `<div class="crm2-list">${limitedList(passedList, lead => leadRow(lead,'sales'), 'Ver todos los traspasos')}</div>` : '<div class="crm2-inline-note">Sin traspasos de Marketing pendientes de aceptar.</div>';
+    return block('Traspasos de Marketing', 'Leads que Marketing pasó a Ventas y aún no aceptas.', traspasos) +
+      block('Contactos y origen', 'Encuentra el primer contacto, la campaña y la prioridad sin abrir varias pantallas.', filters + `<div class="crm2-list">${contacts}</div>`) + buyerCrmLink();
   }
+  // Cuentas: solo el estado de cada cuenta (en riesgo o no). Volver a pedir tiene su propia pestaña (salesReorder).
   function salesClients() {
     const all = accounts();
-    const due = all.filter(accountNeedsReorder).sort((a,b) => accountDue(a)-accountDue(b));
-    const dueIds = new Set(due.map(account => String(account.id)));
-    const risk = all.filter(accountAtRisk).filter(account => !dueIds.has(String(account.id))).sort((a,b) => Number(isDetractor(b))-Number(isDetractor(a)) || Number(accountStats(b).lastAgo||0)-Number(accountStats(a).lastAgo||0));
-    const other = all.filter(account => !due.includes(account) && !risk.includes(account));
-    const first = localRoute() === 'R10' ? due : due;
-    return block('Toca reponer', 'La sugerencia sigue el historial; confirma cantidades y despacho con la cuenta.', `<div class="crm2-list">${limitedList(first,account => accountRow(account,'reorder'),'Ver todas las reposiciones')}</div>`) +
-      block('En riesgo', 'Si hay una incidencia abierta, la postventa va antes de la venta.', `<div class="crm2-list">${limitedList(risk,account => accountRow(account,'risk'),'Ver todas las cuentas en riesgo')}</div>`) +
-      `<details class="crm2-fold"><summary>Todos los clientes (${all.length})</summary><div class="crm2-list">${other.map(account => accountRow(account,'client')).join('') || empty('Sin clientes adicionales','')}</div></details>`;
+    const risk = all.filter(accountAtRisk).sort((a,b) => Number(isDetractor(b))-Number(isDetractor(a)) || Number(accountStats(b).lastAgo||0)-Number(accountStats(a).lastAgo||0));
+    const riskIds = new Set(risk.map(account => String(account.id)));
+    const other = all.filter(account => !riskIds.has(String(account.id)));
+    return block('En riesgo', 'Si hay una incidencia abierta, la postventa va antes de la venta.', `<div class="crm2-list">${limitedList(risk,account => accountRow(account,'risk'),'Ver todas las cuentas en riesgo')}</div>`) +
+      `<details class="crm2-fold"><summary>Todas las cuentas (${other.length})</summary><div class="crm2-list">${other.map(account => accountRow(account,'client')).join('') || empty('Sin cuentas adicionales','')}</div></details>`;
+  }
+  function salesReorder() {
+    const due = accounts().filter(accountNeedsReorder).sort((a,b) => accountDue(a)-accountDue(b));
+    return block('Toca reponer', 'La sugerencia sigue el historial; confirma cantidades y despacho con la cuenta.', `<div class="crm2-list">${limitedList(due,account => accountRow(account,'reorder'),'Ver todas las reposiciones')}</div>`);
   }
   function salesQuotes() {
     const generated = crmQuotes().slice().reverse();
@@ -533,7 +547,7 @@
     const leadBody = ready.length ? limitedList(ready, lead => row(contactName(lead), companyName(lead), `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, permissionShort(lead)), 'Ver todos los leads') : empty('No hay un lead listo para pasar', 'La calificación requiere contacto identificado, negocio B2B, permiso y 40 puntos de interés.');
     const returnedBody = returned.length ? limitedList(returned, lead => row(contactName(lead), `${companyName(lead)} · ${sourceOf(lead)}`, `Motivo: ${progressFor(lead).motivoDevolucion || progressFor(lead).motivo || 'revisar ficha'}`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, 'Devuelto por Ventas')) : `<div class="crm2-inline-note">Sin devoluciones pendientes.</div>`;
     const referralBody = referralRequests.length ? `<div class="crm2-list">${limitedList(referralRequests, item => { const lead = leadById(item.leadId) || {}; return row(contactName(lead), `${companyName(lead)} · ${item.reason}`, item.status, `data-c2="open-lead" data-id="${esc(item.leadId)}"`, 'Referido'); }, 'Ver todos los referidos')}</div>` : '';
-    return marketingDraftBlock() + block('Para pasar a Ventas', '', leadBody) + `<details class="crm2-fold"><summary>Traspaso y ventas</summary><div class="crm2-fold-body"><p>${mql} MQL · ${sql} SQL aceptados</p><p>Ventas del período de prueba <b>${money(sales)}</b></p>${returnedBody}${referralBody}</div></details>`;
+    return block('Para pasar a Ventas', '', leadBody) + `<details class="crm2-fold"><summary>Traspaso y ventas</summary><div class="crm2-fold-body"><p>${mql} MQL · ${sql} SQL aceptados</p><p>Ventas del período de prueba <b>${money(sales)}</b></p>${returnedBody}${referralBody}</div></details>` + marketingDraftBlock();
   }
   function marketingDraftBlock() {
     const segments = Object.keys(D.SEGMENT_CONTENT || {});
@@ -578,7 +592,8 @@
     const list = sortedNewest(leads());
     const renderLead = lead => {
       const pass = progressFor(lead);
-      const action = `data-c2="open-lead" data-id="${esc(lead.id)}"`;
+      // Tarea C-M1: abrir un prospecto reciente para ver de dónde llegó es el cierre de esa tarea.
+      const action = `data-c2="open-lead" data-id="${esc(lead.id)}" data-cierra-tarea="C-M1"`;
       return row(contactName(lead), `${companyName(lead)} · Llegó por ${sourceOf(lead)} · ${permissionShort(lead)}`, `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, action, pass.estado === 'devuelto' ? `Devuelto: ${pass.motivoDevolucion || pass.motivo || 'motivo registrado'}` : statusOfLead(lead));
     };
     const items = list.length ? limitedList(list, renderLead, 'Ver todos los leads') : empty('Sin leads registrados','No se encontraron contactos en M4D.PROSPECTS.');
@@ -614,10 +629,10 @@
       const restricted = entry.permission.key !== 'yes';
       const content = entry.type === 'account' ? 'Revisar servicio antes de una promoción.' : (D.SEGMENT_CONTENT?.[item.business]?.nutre || D.SEGMENT_CONTENT?.[item.business]?.explora || 'Pieza sugerida según el segmento; revisar antes de usar.');
       const requested = Boolean(item.requestedReply || item.request?.reply);
-      const replyControl = restricted ? requested ? secondary('Responder solicitud','reply-request',`data-id="${esc(id)}" ${item.crm2DemoRequest ? 'data-demo-request="true"' : ''}`) : `<span class="crm2-blocked-copy">Sin solicitud de respuesta; no contactar.</span>` : secondary('Programar','schedule',`data-id="${esc(id)}" data-kind="${entry.type}"`);
+      const replyControl = restricted ? requested ? secondary('Responder solicitud','reply-request',`data-id="${esc(id)}" data-cierra-tarea="C-M4" ${item.crm2DemoRequest ? 'data-demo-request="true"' : ''}`) : `<span class="crm2-blocked-copy">Sin solicitud de respuesta; no contactar.</span>` : secondary('Programar','schedule',`data-id="${esc(id)}" data-kind="${entry.type}"`);
       const permissionControl = !restricted ? secondary('Nutrir (con permiso)','nurture',`data-id="${esc(id)}"`) : `<span class="crm2-blocked-copy">Promoción bloqueada hasta registrar el permiso.</span>`;
       const openControl = entry.type !== 'account' ? secondary('Abrir ficha','open-lead',`data-id="${esc(id)}"`) : secondary('Abrir ficha','open-account',`data-id="${esc(id)}"`);
-      return `<article class="crm2-recovery-row"><div><p class="crm2-eyebrow">${esc(entry.reason)}</p><h3>${esc(title)}</h3><p>${esc(entry.type === 'account' ? item.business || 'Cuenta' : companyName(item))} · ${esc(sourceOf(item))}</p><div class="crm2-recovery-meta">${statusPill(permissionLabel, restricted ? 'blocked' : 'good')}<span>${esc(content)}</span></div><div class="crm2-row-actions">${openControl}${replyControl}${permissionControl}</div></div></article>`;
+      return `<article class="crm2-recovery-row"><div><p class="crm2-eyebrow">${esc(entry.reason)}</p><h3>${esc(title)}</h3><p>${esc(entry.type === 'account' ? item.business || 'Cuenta' : companyName(item))} · ${esc(sourceOf(item))}</p><div class="crm2-recovery-meta">${statusPill(permissionLabel, restricted ? 'blocked' : 'good')}<span>${esc(content)}</span></div><div class="crm2-row-actions">${openControl}${replyControl}${permissionControl}${agenteBotones(item, entry.type === 'account', 'marketing', entry.permission)}</div></div></article>`;
     }, 'Ver todos los seguimientos') : '';
     const body = markup || empty('No hay seguimientos preparados','Cuando un contacto se estanque, el motivo y su permiso aparecerán aquí.');
     return block('Recuperación por motivo', 'Los casos con promoción bloqueada solo permiten responder una solicitud que la persona inició.', body) + marketingActivity();
@@ -647,7 +662,7 @@
   function marketingCampaigns() {
     const campaigns = campaignRows();
     const body = campaigns.length ? campaigns.slice(0,4).map(campaign => {
-      const leadsHtml = campaign.people.slice(0,3).map(lead => `<button class="crm2-campaign-lead" type="button" data-c2="open-lead" data-id="${esc(lead.id)}"><b>${esc(contactName(lead))}</b><span>${esc(sourceOf(lead))}</span></button>`).join('');
+      const leadsHtml = campaign.people.slice(0,3).map(lead => `<button class="crm2-campaign-lead" type="button" data-c2="open-lead" data-cierra-tarea="C-M2" data-id="${esc(lead.id)}"><b>${esc(contactName(lead))}</b><span>${esc(sourceOf(lead))}</span></button>`).join('');
       return `<article class="crm2-campaign"><div><p class="crm2-eyebrow">CAMPAÑA · DATO DE PRUEBA</p><h3>${esc(campaign.name)}</h3><p>${campaign.people.length} contacto${campaign.people.length === 1 ? '' : 's'} con ese origen registrado.</p></div><details><summary>Ver piezas y contactos</summary><div class="crm2-campaign-details"><p><b>Origen:</b> ${esc(campaign.name)}</p><p><b>Pieza:</b> ${esc(pieceOf(campaign.people[0]))}</p><p><b>Contenido del rubro:</b> ${esc(D.SEGMENT_CONTENT?.[campaign.people[0]?.business]?.explora || 'Sin pieza asociada en el registro.')}</p>${leadsHtml}</div></details></article>`;
     }).join('') : empty('Sin campañas registradas','El origen del contacto se conserva aunque no haya una campaña asociada.');
     const tactics = Object.entries(D.FLY_TACTICS || {}).map(([stage, items]) => `<details><summary>${esc(stage)} · ${items.length} tácticas</summary><div class="crm2-tactic-list">${items.slice(0,3).map(item => `<p><b>${esc(item.t)}</b><span>${esc(item.m || item.d)}</span></p>`).join('')}</div></details>`).join('');
@@ -731,14 +746,14 @@
       const canApprove = !isReferralApproval || (permissionVerified && b2bVerified && benefitVerified);
       const decisionStatus = item.estado === 'pidio_info' ? 'Información solicitada a Ventas' : 'Pendiente de decisión';
       const checks = isReferralApproval ? `<ul class="crm2-checklist"><li>${statusPill(`Permiso del referido · ${permissionVerified ? 'registrado' : 'por confirmar'}`,permissionVerified ? 'good' : 'wait')}</li><li>${statusPill(`Negocio B2B · ${b2bVerified ? 'registrado' : 'por confirmar'}`,b2bVerified ? 'good' : 'wait')}</li><li>${statusPill(`Beneficio · ${benefitVerified ? 'registrado' : 'por confirmar'}`,benefitVerified ? 'good' : 'wait')}</li></ul>${!canApprove ? '<p class="crm2-small-note">Aprobar queda bloqueado hasta registrar los tres datos. No se asigna un monto al beneficio.</p>' : ''}` : `<ul class="crm2-checklist"><li>${statusPill('Excepción y motivo · revisar','wait')}</li><li>${statusPill('Monto del catálogo · referencial','wait')}</li></ul>`;
-      return `<article class="crm2-approval" data-approval="${esc(item.id)}"><div class="crm2-approval-head"><div><p class="crm2-eyebrow">${item.dataTest ? 'DATO DE PRUEBA' : 'SOLICITUD'} · ${esc(item.tipo || 'excepción')}</p><h3>${esc(item.titulo || 'Solicitud pendiente')}</h3><p>${esc(item.detalle || item.motivo || 'Motivo sin registro')}</p></div>${amount}</div>${statusPill(decisionStatus,item.estado === 'pidio_info' ? 'wait' : '')}${checks}<label class="crm2-note-field">Nota para Ventas<input type="text" data-approval-note="${esc(item.id)}" value="${esc(item.nota || '')}" placeholder="Escribe qué falta confirmar"></label><div class="crm2-row-actions">${primary('Aprobar','decide-approval',`data-id="${esc(item.id)}" data-decision="aprobada" ${canApprove ? '' : 'disabled title="Faltan datos verificables del referido"'}`)}${secondary('Pedir información','decide-approval',`data-id="${esc(item.id)}" data-decision="pidio_info"`)}${secondary('Rechazar','decide-approval',`data-id="${esc(item.id)}" data-decision="descartada"`)}</div></article>`;
+      return `<article class="crm2-approval" data-approval="${esc(item.id)}"><div class="crm2-approval-head"><div><p class="crm2-eyebrow">${item.dataTest ? 'DATO DE PRUEBA' : 'SOLICITUD'} · ${esc(item.tipo || 'excepción')}</p><h3>${esc(item.titulo || 'Solicitud pendiente')}</h3><p>${esc(item.detalle || item.motivo || 'Motivo sin registro')}</p></div>${amount}</div>${statusPill(decisionStatus,item.estado === 'pidio_info' ? 'wait' : '')}${checks}<label class="crm2-note-field">Nota para Ventas<input type="text" data-approval-note="${esc(item.id)}" value="${esc(item.nota || '')}" placeholder="Escribe qué falta confirmar"></label><div class="crm2-row-actions">${primary('Aprobar','decide-approval',`data-id="${esc(item.id)}" data-decision="aprobada" data-cierra-tarea="${item.tipo === 'referido' ? 'C-J3' : 'C-J2'}" ${canApprove ? '' : 'disabled title="Faltan datos verificables del referido"'}`)}${secondary('Pedir información','decide-approval',`data-id="${esc(item.id)}" data-decision="pidio_info" data-cierra-tarea="${item.tipo === 'referido' ? 'C-J3' : 'C-J2'}"`)}${secondary('Rechazar','decide-approval',`data-id="${esc(item.id)}" data-decision="descartada" data-cierra-tarea="${item.tipo === 'referido' ? 'C-J3' : 'C-J2'}"`)}</div></article>`;
     }).join('') : empty('No hay solicitudes pendientes','Las decisiones registradas quedan vinculadas a su propuesta o referido.');
     const followups = managerFollowups().sort(firstSelected);
     const followupHtml = followups.length ? `<div class="crm2-list">${followups.map(item => {
       const person = leadById(item.leadId) || accountById(item.leadId);
       const approvedPermission = permission(person).key === 'yes' && item.status === 'Requiere aprobación';
       const direct = approvedPermission ? primary('Aprobar recuperación', 'approve-recovery', `data-id="${esc(item.id)}"`) : '';
-      return `<article class="crm2-followup-review" data-followup="${esc(item.id)}"><p>${esc(item.name)} · ${esc(item.status === 'Bloqueado' ? 'Bloqueado: falta permiso' : item.status)}</p><p>${esc(item.reason)}</p><div class="crm2-row-actions">${direct}${secondary('Revisar permiso','review-followup',`data-id="${esc(item.leadId || item.id)}"`)}</div></article>`;
+      return `<article class="crm2-followup-review" data-followup="${esc(item.id)}"><p>${esc(item.name)} · ${esc(item.status === 'Bloqueado' ? 'Bloqueado: falta permiso' : item.status)}</p><p>${esc(item.reason)}</p><div class="crm2-row-actions">${direct}${secondary('Revisar permiso','review-followup',`data-id="${esc(item.leadId || item.id)}" data-cierra-tarea="C-J4"`)}</div></article>`;
     }).join('')}</div>` : `<div class="crm2-inline-note">Los seguimientos sin permiso de promoción permanecen bloqueados.</div>`;
     const proposals = block('Solicitudes de Ventas', 'Aprobar, pedir información o rechazar; la respuesta vuelve a la ficha.', body);
     const recovery = block('Seguimientos preparados', 'Un bloqueo de permiso no ofrece un botón para enviar.', followupHtml);
@@ -763,10 +778,7 @@
   function managerTeam() {
     const countByRole = (role) => role === 'ventas' ? leads().length : role === 'marketing' ? leadsReady().length : pendingApprovals().length;
     const work = `<div class="crm2-team-grid">${Object.entries({ventas:'Contactos a cargo',marketing:'Listos para pasar',jefatura:'Pendientes de aprobación'}).map(([role,label])=>`<article><span>${esc(label)}</span><b>${countByRole(role)}</b><small>${role === 'ventas' ? 'Dato de prueba · equipo comercial' : role === 'marketing' ? 'Dato de prueba · calificación' : 'Solicitudes por revisar'}</small></article>`).join('')}</div>`;
-    const tickets = window.M4R3?.postventa?.() || [];
-    const open = tickets.filter(ticket => !/cerrad|resuelt|finaliz/i.test(String(ticket.status || '')));
-    const ops = open.slice(0,3).map(ticket => row(ticket.customer?.name || ticket.folio || 'Caso de postventa', `${ticket.type || 'Incidencia'} · ${ticket.status || 'Recibido'}`, ticket.responsible || 'Responsable sin dato', `data-c2="open-account" data-id="${esc(ticket.customerId || ticket.folio)}"`, 'Postventa')).join('');
-    return block('Carga y operación del equipo', 'Conteos del prototipo; no son productividad ni niveles de servicio reales.', work) + block('Postventa primero', 'Los casos abiertos se revisan antes de preparar una venta.', `<div class="crm2-list">${ops || empty('Sin tickets abiertos','Postventa no registra casos pendientes.')}</div><details class="crm2-fold"><summary>CRM por comprador y etapas</summary><div class="crm2-fold-body"><p>Acceso preservado en <a href="#R17" data-c2-go="R17">CRM por comprador</a>, con permisos y siguiente acción.</p></div></details>`) + block('Alertas de stock', 'Escenario de prueba; sin inventario real.', stockBlockBody());
+    return block('Carga y operación del equipo', 'Conteos del prototipo; no son productividad ni niveles de servicio reales.', work) + `<details class="crm2-fold"><summary>CRM por comprador y etapas</summary><div class="crm2-fold-body"><p>Acceso preservado en <a href="#R17" data-c2-go="R17">CRM por comprador</a>, con permisos y siguiente acción.</p></div></details>`;
   }
   function managerOperations() {
     const all = accounts();
@@ -774,7 +786,7 @@
     const open = tickets.filter(ticket => !/cerrad|resuelt|finaliz/i.test(String(ticket.status || '')));
     const risk = all.filter(accountAtRisk);
     const body = [...open.slice(0,3).map(ticket => row(ticket.customer?.name || ticket.folio, `${ticket.type || 'Postventa'} · ${ticket.status || 'Recibido'}`, ticket.responsible || 'Equipo sin asignar', `data-c2="open-account" data-id="${esc(ticket.customerId || ticket.folio)}"`, 'Postventa')), ...risk.slice(0,2).map(account => accountRow(account,'risk'))].join('');
-    return block('Casos que requieren revisión', 'Postventa abierta y cuentas cuyo ciclo de compra necesita una comprobación humana.', `<div class="crm2-list">${body || empty('Sin alertas operativas','No hay casos o ciclos vencidos en los datos de prueba.')}</div>`) + `<details class="crm2-fold"><summary>Pedidos e inventario</summary><div class="crm2-fold-body"><p>El prototipo usa historial local; stock, despacho y OTIF no están conectados. Confirma las fuentes operativas antes de comprometer disponibilidad.</p><a class="crm2-text-link" href="#R17" data-c2-go="R17">Ver CRM por comprador</a></div></details>`;
+    return block('Postventa primero', 'Los casos abiertos y las cuentas en riesgo se revisan antes de preparar una venta.', `<div class="crm2-list">${body || empty('Sin alertas operativas','No hay casos o ciclos vencidos en los datos de prueba.')}</div>`) + block('Alertas de stock', 'Escenario de prueba; sin inventario real.', stockBlockBody()) + `<details class="crm2-fold"><summary>Pedidos e inventario</summary><div class="crm2-fold-body"><p>El prototipo usa historial local; stock, despacho y OTIF no están conectados. Confirma las fuentes operativas antes de comprometer disponibilidad.</p><a class="crm2-text-link" href="#R17" data-c2-go="R17">Ver CRM por comprador</a></div></details>`;
   }
 
   function getSelected() {
@@ -815,6 +827,17 @@
     const saved = appState().recommendations?.[account.id];
     return `<section class="crm2-inline-panel" tabindex="-1" aria-labelledby="crm2-recommend-title"><h2 id="crm2-recommend-title">Recomendar a otro negocio</h2><p>${esc(account.name)}</p><p>${saved ? 'Invitación de prueba guardada. El negocio decide si quiere recomendar.' : 'Prepara una invitación para que esta cuenta recomiende Marley Coffee a otro negocio.'}</p><div class="crm2-row-actions">${saved ? '' : primary('Guardar invitación','save-account-recommendation',`data-id="${esc(account.id)}"`)}${secondary('Cerrar','close-inline')}</div></section>`;
   }
+  // Botones que pasan por el agente del CRM (crm-agente.js los atiende por delegación). Solo aparecen si el rol puede usarlos:
+  // el correo exige permiso del contacto; contactar y agendar visita son de Ventas; avisar a un compañero es para todos.
+  const AGENTE_TXT = { correo: 'Enviar correo', contactar: 'Contactar', visita: 'Agendar visita', avisar: 'Avisar a un compañero' };
+  function agenteBotones(item, isAccount, role, perm) {
+    const tareas = [];
+    const porCanal = window.MarleyAgente?.canales?.permiso?.(item.id, 'correo');
+    if (porCanal === true || porCanal == null && perm?.key === 'yes') tareas.push('correo');
+    if (role === 'ventas') tareas.push('contactar', 'visita');
+    tareas.push('avisar');
+    return tareas.map(tarea => `<button type="button" class="crm2-btn crm2-btn--secondary" data-crm-agente-tarea="${tarea}" data-cuenta-id="${esc(item.id)}" data-crm-tipo="${isAccount ? 'cuenta' : 'lead'}">${esc(AGENTE_TXT[tarea])}</button>`).join('');
+  }
   function detailPage(role) {
     const s = appState();
     const { lead, account } = getSelected();
@@ -844,9 +867,11 @@
     const referrerAccount = !isAccount && isReferral(item) ? accountById(item.referrerAccountId) : null;
     const referralDetails = isAccount && item.referral ? `<div class="crm2-referral-details"><b>Recomendación registrada</b>${labelValue('Recomendó',item.referral)}${labelValue('Permiso del referido','Pendiente de confirmar')}${labelValue('Negocio B2B',item.business ? `${item.business} · validar actividad y vínculo` : 'Sin dato')}${labelValue('Beneficio para quien refiere',item.benefit || item.beneficio || 'Sin beneficio registrado')}</div>` : !isAccount && isReferral(item) ? `<div class="crm2-referral-details"><b>Recomendación registrada</b>${labelValue('Origen','Origen referido')}${labelValue('Cuenta que recomienda',referrerAccount?.name || item.referrerAccountId || 'Sin cuenta asociada')}${labelValue('Código de referido',item.referralCode || 'Sin código registrado')}${labelValue('Negocio B2B',item.business ? `${item.business} · validar actividad y vínculo` : 'Sin dato')}${labelValue('Permiso del referido', item.referralPending ? 'Por confirmar con el negocio referido' : perm.label)}${labelValue('Beneficio para quien refiere',item.benefit || item.referralBenefit || 'Sin beneficio registrado · no pasa a Jefatura')}</div>` : '';
     const postventa = tickets.length ? `<div class="crm2-alert-panel"><b>Resolver postventa antes de vender</b><span>${esc(tickets[0].type || tickets[0].detail || 'Caso abierto')} · ${esc(tickets[0].status || 'Pendiente')}</span></div>` : '';
+    const agente = `<div class="crm2-agente-acciones" role="group" aria-label="Pedir una tarea al agente">${agenteBotones(item, isAccount, role, perm)}</div>`;
+    // Solo aparece lo que el rol puede usar: «Preparar propuesta» y «Preparar reposición» son de Ventas (sus botones van en la barra).
     const actions = isAccount
-      ? role === 'ventas' ? '' : `<div class="crm2-detail-actions">${secondary('Preparar reposición', 'open-reorder', `data-id="${esc(item.id)}"`)}${secondary('Agendar contacto', 'start-followup', `data-id="${esc(item.id)}"`)}</div>`
-      : role === 'ventas' ? '' : `<div class="crm2-detail-actions"><button class="crm2-btn crm2-btn--primary" type="button" data-c2="quote" data-id="${esc(item.id)}">Preparar propuesta</button>${role === 'marketing' ? `${isMql(item) ? statusPill('MQL registrado','good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="mark-mql" data-id="${esc(item.id)}">Marcar como calificado (MQL)</button>`}${progressFor(item).estado ? statusPill(statusOfLead(item),progressFor(item).estado==='devuelto'?'blocked':'good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="pass-sales" data-id="${esc(item.id)}">Pasar a Ventas</button>`}` : ''}</div>`;
+      ? (role === 'ventas' ? '' : `<div class="crm2-detail-actions">${secondary('Agendar contacto', 'start-followup', `data-id="${esc(item.id)}"`)}</div>`) + agente
+      : (role === 'marketing' ? `<div class="crm2-detail-actions">${isMql(item) ? statusPill('MQL registrado','good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="mark-mql" data-cierra-tarea="C-M3" data-id="${esc(item.id)}">Marcar como calificado (MQL)</button>`}${progressFor(item).estado ? statusPill(statusOfLead(item),progressFor(item).estado==='devuelto'?'blocked':'good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="pass-sales" data-id="${esc(item.id)}">Pasar a Ventas</button>`}</div>` : '') + agente;
     const referralDataAction = !isAccount && isReferral(item) && role === 'ventas' ? `<div class="crm2-detail-actions">${secondary('Pedir datos a Marketing','request-referral-data',`data-id="${esc(item.id)}"`)}</div>` : '';
     const permissionControls = !isAccount && role === 'marketing' ? `<p class="crm2-small-note">Registra una preferencia solo después de verificar la elección explícita del contacto.</p>${secondary('Confirmar permiso promocional','permission-yes',`data-id="${esc(item.id)}"`)} ${secondary('Registrar sin permiso','permission-no',`data-id="${esc(item.id)}"`)}` : '';
     const canSchedule = role !== 'marketing' || perm.key === 'yes';
@@ -854,7 +879,13 @@
     const permissionFirst = permissionReviewId === String(item.id);
     const folded = `<details class="crm2-fold" data-crm2-permissions${permissionFirst ? ' open' : ''}><summary>Permisos y preferencias</summary><div class="crm2-fold-body">${labelValue('Permiso de promoción',perm.label)}${permissionControls}${scheduleControl} ${secondary('Registrar contacto','mark-contacted',`data-id="${esc(item.id)}"`)}</div></details>`;
     const group1 = block('Quién es', '', identity + referralDetails + (isAccount ? liveReferralDetails(account) : ''));
-    const group2 = block('Qué hizo', 'La actividad reciente explica el siguiente paso.', activity + qualification + historyDetails + (isAccount ? '' : conversation + landingContext(lead)));
+    // Porqué del interés: las señales activas con su peso y su porqué. Sale del mismo R6P.interes que usa la lista (mismo puntaje).
+    const interestWhy = !isAccount && lead ? (() => {
+      const info = scoreInterest(lead) || {};
+      const activas = Object.values(info.partes || {}).filter(part => part.activo);
+      return `<details class="crm2-fold" data-crm2-interes-porque><summary>Por qué suma ${Number(info.puntaje || 0)}/100 de interés</summary><div class="crm2-fold-body">${activas.map(part => `<p class="crm2-activity"><b>${esc(part.label)} +${Number(part.aporte || 0)}</b><span>${esc(part.porQue || '')}</span></p>`).join('') || '<p>Todavía no hay señales de interés registradas.</p>'}</div></details>`;
+    })() : '';
+    const group2 = block('Qué hizo', 'La actividad reciente explica el siguiente paso.', activity + qualification + historyDetails + interestWhy + (isAccount ? '' : conversation + landingContext(lead)));
     const recommendation = isAccount && role === 'ventas' && recommendationPanelId === String(item.id) ? accountRecommendation(item) : '';
     const group3 = block(isAccount ? 'Compra y reposición' : 'Qué cotiza y qué hacer ahora', isAccount ? 'Usa el historial para preparar la siguiente reposición.' : 'La sugerencia acompaña la decisión; precio y stock se confirman antes de compartir.', `${postventa}${isAccount && item.live ? livePurchase(account) : purchase}${isAccount ? replenishBlock(account) : ''}${actions}${referralDataAction}<div data-inline-panel>${recommendation}</div>${permissionFirst ? '' : folded}`);
     let actionbar = '';
@@ -862,7 +893,7 @@
       const reasonSelect = `<select class="crm2-action-select" data-return-reason="${esc(item.id)}" aria-label="Motivo de devolución"><option value="">Motivo para devolver</option><option>Falta volumen</option><option>No contesta</option><option>Cotiza a futuro</option><option>Falta presupuesto</option></select>`;
       const exceptionSelect = `<select class="crm2-action-select" data-approval-kind="${esc(item.id)}" aria-label="Tipo de excepción"><option value="">Tipo de excepción</option><option>Descuento fuera de lista</option><option>Comodato bajo volumen mínimo</option><option>Plazo o condición especial</option></select>`;
       const more = `<details class="crm2-action-more"><summary>Más</summary><div class="crm2-action-more-menu"><label>Motivo para devolver${reasonSelect}</label>${secondary('Devolver a Marketing','return-lead',`data-id="${esc(item.id)}"`)}<label>Tipo de excepción${exceptionSelect}</label>${secondary('Enviar a aprobación','send-approval',`data-id="${esc(item.id)}"`)}</div></details>`;
-      actionbar = actionBar(`${primary('Preparar propuesta','quote',`data-id="${esc(item.id)}"`)}${secondary('Aceptar como SQL','accept-sql',`data-id="${esc(item.id)}" ${isMql(item) ? '' : 'disabled title="Marketing debe validar el MQL primero"'}`)}${more}`, true);
+      actionbar = actionBar(`${primary('Preparar propuesta','quote',`data-id="${esc(item.id)}"`)}${secondary('Aceptar como SQL','accept-sql',`data-id="${esc(item.id)}" data-cierra-tarea="C-V2" ${isMql(item) ? '' : 'disabled title="Marketing debe validar el MQL primero"'}`)}${more}`, true);
     } else if (isAccount && role === 'ventas') {
       const id = `data-id="${esc(item.id)}"`;
       const more = `<details class="crm2-action-more"><summary>Más</summary><div class="crm2-action-more-menu">${secondary('Agendar contacto','start-followup',id)}${item.referral ? secondary('Revisar referido','open-referral',id) : ''}</div></details>`;
@@ -902,7 +933,7 @@
       actions.innerHTML = `${secondary('Atrás','quote-back')}${primary('Siguiente','quote-next')}`;
     } else {
       target.innerHTML = `<h3>¿Cómo quieres dejar el envío simulado?</h3><p>Elige el canal para registrar la propuesta en el CRM. No se enviará un correo ni un mensaje real.</p><fieldset class="crm2-radio-set"><legend>Canal</legend><label><input type="radio" name="quote-channel" value="mensaje" ${quoteWizard.channel === 'mensaje' ? 'checked' : ''}> Mensaje en la conversación</label><label><input type="radio" name="quote-channel" value="correo" ${quoteWizard.channel === 'correo' ? 'checked' : ''}> Correo de prueba</label><label><input type="radio" name="quote-channel" value="ambos" ${quoteWizard.channel === 'ambos' ? 'checked' : ''}> Ambos · dentro del prototipo</label></fieldset>`;
-      actions.innerHTML = `${secondary('Atrás','quote-back')}${primary('Registrar envío simulado','quote-send')}`;
+      actions.innerHTML = `${secondary('Atrás','quote-back')}${primary('Registrar envío simulado','quote-send','data-cierra-tarea="C-V3"')}`;
       target.querySelectorAll('input[name="quote-channel"]').forEach(input => input.addEventListener('change', () => { quoteWizard.channel = input.value; }));
     }
   }
@@ -933,6 +964,35 @@
   function detailActionBar(role, route) {
     return detailPage(role).actionbar;
   }
+  // Acción principal de cada pantalla de lista. Va arriba y se repite al final con el mismo texto y destino (regla 5 de la skill).
+  const PRINCIPAL = {
+    salesToday: ['Atender el siguiente', 'open-first'],
+    salesContacts: ['Abrir el primer contacto', 'open-first'],
+    salesClients: ['Revisar la primera cuenta', 'open-first'],
+    salesReorder: ['Preparar la primera reposición', 'open-first'],
+    salesQuotes: ['Elegir contacto para propuesta', 'go:R02'],
+    marketingToday: ['Revisar el primer lead', 'open-first'],
+    marketingLeads: ['Revisar el primer lead', 'open-first'],
+    marketingChannels: ['Revisar leads por origen', 'go:R12'],
+    marketingRecover: ['Abrir la primera ficha', 'open-first'],
+    marketingCampaigns: ['Generar borrador', 'draft'],
+    managerSummary: ['Revisar la primera aprobación', 'open-first'],
+    managerApprovals: ['Revisar la primera solicitud', 'focus-first'],
+    managerGoals: ['Ver aprobaciones pendientes', 'go:R07'],
+    managerTeam: ['Revisar operación', 'go:R15'],
+    managerOperations: ['Abrir el primer caso', 'open-first']
+  };
+  function principalCta(pageName, role, content) {
+    const cfg = PRINCIPAL[pageName];
+    if (!cfg) return '';
+    const [label, kind] = cfg;
+    if (kind === 'open-first' && !/data-c2="(open-lead|open-account|review-approval)"/.test(content)) return '';
+    if (kind === 'focus-first' && !/data-approval=/.test(content)) return '';
+    if (kind === 'draft') return Object.keys(D.SEGMENT_CONTENT || {}).length ? primary(appState().marketingDraft ? 'Generar otro borrador' : label, 'generate-marketing-draft') : '';
+    if (kind.startsWith('go:')) return `<button type="button" class="crm2-btn crm2-btn--primary" data-c2-go="${kind.slice(3)}">${esc(label)}</button>`;
+    // Tarea C-J1 (panel general): el CTA principal de Hoy de Jefatura es el cierre de esa tarea.
+    return primary(label, kind, pageName === 'managerSummary' ? 'data-cierra-tarea="C-J1"' : '');
+  }
   function renderRoute(route, role) {
     let title, subtitle, content, bar = '';
     const pageName = route === 'R06' && role === 'marketing' ? 'marketingChannels' : ROUTE[route]?.page;
@@ -945,7 +1005,7 @@
       content = detail.content; bar = detail.actionbar;
     } else {
       const pageFn = {
-        salesToday, salesContacts, salesClients, salesQuotes,
+        salesToday, salesContacts, salesClients, salesReorder, salesQuotes,
         marketingToday, marketingChannels, marketingLeads, marketingRecover, marketingCampaigns,
         managerSummary, managerApprovals, managerGoals, managerTeam, managerOperations, buyerCRM
       }[pageName];
@@ -953,7 +1013,7 @@
       [title, subtitle] = titleSub(route, role);
       if (pageName === 'managerGoals' && route === 'R09') title = 'Puntaje y fundamento';
     }
-    return shell(route, role, title, subtitle, content, bar);
+    return shell(route, role, title, subtitle, content, bar, principalCta(pageName, role, content));
   }
   function buyerCRM() {
     const legacyMarkup = window.M7BuyerCRM?.render?.()?.replace(/a definir con Marley/gi, 'por confirmar con el equipo Marley');
@@ -1209,7 +1269,7 @@
     const productList = orderItems.map(item => `<li><label>${esc(productLabel(item.p ?? item.k))}<input type="number" min="0" step="1" inputmode="numeric" data-reorder-qty="${esc(item.p)}" value="${esc(item.qty)}" aria-label="Cantidad de ${esc(productLabel(item.p ?? item.k))}"></label></li>`).join('') || '<li>Sin productos del último pedido para sugerir cantidades.</li>';
     const panel = root()?.querySelector('[data-inline-panel]');
     if (!panel) return;
-    panel.innerHTML = `<section class="crm2-inline-panel"><div><p class="crm2-eyebrow">REPOSICIÓN · DATO DE PRUEBA</p><h2>${esc(account.name)}</h2><p>Se sugieren las cantidades del último pedido; confirma con la cuenta qué necesita ahora.</p><ul>${productList}</ul><p class="crm2-small-note">Inventario, precio vigente y despacho no están conectados. Déjalos por confirmar.</p></div><label>Nota de preparación<input data-reorder-note placeholder="Dato por confirmar"></label><div class="crm2-row-actions">${primary('Dejar lista','save-reorder',`data-id="${esc(id)}"`)}${secondary('Cancelar','close-inline')}</div></section>`;
+    panel.innerHTML = `<section class="crm2-inline-panel"><div><p class="crm2-eyebrow">REPOSICIÓN · DATO DE PRUEBA</p><h2>${esc(account.name)}</h2><p>Se sugieren las cantidades del último pedido; confirma con la cuenta qué necesita ahora.</p><ul>${productList}</ul><p class="crm2-small-note">Inventario, precio vigente y despacho no están conectados. Déjalos por confirmar.</p></div><label>Nota de preparación<input data-reorder-note placeholder="Dato por confirmar"></label><div class="crm2-row-actions">${primary('Dejar lista','save-reorder',`data-id="${esc(id)}" data-cierra-tarea="C-V4"`)}${secondary('Cancelar','close-inline')}</div></section>`;
     panel.scrollIntoView({ block:'nearest', behavior:'smooth' });
   }
   function saveReorder(id) {
@@ -1310,6 +1370,8 @@
     if (action === 'choose-role') { M.setRole(button.dataset.role); goto(homeFor(button.dataset.role)); return; }
     if (action === 'logout') { M.setRole(null); searchValue=''; goto('R00'); return; }
     if (action === 'back') { const dest = appState().returnRoute || homeFor(currentState().role); goto(dest); return; }
+    if (action === 'open-first') { root()?.querySelector('.crm2-content > .crm2-block [data-c2^="open-"], .crm2-content > .crm2-block [data-c2="review-approval"]')?.click(); return; }
+    if (action === 'focus-first') { const first = root()?.querySelector('[data-approval]'); if (first) { first.scrollIntoView({ block: 'center' }); (first.querySelector('button') || first).focus({ preventScroll: true }); } return; }
     if (action === 'open-lead') { detailOpen(id,'lead'); return; }
     if (action === 'open-account') { detailOpen(id,'account'); return; }
     if (action === 'toggle-referrals') { save(crm=>{crm.filters=crm.filters||{};crm.filters.referred=!crm.filters.referred;}); render(); return; }

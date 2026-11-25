@@ -36,12 +36,12 @@
 #crm-tablero .crm-tablero__general { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 12px; padding: 10px 12px; border-radius: 6px; background: var(--tab-amarillo); color: #171717; }
 #crm-tablero .crm-tablero__general span { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 #crm-tablero .crm-tablero__general b { font-size: 17px; }
-#crm-tablero .crm-tablero__objetivos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin: 0 0 18px; padding: 0; list-style: none; }
+#crm-tablero .crm-tablero__objetivos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 8px; margin: 0 0 18px; padding: 0; list-style: none; }
 #crm-tablero .crm-tablero__objetivos li { min-width: 0; padding: 8px 12px; border: 1px solid var(--tab-linea); border-radius: 8px; background: #fff; font-size: 14px; line-height: 1.35; }
 #crm-tablero .crm-tablero__objetivos b { color: var(--tab-fuerte); }
 
 /* Tarjetas de KPI */
-#crm-tablero .crm-tablero__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+#crm-tablero .crm-tablero__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 12px; }
 #crm-tablero .crm-kpi { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px; border: 1px solid var(--tab-linea); border-radius: 8px; background: #fff; }
 #crm-tablero .crm-kpi__cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 8px; }
 #crm-tablero .crm-kpi__cab h3 { margin: 0; color: var(--tab-texto); font-size: 16px; font-weight: 700; line-height: 1.25; }

@@ -40,7 +40,7 @@
   ];
   // Etapas del recorrido (12-nov): las preguntas van por lo que se está haciendo, no por pantalla.
   const STAGE_NAMES = { T1:'Buscar y considerar', T2:'Cotizar', T3:'Aceptar', T4:'Seguimiento', T5:'Recomprar', T6:'Ayuda y recomendación' };
-  const AG_VERSION = '2026-11-17-intencion';
+  const AG_VERSION = '2026-11-25-cta-cierra';
 
   let bank = null;
   let fichas = [];
@@ -48,6 +48,10 @@
   let iframeRef = null;
   let jumpPoll = null;
   let questionOpenedAt = 0;
+  let instruccionAbierta = false;
+  let evalAbierta = false;
+  let pendingCta = null;
+  let replayingCta = false;
 
   const isoNow = () => new Date().toISOString();
   const parseStored = (key) => {
@@ -592,13 +596,28 @@
     task.termino_en='';task.duracion_ms=0;
     persist();
   }
-  function taskFinished() {
+  // Cuestionario de la tarea: se abre al apretar el CTA que la cierra (data-cierra-tarea) o con «No encuentro cómo seguir».
+  function openEvaluation(origin,el) {
     const task=state.tareas?.[state.taskIndex];
-    if(!task)return;
-    if(!task.empezo_en)startCurrentTask();
-    task.termino_en=isoNow();task.termino_ms=Date.now();
-    task.duracion_ms=Math.max(0,task.termino_ms-(Number(task.empezo_ms)||task.termino_ms));
-    state.evaluating=true;persist();renderJourney();
+    if(!task||state.phase!=='journey')return;
+    if(!state.evaluating) {
+      if(!task.empezo_en)startCurrentTask();
+      task.termino_en=isoNow();task.termino_ms=Date.now();
+      task.duracion_ms=Math.max(0,task.termino_ms-(Number(task.empezo_ms)||task.termino_ms));
+    }
+    state.evaluating=true;state.evaluando_origen=origin;
+    pendingCta=origin==='cta'?(el||null):null;
+    persist();
+    renderEvaluation();
+  }
+  // «Volver a la tarea»: cierra sin avanzar y sin guardar. La tarea vuelve a estar en curso.
+  function cancelEvaluation() {
+    const task=state.tareas?.[state.taskIndex];
+    if(task){task.termino_en='';task.termino_ms=0;task.duracion_ms=0;}
+    state.evaluating=false;state.evaluando_origen='';pendingCta=null;
+    persist();
+    closeLayer();
+    focusFranja();
   }
   function saveTaskEvaluation() {
     const form=document.getElementById('task-evaluation');
@@ -618,33 +637,74 @@
     task.resultado=result;task.seq=seq==='NR'?null:Number(seq);task.seq_omitida=seq==='NR';task.comentario=comment;
     task.preguntas_etapa={};
     stageAnswers.forEach(({question,value})=>{saveQuestion(question,'etapa',{value},task.etapa);task.preguntas_etapa[question.id]=value;});
-    state.evaluating=false;
+    const origen=state.evaluando_origen||'cta';
+    const replay=pendingCta;
+    pendingCta=null;
+    task.cierre_origen=origen;
+    state.evaluating=false;state.evaluando_origen='';
+    closeLayer();
     const completed=state.taskIndex;
     state.taskIndex+=1;
-    if(!isInternal()) {
-      if(completed===2) {state.phase='jump3';persist();renderJourney();return;}
-      if(completed===3) {state.phase='jump30';persist();renderJourney();return;}
+    const jump=!isInternal()&&(completed===2?'jump3':completed===3?'jump30':'');
+    if(jump) {state.phase=jump;persist();renderJourney();}
+    else if(state.taskIndex>=state.tareas.length) {
+      state.phase='final';state.questionIndex=0;persist();
+      if(origen==='cta')replayCta(replay&&replay.isConnected?replay:ctaFor(task));
+      renderQuestion('final');return;
     }
-    if(state.taskIndex>=state.tareas.length){state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
-    state.phase='journey';enterTask();persist();renderJourney();
+    else {state.phase='journey';enterTask();persist();renderJourney();focusFranja();}
+    // La tarea ya quedó terminada: se vuelve a disparar el clic original, marcado para no interceptarlo otra vez.
+    if(origen==='cta')replayCta(replay&&replay.isConnected?replay:ctaFor(task));
+  }
+  function ctaFor(task) {
+    try {
+      const doc=iframeRef?.contentDocument;
+      return doc?doc.querySelector('[data-cierra-tarea="' + CSS.escape(String(task?.etapa||'')) + '"]'):null;
+    } catch (_) { return null; }
+  }
+  function replayCta(el) {
+    if(!el||!el.isConnected)return;
+    replayingCta=true;
+    try { el.click(); } catch (_) {}
+    finally { replayingCta=false; }
+  }
+  // Fase de captura dentro del iframe (se agrega en cada carga): solo intercepta el CTA que cierra la tarea actual.
+  function onCierraClick(event) {
+    if(replayingCta||!state)return;
+    if(state.evaluating) {event.preventDefault();event.stopImmediatePropagation();return;}
+    if(state.phase!=='journey')return;
+    const task=state.tareas?.[state.taskIndex];
+    if(!task)return;
+    const target=event.target?.nodeType===1?event.target:event.target?.parentElement;
+    const cta=target?.closest?.('[data-cierra-tarea]');
+    if(!cta||cta.getAttribute('data-cierra-tarea')!==task.etapa)return;
+    if(cta.type==='submit'&&cta.form&&!cta.form.checkValidity())return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openEvaluation('cta',cta);
   }
   function renderJourney(first=false) {
-    if(jumpPoll){clearInterval(jumpPoll);jumpPoll=null;}
+    if(jumpPoll){clearInterval(jumpPoll);jumpPoll=null;} if(!state.tareas?.[state.taskIndex]){state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
     if(!document.querySelector('.ag-journey')) {
       const destination=allowedDestination(state.session.destino);
       if(!destination){showFatal('La dirección preparada no pertenece a una ruta permitida de este sitio.');return;}
       app.innerHTML='<section class="ag-journey" aria-label="Recorrido guiado">'
+        + '<aside class="ag-pill" id="ag-pill" aria-label="Tarea en curso"></aside>'
         + '<div class="ag-frame-region"><iframe class="ag-journey-frame" title="Recorrido del sitio o CRM" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>'
-        + '<aside class="ag-taskbar" aria-label="Barra de tareas"></aside></section>';
+        + '<div class="ag-layer" id="ag-layer" hidden></div></section>';
       iframeRef=app.querySelector('.ag-journey-frame');
+      iframeRef.addEventListener('marley:marco-preparado',instalarCierre);
       iframeRef.addEventListener('load',onFrameLoad);
       iframeRef.src=(state.last_iframe_url&&allowedDestination(state.last_iframe_url)?.href)||destination.href;
       state.last_iframe_url=iframeRef.src;
+      document.getElementById('ag-layer').addEventListener('keydown',trapFocus);
     } else iframeRef=app.querySelector('.ag-journey-frame');
-    const bar=app.querySelector('.ag-taskbar');
-    if(!bar)return;
-    renderTaskbar(bar);
+    renderFranja();
+    renderCapa();
     app.setAttribute('aria-busy','false');
+  }
+  function instalarCierre() {
+    try { iframeRef?.contentWindow?.addEventListener('click',onCierraClick,true); } catch (_) { /* marco externo */ }
   }
   function onFrameLoad() {
     if(!iframeRef)return;
@@ -663,6 +723,8 @@
     recordRoute('load',initial);
     try { win.addEventListener('hashchange',()=>recordRoute('hashchange',win.location.href)); } catch(_){}
     doc.addEventListener('click',onFrameClick,true);
+    // La captura en window debe ir antes de los manejadores del sitio en document.
+    instalarCierre();
     observeDownloads(doc);
     startGoogleSimulation(win,doc);
   }
@@ -723,6 +785,7 @@
     try { new MutationObserver(scan).observe(doc.body||doc.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['href','download']}); } catch(_){}
   }
   function onFrameClick(event) {
+    if(replayingCta)return;
     const target=event.target?.nodeType===1?event.target:event.target?.parentElement;
     if(!target)return;
     // 13-nov: el texto de una casilla u opción (<label>) también es interactivo: al tocarlo se marca su control.
@@ -782,53 +845,46 @@
   function taskKicker(task) {
     return 'Tarea ' + (state.taskIndex+1) + ' de ' + state.tareas.length + (task?.etapa_nombre ? ' · ' + task.etapa_nombre : '');
   }
-  function setBarMode(bar,mode) {
-    bar.classList.toggle('is-modal',mode==='modal');
-    bar.classList.toggle('is-jump',mode==='jump');
-    if(mode!=='bar')bar.classList.remove('is-folded');
-  }
-  function barLine(kicker,title) {
-    return '<div class="ag-bar-line"><span class="ag-strip-kicker">' + escapeHtml(kicker) + '</span><span class="ag-bar-sep" aria-hidden="true"> · </span><span class="ag-strip-title">' + escapeHtml(title) + '</span></div>';
-  }
-  function barLinksMarkup() {
-    return '<div class="ag-bar-links">' + restartButtonMarkup('Empezar de cero','ag-restart-inline') + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div>';
-  }
   function enterTask() {
     const task=state.tareas?.[state.taskIndex];
     if(!task)return;
     task.intro_visto=true;
-    state.bar_plegada=false;
+    instruccionAbierta=false;
     startCurrentTask();
   }
-  function toggleBar() {
-    state.bar_plegada=!state.bar_plegada;
-    persist();
-    const bar=app.querySelector('.ag-taskbar');
-    if(!bar)return;
-    bar.classList.toggle('is-folded',Boolean(state.bar_plegada));
-    const button=bar.querySelector('[data-action="bar-fold"]');
+  // «Ver instrucción» despliega la consigna dentro de la franja; la franja empuja el sitio, nunca lo tapa.
+  function toggleInstruccion() {
+    instruccionAbierta=!instruccionAbierta;
+    const button=document.querySelector('#ag-pill [data-action="bar-fold"]');
+    const panel=document.getElementById('ag-pill-instruccion');
+    if(panel)panel.hidden=!instruccionAbierta;
     if(button) {
-      button.setAttribute('aria-expanded',state.bar_plegada?'false':'true');
-      button.setAttribute('aria-label',state.bar_plegada?'Desplegar la tarea':'Plegar la tarea');
-      button.textContent=state.bar_plegada?'▾':'▴';
+      button.setAttribute('aria-expanded',instruccionAbierta?'true':'false');
+      button.textContent=instruccionAbierta?'Ocultar instrucción':'Ver instrucción';
     }
   }
-  function renderTaskbar(bar) {
-    const task=state.tareas[state.taskIndex];
-    if(!task) {state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
-    if(state.phase==='jump3'||state.phase==='jump30') {renderJumpStep(bar,state.phase==='jump3'?3:30);return;}
-    if(state.evaluating) {renderTaskEvaluation(bar);return;}
-    setBarMode(bar,'bar');
-    bar.classList.toggle('is-folded',Boolean(state.bar_plegada));
-    bar.innerHTML=barLine(taskKicker(task),task.titulo)
+  function renderFranja() {
+    const bar=document.getElementById('ag-pill');
+    const task=state.tareas?.[state.taskIndex];
+    if(!bar||!task)return;
+    const abierta=instruccionAbierta;
+    bar.innerHTML='<div class="ag-pill-row">'
+      + '<p class="ag-pill-line"><span class="ag-pill-kicker">Tarea ' + (state.taskIndex+1) + ' de ' + state.tareas.length + '</span><span class="ag-pill-sep" aria-hidden="true"> · </span><span class="ag-pill-title">' + escapeHtml(task.titulo) + '</span></p>'
+      + '<div class="ag-pill-actions">'
+      + '<button class="ag-btn ag-pill-btn" type="button" data-action="bar-fold" aria-expanded="' + (abierta?'true':'false') + '" aria-controls="ag-pill-instruccion">' + (abierta?'Ocultar instrucción':'Ver instrucción') + '</button>'
+      + '<button class="ag-btn ag-pill-btn" type="button" data-action="no-encuentro">No encuentro cómo seguir</button>'
+      + '</div></div>'
+      + '<div class="ag-pill-instruccion" id="ag-pill-instruccion"' + (abierta?'':' hidden') + '>'
       + '<p class="ag-bar-instruction">' + escapeHtml(task.consigna) + '</p>'
-      + '<button class="ag-btn ag-btn--primary ag-bar-done" type="button" data-action="task-done">Terminé esta tarea</button>'
-      + '<button class="ag-btn ag-bar-fold" type="button" data-action="bar-fold" aria-expanded="' + (state.bar_plegada?'false':'true') + '" aria-label="' + (state.bar_plegada?'Desplegar la tarea':'Plegar la tarea') + '">' + (state.bar_plegada?'▾':'▴') + '</button>'
-      + '<p class="ag-bar-status" role="status"></p>'
-      + barLinksMarkup();
-    bar.querySelector('[data-action="task-done"]')?.addEventListener('click',taskFinished);
-    bar.querySelector('[data-action="bar-fold"]')?.addEventListener('click',toggleBar);
+      + '<div class="ag-bar-links">' + restartButtonMarkup('Empezar de cero','ag-restart-inline') + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div>'
+      + '</div>';
+    bar.querySelector('[data-action="bar-fold"]')?.addEventListener('click',toggleInstruccion);
+    bar.querySelector('[data-action="no-encuentro"]')?.addEventListener('click',()=>{if(!state.evaluating)openEvaluation('no-encuentro',null);});
     bar.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
+  }
+  function focusFranja() {
+    const target=document.querySelector('#ag-pill [data-action="bar-fold"]')||document.querySelector('#ag-pill button');
+    try { target?.focus(); } catch (_) {}
   }
   function stageQuestionsFor(task) {
     if(isInternal()||!task)return [];
@@ -865,28 +921,41 @@
     missing.filter(item=>item.kind==='stage').forEach(item=>parts.push('responde «' + String(item.question.texto||'').replace(/\.$/,'') + '»'));
     return 'Para seguir, ' + parts.join(' y ') + '.';
   }
-  function renderTaskEvaluation(bar) {
-    const task=state.tareas[state.taskIndex];
-    setBarMode(bar,'modal');
-    questionOpenedAt=Date.now();
+  function evaluationMarkup(task,noEncontro) {
     const seq=Array.from({length:7},(_,index)=>{
       const number=index+1;
       return '<label><input type="radio" name="task-seq" value="' + number + '"><span>' + number + '</span></label>';
     }).join('');
-    bar.innerHTML='<div class="ag-modal ag-eval-card" role="dialog" aria-modal="true" aria-labelledby="ag-eval-title"><p class="ag-modal-kicker">' + escapeHtml(taskKicker(task)) + '</p>'
-      + '<h1 class="ag-taskbar-title" id="ag-eval-title">¿Lo lograste?</h1><p class="ag-modal-how"><strong>' + escapeHtml(task.titulo) + '</strong></p>'
-      + '<form class="ag-result-form" id="task-evaluation" novalidate>'
+    const marcado=(value)=>noEncontro&&value==='No logrado'?' checked':'';
+    const aviso=noEncontro?'<p class="ag-eval-aviso">Marcamos «No lo logré» porque no encontraste cómo seguir. Revísalo y completa lo que falta.</p>':'';
+    return '<div class="ag-sheet ag-eval" id="ag-eval" role="dialog" aria-modal="true" aria-labelledby="ag-eval-title" aria-describedby="ag-eval-how">'
+      + '<form class="ag-eval-form" id="task-evaluation" novalidate>'
+      + '<div class="ag-eval-body">'
+      + '<p class="ag-modal-kicker">' + escapeHtml(taskKicker(task)) + '</p>'
+      + '<h1 class="ag-eval-title" id="ag-eval-title">¿Lo lograste?</h1>'
+      + '<p class="ag-modal-how" id="ag-eval-how"><strong>' + escapeHtml(task.titulo) + '</strong></p>'
+      + aviso
       + '<fieldset><legend>Resultado <span class="ag-req">Obligatoria</span></legend><div class="ag-result-options">'
       + '<label><input type="radio" name="task-result" value="Logrado"><span>Lo logré</span></label>'
       + '<label><input type="radio" name="task-result" value="Con ayuda"><span>Lo logré con ayuda</span></label>'
-      + '<label><input type="radio" name="task-result" value="No logrado"><span>No lo logré</span></label>'
+      + '<label><input type="radio" name="task-result" value="No logrado"' + marcado('No logrado') + '><span>No lo logré</span></label>'
       + '<label class="ag-skip-opt"><input type="radio" name="task-result" value="Prefiero no responder"><span>Prefiero no responder</span></label>'
       + '</div></fieldset>'
       + '<fieldset><legend>¿Qué tan fácil fue? <span class="ag-req">Obligatoria</span></legend><div class="ag-task-progress">1 = Muy difícil · 7 = Muy fácil</div><div class="ag-seq-grid">' + seq + '</div><label class="ag-skip-opt"><input type="radio" name="task-seq" value="NR"><span>Prefiero no responder</span></label></fieldset>'
       + stageQuestionsFor(task).map(stageQuestionHtml).join('')
       + '<label class="ag-comment-label" for="task-comment">Comentario <span class="ag-task-progress">Opcional</span></label><textarea id="task-comment" class="ag-textarea" maxlength="500" placeholder="¿Algo te confundió o te hizo dudar? No escribas nombres ni datos de contacto."></textarea>'
-      + '<div class="ag-card-footer"><p class="ag-status" id="task-evaluation-status" role="status" aria-live="polite"></p>'
-      + '<div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="submit" id="task-save">Guardar y seguir</button><button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button></div></div></form>' + restartButtonMarkup() + '</div>';
+      + '</div>'
+      + '<div class="ag-eval-foot"><p class="ag-status" id="task-evaluation-status" role="status" aria-live="polite"></p>'
+      + '<div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="submit" id="task-save">Guardar y seguir</button><button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button></div></div>'
+      + '</form></div>';
+  }
+  function renderEvaluation() {
+    const layer=document.getElementById('ag-layer');
+    const task=state.tareas?.[state.taskIndex];
+    if(!layer||!task)return;
+    layer.innerHTML=evaluationMarkup(task,state.evaluando_origen==='no-encuentro');
+    layer.hidden=false;
+    evalAbierta=true;
     const form=document.getElementById('task-evaluation');
     const save=document.getElementById('task-save');
     const status=document.getElementById('task-evaluation-status');
@@ -904,12 +973,57 @@
       if(missing.length){focusInput(missing[0].input);return;}
       saveTaskEvaluation();
     });
-    bar.querySelector('[data-action="return-task"]')?.addEventListener('click',()=>{state.evaluating=false;persist();renderJourney();});
+    layer.querySelector('[data-action="return-task"]')?.addEventListener('click',cancelEvaluation);
     const pending=refresh();
     if(pending.length)focusInput(pending[0].input);
   }
-  function renderJumpStep(bar,days) {
+  function closeLayer() {
+    evalAbierta=false;
+    const layer=document.getElementById('ag-layer');
+    if(!layer)return;
+    layer.hidden=true;
+    layer.innerHTML='';
+  }
+  function renderCapa() {
+    if(!document.getElementById('ag-layer'))return;
+    if(['jump3','jump30'].includes(state.phase)) {renderJumpStep(state.phase==='jump3'?3:30);return;}
+    if(state.evaluating&&state.tareas?.[state.taskIndex]) {if(!evalAbierta)renderEvaluation();return;}
+    closeLayer();
+  }
+  // Durante la evaluación, el sitio solo avanza al guardar el cuestionario.
+  function tabStops(dialog) {
+    const items=Array.from(dialog.querySelectorAll('button,input,textarea,select,a[href]'))
+      .filter(el=>!el.disabled&&el.getClientRects().length>0);
+    return items.filter(el=>{
+      if(el.type!=='radio'||!el.name)return true;
+      const group=items.filter(other=>other.type==='radio'&&other.name===el.name);
+      const checked=group.find(other=>other.checked);
+      return checked?el===checked:el===group[0];
+    });
+  }
+  function trapFocus(event) {
+    const layer=event.currentTarget;
+    const dialog=layer.querySelector('.ag-sheet');
+    if(!dialog||layer.hidden)return;
+    if(event.key==='Escape'&&evalAbierta) {
+      event.preventDefault();
+      if(state.evaluando_origen!=='cta')cancelEvaluation();
+      return;
+    }
+    if(event.key!=='Tab')return;
+    const stops=tabStops(dialog);
+    if(!stops.length)return;
+    const first=stops[0];
+    const last=stops[stops.length-1];
+    const active=document.activeElement;
+    const inside=dialog.contains(active);
+    if(event.shiftKey&&(!inside||active===first)) {event.preventDefault();last.focus();}
+    else if(!event.shiftKey&&(!inside||active===last)) {event.preventDefault();first.focus();}
+  }
+  function renderJumpStep(days) {
+    const layer=document.getElementById('ag-layer');
     const task=state.tareas[state.taskIndex];
+    if(!layer||!task)return;
     const gate=portalSignal();
     const ready=jumpReady(days);
     const title=days===3?'3 días después':'Un mes después';
@@ -918,19 +1032,23 @@
       : 'Pasó un mes desde tu última tarea. Puedes avanzar aunque el contrato todavía no esté firmado.';
     const label=days===3?'Avanzar el tiempo: han pasado 3 días':'Avanzar el tiempo: ha pasado un mes';
     const simulacion=(days===30&&!gate.signed)?' Para seguir, simulamos que firmaste el contrato.':'';
-    setBarMode(bar,'jump');
-    bar.innerHTML=barLine(taskKicker(task),title)
-      + '<p class="ag-bar-instruction">' + escapeHtml(what + simulacion) + '</p>'
-      + '<button class="ag-btn ag-btn--primary ag-bar-done" type="button" data-action="jump"' + (ready?'':' disabled') + '>' + escapeHtml(label) + '</button>'
-      + '<p class="ag-bar-status" role="status"></p>'
-      + barLinksMarkup();
-    bar.querySelector('[data-action="jump"]')?.addEventListener('click',()=>applyJump(days));
-    bar.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
+    layer.innerHTML='<div class="ag-sheet ag-salto" id="ag-salto" role="dialog" aria-modal="true" aria-labelledby="ag-salto-title">'
+      + '<div class="ag-eval-body"><p class="ag-modal-kicker">' + escapeHtml(taskKicker(task)) + '</p>'
+      + '<h1 class="ag-eval-title" id="ag-salto-title" tabindex="-1">' + escapeHtml(title) + '</h1>'
+      + '<p class="ag-bar-instruction">' + escapeHtml(what + simulacion) + '</p></div>'
+      + '<div class="ag-eval-foot"><p class="ag-bar-status" role="status"></p>'
+      + '<button class="ag-btn ag-btn--primary" type="button" data-action="jump"' + (ready?'':' disabled') + '>' + escapeHtml(label) + '</button>'
+      + '<div class="ag-bar-links">' + restartButtonMarkup('Empezar de cero','ag-restart-inline') + '<button class="ag-btn ag-btn--quiet" type="button" data-action="finish-early">Terminar la prueba</button></div></div></div>';
+    layer.hidden=false;
+    evalAbierta=false;
+    layer.querySelector('[data-action="jump"]')?.addEventListener('click',()=>applyJump(days));
+    layer.querySelector('[data-action="finish-early"]')?.addEventListener('click',finishEarly);
+    try { layer.querySelector('#ag-salto-title')?.focus(); } catch (_) {}
     jumpPoll=setInterval(()=>{
-      if(!document.querySelector('.ag-taskbar')||!['jump3','jump30'].includes(state.phase)){clearInterval(jumpPoll);jumpPoll=null;return;}
+      if(!document.getElementById('ag-salto')||!['jump3','jump30'].includes(state.phase)){clearInterval(jumpPoll);jumpPoll=null;return;}
       const nowReady=jumpReady(days);
-      const button=bar.querySelector('[data-action="jump"]');
-      const status=bar.querySelector('.ag-bar-status');
+      const button=layer.querySelector('[data-action="jump"]');
+      const status=layer.querySelector('.ag-bar-status');
       if(button&&!simulandoFirma)button.disabled=!nowReady;
       if(status&&!simulandoFirma&&status.dataset.kind!=='error')status.textContent=nowReady?'':'Completa el paso anterior para habilitar el avance.';
     },700);
@@ -961,13 +1079,9 @@
         accepted=true;
         await waitFor(()=>win.M4?.get?.()?.proposal?.status==='aceptada');
       }
-      if(win.location.hash!=='#C06'&&typeof win.MarleyApp?.go==='function')win.MarleyApp.go('C06');
-      const hasButton=await waitFor(()=>{
-        const button=win.document.querySelector('[data-cycle-action="sign-contract"]');
-        return button&&button.getClientRects().length?button:false;
-      });
-      if(!hasButton)return {signed:false,accepted};
-      hasButton.click();
+      if(typeof win.M4Journey?.signContract!=='function')return {signed:false,accepted};
+      await waitFor(()=>Boolean(win.M4?.get?.()?.customerCycle));
+      win.M4Journey.signContract();
       const signed=await waitFor(()=>Boolean(win.M4?.get?.()?.customerCycle?.contractSignedAt));
       gate=portalSignal();
       return {signed:Boolean(signed||gate.signed),accepted};
@@ -979,15 +1093,15 @@
     const gate=portalSignal();
     let signature={signed:Boolean(gate.signed),accepted:false};
     if(days===30&&!gate.signed) {
-      const status=app.querySelector('.ag-taskbar [role="status"]');
-      const button=app.querySelector('.ag-taskbar [data-action="jump"]');
+      const status=app.querySelector('#ag-salto [role="status"]');
+      const button=app.querySelector('#ag-salto [data-action="jump"]');
       if(status)status.textContent='Para seguir, simulamos que firmaste el contrato.';
       if(button)button.disabled=true;
       simulandoFirma=true;
       try { signature=await simulateContractForMonth(); }
       finally { simulandoFirma=false; if(button)button.disabled=false; }
       if(!signature.signed) {
-        const failed=app.querySelector('.ag-taskbar [role="status"]');
+        const failed=app.querySelector('#ag-salto [role="status"]');
         if(failed){failed.textContent='No pudimos registrar la firma simulada en el recorrido. Vuelve al paso anterior e inténtalo de nuevo.';failed.dataset.kind='error';}
         return;
       }
@@ -995,7 +1109,7 @@
     if(days===3)adaptarTareaTresDias(gate.accepted);
     const payload={dias:days,sesion_id:state.session.id,at:Date.now(),nonce:randomNonce()};
     try { localStorage.setItem(JUMP_KEY,JSON.stringify(payload)); }
-    catch (_) { const status=app.querySelector('.ag-taskbar [role="status"]');if(status)status.textContent='No se pudo guardar el avance del tiempo en este navegador.';return; }
+    catch (_) { const status=app.querySelector('#ag-salto [role="status"]');if(status)status.textContent='No se pudo guardar el avance del tiempo en este navegador.';return; }
     const stage=days===3?'E5':'E7';
     const row={
       sesion_id:state.session.id,sesion_origen:'',participante:state.session.id,
@@ -1013,6 +1127,7 @@
   function finishEarly() {
     if(!window.confirm('¿Quieres terminar el recorrido ahora? Después responderás las preguntas finales y podrás descargar el informe.'))return;
     state.termino_anticipado=true;state.phase='final';state.questionIndex=0;state.evaluating=false;
+    evalAbierta=false;pendingCta=null;
     persist();renderQuestion('final');
   }
 
@@ -1317,12 +1432,6 @@
     const button=event.target.closest('[data-action="restart-test"]');
     if(!button)return;
     event.preventDefault();restartTest();
-  });
-  window.addEventListener('resize',()=>{
-    if(state?.phase==='journey') {
-      const bar=app.querySelector('.ag-taskbar');
-      if(bar&&!state.evaluating)renderTaskbar(bar);
-    }
   });
   initialise();
 })();

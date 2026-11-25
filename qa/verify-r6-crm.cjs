@@ -262,6 +262,8 @@ async function runSuite(name, launcher, launchOpts) {
     // 4. Pantallas C del comprador intactas
     for (const [cHash, sel] of [['C02', '.ux-hero'], ['C10', '.m9-catalog'], ['C04', '.m5-qcard'], ['C11', '.r3-machine-grid'], ['C09', 'h1:has-text("Portal de cliente"), .m5-cycle-head']]) { // coordinador (14-nov): .m5-cycle-head solo existe con un pedido en curso; sin pedido, C09 muestra «Portal de cliente» (igual en la R5 sin CRM)
       await page.goto(BASE + '#' + cHash, { waitUntil: 'domcontentloaded' });
+      // Con el ejemplo de pasos anteriores, C04 reanuda el catálogo y pasa a C10: C04 se entra sin ese estado.
+      if (cHash === 'C04') await page.evaluate(() => { window.M4?.reset?.(); window.MarleyApp.go('C04', { evaluation: true }); });
       await page.waitForFunction((h) => document.body.dataset.current === h, cHash, { timeout: 8000 });
       await page.locator(sel).first().waitFor({ state: 'attached', timeout: 8000 });
     }

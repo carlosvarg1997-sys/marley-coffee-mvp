@@ -64,7 +64,27 @@ async function guided(page, role, folder) {
     await inside.locator('.crm2-approval-queue [data-c2="review-approval"]:has-text("Referidos")').click();
     await inside.locator('body[data-current="R07"] #crm-v2-root h1').waitFor();
   }
-  await page.locator('[data-action="task-done"]').click();
+  // La tarea se cierra con el CTA del sitio que la cierra (data-cierra-tarea de la tarea en curso). Ese CTA abre #task-evaluation.
+  const enCurso = await page.evaluate(() => {
+    const estado = JSON.parse(localStorage.getItem('mc_prueba_autoguiada_v1') || 'null');
+    return estado?.tareas?.[estado.taskIndex]?.etapa || null;
+  });
+  assert.ok(enCurso, 'Debe haber una tarea en curso en la prueba');
+  // El CTA de cierre puede estar en otra pantalla del CRM (por ejemplo, la fila de un contacto de búsqueda en la cola de Ventas): se busca en las pantallas del rol.
+  const pantallasRol = { ventas: ['R01', 'R03', 'R02'], marketing: ['R11', 'R12'], jefatura: ['R05', 'R07'] }[role] || [];
+  const marco = await page.locator('.ag-journey-frame').elementHandle().then(h => h.contentFrame());
+  for (const ruta of pantallasRol) {
+    if (await inside.locator('[data-cierra-tarea="' + enCurso + '"]').first().isVisible().catch(() => false)) break;
+    await marco.evaluate((r) => window.MarleyApp.go(r, { evaluation: true }), ruta).catch(() => {});
+    await page.waitForTimeout(700);
+  }
+  const cierre = inside.locator('[data-cierra-tarea="' + enCurso + '"]').filter({ visible: true }).first();
+  if (!(await cierre.waitFor({ state: 'visible', timeout: 8000 }).then(() => true, () => false))) {
+    const visibles = await inside.locator('[data-cierra-tarea]').evaluateAll(els => els.map(el => el.getAttribute('data-cierra-tarea')));
+    assert.fail('No aparece el CTA que cierra la tarea «' + enCurso + '» (CTA visibles: ' + (visibles.join(', ') || 'ninguno') + ')');
+  }
+  await cierre.click();
+  await page.locator('#task-evaluation').waitFor({ state: 'visible' });
   const save = page.locator('#task-save');
   assert.ok(await save.isDisabled());
   await page.locator('[name="task-result"][value="Logrado"]').check();
@@ -80,8 +100,9 @@ async function guided(page, role, folder) {
   if (await page.locator('#question-next').isVisible()) {
     for (let n = 0; n < 8 && await page.locator('#question-next').isVisible(); n++) await omissionQuestions(page, 1);
   }
-  const finish = page.locator('[data-action="finish-early"]').first();
-  if (!await finish.isVisible()) await page.locator('[data-action="bar-fold"]').click();
+  // «Terminar la prueba» vive dentro de la instrucción plegada de la franja: se abre con «Ver instrucción».
+  const finish = page.locator('[data-action="finish-early"]').filter({ visible: true }).first();
+  if (!await finish.isVisible()) await page.locator('[data-action="bar-fold"]').filter({ visible: true }).first().click();
   await finish.click();
   await omissionQuestions(page, bank.fases_autoguiada.final.internos.length);
   await page.locator('#download-pdf').waitFor();
@@ -96,11 +117,14 @@ async function guided(page, role, folder) {
   assert.equal(report.sesion.rol, role);
   assert.ok(fs.readFileSync(csv, 'utf8').includes(code));
   assert.match(fs.readFileSync(pdf).subarray(0, 12).toString(), /^%PDF-/);
-  const pdfText = execFileSync('pdftotext', [pdf, '-'], { encoding: 'utf8' });
+  const python = process.env.MARLEY_QA_PYTHON;
+  const pdfText = python
+    ? execFileSync(python, ['-X', 'utf8', '-c', 'import sys; from pypdf import PdfReader; print("\\n".join(p.extract_text() for p in PdfReader(sys.argv[1]).pages))', pdf], { encoding: 'utf8' })
+    : execFileSync('pdftotext', [pdf, '-'], { encoding: 'utf8' });
   assert.match(pdfText, /tabla de tareas/i);
   assert.match(pdfText, /prefiero no responder/i);
   assert.ok(pdfText.includes(code));
-  await page.locator('[data-action="restart-test"]').click();
+  await page.locator('[data-action="restart-test"]').filter({ visible: true }).first().click();
   await consent.waitFor();
   assert.ok(await consent.isDisabled());
   assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('mc_prueba_autoguiada_v1')).respuestas.length), 0);
@@ -166,7 +190,13 @@ async function main() {
     try {
       const errors = [];
       const context = await browser.newContext({ viewport, acceptDownloads: true, reducedMotion: 'reduce' });
-      context.on('page', page => page.on('pageerror', error => errors.push(error.message)));
+      // El sondeo /api/ping de index.html (solo en localhost) responde 404 en un servidor estático: no es un error de la prueba.
+      const sondeo = url => /\/api\/ping(\?|$)/.test(url);
+      context.on('page', page => {
+        page.on('pageerror', error => errors.push(error.message));
+        page.on('console', message => { if (message.type() === 'error' && !sondeo(message.location()?.url || '')) errors.push(message.text()); });
+        page.on('response', response => { if (response.status() >= 400 && !sondeo(response.url())) errors.push(`HTTP ${response.status()} ${response.url()}`); });
+      });
       await guided(await context.newPage(), role, folder);
       if (role === 'ventas') await moderated(await context.newPage(), folder);
       if (role === 'marketing') await acquisition(await context.newPage());

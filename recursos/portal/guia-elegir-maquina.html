@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/webp" href="../marca/logo.webp">
+<meta name="description" content="Guía para elegir máquina de Marley Coffee Empresas: las cuatro máquinas, sus funciones y cómo elegir la tuya.">
+<title>Guía para elegir máquina | Marley Coffee Empresas</title>
+<style>
+:root{--ink:#111;--paper:#fff;--amarillo:#F3C900;--gris:#4d4d4d;--suave:#f2f2f2;--linea:#111}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink)}
+body{font:400 16px/1.55 "Pressura",Arial,sans-serif;overflow-wrap:anywhere}
+.wrap{max-width:960px;margin:0 auto;padding:24px 20px 56px}
+@media (min-width:768px){.wrap{padding:36px 32px 64px}}
+h1,h2,h3{font-family:"Festivo","Pressura",Arial,sans-serif;font-weight:400;line-height:1.15;margin:0}
+h1{font-size:clamp(28px,6vw,40px)}
+h2{font-size:clamp(22px,4vw,28px);margin-bottom:12px}
+h3{font-size:20px;margin-bottom:4px}
+p{margin:0}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.cabecera{padding:20px;border-radius:14px;background:var(--ink);color:#fff}
+.cabecera .kicker{color:var(--amarillo)}
+.cabecera p+p{margin-top:8px}
+section{margin-top:40px}
+.bloque{padding:20px;border:2px solid var(--linea);border-radius:12px;background:#fff}
+.bloque>*+*{margin-top:10px}
+.destacada{border-width:3px;background:var(--amarillo)}
+.tarjetas{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:768px){.tarjetas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tarjeta{padding:18px;border:2px solid var(--linea);border-radius:12px;background:#fff;display:grid;gap:6px;min-width:0}
+.tarjeta.para-ti{background:var(--amarillo)}
+.tarjeta small{font-size:14px;color:var(--gris)}
+.tarjeta .etiqueta{justify-self:start;padding:4px 10px;border:1px solid var(--linea);border-radius:999px;font-size:13px;font-weight:700;background:#fff}
+dl{margin:0;display:grid;gap:6px}
+dl div{display:grid;grid-template-columns:minmax(0,1fr);gap:2px}
+dt{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+dd{margin:0}
+.preguntas{display:grid;gap:12px}
+.preguntas li{padding:14px 16px;border:1px solid #cfcfcf;border-radius:10px}
+.preguntas b{display:block;margin-bottom:4px}
+.confirmar li{padding:6px 0}
+.pie{margin-top:40px;display:flex;flex-wrap:wrap;gap:12px}
+.boton{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 18px;border:2px solid var(--linea);border-radius:10px;background:var(--amarillo);color:var(--ink);font:700 16px/1.2 "Pressura",Arial,sans-serif;text-decoration:none}
+.nota{font-size:14px;color:var(--gris)}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="cabecera">
+    <p class="kicker">Guía para tu portal · <span data-g="etiqueta">tu negocio</span></p>
+    <h1>Guía para elegir máquina</h1>
+    <p data-g="intro">Las cuatro máquinas de Marley, lo que hace cada una y cómo elegir la tuya.</p>
+  </header>
+
+  <section aria-labelledby="h-para-ti">
+    <h2 id="h-para-ti">Para tu negocio</h2>
+    <div class="bloque destacada" data-g="para-ti"><p>Tu ejecutivo confirma la máquina para tu negocio.</p></div>
+  </section>
+
+  <section aria-labelledby="h-cuatro">
+    <h2 id="h-cuatro">Las cuatro máquinas</h2>
+    <div class="tarjetas" data-g="tarjetas"></div>
+  </section>
+
+  <section aria-labelledby="h-elegir">
+    <h2 id="h-elegir">Cómo elegir</h2>
+    <ol class="preguntas">
+      <li><b>¿Hay barista?</b> Si sí, la Bar hace espresso, cappuccino y latte. Si no, mira Pods, Café al paso u Oficina.</li>
+      <li><b>¿Cuántas tazas al día?</b> Compara el rango de tazas de cada máquina en las tarjetas de arriba.</li>
+      <li><b>¿Cómo se sirve el café?</b> En barra o en mesa, en vaso para llevar en autoservicio, o con un toque en la oficina.</li>
+      <li><b>¿Qué formato de café usas?</b> Grano, pods o grano con leche: cada máquina trabaja con uno distinto.</li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-confirmar">
+    <h2 id="h-confirmar">Qué confirmar con tu ejecutivo</h2>
+    <div class="bloque">
+      <p data-g="modalidad">En comodato: Marley presta la máquina y tú compras los insumos.</p>
+      <ul class="confirmar" data-g="confirmar"></ul>
+    </div>
+  </section>
+
+  <div class="pie">
+    <a class="boton" href="../../index.html#C09" data-evt="guia_elegir_volver_portal">Volver a mi portal</a>
+  </div>
+</main>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var buyerId = params.get('tipo') || params.get('b') || '';
+  var base = '../datos/';
+  function txt(el, valor) { if (el) { el.textContent = valor; } }
+  function campo(lista, etiqueta, valor) {
+    if (!valor) { return; }
+    var div = document.createElement('div');
+    var dt = document.createElement('dt'); dt.textContent = etiqueta;
+    var dd = document.createElement('dd'); dd.textContent = valor;
+    div.appendChild(dt); div.appendChild(dd); lista.appendChild(div);
+  }
+  function tarjeta(id, m, esMia) {
+    var art = document.createElement('article');
+    art.className = 'tarjeta' + (esMia ? ' para-ti' : '');
+    if (esMia) { var e = document.createElement('span'); e.className = 'etiqueta'; e.textContent = 'Para tu negocio'; art.appendChild(e); }
+    var h = document.createElement('h3'); h.textContent = m.nombre || id; art.appendChild(h);
+    if (m.tipo) { var t = document.createElement('p'); t.textContent = m.tipo; art.appendChild(t); }
+    if (m.linea) { var l = document.createElement('small'); l.textContent = m.linea; art.appendChild(l); }
+    var dl = document.createElement('dl');
+    campo(dl, 'Tazas al día', m.tazas);
+    campo(dl, 'Formato de café', m.formato);
+    campo(dl, 'Atención', m.atencion);
+    art.appendChild(dl);
+    return art;
+  }
+  function pintar(oferta, precios) {
+    var comprador = (oferta.buyers || []).filter(function (b) { return b.id === buyerId; })[0] || null;
+    var maquinas = oferta.maquinas || {};
+    if (comprador) {
+      txt(document.querySelector('[data-g="etiqueta"]'), comprador.etiqueta || 'tu negocio');
+      txt(document.querySelector('[data-g="intro"]'), comprador.mensaje || '');
+      var mia = maquinas[comprador.maquina] || {};
+      var caja = document.querySelector('[data-g="para-ti"]');
+      caja.innerHTML = '';
+      var p1 = document.createElement('p'); p1.innerHTML = '<b></b>'; p1.querySelector('b').textContent = 'Sugerimos ' + (mia.nombre || 'una máquina') + ' para tu negocio.';
+      var p2 = document.createElement('p'); p2.textContent = (comprador.interes ? 'Lo que buscas: ' + comprador.interes + '. ' : '') + (mia.linea || '');
+      caja.appendChild(p1); caja.appendChild(p2);
+    }
+    var grilla = document.querySelector('[data-g="tarjetas"]');
+    Object.keys(maquinas).forEach(function (id) {
+      grilla.appendChild(tarjeta(id, maquinas[id], Boolean(comprador && comprador.maquina === id)));
+    });
+    var conf = document.querySelector('[data-g="confirmar"]');
+    (precios.a_confirmar || []).forEach(function (x) { var li = document.createElement('li'); li.textContent = x.charAt(0).toUpperCase() + x.slice(1) + '.'; conf.appendChild(li); });
+    if (oferta.modalidad_maquina) { txt(document.querySelector('[data-g="modalidad"]'), oferta.modalidad_maquina); }
+  }
+  Promise.all([fetch(base + 'oferta_por_buyer.json').then(function (r) { return r.json(); }), fetch(base + 'precios_cotizacion_19oct.json').then(function (r) { return r.json(); })])
+    .then(function (res) { pintar(res[0], res[1]); })
+    .catch(function () { /* sin datos: la guía general sigue visible */ });
+})();
+</script>
+</body>
+</html>

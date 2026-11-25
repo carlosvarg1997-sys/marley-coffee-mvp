@@ -1,0 +1,48 @@
+/* recursos/vida/vida.css · estilos de vida.js: zoom de imágenes, títulos, claves, totales y botones.
+   Sin JS (o con reduced motion) todo se ve completo y quieto. */
+
+/* Estado inicial oculto: solo si vida.js lo activa (html.vida-on) y el elemento está bajo el pliegue. */
+.vida-on [data-vida="titulo"].vida-oculto{opacity:0;transform:translateY(12px)}
+.vida-on mark[data-vida="clave"].vida-oculto{background-size:0 .32em}
+
+/* Clave: subrayado amarillo bajo la palabra. */
+mark[data-vida="clave"]{color:inherit;padding:0;background:linear-gradient(#f3c900,#f3c900) 0 100%/100% .32em no-repeat}
+
+/* Imagen ampliable. */
+[data-zoom]{cursor:zoom-in;touch-action:manipulation}
+[data-zoom]:focus-visible{outline:3px solid #f3c900;outline-offset:3px}
+
+/* Ventana de zoom: negro, blanco y amarillo. */
+.vz{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:16px;background:#0a0a0a;user-select:none;color:#fff;font-family:"MC Pressura","Pressura",ui-monospace,monospace;font-size:15px;line-height:1.4;overscroll-behavior:contain}
+.vz *{box-sizing:border-box}
+.vz-caja{width:min(1100px,100%);max-height:100%;display:flex;flex-direction:column;gap:12px}
+.vz-barra,.vz-nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.vz-nav{justify-content:center}
+.vz-cuenta{margin:0;font-family:"MC Festivo","Festivo",Impact,sans-serif;font-size:18px;letter-spacing:.04em;text-transform:uppercase;color:#f3c900}
+.vz-escena{position:relative;display:flex;align-items:center;justify-content:center;height:min(74vh,820px);height:min(74svh,820px);min-height:220px;overflow:hidden;background:#000;touch-action:none;cursor:zoom-in}
+.vz-img{display:block;width:100%;height:100%;object-fit:contain;transform-origin:50% 50%;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.vz-btn{min-height:44px;min-width:44px;padding:8px 16px;border:2px solid #fff;border-radius:999px;background:#000;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.vz-btn[data-accion="cerrar"]{background:#f3c900;border-color:#f3c900;color:#000}
+.vz-btn:hover{background:#fff;color:#000}
+.vz-btn:focus-visible{outline:3px solid #f3c900;outline-offset:2px}
+.vz-btn[hidden]{display:none}
+.vz-nota{margin:0;font-size:13px;opacity:.8;text-align:center}
+@media (max-width:767px){.vz{padding:8px}.vz-caja{gap:8px}.vz-escena{height:min(70vh,640px)}.vz-nav .vz-btn{flex:1 1 0;padding-inline:8px}}
+
+/* Movimiento: solo si el sistema lo permite. Nada se repite en bucle. */
+@media (prefers-reduced-motion:no-preference){
+  [data-vida="titulo"]{transition:opacity 480ms cubic-bezier(.2,.7,.2,1),transform 480ms cubic-bezier(.2,.7,.2,1)}
+  mark[data-vida="clave"]{transition:background-size 600ms ease 200ms}
+  .vz-suave{transition:transform 180ms ease}
+  body:not(.m4-body--crm) :is(button,[role=button],.m5-btn,.m4-btn,.m4-r3-btn,.m4-link-btn,.m4-strip-btn,.btn):not(:disabled){transition:transform 160ms ease,background-color 160ms ease,color 160ms ease,border-color 160ms ease,box-shadow 160ms ease}
+}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+  body:not(.m4-body--crm) :is(button,[role=button],.m5-btn,.m4-btn,.m4-r3-btn,.m4-link-btn,.m4-strip-btn,.btn):not(:disabled):hover{transform:translateY(-2px)}
+}
+@media (prefers-reduced-motion:no-preference){
+  body:not(.m4-body--crm) :is(button,[role=button],.m5-btn,.m4-btn,.m4-r3-btn,.m4-link-btn,.m4-strip-btn,.btn):not(:disabled):active{transform:scale(.98);transition-duration:90ms}
+}
+
+/* ?motion=off del sitio: sin transiciones ni desplazamientos en lo de vida. */
+:root[data-motion="off"] :is([data-vida],mark[data-vida="clave"],button,[role=button]){transition:none!important;transform:none!important}
+:root[data-motion="off"] [data-vida="titulo"].vida-oculto{opacity:1!important;transform:none!important}

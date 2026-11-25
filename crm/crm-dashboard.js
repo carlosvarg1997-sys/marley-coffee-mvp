@@ -550,11 +550,11 @@
     if (existente && existente.dataset.rol === rol && existente.dataset.ruta === ruta
       && existente.parentElement === contenido) return;
     if (existente) existente.remove();
-    // Va justo después de la barra del agente del CRM (crm-agente.js), si existe; si no, al inicio.
-    const barraAgente = contenido.querySelector(':scope > #crm-agente-barra, :scope > .crm-agente');
+    // El trabajo va primero: el tablero queda después de la cola o lista de la pantalla y antes del cierre con la acción principal.
     const html = construir(rol, ruta);
-    if (barraAgente) barraAgente.insertAdjacentHTML('afterend', html);
-    else contenido.insertAdjacentHTML('afterbegin', html);
+    const cierre = contenido.querySelector(':scope > .crm2-cierre');
+    if (cierre) cierre.insertAdjacentHTML('beforebegin', html);
+    else contenido.insertAdjacentHTML('beforeend', html);
   }
 
   // setTimeout en vez de requestAnimationFrame: rAF no corre en pestañas ocultas y el bloque no aparecería.

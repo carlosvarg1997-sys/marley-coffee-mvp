@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/webp" href="../marca/logo.webp">
+<meta name="description" content="Guía de cuidado de tu máquina Marley Coffee Empresas, con los datos de tu tipo de negocio.">
+<title>Guía de cuidado de tu máquina | Marley Coffee Empresas</title>
+<style>
+:root{--ink:#111;--paper:#fff;--amarillo:#F3C900;--gris:#4d4d4d;--suave:#f2f2f2;--linea:#111}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink)}
+body{font:400 16px/1.55 "Pressura",Arial,sans-serif;overflow-wrap:anywhere}
+.wrap{max-width:860px;margin:0 auto;padding:24px 20px 56px}
+@media (min-width:768px){.wrap{padding:36px 32px 64px}}
+h1,h2,h3{font-family:"Festivo","Pressura",Arial,sans-serif;font-weight:400;line-height:1.15;margin:0}
+h1{font-size:clamp(28px,6vw,40px)}
+h2{font-size:clamp(22px,4vw,28px);margin-bottom:12px}
+h3{font-size:19px;margin-bottom:6px}
+p{margin:0}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.cabecera{padding:20px;border-radius:14px;background:var(--ink);color:#fff}
+.cabecera .kicker{color:var(--amarillo)}
+.cabecera p+p{margin-top:8px}
+section{margin-top:40px}
+.bloque{padding:20px;border:2px solid var(--linea);border-radius:12px;background:#fff}
+.bloque>*+*{margin-top:10px}
+.fila{display:grid;grid-template-columns:minmax(0,1fr);gap:8px 16px;padding:10px 0;border-bottom:1px solid #e3e3e3}
+.fila:last-child{border-bottom:0}
+.fila dt{font-weight:700}
+.fila dd{margin:0;color:var(--gris)}
+.pasos{counter-reset:paso;display:grid;gap:12px}
+.pasos li{counter-increment:paso;position:relative;padding:14px 14px 14px 56px;border:1px solid #cfcfcf;border-radius:10px}
+.pasos li::before{content:counter(paso);position:absolute;left:14px;top:14px;width:30px;height:30px;border-radius:50%;background:var(--amarillo);display:flex;align-items:center;justify-content:center;font-weight:700}
+.insumos{display:grid;gap:8px}
+.insumos li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;padding:10px 12px;border:1px solid #d6d6d6;border-radius:8px}
+.insumos small{color:var(--gris);font-size:14px}
+.pie{margin-top:40px;display:flex;flex-wrap:wrap;gap:12px}
+.boton{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 18px;border:2px solid var(--linea);border-radius:10px;background:var(--amarillo);color:var(--ink);font:700 16px/1.2 "Pressura",Arial,sans-serif;text-decoration:none}
+.boton--sec{background:#fff}
+.nota{font-size:14px;color:var(--gris)}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="cabecera">
+    <p class="kicker">Guía para tu portal · <span data-g="etiqueta">tu negocio</span></p>
+    <h1>Guía de cuidado de tu máquina</h1>
+    <p data-g="intro">Qué revisar cada vez que se usa la máquina, qué hacer si algo falla y cómo pedir ayuda.</p>
+  </header>
+
+  <section aria-labelledby="h-maquina">
+    <h2 id="h-maquina">Tu máquina</h2>
+    <div class="bloque">
+      <p data-g="maquina-intro">Tu ejecutivo confirma la máquina y sus condiciones para tu negocio.</p>
+      <dl data-g="maquina-datos"></dl>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-insumos">
+    <h2 id="h-insumos">Insumos clave de tu negocio</h2>
+    <div class="bloque">
+      <p class="nota">Precios netos referenciales, de la cotización del 19-oct-2026. Los confirma tu ejecutivo.</p>
+      <ul class="insumos" data-g="insumos"></ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-antes">
+    <h2 id="h-antes">Antes de pedir ayuda</h2>
+    <ol class="pasos">
+      <li><b>Revisa los insumos.</b> Mira si quedan café, leche y vasos para la jornada. Si faltan, avísalo en tu portal.</li>
+      <li><b>Mira la máquina.</b> Si no responde, o el café no sale como antes, anota qué pasó y a qué hora.</li>
+      <li><b>Abre un caso.</b> En tu portal, ve a <i>Ayuda y postventa</i>, elige el motivo y cuéntanos qué pasa.</li>
+      <li><b>Pide una persona.</b> Si es urgente, pide hablar con una persona de Soporte desde el chat del portal.</li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-mantencion">
+    <h2 id="h-mantencion">Mantención y visitas</h2>
+    <div class="bloque">
+      <p>Tu servicio técnico tiene un caso con número y responsable visible en tu portal.</p>
+      <p>Si necesitas una visita técnica, la agendas desde <i>Ayuda y postventa</i> en el día hábil y la franja que elijas.</p>
+      <p class="nota">La frecuencia de limpieza, el cambio de filtro y el mantenimiento los confirma tu ejecutivo según tu operación.</p>
+    </div>
+  </section>
+
+  <div class="pie">
+    <a class="boton" href="../../index.html#C09" data-evt="guia_cuidado_volver_portal">Volver a mi portal</a>
+  </div>
+</main>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var buyerId = params.get('tipo') || params.get('b') || '';
+  var base = '../datos/';
+  function txt(el, valor) { if (el) { el.textContent = valor; } }
+  function dato(lista, etiqueta, valor) {
+    if (!valor) { return; }
+    var div = document.createElement('div');
+    div.className = 'fila';
+    var dt = document.createElement('dt'); dt.textContent = etiqueta;
+    var dd = document.createElement('dd'); dd.textContent = valor;
+    div.appendChild(dt); div.appendChild(dd); lista.appendChild(div);
+  }
+  function pintar(oferta, precios) {
+    var comprador = (oferta.buyers || []).filter(function (b) { return b.id === buyerId; })[0];
+    if (!comprador) { return; }
+    var maquina = (oferta.maquinas || {})[comprador.maquina] || {};
+    txt(document.querySelector('[data-g="etiqueta"]'), comprador.etiqueta || 'tu negocio');
+    txt(document.querySelector('[data-g="intro"]'), comprador.mensaje || '');
+    txt(document.querySelector('[data-g="maquina-intro"]'), 'Para tu negocio: ' + (maquina.nombre || 'tu máquina') + '. ' + (maquina.linea || ''));
+    var datos = document.querySelector('[data-g="maquina-datos"]');
+    dato(datos, 'Tipo', maquina.tipo);
+    dato(datos, 'Tazas al día', maquina.tazas);
+    dato(datos, 'Formato de café', maquina.formato);
+    dato(datos, 'Atención', maquina.atencion);
+    var lista = document.querySelector('[data-g="insumos"]');
+    (comprador.lineas_clave || []).forEach(function (k) {
+      var l = (precios.lineas || []).filter(function (x) { return x.k === k; })[0];
+      if (!l) { return; }
+      var li = document.createElement('li');
+      var b = document.createElement('b'); b.textContent = l.t;
+      var s = document.createElement('small'); s.textContent = (l.d ? l.d + ' · ' : '') + 'precio referencial ' + new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(l.precio) + ' neto';
+      li.appendChild(b); li.appendChild(s); lista.appendChild(li);
+    });
+  }
+  Promise.all([fetch(base + 'oferta_por_buyer.json').then(function (r) { return r.json(); }), fetch(base + 'precios_cotizacion_19oct.json').then(function (r) { return r.json(); })])
+    .then(function (res) { pintar(res[0], res[1]); })
+    .catch(function () { /* sin datos: la guía general sigue visible */ });
+})();
+</script>
+</body>
+</html>

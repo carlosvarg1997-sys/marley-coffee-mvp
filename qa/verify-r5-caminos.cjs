@@ -6,7 +6,7 @@ const path = require('node:path');
 const { promisify } = require('node:util');
 const execFile = promisify(require('node:child_process').execFile);
 const { chromium } = require('./playwright-system-chrome.cjs');
-const { completeDiagnostic } = require('./complete-diagnostic.cjs');
+const { completeDiagnostic, completePack } = require('./complete-diagnostic.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const LANDINGS = [
@@ -350,7 +350,7 @@ async function testViewportFlows(browser, base, vp, failures) {
       if (JSON.stringify(g3.api) !== JSON.stringify({ pasos: ['Productos', 'Tu negocio', 'Propuesta', 'Confirmar'], actual: 3 })) {
         recordFail(failures, `${tag}/productos/C05`, `guía incorrecta: ${JSON.stringify(g3.api)}`);
       }
-      await page.locator('[data-r5-top-accept]').click();
+      await completePack(page);
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C06', null, { timeout: 8000 });
       screens.push(await currentHash(page).then((h) => h.slice(1)));
       const g4 = await readGuide(page);
@@ -372,8 +372,7 @@ async function testViewportFlows(browser, base, vp, failures) {
     try {
       await page.goto(`${base}/index.html#C02`, { waitUntil: 'domcontentloaded' });
       await page.waitForFunction(() => window.__r5Instalado === true, null, { timeout: 8000 });
-      await page.locator('.ux-hero [data-m10-unknown]').waitFor({ state: 'visible', timeout: 10000 });
-      await page.locator('.ux-hero [data-m10-unknown]').click();
+      await page.locator('#condiciones [data-cierra-tarea="T1"]').click({ timeout: 10000 });
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C04', null, { timeout: 8000 });
 
       const screens = ['C04'];
@@ -407,16 +406,16 @@ async function testViewportFlows(browser, base, vp, failures) {
       if (JSON.stringify(g2.api) !== JSON.stringify({ pasos: ['Tu solución', 'Propuesta', 'Confirmar'], actual: 2 })) {
         recordFail(failures, `${tag}/solucion/C05`, `guía incorrecta: ${JSON.stringify(g2.api)}`);
       }
-      await page.locator('.premium-proposal-details > summary').click();
+      await page.locator('#pack-resumen').waitFor({ state: 'visible' });
       const c05Info = await page.evaluate(() => ({
         maq: window.R5?.maquina?.(),
-        porqueVisible: Boolean(document.querySelector('.r3-proposal-machine .r5-porque')),
-        porqueText: (document.querySelector('.r3-proposal-machine .r5-porque')?.innerText || '').trim(),
+        porqueVisible: Boolean(document.querySelector('.cmp-maquina .cmp-motivo')?.getClientRects().length),
+        porqueText: (document.querySelector('.cmp-maquina .cmp-motivo')?.innerText || '').trim(),
       }));
       if (c05Info.maq !== 'bar') recordFail(failures, `${tag}/C05/maquina`, `C05 tiene "${c05Info.maq}" y C04 tenía "bar"`);
       if (!c05Info.porqueVisible || !c05Info.porqueText) recordFail(failures, `${tag}/C05/porque`, 'falta el porqué visible de la máquina en C05');
 
-      await page.locator('[data-r5-top-accept]').click();
+      await completePack(page);
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C06', null, { timeout: 8000 });
       screens.push('C06');
       const g3 = await readGuide(page);
@@ -520,10 +519,9 @@ async function testViewportFlows(browser, base, vp, failures) {
       if (dest !== '#C05') {
         recordFail(failures, `${tag}/landing/${l.slug}/C05`, `C04 pasó a ${dest} en vez de ir directo a #C05`);
       } else {
-        await page.locator('.m5-propsec').waitFor({ state: 'visible' });
-        await page.locator('.premium-proposal-details > summary').click();
-        if (!(await page.locator('.r3-proposal-machine .r5-porque').isVisible())) {
-          recordFail(failures, `${tag}/landing/${l.slug}/C05`, 'falta .r5-porque en la propuesta');
+        await page.locator('#pack-resumen').waitFor({ state: 'visible' });
+        if (!(await page.locator('.cmp-maquina .cmp-motivo').isVisible())) {
+          recordFail(failures, `${tag}/landing/${l.slug}/C05`, 'falta la explicación de la máquina en la propuesta');
         }
       }
       if (pageErrors.length) recordFail(failures, `${tag}/landing/${l.slug}/errores`, pageErrors.join(' | '));
@@ -534,24 +532,25 @@ async function testViewportFlows(browser, base, vp, failures) {
 }
 
 async function testLateralWidths(browser, base, failures) {
-  const portalRoutes = ['C02', 'C10', 'C04', 'C05', 'C06', 'C11', 'C09'];
+  const portalRoutes = ['C02', 'C10', 'C11', 'C09'];
   for (const w of [360, 390, 414, 768]) {
     const { ctx, page } = await newPage(browser, w, w <= 420 ? 844 : 900, w <= 420);
     try {
-      await page.goto(`${base}/index.html#C04`, { waitUntil: 'domcontentloaded' });
-      await page.waitForFunction(() => window.__r5Instalado === true, null, { timeout: 8000 });
-      await completeDiagnostic(page, { business: 'Restaurante' });
-      await page.waitForFunction(() => document.body.dataset.current === 'C05', null, { timeout: 8000 });
-      await page.locator('[data-r5-top-accept]').click();
-      await page.waitForFunction(() => document.body.dataset.current === 'C06', null, { timeout: 8000 });
-      for (const r of portalRoutes) {
-        await page.goto(`${base}/index.html?qa_route=${r}#${r}`, { waitUntil: 'domcontentloaded' });
+      const medir = async r => {
         await page.waitForFunction((route) => document.body.dataset.current === route && window.__r5Instalado === true, r, { timeout: 8000 });
         await page.waitForTimeout(150);
         const ov = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
-        if (ov.sw > ov.cw) {
-          recordFail(failures, `${w}px/${r}`, `desborde lateral scrollWidth=${ov.sw} > clientWidth=${ov.cw}`);
-        }
+        if (ov.sw > ov.cw) recordFail(failures, `${w}px/${r}`, `desborde lateral scrollWidth=${ov.sw} > clientWidth=${ov.cw}`);
+      };
+      await page.goto(`${base}/index.html#C04`, { waitUntil: 'domcontentloaded' });
+      await medir('C04');
+      await completeDiagnostic(page, { business: 'Restaurante' });
+      await medir('C05');
+      await completePack(page);
+      await medir('C06');
+      for (const r of portalRoutes) {
+        await page.goto(`${base}/index.html?qa_route=${r}#${r}`, { waitUntil: 'domcontentloaded' });
+        await medir(r);
       }
       for (const l of LANDINGS) {
         await page.goto(`${base}/captacion/landing/${l.slug}.html`, { waitUntil: 'domcontentloaded' });

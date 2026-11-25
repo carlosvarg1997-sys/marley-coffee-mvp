@@ -486,3 +486,25 @@ body.crm-v2-active .m7o-bar { display: none !important; }
   .crm2-actionbar [data-c2='recommend-account'] { flex: 0 1 auto; }
 }
 /* 17-nov (Claude): colores por flujo intactos; el tinte de Ventas y el amarillo suave se aclaran para que no se lean como crema (pedido de Carlitos) */
+
+/* 25-nov (subagente E): acción principal arriba y repetida al final; botones del agente; aire mínimo.
+   Márgenes laterales 32 px en escritorio y tableta, 20 px en celular; 24 px entre bloques; sin scroll lateral. */
+.crm2-page-cta { margin-top: var(--space-2); }
+.crm2-cierre { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); margin-top: var(--space-1); padding-top: var(--space-2); border-top: 1px solid var(--crm2-line); }
+.crm2-agente-acciones { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); }
+.crm2-agente-acciones .crm2-btn { min-height: 44px; }
+.crm2-main { padding-left: 32px; padding-right: 32px; }
+.crm2-content { gap: var(--space-3); }
+@media (max-width: 640px) {
+  .crm2-main { padding-left: 20px; padding-right: 20px; }
+  .crm2-content { gap: var(--space-3); }
+  .crm2-cierre .crm2-btn { flex: 1 1 100%; }
+}
+.crm2-page-head > .crm2-page-cta { grid-column: 1 / -1; }
+/* 25-nov (E, revisión visual): el trabajo va primero; la barra del agente y el tablero bajan debajo de la cola o lista de la pantalla. */
+.crm2-content > #crm-agente-barra { order: 1; }
+.crm2-content > #crm-tablero, .crm2-content > .crm2-cierre { order: 2; }
+@media (max-width: 900px) {
+  .crm2-nav { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+  .crm2-nav-link { font-size: 12px; }
+}

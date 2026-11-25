@@ -69,41 +69,45 @@ async function buyer(page) {
   await page.keyboard.press('Escape');
   if (!await page.locator('.b2c-business-link:visible').count()) await click(page, 'C01', '.b2c-menu-details > summary', () => open(page, '.b2c-business-link:visible'));
   await click(page, 'C01', '.b2c-business-link:visible', () => screen(page, 'C02'));
-  await click(page, 'C02', '.ux-hero [data-m10-unknown]', () => screen(page, 'C04'));
+  // El camino a «Cuéntanos de tu negocio» es el CTA T1 de la sección «Así funciona» (ya no está en el hero de C02).
+  await click(page, 'C02', '[data-cierra-tarea="T1"]', () => screen(page, 'C04'));
   await click(page, 'C04', '#r4Datos [data-r4-next]:visible', () => text(page, '#r4Datos .r4-msg', /Elige el tipo de negocio/));
   await click(page, 'C04', '#r4Datos [data-v="Hotel"]', () => page.locator('#r4Datos [data-v="Hotel"][aria-pressed="true"]').waitFor());
   await completeDiagnostic(page, { business: 'Hotel' });
   await screen(page, 'C05');
-  await text(page, '.premium-quote-total', /Total neto referencial\s*\$[\d.]+\s*\+ IVA/);
-  assert.equal(await page.locator('.r3-proposal-machine .r5-porque').isVisible(), false);
-  await click(page, 'C05', '.premium-quote-help [data-m7-open]', () => open(page, '#m7-title'));
+  await text(page, '.premium-quote-total', /Total neto referencial\s*\$\s*[\d.]+\s*\+ IVA/);
+  await text(page, '.cmp-maquina .cmp-motivo', /\S/);
+  await click(page, 'C05', '[data-m7-open="ayuda"]', () => open(page, '#m7-title, #agente-panel:not([hidden])'));
   await page.keyboard.press('Escape');
-  await click(page, 'C05', '.premium-proposal-details > summary', () => open(page, '.r3-proposal-machine .r5-porque'));
-  assert.equal(await page.locator('.premium-quote-total strong').innerText(),
-    await page.locator('.r3-proposal-totals .r3-total dd').innerText(), 'El total de la primera vista coincide con el desglose');
-  assert.match(await page.locator('.mcp-guia [aria-current="step"]').innerText(), /Propuesta/);
-  await click(page, 'C05', '[data-r5-top-accept]', () => screen(page, 'C06'));
-  await text(page, '.mcp-cierre-card', /Folio/);
-  await click(page, 'C06', '[data-cycle-action="sign-contract"]', () => text(page, '[aria-labelledby="m5-cycle-contract-title"] [role="status"]', /Contrato simulado registrado/));
-  await click(page, 'C06', '[data-r5-top-confirm]', () => screen(page, 'C09'));
-  await click(page, 'C09', '.r3-support-fold > summary', () => open(page, '.r3-support-fold[open] #r3-help'));
-  await click(page, 'C09', '.r3-support-fold [data-m7-open]', () => open(page, '#m7-title'));
-  await page.keyboard.press('Escape');
-  await click(page, 'C09', '#r3-recommend > summary', () => open(page, '#r3-recommend[open] .m5-cycle'));
-  await page.evaluate(() => M4Journey.jumpDays(30));
-  await click(page, 'C09', '[data-cycle-action="confirm-order"]', () => open(page, '[data-r3-confirm-received]'));
-  await click(page, 'C09', '[data-r3-advance-wait]', () => text(page, '.r3-order-focus h2', /va en camino/i));
-  assert.equal(await page.locator('.r3-order-progress').getAttribute('aria-valuenow'), '68');
-  await click(page, 'C09', '.premium-order-details > summary', () => open(page, '.premium-order-details[open] .r3-history-lines li'));
-  await click(page, 'C09', '[data-r3-confirm-received]:visible', () => open(page, '[data-r3-advance-time]:visible'));
-  await click(page, 'C09', '.premium-order-support [data-r3-scroll="r3-help"]', () => open(page, '.r3-support-fold[open] #r3-help'));
-  await click(page, 'C09', '.premium-order-support [data-r3-scroll="r3-recommend"]', () => open(page, '#r3-recommend[open] .m5-cycle'));
-  await click(page, 'C09', '[data-r3-advance-time]:visible', () => open(page, '[data-r3-repeat-summary]:visible'));
-  await click(page, 'C09', '[data-r3-repeat-summary]:visible', () => open(page, '#r3-repeat-summary form'));
-  await click(page, 'C09', '#r3-repeat-summary [type="submit"]', () => text(page, '.r3-repeat-done h2', /Reposición confirmada/i));
+  await click(page, 'C05', '[data-pack-accion="ver-productos"]', () => open(page, '#pack-productos .cmp-deck'));
+  assert.equal(await page.locator('#pack-resumen [data-pack-total]').getAttribute('data-pack-total'),
+    await page.locator('#pack-productos [data-pack-total]').getAttribute('data-pack-total'), 'El total coincide con el detalle');
+  await click(page, 'C05', '[data-pack-accion="cerrar-productos"]', () => page.locator('#pack-productos').waitFor({state:'hidden'}));
+  await click(page, 'C05', '[data-pack-accion="aceptar"]', () => open(page, '#pack-contacto, #cross-sell'));
+  if (await page.locator('#pack-contacto').isVisible()) {
+    await page.locator('#pack-contacto [name="name"]').fill('Prueba Piloto');
+    await page.locator('#pack-contacto [name="email"]').fill('piloto@example.test');
+    await page.locator('#pack-contacto [name="consent"]').check();
+    await click(page, 'C05', '[data-pack-accion="confirmar-contacto"]', () => open(page, '#cross-sell'));
+  }
+  await click(page, 'C05', '[data-cross="no-gracias"]', () => screen(page, 'C06'));
+  await text(page, 'h1', /Tu pack quedó confirmado/i);
+  await click(page, 'C06', '[data-cierra-tarea="T3"]', () => open(page, '#portal-tabs'));
+  await click(page, 'C09', '#portal-tabs [data-portal-tab="ayuda"]', () => open(page, '#mp-panel-ayuda'));
+  await click(page, 'C09', '#portal-tabs [data-portal-tab="recomendar"]', () => open(page, '#mp-panel-recomendar'));
+  await click(page, 'C09', '#portal-tabs [data-portal-tab="pedido"]', () => open(page, '#portal-franja'));
+  await click(page, 'C09', '[data-portal-accion="firmar-contrato"]', () => open(page, '[data-mp-dialogo]'));
+  await click(page, 'C09', '[data-portal-accion="confirmar-firma"]', () => open(page, '[data-etapa="firmado"][aria-current="step"]'));
+  await click(page, 'C09', '[data-portal-accion="avanzar-tiempo"]', () => open(page, '[data-portal-accion="confirmar-pedido"]'));
+  await click(page, 'C09', '[data-portal-accion="confirmar-pedido"]', () => open(page, '[data-portal-accion="avanzar-tiempo"]'));
+  await click(page, 'C09', '[data-portal-accion="avanzar-tiempo"]', () => open(page, '[data-etapa="camino"][aria-current="step"]'));
+  await click(page, 'C09', '[data-portal-accion="confirmar-recepcion"]', () => open(page, '[data-etapa="instalado"][aria-current="step"]'));
+  await click(page, 'C09', '[data-portal-accion="avanzar-tiempo"]', () => open(page, '[data-portal-accion="ir-repetir"]'));
+  await click(page, 'C09', '[data-portal-accion="ir-repetir"]', () => open(page, '#mp-form-repetir'));
+  await click(page, 'C09', '[data-cierra-tarea="T5"]', () => text(page, '.mp-aviso-ok', /Repetición confirmada/i));
   assert.equal(await page.evaluate(() => M4.get().customerCycle.orders.length), 2);
   assert.equal(await page.evaluate(() => M4.get().emails.filter(email => email.orderId).length), 2);
-  await click(page, 'C09', '[data-r3-back-portal]', () => open(page, '.r3-order-head'));
+  await click(page, 'C09', '#portal-tabs [data-portal-tab="pedido"]', () => open(page, '#portal-franja'));
 
   await go(page, 'C03');
   const c03 = page.locator('#m4Contact details > summary');
@@ -126,7 +130,7 @@ const firstCrmAction = {
   R02: '[data-c2="toggle-referrals"]', R03: '[data-c2="open-account"]', R04: '[data-c2="recommend-account"]',
   R06: '.crm2-main details > summary', R08: '.crm2-main details > summary', R09: '.crm2-main details > summary',
   R10: '[data-c2="open-account"]', R12: '[data-c2="open-lead"]', R13: '.crm2-campaign details > summary',
-  R14: '[data-c2="open-account"]', R15: '[data-c2="open-account"]',
+  R14: '.crm2-main details > summary', R15: '[data-c2="open-account"]',
   R16: '[data-c2="reply-request"]', R17: 'details.crm2-buyer-fold > summary',
 };
 
@@ -165,6 +169,7 @@ async function crm(page) {
     if (route === 'R04') continue;
     await go(page, route);
     const target = page.locator(`#crm-v2-root ${selector}:visible`).first();
+    assert.ok(await target.count(), `${route}: control principal visible (${selector})`);
     const type = await target.evaluate(element => element.tagName === 'SUMMARY' ? 'fold' : element.dataset.c2);
     await click(page, route, `#crm-v2-root ${selector}:visible`, async () => {
       if (type === 'fold') assert.equal(await target.evaluate(element => element.parentElement.open), true);
@@ -177,7 +182,7 @@ async function crm(page) {
 
 async function seo(page) {
   const pages = ['index.html', 'prototipo.html', 'blog-empresas.html', 'guia-servicio-cafe.html', ...fs.readdirSync(path.join(repo,'captacion/landing')).filter(name => name.endsWith('.html')).map(name => `captacion/landing/${name}`)];
-  assert.deepEqual(fs.readFileSync(path.join(repo, 'index.html')), fs.readFileSync(path.join(repo, 'prototipo.html')));
+  assert.ok(fs.readFileSync(path.join(repo, 'index.html')).equals(fs.readFileSync(path.join(repo, 'prototipo.html'))), 'Los dos HTML del prototipo son idénticos');
   const evidence = [];
   for (const file of pages) {
     const before = execFileSync('git', ['show', `204ffb2:${file}`], { cwd: repo, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
@@ -188,14 +193,17 @@ async function seo(page) {
       const ld = [...doc.querySelectorAll('script[type="application/ld+json"]')].map(el => JSON.parse(el.textContent));
       const links = [...new Set([...doc.querySelectorAll('a[href]')].map(el => el.getAttribute('href')))].sort();
       const images = [...doc.querySelectorAll('img[alt]')].map(el => [el.getAttribute('src'), el.alt]);
-      return { heading: doc.querySelectorAll('h1').length, metadata, ld, links, images };
+      return { heading: doc.querySelectorAll('h1').length, metadata, ld, links, images, tieneCondiciones: Boolean(doc.querySelector('#condiciones')) };
     };
     const old = await page.evaluate(parser, before);
     const current = await page.evaluate(parser, after);
     assert.equal(current.heading, 1, `${file}: H1 del HTML`);
     assert.deepEqual(current.metadata, old.metadata, `${file}: metadatos`);
     assert.deepEqual(current.ld, old.ld, `${file}: JSON-LD`);
-    assert.deepEqual(current.links, old.links, `${file}: destinos HTML`);
+    const esPrototipo = file === 'index.html' || file === 'prototipo.html';
+    const enlacesEsperados = esPrototipo ? [...old.links, '#condiciones'].sort() : old.links;
+    assert.deepEqual(current.links, enlacesEsperados, `${file}: destinos HTML`);
+    if (esPrototipo) assert.ok(current.tieneCondiciones, `${file}: ancla de condiciones del HTML inicial`);
     assert.deepEqual(current.images, old.images, `${file}: imágenes y texto alternativo`);
     evidence.push(file);
   }

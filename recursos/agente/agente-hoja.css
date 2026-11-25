@@ -101,3 +101,27 @@ body.agente-abierto { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .agente-escribiendo::after { animation: none; }
 }
+
+/* Chat incrustado en #agente-portal (C09): no superpone nada de la página y usa el mismo lenguaje visual. */
+.agente-incrustado { position: relative; width: 100%; max-width: 100%; font-family: "Pressura", Arial, sans-serif; color: var(--agente-negro); text-align: left; }
+.agente-incrustado *, .agente-incrustado *::before, .agente-incrustado *::after { box-sizing: border-box; }
+.agente-incrustado h2, .agente-incrustado h3 { font-family: "Festivo", Arial, sans-serif; font-weight: 400; line-height: 1.2; text-transform: none; letter-spacing: 0; }
+.agente-incrustado h4 { font-family: "Pressura", Arial, sans-serif; font-weight: 700; line-height: 1.3; text-transform: none; letter-spacing: 0; }
+.agente-hoja--incrustado { width: 100%; height: auto; min-height: 0; box-shadow: none; border: 2px solid var(--agente-negro); border-radius: 14px; overflow: hidden; }
+.agente-hoja--incrustado .agente-log { flex: none; min-height: 220px; max-height: 420px; gap: 24px; }
+.agente-hoja--incrustado .agente-escribiendo { padding: 12px 16px; }
+.agente-hoja--incrustado .agente-chips { max-height: none; }
+.agente-cab--incrustado { padding: 14px 16px; }
+.agente-titulo { margin: 0; font: 400 24px/1.15 "Festivo", Arial, sans-serif; color: var(--agente-blanco); text-transform: none; }
+/* Estado de la espera: lo ve el comprador con una persona en camino o ya unida. */
+.agente-estado { margin: 0; padding: 10px 14px; font: 700 14px/1.35 "Pressura", Arial, sans-serif; border-bottom: 1.5px solid var(--agente-negro); }
+.agente-estado[hidden] { display: none; }
+.agente-estado--espera { background: var(--agente-amarillo); color: var(--agente-negro); }
+.agente-estado--unida { background: var(--agente-negro); color: var(--agente-amarillo); }
+.agente-msg--persona { align-self: flex-start; background: var(--agente-negro); color: var(--agente-blanco); border-radius: 14px 14px 14px 4px; }
+.agente-msg--persona .agente-autor { color: var(--agente-amarillo); opacity: 1; }
+.agente-msg--persona .agente-card { color: var(--agente-negro); }
+@media (max-width: 640px) {
+  .agente-hoja--incrustado { height: auto !important; border-radius: 12px; }
+  .agente-hoja--incrustado .agente-log { max-height: 60vh; }
+}

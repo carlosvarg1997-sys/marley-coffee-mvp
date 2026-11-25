@@ -311,18 +311,29 @@ async function clicConRespuesta(page, locator, etiqueta, log, { estricto = true 
 // ---------- Comprador: lanzador, respuestas y controles ----------
 
 async function abrirAgente(page) {
-  if (await page.locator(SEL_PANEL).isVisible().catch(() => false)) return;
+  if (await page.evaluate(() => document.body.dataset.current === 'C09')) {
+    const ayuda = page.locator('#portal-tabs [data-portal-tab="ayuda"]');
+    await ayuda.waitFor({ state: 'visible', timeout: 8000 });
+    if (await ayuda.getAttribute('aria-selected') !== 'true') await ayuda.click();
+    const abrir = page.locator('#mp-agente:not([open]) > summary');
+    if (await abrir.isVisible()) await abrir.click();
+    const alcance = '#agente-portal';
+    await page.locator(`${alcance} [data-agente-parte="entrada"]`).waitFor({ state: 'visible', timeout: 8000 });
+    return alcance;
+  }
+  if (await page.locator(SEL_PANEL).isVisible().catch(() => false)) return SEL_PANEL;
   let boton = await controlVisible(page, SEL_LANZADOR);
   if (!boton) {
     // En el portal el botón vive en «Ayuda y postventa», que puede estar plegado.
     const abrir = await controlVisible(page, 'summary, button, a', /Ayuda y postventa/i);
     if (abrir) await abrir.locator.click({ timeout: 4000 });
-    if (await page.locator(SEL_PANEL).isVisible().catch(() => false)) return;
+    if (await page.locator(SEL_PANEL).isVisible().catch(() => false)) return SEL_PANEL;
     boton = await controlVisible(page, SEL_LANZADOR);
   }
   assert.ok(boton, 'No hay un botón visible para abrir el agente (data-m7-open="ayuda", «Te ayudamos a decidir»)');
   await boton.locator.click({ timeout: 4000 });
   await page.locator(SEL_PANEL).waitFor({ state: 'visible', timeout: 6000 });
+  return SEL_PANEL;
 }
 
 async function cerrarAgente(page) {
@@ -347,19 +358,20 @@ async function esperarTexto(page, selector, predicado, etiqueta, ms = 6000) {
   throw new Error(`No apareció ${etiqueta} en ${selector}: ${texto.slice(0, 300)}`);
 }
 
-async function mensajesAgente(page) {
-  return page.$$eval(SEL_MENSAJE, (els) => els.map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim()));
+async function mensajesAgente(page, alcance = SEL_PANEL) {
+  return page.$$eval(`${alcance} [data-agente-mensaje]`, (els) => els.map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim()));
 }
 
 async function preguntarCliente(page, log, texto, patrones, etiqueta) {
-  await abrirAgente(page);
-  const antes = (await mensajesAgente(page)).length;
-  await page.locator('#agente-entrada').fill(texto);
-  await clicConRespuesta(page, page.locator('#agente-enviar'), `Enviar «${texto}»`, log);
+  const alcance = await abrirAgente(page);
+  const chat = page.locator(alcance);
+  const antes = (await mensajesAgente(page, alcance)).length;
+  await chat.locator('[data-agente-parte="entrada"]').fill(texto);
+  await clicConRespuesta(page, chat.locator('[data-agente-parte="enviar"]'), `Enviar «${texto}»`, log);
   const limite = Date.now() + 7000;
   let nuevos = [];
   while (Date.now() < limite) {
-    nuevos = (await mensajesAgente(page)).slice(antes).filter((t) => t && t !== norm(texto));
+    nuevos = (await mensajesAgente(page, alcance)).slice(antes).filter((t) => t && t !== norm(texto));
     if (patrones.every((p) => nuevos.some((t) => p.test(t)))) break;
     await sleep(150);
   }
@@ -472,8 +484,8 @@ function traspasosNuevos(antes, despues) {
 async function elegirRol(page, rol, log) {
   await page.evaluate(() => window.M4.setRole(null));
   await irA(page, 'R00');
-  const ingreso = await controlVisible(page, `[data-c2="choose-role"][data-role="${rol}"]`);
-  assert.ok(ingreso, `No aparece el ingreso de ${rol} en R00`);
+  // El ingreso del rol se carga perezosamente: en Edge en vivo aparece a los 0,33 s, así que se espera activamente y no con una sola mirada.
+  const ingreso = await esperarControl(page, `[data-c2="choose-role"][data-role="${rol}"]`, 8000, `el ingreso de ${rol} en R00`);
   await ingreso.locator.click({ timeout: 5000 });
   await page.waitForFunction((h) => location.hash === h, `#${HOME[rol]}`, { timeout: 8000 });
   await page.locator('#crm-agente-barra').first().waitFor({ state: 'visible', timeout: 8000 });
@@ -622,20 +634,21 @@ async function flujoComprador(page, size, log) {
 
 async function flujoPortal(page, size, log) {
   await irA(page, 'C09');
-  await abrirAgente(page);
+  const alcance = await abrirAgente(page);
+  const opciones = `${alcance} [data-agente-chip]`;
   await preguntarCliente(page, log, '¿En qué etapa va mi pedido?', [/etapa|estado|pedido|folio/i], 'estado del pedido');
   paso(log, 'Portal: el comprador pregunta en qué etapa va su pedido');
 
   const antes = await estado(page);
   const repAntes = await page.evaluate(() => (window.M4.get().reorders || []).length);
-  const repetir = await controlVisible(page, SEL_CHIP, /repet|reposic/i);
+  const repetir = await controlVisible(page, opciones, /repet|reposic/i);
   if (repetir) {
     await clicConRespuesta(page, repetir.locator, `Portal · «${repetir.texto}»`, log);
   } else {
     await preguntarCliente(page, log, 'Quiero repetir mi último pedido', [/repet|reposic|confirm/i], 'repetir pedido');
   }
   await sleep(900);
-  const confirmar = await controlVisible(page, SEL_CHIP, /confirm|^s[ií][,.! ]|^s[ií]$/i);
+  const confirmar = await controlVisible(page, opciones, /confirm|^s[ií][,.! ]|^s[ií]$/i);
   if (confirmar) {
     await clicConRespuesta(page, confirmar.locator, `Confirmar repetición · «${confirmar.texto}»`, log);
   } else {
@@ -650,7 +663,7 @@ async function flujoPortal(page, size, log) {
     if (!registrado) await sleep(150);
   }
   if (!registrado) {
-    const ultimos = (await mensajesAgente(page)).slice(-2);
+    const ultimos = (await mensajesAgente(page, alcance)).slice(-2);
     throw new Error(`Repetir el pedido no dejó registro, solicitud ni traspaso. Últimas respuestas del agente: ${JSON.stringify(ultimos)}`);
   }
   paso(log, 'El comprador repite su pedido con el agente y queda registrado');

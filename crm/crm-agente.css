@@ -182,3 +182,61 @@
 @media (prefers-reduced-motion: reduce) {
   .crm-agente * { transition: none !important; animation: none !important; }
 }
+
+/* Panel del agente en todas las pestañas del CRM (subagente D, 25-nov). Va dentro del contenido de la ruta:
+   no es fijo ni flotante, así que nunca tapa un CTA. Usa los mismos tokens que la barra «Pídele al agente». */
+.crm-agente-sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.crm-agente-chat { margin: 0 0 16px; padding: 0; overflow: hidden; }
+.crm-agente-lanzador { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 44px; padding: 10px 14px; border: 0; background: #fff; color: var(--ag-ink); font: 15px/1.3 var(--crm2-font, Arial, sans-serif); text-align: left; cursor: pointer; }
+.crm-agente-lanzador:hover { background: var(--ag-tint); }
+.crm-agente-lanzador-txt b { color: var(--ag-strong); }
+.crm-agente-lanzador-n { min-width: 24px; padding: 2px 8px; border-radius: 999px; background: var(--ag-yellow); color: var(--ag-ink); font-weight: 700; text-align: center; }
+.crm-agente-lanzador-n[hidden], .crm-agente-cuerpo[hidden], .crm-agente-espera[hidden], .crm-agente-avisos-chat[hidden] { display: none; }
+.crm-agente-cuerpo { padding: 4px 14px 14px; border-top: 1px solid var(--ag-line); }
+.crm-agente-espera { margin-top: 10px; padding: 12px; border-radius: 8px; background: rgba(243, 201, 0, 0.16); }
+.crm-agente-espera-t { margin: 0 0 6px; color: var(--ag-strong); font-size: 16px; line-height: 1.25; }
+.crm-agente-espera-item { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--ag-line); border-radius: 8px; background: #fff; }
+.crm-agente-espera-item p { margin: 0 0 6px; }
+.crm-agente-hilo-chat { display: flex; flex-direction: column; gap: 10px; max-height: 380px; min-height: 96px; margin-top: 10px; padding: 10px; overflow-y: auto; overflow-x: hidden; border: 1px solid var(--ag-line); border-radius: 8px; background: #fff; }
+.crm-agente-vacio { margin: 0; color: var(--ag-muted); font-size: 14px; }
+.crm-agente-burbuja { max-width: 92%; padding: 10px 12px; border-radius: 12px; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
+.crm-agente-burbuja p { margin: 0 0 6px; }
+.crm-agente-burbuja--usuario { align-self: flex-end; background: var(--ag-tint); border: 1px solid var(--ag-line); border-radius: 12px 12px 4px 12px; }
+.crm-agente-burbuja--usuario p { margin: 0; }
+.crm-agente-burbuja--agente { align-self: flex-start; background: #fff; border: 1.5px solid var(--ag-ink); border-radius: 12px 12px 12px 4px; }
+.crm-agente-burbuja--borrador { max-width: 100%; width: 100%; }
+.crm-agente-canal { margin: 0 0 6px; color: var(--ag-strong); font-size: 13px; }
+.crm-agente-texto-borrador { display: block; width: 100%; min-height: 120px; margin: 0; padding: 10px 12px; border: 1.5px solid var(--ag-ink); border-radius: 8px; background: #fff; color: var(--ag-ink); font: 15px/1.45 var(--crm2-font, Arial, sans-serif); resize: vertical; }
+.crm-agente-texto-borrador:focus-visible { outline: 3px solid var(--ag-strong); outline-offset: 2px; }
+.crm-agente-texto-borrador:disabled { background: #f4f4f4; color: var(--ag-muted); }
+.crm-agente-ajustes, .crm-agente-decision { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.crm-agente-chat .crm-agente-chip { min-height: 44px; padding: 8px 14px; border: 1.5px solid var(--ag-accent); border-radius: 999px; background: #fff; color: var(--ag-strong); font: 700 14px/1.2 var(--crm2-font, Arial, sans-serif); cursor: pointer; }
+.crm-agente-chat .crm-agente-chip:hover { background: var(--ag-tint); }
+.crm-agente-chat .crm-agente-chip:disabled { opacity: 0.5; cursor: default; }
+.crm-agente-chat .crm-agente-btn { min-height: 44px; padding: 8px 16px; border: 1.5px solid var(--ag-strong); border-radius: 8px; background: #fff; color: var(--ag-strong); font: 700 14px/1.2 var(--crm2-font, Arial, sans-serif); cursor: pointer; }
+.crm-agente-chat .crm-agente-btn--ok { background: var(--ag-yellow); border-color: var(--ag-ink); color: var(--ag-ink); }
+.crm-agente-chat .crm-agente-btn:disabled { opacity: 0.5; cursor: default; }
+.crm-agente-chat .crm-agente-btn:focus-visible, .crm-agente-chat .crm-agente-chip:focus-visible, .crm-agente-lanzador:focus-visible, .crm-agente-chat input:focus-visible { outline: 3px solid var(--ag-strong); outline-offset: 2px; }
+.crm-agente-estado-b { color: var(--ag-muted); font-size: 13px; }
+.crm-agente-niveles-b { margin: 10px 0 0; display: grid; gap: 4px; font-size: 13px; }
+.crm-agente-niveles-b > div { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr); gap: 8px; padding: 4px 0; border-top: 1px solid var(--ag-line); }
+.crm-agente-niveles-b dt { color: var(--ag-muted); font-weight: 700; }
+.crm-agente-niveles-b dd { margin: 0; overflow-wrap: anywhere; }
+.crm-agente-escribe { align-self: flex-start; margin: 0; padding: 6px 10px; color: var(--ag-muted); font-size: 13px; }
+.crm-agente-escribe::after { content: "…"; display: inline-block; width: 1.2em; animation: crm-agente-puntos 1.2s steps(4, end) infinite; }
+@keyframes crm-agente-puntos { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.crm-agente-avisos-chat { display: flex; flex-direction: column; gap: 4px; margin: 10px 0 0; padding: 8px 12px; border-left: 4px solid var(--ag-yellow); border-radius: 6px; background: var(--ag-tint); color: var(--ag-ink); font-weight: 700; font-size: 14px; }
+.crm-agente-aviso-p { display: block; }
+.crm-agente-sugerencias-chat { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
+.crm-agente-form-chat { margin: 10px 0 0; }
+.crm-agente-ejemplo { margin: 8px 0 0; color: var(--ag-muted); font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.crm-agente-chat .crm-agente-campo { display: flex; gap: 8px; align-items: stretch; }
+.crm-agente-chat .crm-agente-campo input { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 8px 12px; border: 1.5px solid var(--ag-ink); border-radius: 8px; background: #fff; color: var(--ag-ink); font: 15px/1.3 var(--crm2-font, Arial, sans-serif); }
+.crm-agente-chat .crm-agente-enviar { min-height: 44px; min-width: 44px; padding: 0 16px; border: 1.5px solid var(--ag-ink); border-radius: 8px; background: var(--ag-ink); color: var(--ag-yellow); font: 700 14px/1 var(--crm2-font, Arial, sans-serif); cursor: pointer; }
+.crm-agente-chat .crm-agente-registro { margin-top: 10px; }
+@media (max-width: 640px) {
+  .crm-agente-hilo-chat { max-height: 52vh; }
+  .crm-agente-burbuja { max-width: 100%; }
+  .crm-agente-niveles-b > div { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .crm-agente-escribe::after { animation: none; } }

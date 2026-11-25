@@ -103,7 +103,14 @@ async function main() {
       assert.equal(received.lead.attribution.entrySurface, 'resultado-organico');
       assert.equal(received.focus, true);
       assert.equal(received.menu, false);
-      assert.equal(received.overflow, false);
+      const fuera = received.overflow ? await page.evaluate(() => {
+        const ancho = document.documentElement.clientWidth;
+        return [...document.querySelectorAll('#app *')].flatMap(e => {
+          const r = e.getBoundingClientRect();
+          return r.width && (r.right > ancho + 1 || r.left < -1) ? [`${e.tagName}.${String(e.className).slice(0, 65)} (${Math.round(r.left)}–${Math.round(r.right)})`] : [];
+        }).slice(0, 10);
+      }) : [];
+      assert.equal(received.overflow, false, `Desborde en ${width}px: ${fuera.join(', ')}`);
       assert.equal(received.localEvents, null);
       assert.equal(received.sessionEvents, true);
       await page.screenshot({ path: path.join(evidence, `W10_C04_${width}.png`) });
@@ -129,11 +136,10 @@ async function main() {
       await completeDiagnostic(page);
       // R5 (14-nov): desde la landing («Calcula tu solución») C04 pasa directo a la propuesta C05, sin pasar por C10.
       await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C05');
-      await page.locator('.m5-propsec').waitFor({ state: 'visible' });
-      await page.locator('.premium-proposal-details > summary').click();
+      await page.locator('#pack-resumen').waitFor({ state: 'visible' });
       const propR5 = await page.evaluate(() => ({
         maqC05: window.R5?.maquina?.() || null,
-        porqueVisible: Boolean(document.querySelector('.r3-proposal-machine .r5-porque')),
+        porqueVisible: Boolean(document.querySelector('.cmp-maquina .cmp-motivo')?.textContent.trim()),
       }));
       assert.equal(propR5.porqueVisible, true, 'R5: C05 muestra el porqué de la máquina');
       if (maqC04) assert.equal(propR5.maqC05, maqC04, 'R5: la máquina en C05 coincide con C04');

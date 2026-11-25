@@ -1,0 +1,532 @@
+/* B2 · Portal del cliente (25-nov-2026). Todo cuelga de .mp-portal: negro, blanco y amarillo Marley, sin crema.
+   Aire: margen lateral 20 px (celular) y 32 px (escritorio); 24 px entre bloques; 40 px entre secciones;
+   12 px de relleno en cajas y 8 px en botones y chips; sin scroll lateral. */
+.mp-portal {
+  --mp-ink: #111;
+  --mp-paper: #fff;
+  --mp-amarillo: #F3C900;
+  --mp-linea: #111;
+  --mp-gris: #4d4d4d;
+  --mp-suave: #f2f2f2;
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 20px 20px 40px;
+  background: var(--mp-paper);
+  color: var(--mp-ink);
+  font-family: "Pressura", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.mp-portal *, .mp-portal *::before, .mp-portal *::after { box-sizing: border-box; }
+/* Reglas globales solo para lo propio del portal: el chat del agente (#agente-portal) conserva sus estilos. */
+.mp-principal :is(h2, h3), .mp-cabecera h1, .mp-agente-cuerpo > h2, .mp-dialogo :is(h2, h3) {
+  font-family: "Festivo", "Pressura", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--mp-ink);
+  margin: 0;
+}
+.mp-principal p, .mp-cabecera p, .mp-agente-cuerpo > p, .mp-dialogo p, .mp-nota { margin: 0; }
+.mp-principal ul, .mp-principal ol, .mp-dialogo ul { margin: 0; padding: 0; list-style: none; }
+.mp-portal b { font-weight: 700; }
+.mp-principal small, .mp-cabecera small, .mp-dialogo small { display: block; font-size: 14px; line-height: 1.4; color: var(--mp-gris); }
+.mp-principal img { display: block; max-width: 100%; height: auto; }
+.mp-portal :focus-visible { outline: 3px solid var(--mp-ink); outline-offset: 3px; }
+.mp-portal mark { background: linear-gradient(transparent 58%, var(--mp-amarillo) 58%); color: inherit; padding: 0 2px; }
+
+/* Títulos y textos de apoyo */
+.mp-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--mp-ink);
+}
+.mp-titulo { font-size: clamp(26px, 6vw, 40px); }
+.mp-h2 { font-size: clamp(24px, 4.6vw, 32px); margin-top: 8px; }
+.mp-h3 { font-size: 22px; }
+.mp-lead { margin-top: 12px; font-size: 17px; }
+.mp-fino { font-size: 14px; line-height: 1.45; color: var(--mp-gris); margin-top: 6px; }
+.mp-nota { margin-top: 24px; font-size: 14px; color: var(--mp-gris); }
+
+/* Cabecera del portal */
+.mp-cabecera {
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--mp-ink);
+  color: #fff;
+}
+.mp-cabecera .mp-kicker, .mp-cabecera .mp-titulo, .mp-cabecera .mp-folio, .mp-cabecera .mp-saludo { color: #fff; }
+.mp-cabecera .mp-kicker { color: var(--mp-amarillo); }
+.mp-saludo { margin-top: 8px; font-size: 16px; line-height: 1.4; }
+.mp-folio { margin-top: 10px; font-size: 15px; }
+.mp-folio b { color: var(--mp-amarillo); }
+
+/* Pestañas: cuatro flujos, cada uno con su pestaña. Sin barra con scroll lateral. */
+.mp-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 20px;
+}
+.mp-tab {
+  min-height: 46px;
+  padding: 8px 10px;
+  border: 2px solid var(--mp-linea);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--mp-ink);
+  font: 700 15px/1.2 "Pressura", Arial, sans-serif;
+  text-align: center;
+  cursor: pointer;
+  min-width: 0;
+}
+.mp-tab.is-activa { background: var(--mp-amarillo); }
+
+/* Panel de cada pestaña */
+.mp-panel { margin-top: 24px; min-width: 0; }
+.mp-cabeza-panel { margin-bottom: 0; }
+.mp-bloque {
+  margin-top: 40px;
+  padding: 14px;
+  border: 2px solid var(--mp-linea);
+  border-radius: 12px;
+  background: #fff;
+  min-width: 0;
+}
+.mp-bloque > .mp-h3 + .mp-fino { margin-bottom: 4px; }
+.mp-tarjeta {
+  margin-top: 40px;
+  padding: 20px;
+  border: 2px solid var(--mp-linea);
+  border-radius: 12px;
+  background: #fff;
+  min-width: 0;
+}
+.mp-tarjeta > * + * { margin-top: 10px; }
+.mp-accion { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; }
+.mp-cierre { margin: 40px 0 24px; padding-top: 8px; display: flex; flex-wrap: wrap; gap: 12px; }
+.mp-acciones { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* Botones y enlaces de acción */
+.mp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 18px;
+  border: 2px solid var(--mp-linea);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--mp-ink);
+  font: 700 16px/1.2 "Pressura", Arial, sans-serif;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  max-width: 100%;
+}
+.mp-btn--primario { background: var(--mp-amarillo); }
+.mp-btn--sec { background: #fff; }
+.mp-btn[aria-pressed="true"] { background: var(--mp-ink); color: #fff; }
+.mp-link {
+  min-height: 44px;
+  padding: 8px 4px;
+  border: 0;
+  background: none;
+  color: var(--mp-ink);
+  font: 700 15px/1.3 "Pressura", Arial, sans-serif;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+}
+.mp-error {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 2px solid var(--mp-ink);
+  border-left-width: 8px;
+  border-radius: 8px;
+  background: #fff;
+  font-weight: 700;
+}
+.mp-aviso-ok {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-left: 8px solid var(--mp-amarillo);
+  border-radius: 8px;
+  background: var(--mp-suave);
+  font-weight: 700;
+}
+.mp-aviso {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-left: 8px solid var(--mp-ink);
+  border-radius: 8px;
+  background: var(--mp-suave);
+}
+.mp-aviso > * + * { margin-top: 4px; }
+
+/* Pedido: máquina, productos y total */
+.mp-folio-linea { margin-top: 8px; font-size: 15px; }
+.mp-maquina {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+}
+.mp-maquina-foto { width: 64px; height: 64px; object-fit: contain; }
+.mp-maquina-txt { min-width: 0; }
+.mp-maquina-txt > * + * { margin-top: 2px; }
+.mp-maquina-txt b { font-size: 18px; }
+.mp-maquina-txt span { display: block; font-size: 15px; }
+.mp-maquina-txt small { font-size: 14px; }
+.mp-lista { margin-top: 12px; display: grid; gap: 4px; }
+.mp-prod {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid #e3e3e3;
+}
+.mp-prod .mp-thumb { width: 44px; height: 44px; padding: 2px; }
+.mp-prod:last-child { border-bottom: 0; }
+.mp-prod-txt { min-width: 0; }
+.mp-prod-txt b { font-size: 15px; }
+.mp-prod-precio { font-weight: 700; white-space: nowrap; }
+.mp-thumb {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  padding: 4px;
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
+  background: #fff;
+}
+.mp-thumb--vacia { display: block; background: var(--mp-suave); }
+.mp-total {
+  margin-top: 12px;
+  padding: 14px;
+  border: 2px solid var(--mp-linea);
+  border-radius: 10px;
+  background: var(--mp-amarillo);
+}
+.mp-total > * + * { margin-top: 6px; }
+.mp-total p { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; }
+.mp-total b { font-size: 24px; }
+.mp-total small { color: var(--mp-ink); }
+.mp-total--repetir { margin-top: 24px; }
+
+/* Franja de llegada */
+.mp-franja { margin-top: 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.mp-modalidad { margin-top: 12px; }
+/* La pregunta rápida de Mi pedido solo entra en escritorio; en celular quedan todas en «Ayuda y postventa» (alto ≤ 2.500 px). */
+.mp-rapidas-pedido { display: none; }
+.mp-etapa { min-width: 0; }
+.mp-etapa-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 2px solid #cfcfcf;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--mp-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mp-etapa.is-hecha .mp-etapa-btn { border-color: var(--mp-ink); }
+.mp-etapa.is-actual .mp-etapa-btn { border-color: var(--mp-ink); background: var(--mp-amarillo); }
+.mp-etapa[class*="is-"] .mp-etapa-btn[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--mp-ink); }
+.mp-etapa-n {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--mp-ink);
+  background: #fff;
+  color: var(--mp-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+}
+.mp-etapa.is-hecha .mp-etapa-n { background: var(--mp-ink); color: #fff; }
+.mp-etapa-txt { min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.mp-etapa-txt b { font-size: 15px; overflow-wrap: normal; word-break: normal; }
+.mp-etapa-txt em { font-style: normal; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.mp-etapa-txt small { font-size: 13px; }
+.mp-franja-detalle {
+  margin-top: 10px;
+  border-radius: 8px;
+  background: var(--mp-suave);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.mp-franja-detalle:not(:empty) { padding: 10px 12px; }
+.mp-franja-detalle:empty { display: none; }
+
+/* Repetir pedido: filas editables, sugerencias y recordatorio */
+.mp-form { margin-top: 0; }
+.mp-accion + .mp-form { margin-top: 24px; }
+.mp-form > .mp-bloque { margin-top: 24px; }
+.mp-linea {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 84px;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #e3e3e3;
+}
+.mp-linea:last-child { border-bottom: 0; }
+.mp-linea .mp-thumb { width: 44px; height: 44px; padding: 2px; }
+.mp-linea-txt { min-width: 0; }
+.mp-linea-txt b { font-size: 15px; }
+.mp-cant { grid-column: 3; display: flex; align-items: center; min-width: 0; }
+.mp-cant input { width: 84px; }
+.mp-cant span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.mp-form input[type="number"] {
+  width: 96px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 2px solid var(--mp-ink);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--mp-ink);
+  font: 700 17px/1.2 "Pressura", Arial, sans-serif;
+}
+.mp-sugerencias { margin-top: 24px; }
+.mp-sug-lista { margin-top: 12px; display: grid; gap: 12px; }
+.mp-sug {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #cfcfcf;
+  border-radius: 10px;
+}
+.mp-sug .mp-thumb { width: 44px; height: 44px; padding: 2px; }
+.mp-sug-txt { min-width: 0; grid-column: 2; display: grid; gap: 4px; }
+.mp-sug-txt b { font-size: 16px; }
+.mp-sug-acc { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+.mp-sug-acc .mp-btn { flex: 1 1 0; min-height: 44px; padding: 8px 10px; font-size: 15px; }
+.mp-sug .mp-thumb { grid-row: 1 / span 1; }
+
+/* Campos de formularios */
+.mp-form { display: grid; gap: 16px; }
+.mp-campo { display: grid; gap: 6px; min-width: 0; border: 0; padding: 0; margin: 0; }
+.mp-campo > span, .mp-radios legend { font-weight: 700; font-size: 16px; padding: 0; }
+.mp-form input[type="text"],
+.mp-form select,
+.mp-form textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 2px solid var(--mp-ink);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--mp-ink);
+  font: 400 16px/1.3 "Pressura", Arial, sans-serif;
+}
+.mp-form textarea { resize: vertical; min-height: 96px; }
+.mp-radios { display: grid; gap: 8px; }
+.mp-radios label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 12px;
+  border: 2px solid #cfcfcf;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.mp-radios input[type="radio"] { width: 20px; height: 20px; margin: 0; accent-color: var(--mp-ink); }
+
+/* Chips de preguntas rápidas */
+.mp-chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.mp-chip {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 2px solid var(--mp-ink);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--mp-ink);
+  font: 700 15px/1.2 "Pressura", Arial, sans-serif;
+  text-align: center;
+  cursor: pointer;
+  max-width: 100%;
+}
+.mp-chip.is-activa { background: var(--mp-amarillo); }
+.mp-respuesta {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-left: 8px solid var(--mp-amarillo);
+  border-radius: 8px;
+  background: var(--mp-suave);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Lead magnets (guías y recordatorio) */
+.mp-guia > * + * { margin-top: 8px; }
+.mp-guia .mp-btn { margin-top: 14px; }
+
+/* Cuerpo del portal: en celular, pestaña y después el agente; en escritorio, el agente a un costado (sin posición fija). */
+.mp-cuerpo { display: block; min-width: 0; }
+.mp-principal { min-width: 0; }
+
+/* Agente: presente en las cuatro pestañas. En celular se pliega con una toque; en escritorio queda abierto. */
+.mp-agente {
+  margin-top: 32px;
+  border: 2px solid var(--mp-ink);
+  border-radius: 12px;
+  background: #fff;
+  min-width: 0;
+}
+.mp-agente-resumen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 12px 16px;
+  font: 700 17px/1.3 "Pressura", Arial, sans-serif;
+  color: var(--mp-ink);
+  cursor: pointer;
+  list-style: none;
+}
+.mp-agente-resumen::-webkit-details-marker { display: none; }
+.mp-agente-resumen::after { content: "+"; font: 700 24px/1 "Pressura", Arial, sans-serif; }
+.mp-agente[open] > .mp-agente-resumen::after { content: "–"; }
+.mp-agente[open] > .mp-agente-resumen { border-bottom: 2px solid var(--mp-ink); }
+.mp-agente-cuerpo { padding: 16px 16px 20px; min-width: 0; }
+.mp-agente-cuerpo > * + * { margin-top: 8px; }
+.mp-panel .mp-agente + section { margin-top: 40px; }
+.mp-consultas > summary { cursor: pointer; font-weight: 700; }
+.mp-agente-marco { margin-top: 16px; min-width: 0; }
+.mp-agente-espera { font-size: 15px; color: var(--mp-gris); }
+
+/* Recomendar: aviso de guía enviada */
+.mp-guia .mp-aviso { margin-top: 16px; }
+
+/* Ventana del resumen de contrato (solo mientras está abierta) */
+.mp-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, .62);
+}
+.mp-dialogo {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  padding: 24px;
+  border: 3px solid var(--mp-ink);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--mp-ink);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+.mp-dialogo > * + * { margin-top: 12px; }
+.mp-dialogo-lista { display: grid; gap: 6px; padding: 12px; border: 1px solid #d6d6d6; border-radius: 8px; }
+.mp-dialogo-lista li { font-size: 15px; }
+.mp-dialogo .mp-acciones { margin-top: 20px; }
+.mp-dialogo .mp-fino { margin-top: 16px; }
+
+/* Datos técnicos plegados */
+.mp-tecnico { margin-top: 20px; border: 1px solid #d6d6d6; border-radius: 10px; padding: 0 16px; }
+.mp-tecnico summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-weight: 700; }
+.mp-tecnico-lista { padding: 0 0 14px; display: grid; gap: 6px; font-size: 14px; color: var(--mp-gris); }
+
+.mp-solo-escritorio { display: none; }
+.mp-espaciador { display: none; }
+
+/* Aviso «Correo enviado»: va en el flujo del portal, arriba (a la derecha en escritorio). No se superpone a nada. */
+.mp-toast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 0 0 16px auto;
+  width: min(420px, 100%);
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--mp-ink);
+  border-left-width: 8px;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--mp-ink);
+}
+.mp-toast p { margin: 0; font-size: 15px; line-height: 1.35; }
+.mp-toast-acc { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mp-toast-cerrar {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 2px solid var(--mp-ink);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--mp-ink);
+  font: 700 14px/1.2 "Pressura", Arial, sans-serif;
+  cursor: pointer;
+}
+
+/* Escritorio: más aire lateral, cuatro pestañas en una fila, agente a un costado y tarjetas en rejilla (altura ≤ 1.800 px) */
+@media (min-width: 768px) {
+  .mp-portal { max-width: 1120px; padding: 32px 32px 56px; }
+  .mp-cabecera { padding: 16px 22px; }
+  .mp-titulo { font-size: 32px; }
+  .mp-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .mp-panel { margin-top: 24px; }
+  .mp-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 32px; align-items: stretch; }
+  [data-vista="ayuda"] .mp-agente { margin-top: 24px; }
+  /* La columna principal ocupa toda la altura del cuerpo: el CTA de abajo queda al final, con aire arriba y abajo. */
+  .mp-principal { display: flex; flex-direction: column; align-self: stretch; }
+  .mp-panel { flex: 1 0 auto; display: flex; flex-direction: column; }
+  .mp-espaciador { display: block; flex: 1 1 auto; }
+  .mp-agente { margin-top: 0; position: static; align-self: start; }
+  .mp-nota { margin-top: 32px; }
+  .mp-maquina-foto { width: 80px; height: 80px; }
+  .mp-maquina { grid-template-columns: 80px minmax(0, 1fr); }
+  .mp-solo-escritorio { display: inline; }
+  .mp-rapidas-pedido { display: block; margin-top: 16px; }
+  .mp-agente-resumen { display: none; }
+  .mp-agente-cuerpo { padding: 18px 18px 20px; }
+  .mp-franja { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .mp-etapa-btn { flex-direction: column; align-items: flex-start; min-height: 96px; padding: 10px; }
+  .mp-etapa-txt { display: grid; gap: 4px; }
+  .mp-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+  .mp-prod { border-bottom: 0; }
+  .mp-accion .mp-btn, .mp-cierre .mp-btn { min-width: 240px; }
+  .mp-sug-lista { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .mp-sug { grid-template-columns: minmax(0, 1fr); }
+  .mp-sug .mp-thumb { grid-row: auto; }
+  .mp-sug-txt { grid-column: auto; }
+  .mp-sug-acc { grid-column: auto; grid-row: auto; flex-direction: column; }
+  .mp-sug-acc .mp-btn { flex: 0 0 auto; width: 100%; }
+  .mp-chips { gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-portal *, .mp-portal *::before, .mp-portal *::after { transition: none !important; animation: none !important; }
+}
