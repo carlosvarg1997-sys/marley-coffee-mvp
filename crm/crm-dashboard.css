@@ -1,0 +1,77 @@
+/* Marley Coffee · CRM · Tablero de metas y KPIs por área (subagente D, 24-nov-2026).
+   Todo cuelga de #crm-tablero para no tocar el resto del CRM. Color por rol; amarillo solo en el objetivo general. */
+#crm-tablero {
+  --tab-acento: #171717;
+  --tab-fuerte: #171717;
+  --tab-linea: #d9d9d9;
+  --tab-texto: #171717;
+  --tab-suave: #5d5d5d;
+  --tab-amarillo: #f3c900;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 24px;
+  padding: 20px;
+  border: 1px solid var(--tab-linea);
+  border-top: 6px solid var(--tab-acento);
+  border-radius: 8px;
+  background: #f2f2f2;
+  color: var(--tab-texto);
+  font-family: var(--crm2-font, Arial, sans-serif);
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+}
+#crm-tablero[data-rol="ventas"] { --tab-acento: #914411; --tab-fuerte: #682f0d; --tab-linea: #eeb994; }
+#crm-tablero[data-rol="marketing"] { --tab-acento: #5c3d80; --tab-fuerte: #41265f; --tab-linea: #d2c2e0; }
+#crm-tablero[data-rol="jefatura"] { --tab-acento: #87344a; --tab-fuerte: #612336; --tab-linea: #e4c1ca; }
+#crm-tablero *,
+#crm-tablero *::before,
+#crm-tablero *::after { box-sizing: border-box; }
+
+/* Encabezado del área */
+#crm-tablero .crm-tablero__kicker { margin: 0; color: var(--tab-fuerte); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+#crm-tablero .crm-tablero__titulo { margin: 4px 0 6px; color: var(--tab-texto); font: 600 24px/1.2 var(--crm2-display, Arial, sans-serif); }
+#crm-tablero .crm-tablero__nota { margin: 0 0 14px; max-width: 80ch; color: var(--tab-suave); font-size: 14px; }
+#crm-tablero .crm-tablero__general { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 12px; padding: 10px 12px; border-radius: 6px; background: var(--tab-amarillo); color: #171717; }
+#crm-tablero .crm-tablero__general span { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+#crm-tablero .crm-tablero__general b { font-size: 17px; }
+#crm-tablero .crm-tablero__objetivos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin: 0 0 18px; padding: 0; list-style: none; }
+#crm-tablero .crm-tablero__objetivos li { min-width: 0; padding: 8px 12px; border: 1px solid var(--tab-linea); border-radius: 8px; background: #fff; font-size: 14px; line-height: 1.35; }
+#crm-tablero .crm-tablero__objetivos b { color: var(--tab-fuerte); }
+
+/* Tarjetas de KPI */
+#crm-tablero .crm-tablero__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+#crm-tablero .crm-kpi { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px; border: 1px solid var(--tab-linea); border-radius: 8px; background: #fff; }
+#crm-tablero .crm-kpi__cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 8px; }
+#crm-tablero .crm-kpi__cab h3 { margin: 0; color: var(--tab-texto); font-size: 16px; font-weight: 700; line-height: 1.25; }
+#crm-tablero .crm-kpi__fase { padding: 2px 8px; border: 1px solid var(--tab-linea); border-radius: 999px; color: var(--tab-fuerte); font-size: 12px; white-space: nowrap; }
+#crm-tablero .crm-kpi__cifras { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+#crm-tablero .crm-kpi__bloque { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+#crm-tablero .crm-kpi__rotulo { color: var(--tab-suave); font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+#crm-tablero .crm-kpi__bloque--meta .crm-kpi__rotulo { color: var(--tab-fuerte); }
+#crm-tablero .crm-kpi__valor { color: var(--tab-texto); font-size: 18px; font-weight: 700; line-height: 1.2; overflow-wrap: break-word; }
+#crm-tablero .crm-kpi__valor--pendiente { color: var(--tab-suave); font-size: 15px; font-weight: 600; }
+#crm-tablero .crm-kpi__bloque small { color: var(--tab-suave); font-size: 13px; line-height: 1.35; }
+
+/* Barra de avance: rayada cuando no hay base para medir */
+#crm-tablero .crm-kpi__barra { height: 10px; border-radius: 999px; background: #e3e3e3; overflow: hidden; }
+#crm-tablero .crm-kpi__barra i { display: block; height: 100%; border-radius: inherit; background: var(--tab-acento); }
+#crm-tablero .crm-kpi__barra--vacia { background: repeating-linear-gradient(45deg, #e3e3e3 0 6px, #efefef 6px 12px); }
+#crm-tablero .crm-kpi__avance small { display: block; margin-top: 6px; color: var(--tab-suave); font-size: 13px; line-height: 1.35; }
+#crm-tablero .crm-kpi__objetivo { margin: 0; color: var(--tab-fuerte); font-size: 13px; font-weight: 600; line-height: 1.35; }
+
+/* Desplegable «¿Qué significa?» */
+#crm-tablero .crm-kpi__explica { border-top: 1px solid var(--tab-linea); padding-top: 2px; }
+#crm-tablero .crm-kpi__explica summary { display: flex; align-items: center; min-height: 44px; color: var(--tab-texto); font-size: 14px; font-weight: 700; cursor: pointer; }
+#crm-tablero .crm-kpi__explica summary:focus-visible { outline: 3px solid #171717; outline-offset: 3px; }
+#crm-tablero .crm-kpi__explica dl { margin: 2px 0 6px; font-size: 14px; }
+#crm-tablero .crm-kpi__explica dt { margin-top: 8px; color: var(--tab-fuerte); font-weight: 700; }
+#crm-tablero .crm-kpi__explica dd { margin: 2px 0 0; color: var(--tab-texto); line-height: 1.4; }
+
+@media (max-width: 480px) {
+  #crm-tablero { padding: 16px; }
+  #crm-tablero .crm-tablero__titulo { font-size: 21px; }
+  #crm-tablero .crm-tablero__grid { grid-template-columns: 1fr; }
+  #crm-tablero .crm-kpi__cifras { grid-template-columns: 1fr; }
+}
