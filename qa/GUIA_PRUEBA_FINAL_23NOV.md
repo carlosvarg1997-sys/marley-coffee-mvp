@@ -20,9 +20,22 @@ Usa un código por persona y los datos ficticios del kit. Antes de empezar, lee 
 | Marketing · Hoy | «Prepara un borrador para oficinas y revisa qué dice antes de confirmarlo». | Encuentra el borrador, reconoce el público y puede revisarlo antes de confirmar. |
 | Jefatura · Hoy | «Encuentra un referido por aprobar y revisa qué falta para decidir». | Encuentra la decisión, distingue un permiso pendiente y sabe dónde pedir datos. |
 | C04 y C09 · Duda y pedido con el agente | «Pregúntale al asistente de Marley qué incluye el comodato. Después, en tu portal, pídele que repita tu último pedido.» | Encuentra el botón de ayuda, entiende la respuesta, confirma la repetición y ve que quedó como solicitud, sin cobro. |
-| Marketing · Hoy, con el agente | «Pregúntale al agente qué cotizó el lead, revisa lo que te muestra y pásalo a Ventas.» | Encuentra la barra «Pídele al agente», reconoce la cotización y los puntajes con su porqué, entiende si el lead cumple MQL, aprueba el mensaje antes de enviarlo y ve el aviso que queda en Ventas. |
+| C04 · Chat del comprador, pedido de llamada | «Pide que te llamen y responde lo que el asistente te pregunte: tu nombre, tu negocio, tu correo y los permisos. Si no quieres dar algún dato, elige «Prefiero no responder».» | Sigue las preguntas de a una, entiende qué permiso da, encuentra «Prefiero no responder» y sabe que el chat guarda solo lo que autorizó. |
+| Marketing · Hoy, con el agente | «Pregúntale al agente qué cotizó [el nombre de quien escribió en el chat], revisa lo que te muestra, pregúntale si cumple para MQL y pásalo a Ventas.» | Encuentra la barra «Pídele al agente», reconoce la cotización, los puntajes con su porqué, el origen «Chat del sitio» y la conversación; entiende si cumple MQL, aprueba el mensaje antes de enviarlo y ve el aviso que queda en Ventas. |
 
-En estas dos tareas nuevas, el asistente responde solo con datos del prototipo. Para Marketing usa el lead **Fernanda Rojas**: en la muestra cumple MQL. Elena Fuentes, la compradora de la demostración, no cumple MQL, así que el agente no la pasa a Ventas. Si el agente dice que no hay pedido para repetir, o no pasa un lead que sí cumple, anótalo tal cual: es un hallazgo de la prueba.
+En estas tareas, el asistente responde solo con datos del prototipo. El lead de Marketing es la persona que dio sus datos en el chat. Si nadie dio sus datos, usa **Fernanda Rojas** (MC-HOR-2040): en la muestra cumple MQL. Si el agente dice que no hay pedido para repetir, o no pasa un lead que sí cumple, anótalo tal cual: es un hallazgo de la prueba.
+
+## Demostración: la conexión chat → CRM en 5 pasos
+
+Úsala para mostrar que lo que el cliente conversa en el sitio llega al CRM con su nombre y su origen. Todo es simulación: no sale ningún correo ni WhatsApp real.
+
+1. **El comprador pide que lo llamen (C04).** Responde nombre, negocio, correo y los permisos, de a una pregunta. Puede elegir «Prefiero no responder» en cada paso: si no da su contacto, no se guarda nada.
+2. **Marketing busca el lead por su nombre.** En el Hoy escribe «¿Qué cotizó [nombre]?»: aparecen la cotización, los puntajes con su porqué, el origen «Chat del sitio», lo que hizo en el sitio y la conversación con el asistente. Luego pregunta «¿Cumple para MQL?».
+3. **Marketing lo pasa a Ventas.** Escribe «Pásalo a Ventas»: el agente crea el traspaso con un resumen y avisa a Ventas. Marketing aprueba el mensaje que redactó el agente antes del envío simulado.
+4. **El mensaje aparece del lado del cliente.** En el chat del comprador queda como vista previa del correo o WhatsApp que autorizó, y en la línea de tiempo del CRM.
+5. **Ventas y Jefatura siguen.** Ventas ve el aviso en su Hoy y pide «resume la cuenta» y «propón la canasta». Jefatura pregunta «¿qué espera mi aprobación?» y confirma lo que corresponda.
+
+Si el comprador no da sus datos, el paso 2 se hace con **Fernanda Rojas** y el paso 4 no aplica: anótalo como respaldo de la demostración.
 
 Para cada tarea registra si la logró, si pidió ayuda, facilidad del 1 al 7 y qué hizo o dijo al dudar. Deja que explore primero y anota la ayuda que diste. Pregúntale al final qué acción esperaba encontrar.
 

@@ -20,8 +20,13 @@
 // Diagnóstico: AGENTE_VERIFY_SIN_PORTAL=1 omite solo el paso del portal (C09) para
 // revisar el resto del flujo; la salida lo marca. Una corrida válida no lo usa.
 //
-// Datos de la demostración: el comprador es Elena Fuentes (MC-HOR-2050). Marketing
-// revisa a Fernanda Rojas (MC-HOR-2040), que es MQL en los datos de muestra.
+// Flujo de la conexión chat -> CRM (25-nov): el comprador de la sesión empieza anónimo,
+// pide que lo llamen y da su nombre, empresa, correo y permisos en el chat. Ese lead
+// queda en el CRM con su origen (chat del sitio), su cotización, sus puntajes y su
+// conversación. Marketing lo busca por su nombre, pregunta por MQL, lo pasa a Ventas,
+// aprueba el mensaje y el envío aparece del lado del cliente. Si el comprador no da sus
+// datos, Marketing sigue con Fernanda Rojas (MC-HOR-2040), MQL en los datos de muestra.
+// Al final se prueban «Prefiero no responder» (no se crea lead) y la baja (sin contacto).
 
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -43,8 +48,7 @@ const NAVEGADORES = [
 ];
 const HOME = { ventas: 'R01', marketing: 'R11', jefatura: 'R05' };
 const NIVELES = ['regla', 'ia', 'persona'];
-// Lead del recorrido de Marketing: en los datos de muestra es MQL (interés 58, en etapa MQL).
-// Elena Fuentes (MC-HOR-2050), el comprador de la sesión, no cumple MQL: interés 25 y sin permiso.
+// Respaldo de Marketing si el comprador no da sus datos: Fernanda Rojas es MQL en los datos de muestra.
 const LEAD = 'Fernanda Rojas';
 const LEAD_ID = 'MC-HOR-2040';
 const RIESGOSA = /persona|humano|humana|llam|asesor|ejecutiv|autoriz|whatsapp|correo|derivar/i;
@@ -175,7 +179,8 @@ async function abrirSesion(browser, size, log) {
     });
   const motor = await page.evaluate(() => Boolean(window.MarleyAgente));
   assert.ok(motor, 'Falta window.MarleyAgente: revisa que index.html cargue recursos/agente/agente-motor.js (subagente A)');
-  await page.evaluate(() => window.M4.loadExample());
+  // Sesión nueva: el comprador es anónimo y su lead se crea en el chat. Se quita solo la conversación del agente (sin clear()).
+  await page.evaluate(() => { window.localStorage.removeItem('marley.agente.v1'); window.M4.reset(); });
   return { context, page };
 }
 
@@ -594,11 +599,17 @@ async function flujoComprador(page, size, log) {
   paso(log, 'El comprador cotiza: responde con opciones y recibe una propuesta');
 
   const antesLlamada = await estado(page);
-  await preguntarCliente(page, log, 'Quiero que me llamen', [/llam|contact|persona/i], 'pedido de llamada');
+  // Pide que lo llamen y da sus datos en el chat: el agente pregunta solo lo que falta, de a una pregunta.
+  await capturarLead(page, log);
+  const lead = await page.evaluate(() => {
+    const L = window.M4.get().lead || {};
+    return { nombre: L.name || '', id: L.id || '', empresa: L.company || '', origen: L.source || '' };
+  });
+  assert.ok(lead.id && lead.nombre === 'Ana Pérez', `El chat debe crear el lead con el nombre dado (lead: ${JSON.stringify(lead)})`);
+  assert.equal(lead.origen, 'Chat del sitio', 'El lead creado en el chat debe llevar el origen «Chat del sitio»');
+  log.lead = lead;
+  paso(log, 'El comprador pide que lo llamen y el chat pide nombre, empresa, correo y permisos, de a una pregunta');
   // Antes de enviar nada, el agente muestra el resumen y pide confirmación («Sí, pásalo a Ventas»).
-  const derivar = await controlVisible(page, SEL_DERIVAR);
-  assert.ok(derivar, 'Falta la acción «hablar con una persona» (data-agente-accion="derivar-persona")');
-  await clicConRespuesta(page, derivar.locator, 'Hablar con una persona (con resumen)', log);
   const confirma = await esperarControlTexto(page, SEL_CHIP, /pas[aá]lo|confirm|s[ií][,.! ]/i, 5000, 'la confirmación para pasar el caso a Ventas');
   await clicConRespuesta(page, confirma.locator, `Confirmar envío a Ventas · «${confirma.texto}»`, log);
   const conTraspaso = await esperarEstado(page, (s) => traspasosNuevos(antesLlamada, s).length > 0, 8000, 'traspaso de la llamada');
@@ -648,6 +659,9 @@ async function flujoPortal(page, size, log) {
 }
 
 async function flujoMarketing(page, size, log) {
+  // Lead de la demostración: el que creó el chat del comprador. Si no dio sus datos, queda Fernanda Rojas (respaldo).
+  const LEAD = log.lead ? log.lead.nombre : 'Fernanda Rojas';
+  const LEAD_ID = log.lead ? log.lead.id : 'MC-HOR-2040';
   await elegirRol(page, 'marketing', log);
   assert.ok((await page.locator('[data-crm-agente-sugerencia]').count()) >= 2, 'El Hoy de Marketing debe ofrecer al menos dos sugerencias del agente');
   await captura(page, log, 'crm-01-marketing-hoy');
@@ -657,10 +671,11 @@ async function flujoMarketing(page, size, log) {
   ], 'qué cotizó el lead');
   paso(log, 'Marketing pregunta «qué cotizó» y recibe cotización, puntajes con su porqué, origen, sitio y conversación');
 
-  await preguntarCrm(page, '¿Pidió ejecutivo?', [/ejecutiv/i], 'pregunta: ejecutivo');
+  await preguntarCrm(page, '¿De dónde llegó?', [/chat del sitio/i], 'pregunta: origen del lead');
+  await preguntarCrm(page, '¿Pidió ejecutivo?', [/persona|llam|ejecutiv/i], 'pregunta: ejecutivo');
   await preguntarCrm(page, '¿Cuántas tazas?', [/\d|tazas?/i], 'pregunta: tazas');
   await preguntarCrm(page, '¿Qué dudas tuvo?', [/duda|pregunt/i], 'pregunta: dudas');
-  await preguntarCrm(page, '¿Cumple para MQL?', [/MQL/i], 'pregunta: MQL');
+  await preguntarCrm(page, '¿Cumple para MQL?', [/Sí cumple|MQL/i], 'pregunta: MQL');
   paso(log, 'Marketing hace preguntas específicas y el agente responde con los datos del registro');
 
   // Pásalo a Ventas: primero lo escrito; si no crea el traspaso, el botón del agente.
@@ -706,13 +721,18 @@ async function flujoMarketing(page, size, log) {
   const enCuenta = arr(conEnvio.conversaciones[LEAD_ID]).slice(arr(antesEnvio.conversaciones[LEAD_ID]).length);
   assert.ok(enCuenta.some((m) => norm(m.texto).slice(0, FRAGMENTO) === fragmento), 'El envío aprobado no quedó en la conversación de la cuenta del cliente');
   paso(log, 'El envío queda en la conversación de la cuenta del cliente');
+  await flujoLadoCliente(page, log, fragmento);
+  // Respaldo: el lead de muestra (Fernanda Rojas) sigue disponible para Marketing si el comprador no da sus datos.
+  await elegirRol(page, 'marketing', log);
+  await preguntarCrm(page, '¿Cumple para MQL de Fernanda Rojas?', [/Sí cumple|MQL/i], 'respaldo: lead de muestra');
+  paso(log, 'Respaldo: Fernanda Rojas (lead de muestra) sigue consultable para Marketing');
 }
 
 async function flujoVentas(page, size, log) {
   await elegirRol(page, 'ventas', log);
   const aviso = await esperarControl(page, SEL_AVISO, 8000, 'el aviso de Ventas');
   const textoAviso = norm(await aviso.locator.textContent());
-  assert.match(textoAviso, /Fernanda|Rojas|Hotel|traspas|MQL|Marketing/i, 'El aviso de Ventas debe nombrar la cuenta o el traspaso');
+  assert.match(textoAviso, new RegExp(`${log.lead ? log.lead.nombre : 'Fernanda Rojas'}|traspas|MQL|Marketing`, 'i'), 'El aviso de Ventas debe nombrar la cuenta o el traspaso');
   await captura(page, log, 'ventas-01-aviso');
   paso(log, 'El aviso del traspaso aparece en el Hoy de Ventas');
 
@@ -721,7 +741,7 @@ async function flujoVentas(page, size, log) {
   await clicConRespuesta(page, ver.locator, 'Ver aviso de Ventas', log);
   await irA(page, 'R01');
   await page.locator('#crm-agente-barra').first().waitFor({ state: 'visible', timeout: 8000 });
-  await preguntarCrm(page, 'Resume la cuenta', [/resum|cuenta/i, /Fernanda|Rojas|Hotel/i], 'resumen de la cuenta');
+  await preguntarCrm(page, 'Resume la cuenta', [/resum|cuenta/i, new RegExp(`${log.lead ? log.lead.nombre : 'Fernanda Rojas'}|Hotel`, 'i')], 'resumen de la cuenta');
   paso(log, 'Ventas pide «resume la cuenta»');
   await preguntarCrm(page, 'Propón la canasta', [/canasta|propuesta/i], 'propuesta de canasta');
   paso(log, 'Ventas pide «propón la canasta» con el motor de recomendación');
@@ -757,6 +777,112 @@ async function flujoJefatura(page, size, log) {
   assert.ok(conRegistro, 'La decisión de Jefatura debe quedar en el registro');
   paso(log, 'Jefatura aprueba el referido: queda en el registro con nivel persona y quién decidió');
   await captura(page, log, 'jefatura-02-aprobado');
+}
+
+// ---------- Captura del lead desde el chat (25-nov) ----------
+// Cada respuesta del agente se espera por su rol: el último mensaje tiene que ser del agente y no estar «escribiendo».
+async function contarMensajes(page) {
+  return page.$$eval(SEL_MENSAJE, (els) => ({ n: els.length, ult: els.length ? (els.at(-1).textContent || '').replace(/\s+/g, ' ').trim() : '' }));
+}
+async function esperarRespuesta(page, antes, etiqueta) {
+  const limite = Date.now() + 8000;
+  while (Date.now() < limite) {
+    const msgs = await page.$$eval(SEL_MENSAJE, (els) => els.map((el) => ({ rol: el.getAttribute('data-rol'), t: (el.textContent || '').replace(/\s+/g, ' ').trim() })));
+    const ultimo = msgs.at(-1);
+    const cambio = msgs.length !== antes.n || (ultimo && ultimo.t !== antes.ult);
+    if (cambio && ultimo && ultimo.rol !== 'comprador' && !/cargando|escribiendo/i.test(ultimo.t)) return msgs.map((m) => m.t);
+    await sleep(150);
+  }
+  const ultimos = await page.$$eval(SEL_MENSAJE, (els) => els.slice(-3).map((el) => `${el.getAttribute('data-rol')}: ${(el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 160)}`));
+  const total = await page.$$eval(SEL_MENSAJE, (els) => els.length);
+  const guardado = await page.evaluate(() => {
+    const e = JSON.parse(window.localStorage.getItem('marley.agente.v1') || '{}');
+    return { conv: Object.fromEntries(Object.entries(e.conversaciones || {}).map(([k, v]) => [k, v.length])), capturas: Object.keys(e.capturas || {}), cuenta: window.M4.get().lead ? window.M4.get().lead.id : null };
+  });
+  throw new Error(`El agente no respondió a tiempo (${etiqueta}). Mensajes antes ${antes.n}, ahora ${total}. Guardado: ${JSON.stringify(guardado)}. Últimos mensajes: ${JSON.stringify(ultimos)}`);
+}
+async function responderTexto(page, log, texto, etiqueta) {
+  const antes = await contarMensajes(page);
+  await page.locator('#agente-entrada').fill(texto);
+  await clicConRespuesta(page, page.locator('#agente-enviar'), `${etiqueta} · «${texto}»`, log);
+  return esperarRespuesta(page, antes, etiqueta);
+}
+async function pulsarOpcion(page, log, patron, etiqueta) {
+  const antes = await contarMensajes(page);
+  const opcion = await esperarControlTexto(page, SEL_CHIP, patron, 6000, etiqueta);
+  await clicConRespuesta(page, opcion.locator, `${etiqueta} · «${opcion.texto}»`, log);
+  return esperarRespuesta(page, antes, etiqueta);
+}
+// El comprador pide una llamada y responde lo que el agente pregunta, de a una pregunta, hasta «Guardé tus datos».
+async function capturarLead(page, log, datos = {}) {
+  const d = Object.assign({
+    nombre: 'Ana Pérez',
+    empresa: 'Hotel Sol',
+    negocio: /^Hotel$/,
+    correo: 'ana.perez@hotelsol.cl',
+    permisoContacto: /^Sí, autorizo$/,
+    permisoNovedades: /^Sí, novedades$/,
+  }, datos);
+  await responderTexto(page, log, 'Quiero que me llamen', 'pedido de llamada');
+  for (let i = 0; i < 8; i += 1) {
+    const msgs = await mensajesAgente(page);
+    const ultima = msgs.at(-1) || '';
+    if (msgs.slice(-2).some((t) => /Guardé tus datos/.test(t))) return d;
+    if (/te llamas/i.test(ultima)) await responderTexto(page, log, d.nombre, 'nombre del comprador');
+    else if (/negocio o empresa/i.test(ultima)) {
+      if (d.empresa) await responderTexto(page, log, d.empresa, 'empresa del comprador');
+      else await pulsarOpcion(page, log, /^Prefiero no responder$/, 'el comprador prefiere no dar su empresa');
+    } else if (/tipo de negocio/i.test(ultima)) await pulsarOpcion(page, log, d.negocio, 'tipo de negocio');
+    else if (/por correo o por WhatsApp/i.test(ultima)) await pulsarOpcion(page, log, /^Por correo$/, 'canal de contacto');
+    else if (/Escribe tu correo/i.test(ultima)) await responderTexto(page, log, d.correo, 'correo del comprador');
+    else if (/autorizas a contactarte/i.test(ultima)) await pulsarOpcion(page, log, d.permisoContacto, 'permiso de contacto');
+    else if (/novedades y ofertas/i.test(ultima)) await pulsarOpcion(page, log, d.permisoNovedades, 'permiso de novedades');
+    else throw new Error(`Pregunta del agente no prevista en la captura: ${ultima.slice(0, 200)}`);
+  }
+  throw new Error('La captura del lead no terminó en 8 pasos');
+}
+// Lado del cliente: el envío que aprobó Marketing aparece en el chat del comprador, como vista previa simulada.
+async function flujoLadoCliente(page, log, fragmento) {
+  await irA(page, 'C01');
+  await abrirAgente(page);
+  const envio = await esperarControl(page, '#agente-panel [data-agente-envio]', 8000, 'el envío aprobado en el chat del comprador');
+  const texto = norm(await envio.locator.textContent());
+  assert.ok(texto.includes(fragmento), 'El envío aprobado debe aparecer del lado del cliente, en su chat');
+  assert.match(texto, /Vista previa|simulaci/i, 'El envío del lado del cliente debe verse como vista previa simulada');
+  await captura(page, log, 'cliente-04-envio-visto');
+  paso(log, 'El envío aprobado por Marketing aparece del lado del cliente, como vista previa simulada');
+  await cerrarAgente(page);
+}
+// Respaldo: «Prefiero no responder» no crea lead; con permiso, la baja corta el contacto y el lead deja de ser identificado.
+async function flujoRespaldo(page, log) {
+  await page.evaluate(() => window.M4.reset());
+  await irA(page, 'C04');
+  await abrirAgente(page);
+  await responderTexto(page, log, 'Quiero que me llamen', 'respaldo: pedido de llamada');
+  for (let i = 0; i < 6; i += 1) {
+    const ultima = (await mensajesAgente(page)).at(-1) || '';
+    if (/No guardé tus datos/.test(ultima)) break;
+    await pulsarOpcion(page, log, /^Prefiero no responder$/, 'respaldo: el comprador prefiere no responder');
+  }
+  const cancelado = (await mensajesAgente(page)).at(-1) || '';
+  assert.match(cancelado, /No guardé tus datos/, 'Sin datos de contacto, el chat debe decirlo y no guardar nada');
+  assert.equal(await page.evaluate(() => window.M4.get().lead), null, 'Sin datos de contacto no debe crearse un lead');
+  paso(log, 'Prefiero no responder: el chat no guarda datos de contacto ni crea un lead');
+
+  await page.evaluate(() => window.M4.reset());
+  await irA(page, 'C04');
+  await abrirAgente(page);
+  await capturarLead(page, log, { nombre: 'Luis Soto', empresa: null, negocio: /^Restaurante$/, correo: 'luis@restaurante.cl', permisoNovedades: /^Solo mi solicitud$/ });
+  const idBaja = await page.evaluate(() => (window.M4.get().lead || {}).id || null);
+  assert.ok(idBaja, 'La segunda captura debe crear el lead');
+  await responderTexto(page, log, 'No me escriban', 'respaldo: baja');
+  const tras = await page.evaluate(() => { const L = window.M4.get().lead || {}; return { consent: L.consent === true, mkt: L.marketingConsent === true }; });
+  assert.deepEqual(tras, { consent: false, mkt: false }, 'La baja debe quitar el permiso de contacto del lead');
+  const cons = (await estado(page)).crudo.consentimientos[idBaja] || {};
+  assert.ok(cons.baja === true && cons.correo !== true && cons.whatsapp !== true, 'La baja debe dejar el canal sin permiso');
+  assert.match((await mensajesAgente(page)).at(-1) || '', /No te enviaremos mensajes/, 'La baja debe confirmarse en el chat');
+  paso(log, 'Baja: el chat la confirma, quita el permiso de contacto y no envía nada');
+  await cerrarAgente(page);
 }
 
 // ---------- Revisiones finales ----------
@@ -804,6 +930,7 @@ async function correrCombinacion(navegador, size, log) {
       await flujoMarketing(page, size, log);
       await flujoVentas(page, size, log);
       await flujoJefatura(page, size, log);
+      await flujoRespaldo(page, log);
 
       const s = await estado(page);
       revisarEsquema(s);
@@ -842,6 +969,8 @@ async function correrCombinacion(navegador, size, log) {
   const resultados = [];
   for (const navegador of NAVEGADORES) {
     for (const size of SIZES) {
+      // Diagnóstico: AGENTE_VERIFY_SOLO=chrome-1280 corre una sola combinación. La corrida válida no lo usa.
+      if (process.env.AGENTE_VERIFY_SOLO && `${navegador.nombre}-${size.width}`.toLowerCase() !== process.env.AGENTE_VERIFY_SOLO.toLowerCase()) continue;
       const log = {
         etiqueta: `${navegador.nombre}-${size.width}x${size.height}`,
         navegador: navegador.nombre,
