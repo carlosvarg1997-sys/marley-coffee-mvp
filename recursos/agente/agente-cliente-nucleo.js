@@ -38,7 +38,9 @@
     let st = null;
     try { st = A.estado.get(); } catch (_) { st = null; }
     const conv = st && st.conversaciones ? st.conversaciones : {};
-    const mezcla = [].concat(conv['cliente-local'] || [], conv[cuentaActual()] || []);
+    // Cada clave se lee una sola vez: con un comprador anónimo la cuenta es «cliente-local» y los mensajes no deben salir dobles.
+    const claves = [...new Set(['cliente-local', cuentaActual()])];
+    const mezcla = claves.reduce((acc, k) => acc.concat(conv[k] || []), []);
     return mezcla.filter((m) => m && m.canal !== 'nota').sort((a, b) => (a.ts || 0) - (b.ts || 0));
   }
 
@@ -99,9 +101,13 @@
     const clase = comprador ? 'comprador' : (m.envio ? 'equipo' : 'agente');
     const autor = comprador ? 'Tú' : (m.envio ? `Mensaje simulado por ${CANAL[m.canal] || m.canal}` : 'Asistente de IA de Marley');
     const tarjetas = (m.tarjetas || []).map(pintarTarjeta).join('');
+    // Lo que Marketing o Ventas envían (simulado) aparece como vista previa del correo o WhatsApp.
+    const cuerpo = m.envio
+      ? `<section class="agente-card agente-preview" data-agente-envio data-canal="${esc(m.canal)}"><h3>Vista previa (simulación)</h3><p class="agente-nota">${esc(CANAL[m.canal] || m.canal)} · para ${esc(m.para || 'contacto registrado')}</p><p>${esc(m.texto)}</p><p class="agente-nota">Aprobado por una persona de Marley. No salió nada real.</p></section>`
+      : `<p class="agente-texto">${esc(m.texto)}</p>`;
     return `<article class="agente-msg agente-msg--${clase}" data-agente-mensaje data-rol="${esc(m.rol)}">
       <p class="agente-autor">${esc(autor)}</p>
-      <p class="agente-texto">${esc(m.texto)}</p>${tarjetas}</article>`;
+      ${cuerpo}${tarjetas}</article>`;
   }
   function pintarChips(lista) {
     const caja = raiz.querySelector('#agente-chips');

@@ -171,7 +171,7 @@
       id: p.id, nombre: p.name || '', empresa: p.company || '', negocio: p.business || null, comuna: p.comuna || null,
       canal: p.channel || null, fuente: p.source || null, campana: p.source || null, etapa: p.stage || null,
       hace: typeof p.agoMin === 'number' ? p.agoMin : null, origen: 'crm', puntaje: p.score ?? null,
-      respuestas, puntajes: puntajesDe(p), ejecutiva: seguro(() => D4().execFor(p.comuna).name, null),
+      respuestas, puntajes: puntajesDe(p), b2b: null, telefono: '', permisoPromo: permisoPromoDe(p.id, { marketingConsent: p.marketingConsent, etapa: p.stage }), ejecutiva: seguro(() => D4().execFor(p.comuna).name, null),
       zona: seguro(() => D4().ZONES[D4().execFor(p.comuna).zone].name, null), eventos: [],
     };
   }
@@ -185,7 +185,9 @@
       puntajes: puntajesDe(s), ejecutiva: seguro(() => D4().execFor(a.comuna).name, null),
       zona: seguro(() => D4().ZONES[D4().execFor(a.comuna).zone].name, null),
       eventos: (s.events || []).map((e) => (M4() && M4().EV && M4().EV[e.key] ? M4().EV[e.key].label : e.key)),
-      email: L.email || '', consentimientoSitio: !!L.consent,
+      email: L.email || '', telefono: L.phone || '', consentimientoSitio: !!L.consent,
+      b2b: Boolean(M4() && M4().B2B_SEGMENTS && M4().B2B_SEGMENTS.includes(a.negocio)),
+      permisoPromo: permisoPromoDe(L.id, { marketingConsent: L.marketingConsent, etapa: null }),
     };
   }
   function respuestasDe(p) {
@@ -205,7 +207,7 @@
 
   // ---------- Estado (localStorage['marley.agente.v1']) ----------
   let copiaMemoria = null;
-  const vacio = () => ({ conversaciones: {}, traspasos: [], notificaciones: { ventas: [], marketing: [], jefatura: [] }, registro: [], consentimientos: {} });
+  const vacio = () => ({ conversaciones: {}, traspasos: [], notificaciones: { ventas: [], marketing: [], jefatura: [] }, registro: [], consentimientos: {}, capturas: {} });
   function leerEstado() {
     try {
       const raw = localStorage.getItem(CLAVE);
@@ -340,12 +342,18 @@
   // Si el comprador ya tiene lead, su conversación previa (cliente-local) pasa a su cuenta.
   function migrarConversacion(cuentaId) {
     if (!cuentaId || cuentaId === CLIENTE_LOCAL) return;
+    migrarCuenta(CLIENTE_LOCAL, cuentaId);
+  }
+  // Une la conversación de una cuenta con la de otra, por hora. Pasa cuando el comprador anónimo se vuelve lead.
+  function migrarCuenta(desde, hacia) {
+    if (!desde || !hacia || desde === hacia) return;
     const e = leerEstado();
-    if (e.conversaciones[CLIENTE_LOCAL] && !e.conversaciones[cuentaId]) {
-      e.conversaciones[cuentaId] = e.conversaciones[CLIENTE_LOCAL];
-      delete e.conversaciones[CLIENTE_LOCAL];
-      guardarEstado(e);
-    }
+    const origen = Array.isArray(e.conversaciones[desde]) ? e.conversaciones[desde] : null;
+    if (!origen) return;
+    const destino = Array.isArray(e.conversaciones[hacia]) ? e.conversaciones[hacia] : [];
+    e.conversaciones[hacia] = destino.concat(origen).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    delete e.conversaciones[desde];
+    guardarEstado(e);
   }
   function historial(cuentaId, n = 30) {
     const arr = leerEstado().conversaciones[String(cuentaId)];
@@ -431,6 +439,7 @@
 
   function recomendacionCliente(s, acciones) {
     const a = s.answers || {};
+    guardarCotizacionChat();
     const rec = recomendarCon(a, { quote: s.quote || null });
     const mid = rec.machine || 'bar';
     const info = infoMaquina(mid);
@@ -540,11 +549,24 @@
     return t;
   }
 
+  // Si hay una captura de datos en curso, sus respuestas van primero; lo demás sigue por el camino normal.
   function responderCliente(c, texto, opcion) {
     const s = estadoProto();
     migrarConversacion(c.cuentaId);
     const acciones = [];
     const reg0 = (datoUsado, nivel = 'regla') => reg(datoUsado, 'Respuesta aprobada del prototipo', nivel);
+    const cap = puedeCapturar(c) ? capturaDe(c.cuentaId) : null;
+    if (cap) {
+      if (opcion && opcion.indexOf('cap:') === 0) return responderCaptura(c, s, cap, opcion, '', acciones);
+      if (!opcion && capturaEsDato(cap, s, texto)) return responderCaptura(c, s, cap, '', texto, acciones);
+      if (!opcion && detectar(texto, INTENCIONES_CLIENTE) === 'baja') return bajaCliente(c, s, acciones);
+      const salida = responderClienteNormal(c, s, texto, opcion, acciones, reg0);
+      salida.mensajes.push(preguntaCaptura(cap, s));
+      return salida;
+    }
+    return responderClienteNormal(c, s, texto, opcion, acciones, reg0);
+  }
+  function responderClienteNormal(c, s, texto, opcion, acciones, reg0) {
     if (opcion) return despacharOpcionCliente(c, s, opcion, acciones, reg0);
     // «Repetir» gana sobre «pedido»: «quiero repetir mi último pedido» no es una consulta de estado.
     const it = /\b(repet|reposic|reponer|volver a pedir|pedir de nuevo)/.test(sinTildes(texto)) ? 'repetir' : detectar(texto, INTENCIONES_CLIENTE);
@@ -554,14 +576,11 @@
       case 'negociar':
         return res([msg('Los precios especiales, los descuentos y el crédito los revisa una persona de Ventas; yo no los puedo ofrecer. ¿Quieres que pase tu caso con un resumen?', [chip('persona_ventas', 'Sí, pásalo a Ventas'), chip('propuesta', 'Seguir con mi propuesta')])], acciones, reg0('Regla: excepciones solo con una persona'));
       case 'baja':
-        fijarConsentimiento(c.cuentaId, 'todos', false);
-        acciones.push({ tipo: 'consentimiento', canal: 'todos', valor: false });
-        registrar({ rol: 'comprador', accion: 'baja', datoUsado: 'Petición de la persona', sugerencia: 'Respetar la baja', nivel: 'persona', decidio: 'comprador' });
-        return res([msg('Listo. No te enviaremos mensajes por WhatsApp ni por correo. Puedes seguir usando este chat cuando quieras.', [chip('ayuda', 'Ver qué más puedo hacer')])], acciones);
+        return bajaCliente(c, s, acciones);
       case 'soporte':
         return abrirSoporte(c, s, acciones);
       case 'persona':
-        return ofrecerDerivacion(c, s, 'Quiero hablar con una persona', acciones);
+        return pedirDatosOPasar(c, s, 'persona', 'Quiero hablar con una persona', acciones);
       case 'referido':
         return ofrecerReferido(acciones);
       case 'contacto':
@@ -647,6 +666,7 @@
   }
 
   function ofrecerCanal(c, s, acciones) {
+    if (puedeCapturar(c) && !identificadoEstado(s)) return iniciarCaptura(c, s, 'contacto', acciones);
     const cons = consentimientoDe(c.cuentaId);
     const tieneCorreo = !!(s.lead && s.lead.email);
     const texto = cons.whatsapp || cons.correo
@@ -696,7 +716,7 @@
     const m = M4();
     if (!m) return;
     seguro(() => m.update((st) => {
-      st.quote = Object.assign({}, st.quote || {}, cambio, { mode: 'comodato', days: (st.proposal && st.proposal.days) || 26 });
+      st.quote = Object.assign({}, st.quote || {}, cambio, { mode: 'comodato', days: (st.proposal && st.proposal.days) || 26, editedByClient: true });
       if (st.proposal && st.proposal.status !== 'aceptada') Object.assign(st.proposal, cambio);
     }));
     acciones.push({ tipo: 'ajuste-cotizacion', campo: clave, valor: cambio[clave] });
@@ -726,8 +746,9 @@
     if (opcion === 'repetir:confirmar') return confirmarRepetir(c, s, acciones);
     if (opcion === 'soporte') return abrirSoporte(c, s, acciones);
     if (opcion === 'referido') return ofrecerReferido(acciones);
-    if (opcion === 'persona') return ofrecerDerivacion(c, s, 'Quiero hablar con una persona', acciones);
+    if (opcion === 'persona') return pedirDatosOPasar(c, s, 'persona', 'Quiero hablar con una persona', acciones);
     if (opcion === 'persona_ventas') {
+      if (puedeCapturar(c) && !identificadoEstado(s)) return iniciarCaptura(c, s, 'persona', acciones);
       const t = derivarCliente(s, c.cuentaId, 'ventas', 'El comprador pidió hablar con una persona');
       acciones.push({ tipo: 'derivar', a: 'ventas', traspasoId: t.id });
       return res([msg('Listo. Ventas recibe tu caso con el resumen; no repites nada. Una persona te responde por el canal que elegiste; no tengo un horario confirmado.', [chip('estado', 'Ver el estado'), chip('ayuda', 'Hacer otra consulta')], [{ tipo: 'ficha', titulo: 'Caso enviado a Ventas', filas: [['Estado', 'Asignado a tu ejecutiva de zona'], ['Resumen', 'Incluye tus respuestas y tu propuesta']] }])], acciones, reg('Resumen enviado a Ventas', 'Derivar a una persona', 'persona'));
@@ -779,6 +800,7 @@
     acciones.push({ tipo: 'diagnostico', campo: clave });
     const siguiente = { negocio: 'volumen', volumen: 'operacion', operacion: 'comuna' }[clave];
     if (siguiente) return res([preguntaWizard(siguiente)], acciones, reg('Respuesta del diagnóstico', 'Siguiente pregunta', 'regla'));
+    seguro(() => M4().update((st) => { st.diag.done = true; }));
     registrar({ rol: 'comprador', accion: 'diagnostico-completo', datoUsado: 'Cuatro respuestas del diagnóstico', sugerencia: 'Recomendación de máquina', nivel: 'ia', decidio: 'comprador' });
     return res([recomendacionCliente(estadoProto(), acciones)], acciones, reg('Cuatro respuestas del diagnóstico y motor de C04', 'Recomendación de máquina', 'ia'));
   }
@@ -831,6 +853,263 @@
     acciones.push({ tipo: 'referido', negocio, permiso: true, traspasoId: t.id });
     registrar({ rol: 'comprador', accion: 'referido', datoUsado: 'Tipo de negocio y permiso del referido', sugerencia: 'Aprobación de Jefatura antes de contactar', nivel: 'persona', decidio: 'comprador' });
     return res([msg(`Gracias. Registré el referido de ${negocio.toLowerCase()}. Jefatura lo revisa antes de contactarlo; no prometemos fecha.`, [chip('ayuda', 'Hacer otra consulta')], [{ tipo: 'folio', folio: t.id, estado: 'Por aprobar', siguiente: 'Jefatura revisa el referido.' }])], acciones, reg('Referido con permiso', 'Aprobación de Jefatura', 'persona'));
+  }
+
+  // ---------- Captura del lead desde el chat (datos con permiso) ----------
+  // El comprador da sus datos de a uno, con «Prefiero no responder» en cada paso, y solo se piden los que faltan.
+  // Nada llega al CRM hasta que autoriza el contacto por correo o WhatsApp; el permiso de novedades (promoción) se pide aparte.
+  // Al terminar, el lead queda en el estado de M4 (el CRM lo lee con su origen, su cotización y su conversación).
+  const RX_CORREO = /[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}/i;
+  const NEGOCIOS_CAPTURA = ['Hotel', 'Restaurante', 'Cafetería', 'Eventos o catering', 'OCS', 'Conveniencia', 'Otro'];
+  const INTENCIONES_NO_DATO = ['baja', 'trampa', 'negociar', 'saludo', 'cierre', 'ayuda', 'persona', 'contacto', 'soporte'];
+  function puedeCapturar(c) { return Boolean(c) && c.ruta !== 'C09'; }
+  function identificadoEstado(s) { const m = M4(); return Boolean(m && typeof m.identified === 'function' && m.identified(s)); }
+  function telefonoEn(texto) {
+    const digitos = String(texto || '').replace(/\D/g, '');
+    if (digitos.length < 8 || digitos.length > 15) return null;
+    return String(texto).trim().startsWith('+') ? '+' + digitos : digitos;
+  }
+  function textoLibre(texto, max) {
+    return String(texto || '').replace(RX_CORREO, ' ').replace(/\+?\d[\d\s-]{6,}\d/g, ' ').replace(/[,;|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+  }
+  function nombreDe(texto) {
+    return textoLibre(texto, 60).replace(/^(hola[,.]?\s+)?(me llamo|mi nombre es|soy)\s+/i, '').trim();
+  }
+  function negocioEn(texto) {
+    const t = sinTildes(texto);
+    if (/oficina|\bocs\b/.test(t)) return 'OCS';
+    if (/hotel|hostal|alojamiento/.test(t)) return 'Hotel';
+    if (/restaur|bistro|grill|brasa/.test(t)) return 'Restaurante';
+    if (/cafe/.test(t)) return 'Cafetería';
+    if (/evento|catering/.test(t)) return 'Eventos o catering';
+    if (/conveniencia|almacen|minimarket|bodega/.test(t)) return 'Conveniencia';
+    if (/\botro\b/.test(t)) return 'Otro';
+    return null;
+  }
+  function capturaDe(cuentaId) { return leerEstado().capturas[String(cuentaId)] || null; }
+  function guardarCaptura(cuentaId, cap) {
+    const e = leerEstado();
+    if (cap) e.capturas[String(cuentaId)] = cap; else delete e.capturas[String(cuentaId)];
+    guardarEstado(e);
+    return cap || null;
+  }
+  // Próximo dato que falta: primero lo que el lead ya tiene (C01 a C09) no se vuelve a pedir.
+  function pasoCaptura(cap, s) {
+    const d = cap.datos || {};
+    const L = s.lead || {};
+    const a = s.answers || {};
+    if (d.nombre === undefined && !L.name) return 'nombre';
+    if (d.empresa === undefined && !L.company) return 'empresa';
+    if (d.negocio === undefined && !a.negocio) return 'negocio';
+    if (!d.canal) return 'canal';
+    if (d.canal === 'correo' && !(d.correo || L.email)) return 'dato';
+    if (d.canal === 'whatsapp' && !(d.whatsapp || L.phone)) return 'dato';
+    if (d.permiso === undefined) return 'permiso';
+    if (d.promo === undefined) return 'promo';
+    return 'listo';
+  }
+  function preguntaCaptura(cap, s) {
+    const paso = pasoCaptura(cap, s);
+    const d = cap.datos || {};
+    const omitir = chip('cap:omitir', 'Prefiero no responder');
+    const via = d.canal === 'whatsapp' ? 'WhatsApp' : 'correo';
+    if (paso === 'nombre') return msg('¿Cómo te llamas?', [omitir]);
+    if (paso === 'empresa') return msg('¿Cómo se llama tu negocio o empresa?', [omitir]);
+    if (paso === 'negocio') return msg('¿Qué tipo de negocio tienes?', NEGOCIOS_CAPTURA.map((n) => chip('cap:negocio:' + n, NEGOCIO_ETIQUETA[n] || n)).concat([omitir]));
+    if (paso === 'canal') return msg('¿Prefieres que te escribamos por correo o por WhatsApp?', [chip('cap:canal:correo', 'Por correo'), chip('cap:canal:whatsapp', 'Por WhatsApp'), omitir]);
+    if (paso === 'dato') return msg(d.canal === 'whatsapp' ? 'Escribe tu número de WhatsApp, con código de país (por ejemplo, +56 9 1234 5678).' : 'Escribe tu correo (por ejemplo, nombre@tuempresa.cl).', [omitir]);
+    if (paso === 'permiso') return msg(`¿Me autorizas a contactarte por ${via} para responder tu solicitud? Puedes pedir la baja cuando quieras.`, [chip('cap:permiso:si', 'Sí, autorizo'), omitir]);
+    if (paso === 'promo') return msg(`¿Quieres además recibir novedades y ofertas de Marley Coffee por ${via}?`, [chip('cap:promo:si', 'Sí, novedades'), chip('cap:promo:no', 'Solo mi solicitud'), omitir]);
+    return msg('Listo.', []);
+  }
+  // ¿El texto libre responde a la captura? Si no, el chat lo trata como una pregunta normal y vuelve a pedir el dato.
+  function capturaEsDato(cap, s, texto) {
+    const t = sinTildes(texto);
+    const paso = pasoCaptura(cap, s);
+    if (/prefiero no responder/.test(t) || RX_CORREO.test(texto) || telefonoEn(texto)) return true;
+    if (paso === 'canal') return /whats|wasap|celular|fono|correo|mail/.test(t);
+    if (paso === 'permiso') return /^(si|claro|dale|ok|okay|acepto|autorizo|de acuerdo|no|mejor no|prefiero)\b/.test(t);
+    if (paso === 'promo') return /novedad|oferta|^solo|^no\b|^si\b|^acepto|^claro/.test(t);
+    if (paso === 'negocio') return Boolean(negocioEn(texto));
+    if (paso === 'empresa') return texto.length <= 80 && !['baja', 'trampa', 'negociar'].includes(detectar(texto, INTENCIONES_CLIENTE));
+    if (paso === 'nombre') { const it = detectar(texto, INTENCIONES_CLIENTE); return texto.length <= 60 && !(it && INTENCIONES_NO_DATO.includes(it)); }
+    return false;
+  }
+  function iniciarCaptura(c, s, pendiente, acciones) {
+    const e = leerEstado();
+    e.capturas[String(c.cuentaId)] = { pendiente, datos: {}, ts: ahora() };
+    guardarEstado(e);
+    const cap = e.capturas[String(c.cuentaId)];
+    registrar({ rol: 'comprador', accion: 'captura-inicio', datoUsado: pendiente === 'persona' ? 'Pidió hablar con una persona' : 'Pidió seguir por otro canal', sugerencia: 'Pedir solo los datos que faltan y el permiso', nivel: 'regla', decidio: 'comprador' });
+    const intro = pendiente === 'persona' ? 'Para que una persona de nuestro equipo comercial te contacte, te hago unas preguntas cortas.' : 'Para seguir por otro canal, te hago unas preguntas cortas.';
+    const q = preguntaCaptura(cap, s);
+    return res([msg(`${intro} En cada una puedes elegir «Prefiero no responder». ${q.texto}`, q.chips)], acciones, reg('Regla: pedir solo lo que falta y con permiso', 'Captura de datos de contacto', 'regla'));
+  }
+  function pedirDatosOPasar(c, s, pendiente, motivo, acciones) {
+    if (puedeCapturar(c) && !identificadoEstado(s)) return iniciarCaptura(c, s, pendiente, acciones);
+    return ofrecerDerivacion(c, s, motivo, acciones);
+  }
+  function responderCaptura(c, s, cap, opcion, texto, acciones) {
+    const d = cap.datos;
+    const paso = pasoCaptura(cap, s);
+    const tt = sinTildes(texto || '');
+    let omitir = false;
+    const rehacer = (prefijo) => {
+      guardarCaptura(c.cuentaId, cap);
+      const q = preguntaCaptura(cap, s);
+      return res([msg(prefijo + q.texto, q.chips)], acciones, reg('Dato que falta', 'Volver a pedir el dato', 'regla'));
+    };
+    if (opcion) {
+      const partes = opcion.split(':');
+      const clave = partes[1];
+      const valor = partes[2];
+      if (clave === 'omitir') omitir = true;
+      else if (clave === 'canal' && (valor === 'correo' || valor === 'whatsapp')) d.canal = valor;
+      else if (clave === 'negocio' && NEGOCIOS_CAPTURA.includes(valor)) d.negocio = valor;
+      else if (clave === 'permiso') { if (valor === 'si') d.permiso = true; else return cancelarCaptura(c, acciones, 'Sin permiso de contacto'); }
+      else if (clave === 'promo') d.promo = valor === 'si';
+    } else if (/prefiero no responder/.test(tt)) {
+      omitir = true;
+    } else {
+      const correo = (String(texto || '').match(RX_CORREO) || [])[0] || null;
+      const tel = correo ? null : telefonoEn(texto);
+      if (correo) { d.correo = correo.toLowerCase(); if (!d.canal) d.canal = 'correo'; }
+      if (tel) { d.whatsapp = tel; if (!d.canal) d.canal = 'whatsapp'; }
+      if (paso === 'nombre') {
+        const n = nombreDe(texto);
+        if (n) d.nombre = n;
+        else if (!correo && !tel) return rehacer('Escribe tu nombre, por ejemplo «Ana Pérez». ');
+      } else if (paso === 'empresa') {
+        const emp = textoLibre(texto, 80);
+        if (emp.length >= 2) d.empresa = emp; else return rehacer('Escribe el nombre de tu negocio. ');
+      } else if (paso === 'negocio') {
+        const n = negocioEn(texto);
+        if (n) d.negocio = n; else return rehacer('Elige una de estas opciones. ');
+      } else if (paso === 'canal') {
+        if (/whats|wasap|celular|fono/.test(tt)) d.canal = 'whatsapp';
+        else if (/correo|mail/.test(tt)) d.canal = 'correo';
+        else if (!d.canal) return rehacer('Responde correo o WhatsApp. ');
+      } else if (paso === 'dato') {
+        if (d.canal === 'whatsapp' && !d.whatsapp) return rehacer('Escribe un número de WhatsApp con al menos 8 dígitos. ');
+        if (d.canal !== 'whatsapp' && !d.correo) return rehacer('Ese correo no parece válido. ');
+      } else if (paso === 'permiso') {
+        if (/^(si|claro|dale|ok|okay|acepto|autorizo|de acuerdo)\b/.test(tt)) d.permiso = true;
+        else if (/^(no|mejor no|prefiero)\b/.test(tt)) return cancelarCaptura(c, acciones, 'Sin permiso de contacto');
+        else return rehacer('Responde sí o no. ');
+      } else if (paso === 'promo') {
+        if (/novedad|oferta|^si\b|^acepto|^claro/.test(tt)) d.promo = true;
+        else if (/^solo|^no\b/.test(tt)) d.promo = false;
+        else return rehacer('Responde sí o no. ');
+      }
+    }
+    if (omitir) {
+      if (paso === 'nombre' || paso === 'empresa' || paso === 'negocio') d[paso] = null;
+      else if (paso === 'promo') d.promo = false;
+      else return cancelarCaptura(c, acciones, 'Prefiero no responder');
+    }
+    if (pasoCaptura(cap, s) !== 'listo') {
+      guardarCaptura(c.cuentaId, cap);
+      return res([preguntaCaptura(cap, s)], acciones, reg('Dato que dio la persona', 'Pedir el siguiente dato', 'persona'));
+    }
+    return completarCaptura(c, cap, s, acciones);
+  }
+  function cancelarCaptura(c, acciones, motivo) {
+    guardarCaptura(c.cuentaId, null);
+    registrar({ rol: 'comprador', accion: 'captura-cancelada', datoUsado: motivo, sugerencia: 'No guardar datos de contacto ni escribir', nivel: 'persona', decidio: 'comprador' });
+    return res([msg('Entendido. No guardé tus datos de contacto y no te escribiremos. Puedes seguir en este chat con tu propuesta.', [chip('propuesta', 'Ver mi propuesta'), chip('ayuda', 'Hacer otra consulta')])], acciones, reg('Respeto la decisión de la persona', 'Sin datos de contacto', 'persona'));
+  }
+  function eventoEnEstado(st, key, label) {
+    const m = M4();
+    const EV = (m && m.EV) || {};
+    if (!Array.isArray(st.events) || st.events.some((e) => e.key === key)) return;
+    st.events.push({ key, pts: (EV[key] && EV[key].pts) || 0, label, at: m ? m.now() : Date.now() });
+  }
+  // Permiso de promoción como lo lee el CRM: lo que se guardó en el CRM manda; luego el dato del lead.
+  function permisoPromoDe(id, item) {
+    const st = estadoProto();
+    const guardado = st.crm2 && st.crm2.permissions && st.crm2.permissions[id] ? st.crm2.permissions[id].promotion : undefined;
+    const v = guardado !== undefined && guardado !== null ? guardado : (item && typeof item.marketingConsent === 'boolean' ? item.marketingConsent : undefined);
+    if (v === true || v === 'si' || v === 'true') return 'yes';
+    if (v === false || v === 'no' || v === 'false') return 'no';
+    if (v === undefined && item && ['MQL', 'SQL'].includes(item.etapa)) return 'yes';
+    return 'unknown';
+  }
+  function completarCaptura(c, cap, s, acciones) {
+    const m = M4();
+    const d = cap.datos;
+    const L0 = s.lead || {};
+    const prevId = L0.id || null;
+    const canal = d.canal === 'whatsapp' ? 'whatsapp' : 'correo';
+    const correo = d.correo || L0.email || '';
+    const telefono = d.whatsapp || L0.phone || '';
+    const nombre = typeof d.nombre === 'string' ? d.nombre : (L0.name || '');
+    const empresa = typeof d.empresa === 'string' ? d.empresa : '';
+    const promo = d.promo === true;
+    if (!m || typeof m.saveContact !== 'function') return res([msg('No puedo guardar tus datos en este momento. Lo confirma una persona del equipo.', [chip('persona', 'Hablar con una persona')])], acciones, reg('Prototipo no disponible', 'Sin guardar', 'persona'));
+    if (typeof d.negocio === 'string') seguro(() => m.answer('negocio', d.negocio));
+    seguro(() => m.saveContact({ name: nombre, email: correo, phone: telefono, consent: true, marketingConsent: promo }));
+    const lead = m.get().lead;
+    if (!lead) return res([msg('No pude registrar el contacto en este momento. Lo confirma una persona del equipo.', [chip('persona', 'Hablar con una persona')])], acciones, reg('Error controlado', 'Derivar a una persona', 'persona'));
+    seguro(() => m.update((st) => {
+      const Lt = st.lead;
+      if (empresa) Lt.company = empresa;
+      if (!prevId) Lt.source = 'Chat del sitio';
+      Lt.channel = canal;
+      Lt.followupChannel = canal;
+      Lt.chatAt = Lt.chatAt || m.now();
+      if (cap.pendiente === 'persona') {
+        Lt.consultationRequested = true;
+        Lt.contactRequestedAt = Lt.contactRequestedAt || m.now();
+        eventoEnEstado(st, 'ejecutivo', 'Pidió hablar con una persona (chat del sitio)');
+      }
+      if (st.quote && st.quote.machine) eventoEnEstado(st, 'cotizar', 'Cotizó en el chat del sitio');
+    }));
+    const nuevoId = String(lead.id);
+    const desde = String(c.cuentaId);
+    migrarCuenta(CLIENTE_LOCAL, nuevoId);
+    if (desde !== nuevoId) migrarCuenta(desde, nuevoId);
+    guardarCaptura(desde, null);
+    guardarCaptura(nuevoId, null);
+    c.cuentaId = nuevoId;
+    fijarConsentimiento(nuevoId, canal, true);
+    avisar('marketing', { tipo: 'lead', texto: `Nuevo contacto desde el chat del sitio: ${nombre || 'sin nombre'}${empresa ? ' · ' + empresa : ''}. Permiso de novedades: ${promo ? 'sí' : 'no'}.`, leadId: nuevoId });
+    registrar({ rol: 'comprador', accion: 'captura-lead', datoUsado: 'Nombre, empresa, dato de contacto y permiso que dio la persona', sugerencia: 'Crear o actualizar el lead del CRM con su origen (chat del sitio)', nivel: 'persona', decidio: 'comprador' });
+    registrar({ rol: 'comprador', accion: promo ? 'permiso-novedades' : 'sin-permiso-novedades', datoUsado: 'Respuesta a la pregunta de novedades', sugerencia: promo ? 'Puede llegar a MQL si cumple el resto' : 'Solo responder su solicitud', nivel: 'persona', decidio: 'comprador' });
+    const s2 = estadoProto();
+    const primer = nombre ? primerNombre(nombre) : '';
+    const destino = canal === 'whatsapp' ? `WhatsApp (${telefono})` : `correo (${correo})`;
+    const listo = msg(`Listo${primer ? ', ' + primer : ''}. Guardé tus datos${empresa ? ' de ' + empresa : ''} y tu consulta. Te escribiremos por ${destino} solo para responder tu solicitud${promo ? '; como lo autorizaste, también recibirás novedades' : ''}. Puedes pedir la baja cuando quieras.`);
+    if (cap.pendiente === 'persona') {
+      const der = ofrecerDerivacion(c, s2, 'Quiero hablar con una persona', acciones);
+      return res([listo].concat(der.mensajes), acciones, reg('Datos con permiso del comprador', 'Resumen para Ventas antes de pasar el caso', 'persona'));
+    }
+    if (cap.pendiente === 'contacto') {
+      const pv = responderConsentimiento(c, s2, canal, 'si', acciones);
+      return res([listo].concat(pv.mensajes), acciones, pv.registro || reg('Permiso del comprador', 'Vista previa simulada', 'persona'));
+    }
+    listo.chips = [chip('propuesta', 'Ver mi propuesta'), chip('persona', 'Hablar con una persona'), chip('ayuda', 'Hacer otra consulta')];
+    return res([listo], acciones, reg('Datos con permiso del comprador', 'Lead creado en el CRM', 'persona'));
+  }
+  // Baja: sin envíos y sin permiso de contacto. Si el lead existe, deja de contar como identificado (el CRM no lo marca MQL).
+  function bajaCliente(c, s, acciones) {
+    fijarConsentimiento(c.cuentaId, 'todos', false);
+    guardarCaptura(c.cuentaId, null);
+    if (puedeCapturar(c) && s.lead && String(s.lead.id) === String(c.cuentaId)) {
+      seguro(() => M4().update((st) => { if (st.lead) { st.lead.consent = false; st.lead.marketingConsent = false; } }));
+    }
+    acciones.push({ tipo: 'consentimiento', canal: 'todos', valor: false });
+    registrar({ rol: 'comprador', accion: 'baja', datoUsado: 'Petición de la persona', sugerencia: 'Respetar la baja: sin envíos ni permiso de contacto', nivel: 'persona', decidio: 'comprador' });
+    return res([msg('Listo. No te enviaremos mensajes por WhatsApp ni por correo. Puedes seguir usando este chat cuando quieras.', [chip('ayuda', 'Ver qué más puedo hacer')])], acciones, reg('Petición de la persona', 'Respetar la baja', 'persona'));
+  }
+  // La cotización que ve el comprador en el chat queda en el estado: el CRM la muestra como «Lo que cotizó».
+  function guardarCotizacionChat() {
+    const m = M4();
+    if (!m) return;
+    const cot = cotizacionCliente(estadoProto());
+    if (!cot.machine) return;
+    seguro(() => m.update((st) => {
+      if (!st.quote || !st.quote.machine) st.quote = Object.assign({}, st.quote || {}, { machine: cot.machine, cups: cot.cups, mode: 'comodato', days: 26, services: cot.services || [], origen: 'chat' });
+    }));
   }
 
   // ---------- CRM: el agente como forma de trabajo ----------
@@ -887,6 +1166,9 @@
       const hit = fuentes.find((f) => f.id.toLowerCase() === idMatch[1]);
       if (hit) return [hit];
     }
+    // Nombre completo escrito en la pregunta («Ana Pérez»): gana sobre otro lead que solo comparte el apellido.
+    const completo = fuentes.find((f) => f.nombre && limpio(f.nombre).split(' ').length >= 2 && t.includes(limpio(f.nombre)));
+    if (completo) return [completo];
     for (const f of fuentes) {
       const pal = palabras(`${f.nombre} ${f.empresa}`).filter((w) => w.length >= 4 && !PALABRAS_GENERICAS.includes(w));
       const hits = pal.filter((w) => tokens.some((x) => nombreCoincide(x, w))).length;
@@ -926,13 +1208,23 @@
     return out;
   }
 
+  // Mismo criterio que el CRM (crm-v2 isMql y crm-agente): contacto identificado, negocio B2B, permiso de promoción e interés de 40 o más.
   function criterioMQL(lead) {
     const i = (lead.puntajes && lead.puntajes.interes) || null;
-    const cumple = i ? i.mql === true : (lead.etapa === 'MQL' || lead.etapa === 'SQL');
+    const puntaje = i ? Number(i.puntaje) || 0 : 0;
+    const b2b = lead.b2b === null || lead.b2b === undefined ? Boolean(lead.negocio) : lead.b2b === true;
+    const lista = [
+      { ok: Boolean(lead.nombre) && Boolean(lead.email || lead.telefono || lead.empresa), txt: 'contacto identificado (nombre y un dato de contacto)' },
+      { ok: b2b, txt: 'negocio B2B' },
+      { ok: lead.permisoPromo === 'yes', txt: 'permiso de promoción registrado' },
+      { ok: puntaje >= 40, txt: `interés de 40 o más (hoy ${puntaje})` },
+    ];
+    const faltan = lista.filter((c) => !c.ok).map((c) => c.txt);
+    const cumple = faltan.length === 0;
     const texto = cumple
-      ? `Sí cumple para MQL: interés ${i ? i.puntaje : '—'}/100 y la zona tiene ejecutiva asignada.`
-      : `Todavía no cumple para MQL: el interés es ${i ? i.puntaje : '—'}/100. Falta más actividad antes de pasarlo a Ventas.`;
-    return { cumple, texto, porque: i ? i.porque : null };
+      ? `Sí cumple para MQL: contacto identificado, negocio B2B, permiso de promoción e interés de ${puntaje}/100.`
+      : `Todavía no cumple para MQL. Falta: ${faltan.join('; ')}.`;
+    return { cumple, texto, porque: i ? i.porque : null, lista, faltan };
   }
 
   function mensajeBorrador(lead) {
