@@ -19,6 +19,10 @@ Usa un código por persona y los datos ficticios del kit. Antes de empezar, lee 
 | Ventas · Hoy | «Abre una cuenta que requiera atención y prepara una recomendación». | Cuenta los clics hasta encontrar «Recomendar» y comprueba qué quedó guardado. |
 | Marketing · Hoy | «Prepara un borrador para oficinas y revisa qué dice antes de confirmarlo». | Encuentra el borrador, reconoce el público y puede revisarlo antes de confirmar. |
 | Jefatura · Hoy | «Encuentra un referido por aprobar y revisa qué falta para decidir». | Encuentra la decisión, distingue un permiso pendiente y sabe dónde pedir datos. |
+| C04 y C09 · Duda y pedido con el agente | «Pregúntale al asistente de Marley qué incluye el comodato. Después, en tu portal, pídele que repita tu último pedido.» | Encuentra el botón de ayuda, entiende la respuesta, confirma la repetición y ve que quedó como solicitud, sin cobro. |
+| Marketing · Hoy, con el agente | «Pregúntale al agente qué cotizó el lead, revisa lo que te muestra y pásalo a Ventas.» | Encuentra la barra «Pídele al agente», reconoce la cotización y los puntajes con su porqué, entiende si el lead cumple MQL, aprueba el mensaje antes de enviarlo y ve el aviso que queda en Ventas. |
+
+En estas dos tareas nuevas, el asistente responde solo con datos del prototipo. Para Marketing usa el lead **Fernanda Rojas**: en la muestra cumple MQL. Elena Fuentes, la compradora de la demostración, no cumple MQL, así que el agente no la pasa a Ventas. Si el agente dice que no hay pedido para repetir, o no pasa un lead que sí cumple, anótalo tal cual: es un hallazgo de la prueba.
 
 Para cada tarea registra si la logró, si pidió ayuda, facilidad del 1 al 7 y qué hizo o dijo al dudar. Deja que explore primero y anota la ayuda que diste. Pregúntale al final qué acción esperaba encontrar.
 
