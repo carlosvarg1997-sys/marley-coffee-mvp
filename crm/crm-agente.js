@@ -106,7 +106,7 @@
     const puntaje = Number(interesDe(l)?.puntaje || 0);
     const lista = [
       { ok: Boolean(l?.name || l?.contactName) && Boolean(l?.email || l?.phone || l?.company), txt: 'Contacto identificado: nombre y un dato de contacto' },
-      { ok: Boolean(l?.business || l?.company), txt: 'Negocio B2B con rubro o empresa' },
+      { ok: l?.b2b === undefined ? Boolean(l?.business || l?.company) : l.b2b === true, txt: 'Negocio B2B (tipo de negocio del diagnóstico)' },
       { ok: permisoDe(l) === 'yes', txt: 'Permiso de promoción registrado' },
       { ok: puntaje >= 40, txt: `Interés de 40 o más (hoy ${puntaje})` }
     ];

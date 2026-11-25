@@ -316,7 +316,8 @@
   function isMql(lead) {
     const score = Number(scoreInterest(lead)?.puntaje || 0);
     const identified = Boolean(lead?.name || lead?.contactName) && Boolean(lead?.email || lead?.phone || lead?.company);
-    const b2b = Boolean(lead?.business || lead?.company);
+    // Los leads en vivo traen b2b (tipo de negocio del diagnóstico); los de muestra conservan el criterio anterior.
+    const b2b = lead?.b2b === undefined ? Boolean(lead?.business || lead?.company) : lead.b2b === true;
     return identified && b2b && permission(lead).key === 'yes' && score >= 40;
   }
   function leadsReady() { return leads().filter(lead => isMql(lead) && !['aceptado','sql'].includes(progressFor(lead).estado)); }

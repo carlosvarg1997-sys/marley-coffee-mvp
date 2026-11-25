@@ -7238,10 +7238,19 @@ window.M4R = (() => {
   const ACTIVE = (id, role) => (id === 'R04' ? (role === 'marketing' ? 'R12' : 'R03') : id);
 
   // ---------- Datos combinados (demo + recorrido en vivo) ----------
+  // MQL en el CRM (mismo criterio que crm-v2 isMql): contacto identificado, negocio B2B, permiso de promoción e interés de 40 o más (R6P).
+  function mqlEnCrm(s) {
+    const L = s.lead || {};
+    const R6 = window.R6P;
+    const puntaje = R6 && typeof R6.interes === 'function' ? Number(R6.interes(s).puntaje || 0) : 0;
+    return Boolean(L.name && (L.email || L.phone || L.company)) && M.B2B_SEGMENTS.includes(s.answers.negocio) && L.marketingConsent === true && puntaje >= 40;
+  }
   function liveLead(s = M.get()) {
     if (!s.lead) return null;
     const creator = s.lead.intent === 'creator-partnership';
-    return { id: s.lead.id, name: s.lead.name || 'Contacto sin nombre', company: creator ? 'Solicitud de alianza · sin datos de empresa' : (s.lead.company || (s.answers.negocio ? s.answers.negocio + ' (recorrido en vivo)' : 'Recorrido en vivo')), business: creator ? 'Alianzas con creadores' : (s.answers.negocio || 'Por definir'), comuna: s.answers.comuna || 'Sin comuna', score: creator ? 0 : M.score(s), points: creator ? 0 : M.score(s), stage: creator ? 'Lead' : M.stage(s), channel: s.lead.channel || '', source: s.lead.source, attribution: s.lead.attribution || null, landing: s.lead.landing || null, referrerAccountId: s.lead.referrerAccountId || '', referralCode: s.lead.referralCode || '', intent: s.lead.intent || '', creatorProfile: s.lead.creatorProfile || '', email: s.lead.email || '', consent: s.lead.consent, marketingConsent: s.lead.marketingConsent, at: s.lead.createdAt, live: true };
+    return { id: s.lead.id, name: s.lead.name || 'Contacto sin nombre', company: creator ? 'Solicitud de alianza · sin datos de empresa' : (s.lead.company || (s.answers.negocio ? s.answers.negocio + ' (recorrido en vivo)' : 'Recorrido en vivo')), business: creator ? 'Alianzas con creadores' : (s.answers.negocio || 'Por definir'), comuna: s.answers.comuna || 'Sin comuna', score: creator ? 0 : M.score(s), points: creator ? 0 : M.score(s), stage: creator ? 'Lead' : (M.stage(s) !== 'SQL' && mqlEnCrm(s) ? 'MQL' : M.stage(s)), channel: s.lead.channel || '', source: s.lead.source, attribution: s.lead.attribution || null, landing: s.lead.landing || null, referrerAccountId: s.lead.referrerAccountId || '', referralCode: s.lead.referralCode || '', intent: s.lead.intent || '', creatorProfile: s.lead.creatorProfile || '', email: s.lead.email || '', consent: s.lead.consent, marketingConsent: s.lead.marketingConsent, at: s.lead.createdAt, live: true,
+      // Con estos datos R6P.interes da el mismo puntaje en la lista del CRM que en el estado del portal (antes la lista daba 25 y el portal 80).
+      b2b: M.B2B_SEGMENTS.includes(s.answers.negocio), events: s.events || [], answers: s.answers || {}, lead: s.lead, diag: s.diag || {}, quote: s.quote || null, proposal: s.proposal || null, call: s.call || null, consultation: s.consultation || null, lmi: s.lmi || [] };
   }
   const NOWREF = () => (M.STATIC ? D.REF : Date.now());
   const leads = (s = M.get()) => { const l = liveLead(s); const referrals = (s.referralLeads || []).map((x) => ({ ...x, live: false, referralLead: true })); return [...(l ? [l] : []), ...referrals, ...D.PROSPECTS.map((p) => ({ ...p, at: NOWREF() - p.agoMin * 60000 }))]; };
