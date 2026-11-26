@@ -540,18 +540,22 @@
     const shell = raiz.querySelector('.crm2-shell');
     const contenido = raiz.querySelector('.crm2-content');
     const existente = document.getElementById('crm-tablero');
+    const bloque = existente?.closest('details.crm2-tablero-fold') || existente;
     const ruta = (location.hash || '').replace(/^#/, '').split('?')[0];
     const rolPantalla = shell ? (shell.className.match(/crm2-role-(ventas|marketing|jefatura)/) || [])[1] : null;
     const rol = rolPantalla && RUTA_ROL[ruta] === rolPantalla && !raiz.hidden ? rolPantalla : null;
     if (!rol || !contenido) {
-      if (existente) existente.remove();
+      if (bloque) bloque.remove();
       return;
     }
     if (existente && existente.dataset.rol === rol && existente.dataset.ruta === ruta
-      && existente.parentElement === contenido) return;
-    if (existente) existente.remove();
+      && bloque.parentElement === contenido) return;
+    if (bloque) bloque.remove();
     // El trabajo va primero: el tablero queda después de la cola o lista de la pantalla y antes del cierre con la acción principal.
-    const html = construir(rol, ruta);
+    const tablero = construir(rol, ruta);
+    const html = ruta === 'R01' || ruta === 'R11'
+      ? '<details class="crm2-fold crm2-tablero-fold"><summary>Metas e indicadores</summary>' + tablero + '</details>'
+      : tablero;
     const cierre = contenido.querySelector(':scope > .crm2-cierre');
     if (cierre) cierre.insertAdjacentHTML('beforebegin', html);
     else contenido.insertAdjacentHTML('beforeend', html);

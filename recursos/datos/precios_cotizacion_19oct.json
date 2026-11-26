@@ -10,7 +10,8 @@
       "t": "Café en grano orgánico",
       "d": "8 × 907 g",
       "precio": 447920,
-      "foto": "recursos/productos/catalog/grano.webp"
+      "foto": "https://coffeemarleycl.vtexassets.com/arquivos/ids/155734-600-750/CC-CA0103-0005_1.png.png",
+      "foto_nota": "Foto de referencia del café de 227 g. El pack cotiza el formato de 907 g."
     },
     {
       "k": "leche",
@@ -38,21 +39,21 @@
       "t": "Vaso 6,5 + tapa",
       "d": "500 de cada uno",
       "precio": 67000,
-      "foto": "recursos/productos/catalog/consumibles.webp"
+      "foto": "recursos/productos/vaso-marley-kraft-maquina.webp"
     },
     {
       "k": "vaso9",
       "t": "Vaso 9 + tapa",
       "d": "500 de cada uno",
       "precio": 94000,
-      "foto": "recursos/productos/catalog/consumibles.webp"
+      "foto": "recursos/productos/vaso-marley-kraft-maquina.webp"
     },
     {
       "k": "vaso14",
       "t": "Vaso 14 + tapa",
       "d": "500 de cada uno",
       "precio": 107500,
-      "foto": "recursos/productos/catalog/consumibles.webp"
+      "foto": "recursos/productos/vaso-marley-kraft-maquina.webp"
     },
     {
       "k": "azucar",

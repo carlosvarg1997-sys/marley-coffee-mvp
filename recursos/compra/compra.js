@@ -48,7 +48,7 @@
   function pack(s) {
     var c = cot(s); if (!c) return null;
     var cant = {}; c.items.forEach(function (it) { cant[it.id] = it.qty; });
-    var lineas = c.lineas.map(function (l) { return { k: l.k, id: l.id, t: l.t, d: l.d, foto: l.foto, precio: l.precio, qty: cant[l.id] || 0 }; });
+    var lineas = c.lineas.map(function (l) { return { k: l.k, id: l.id, t: l.t, d: l.d, foto: l.foto, fotoNota: l.foto_nota, precio: l.precio, qty: cant[l.id] || 0 }; });
     return { lineas: lineas, enPack: lineas.filter(function (l) { return l.qty > 0; }), total: totalDe(s), kit: c.kit, filtro: c.filtro, comprador: c.comprador };
   }
   // Cambia una cantidad en el carrito legado (M9Catalog.save): el total sale de MC_TOTAL_PROPUESTA con la misma regla.
@@ -67,7 +67,7 @@
   }
   function maq(k) {
     var j = OF && OF.maquinas && OF.maquinas[k];
-    if (j) return { id: k, name: j.nombre, kind: j.tipo, line: j.linea, cupsTxt: j.tazas, format: j.formato, staff: j.atencion, photo: j.foto };
+    if (j) return { id: k, name: j.nombre, kind: j.tipo, line: j.linea, cupsTxt: j.tazas, format: j.formato, staff: j.atencion, photo: 'recursos/maquinas/' + k + '_foto.webp' };
     var m = (D.MACHINES || {})[k] || {};
     return { id: k, name: m.name || 'Bar', kind: m.kind || '', line: m.line || '', cupsTxt: m.cupsTxt || '', format: m.format || '', staff: m.staff || '', photo: m.photo || m.img || 'recursos/maquinas/bar.webp' };
   }
@@ -108,17 +108,17 @@
 
   /* ---------- HTML ---------- */
   function cabecera(eyebrow, titulo, lead, id) {
-    return '<p class="cmp-eyebrow">' + esc(eyebrow) + '</p><h1 id="' + (id || 'cmp-t') + '" data-vida="titulo">' + esc(titulo) + '</h1>' + (lead ? '<p class="cmp-lead">' + lead + '</p>' : '');
+    return '<p class="cmp-eyebrow">' + esc(eyebrow) + '</p><h1 id="' + (id || 'cmp-t') + '" data-vida="titulo" tabindex="-1">' + esc(titulo) + '</h1>' + (lead ? '<p class="cmp-lead">' + lead + '</p>' : '');
   }
   function miniaturas(p) {
     return p.enPack.slice(0, 8).map(function (l) {
-      return '<img src="' + esc(l.foto) + '" alt="' + esc(l.t) + '" width="44" height="44" loading="lazy" onerror="this.onerror=null;this.src=\'' + RESPALDO + '\'">';
+      return '<img src="' + esc(l.foto) + '" alt="' + esc(l.t) + '" width="44" height="44" loading="lazy" data-zoom data-zoom-grupo="miniaturas-pack" onerror="this.onerror=null;this.src=\'' + RESPALDO + '\'">';
     }).join('');
   }
   function detalle(p) {
     var cards = p.lineas.map(function (l) {
-      return '<article class="cmp-card"><img src="' + esc(l.foto) + '" alt="' + esc(l.t) + '" loading="lazy" data-zoom data-zoom-grupo="productos" onerror="this.onerror=null;this.src=\'' + RESPALDO + '\'">' +
-        '<div><h3>' + esc(l.t) + '</h3><p>' + esc(l.d || 'Formato a confirmar') + '</p><p class="cmp-precio">' + clp(l.precio) + ' <small>referencial, sin IVA</small></p>' +
+      return '<article class="cmp-card mc-card"><img src="' + esc(l.foto) + '" alt="' + esc(l.t) + '" width="600" height="750" loading="lazy" data-zoom data-zoom-grupo="productos" onerror="this.onerror=null;this.src=\'' + RESPALDO + '\'">' +
+        '<div><h3>' + esc(l.t) + '</h3><p>' + esc(l.d || 'Formato a confirmar') + '</p>' + (l.fotoNota ? '<p class="cmp-nota">' + esc(l.fotoNota) + '</p>' : '') + '<p class="mc-price"><span class="mc-price-label">Precio por formato</span><strong class="mc-price-value">' + clp(l.precio) + '</strong><small>+ IVA · referencial</small></p>' +
         '<p class="cmp-sub">' + (l.qty > 0 ? 'En tu pack: ' + clp(l.precio * l.qty) : 'No está en tu pack') + '</p>' +
         '<div class="cmp-qty"><button type="button" class="cmp-step" data-pack-cant="' + esc(l.id) + ':-1" aria-label="Quitar uno de ' + esc(l.t) + '">−</button>' +
         '<input type="number" inputmode="numeric" min="0" max="999" value="' + l.qty + '" data-pack-cant-input="' + esc(l.id) + '" aria-label="Cantidad de ' + esc(l.t) + '">' +
@@ -127,7 +127,7 @@
     return '<section id="pack-productos" class="cmp-detalle" aria-label="Productos del pack"><p class="cmp-hint">Desliza para ver cada producto. Cambia una cantidad y el total se recalcula.</p>' +
       '<div class="cmp-deck" tabindex="0" role="region" aria-label="Lista deslizable de productos">' + cards + '</div>' +
       '<p class="cmp-fijos">Kit de instalación: ' + clp(p.kit) + ' · Filtro: ' + clp(p.filtro) + ' <small>referenciales, sin IVA</small></p>' +
-      '<p class="cmp-total-bar" aria-live="polite">Total neto referencial: <b data-pack-total="' + p.total + '" data-vida="cuenta" data-valor="' + p.total + '">' + clp(p.total) + '</b> + IVA</p>' +
+      '<p class="cmp-total-bar mc-price" aria-live="polite"><span class="mc-price-label">Total neto referencial</span><b class="mc-price-value" data-pack-total="' + p.total + '" data-vida="cuenta" data-valor="' + p.total + '">' + clp(p.total) + '</b><small>+ IVA · referencial</small></p>' +
       '<p class="cmp-error" role="status">' + esc(ui.error) + '</p>' +
       '<button type="button" class="cmp-link" data-pack-accion="cerrar-productos">Ocultar productos</button></section>';
   }
@@ -139,21 +139,21 @@
       '<label><span>Celular (opcional)</span><input id="m4FPhone" name="phone" type="tel" inputmode="numeric" placeholder="+56 9"></label>' +
       '<label class="cmp-check"><input type="checkbox" name="consent"><span>Autorizo que Marley Coffee use estos datos para responder esta solicitud.</span></label>' +
       '<p class="cmp-error" role="status">' + esc(ui.error) + '</p>' +
-      '<button type="submit" class="m5-btn r3-main" data-pack-accion="confirmar-contacto" data-evt="pack-aceptar-con-datos">Aceptar mi pack</button></form>';
+      '<button type="submit" class="m5-btn mc-btn mc-btn--main" data-pack-accion="confirmar-contacto" data-evt="pack-aceptar-con-datos">Aceptar mi pack</button></form>';
   }
   function cruceHTML() {
     var mug = (D.PRODUCTS || {}).mug || { name: 'Taza mug negro Marley Coffee', img: 'recursos/productos/taza-mug-negro.webp' };
     return '<section id="cross-sell" class="cmp-cruce" aria-labelledby="cmp-cruce-t"><p class="cmp-eyebrow">Pack aceptado</p><h2 id="cmp-cruce-t">¿Sumas un complemento a tu pack?</h2>' +
-      '<div class="cmp-cruce-card"><img src="' + esc(mug.img) + '" alt="' + esc(mug.name) + '" loading="lazy" data-zoom data-zoom-grupo="sugerencia">' +
+      '<div class="cmp-cruce-card mc-card"><img src="' + 'https://coffeemarleycl.vtexassets.com/arquivos/ids/156020-600-750/TazonMug-NegroDorado-Frontal.jpg' + '" alt="' + esc(mug.name) + '" width="600" height="750" loading="lazy" data-zoom data-zoom-grupo="sugerencia">' +
       '<div><b>' + esc(mug.name) + '</b><p>Para tus clientes en cada taza. Su precio lo confirma tu ejecutivo y no suma al total.</p><p class="cmp-precio">Precio con tu ejecutivo</p></div></div>' +
-      '<div class="cmp-acciones"><button type="button" class="m5-btn r3-main" data-cross="agregar" data-evt="cruce-agregar">Agregar</button>' +
-      '<button type="button" class="m5-btn m5-btn--ghost" data-cross="no-gracias" data-evt="cruce-no-gracias">No, gracias</button></div></section>';
+      '<div class="cmp-acciones"><button type="button" class="m5-btn mc-btn mc-btn--main" data-cross="agregar" data-evt="cruce-agregar">Agregar</button>' +
+      '<button type="button" class="m5-btn mc-btn mc-btn--sec" data-cross="no-gracias" data-evt="cruce-no-gracias">No, gracias</button></div></section>';
   }
   function botonAceptar() {
-    return '<button type="button" class="m5-btn r3-main" data-pack-accion="aceptar" data-cierra-tarea="T2" data-cta-principal="aceptar-pack" data-evt="pack-aceptar">Aceptar mi pack</button>';
+    return '<button type="button" class="m5-btn mc-btn mc-btn--main" data-pack-accion="aceptar" data-cierra-tarea="T2" data-cta-principal="aceptar-pack" data-evt="pack-aceptar">Aceptar mi pack</button>';
   }
   function accionesPack() {
-    return '<div class="cmp-acciones"><button type="button" class="m5-btn" data-pack-accion="ver-productos" data-evt="pack-ver-productos" aria-controls="pack-productos" aria-expanded="' + ui.verProductos + '">' + (ui.verProductos ? 'Ocultar productos' : 'Ver mis productos') + '</button>' + botonAceptar() + '</div>';
+    return '<div class="cmp-acciones"><button type="button" class="m5-btn mc-btn mc-btn--sec" data-pack-accion="ver-productos" data-evt="pack-ver-productos" aria-controls="pack-productos" aria-expanded="' + ui.verProductos + '">' + (ui.verProductos ? 'Ocultar productos' : 'Ver mis productos') + '</button>' + botonAceptar() + '</div>';
   }
   function pantallaC05(s, p) {
     if (s.compra && s.compra.paso === 'cruce') return '<section class="cmp-sec"><div class="cmp-wrap">' + cruceHTML() + '</div></section>';
@@ -165,34 +165,34 @@
     var extra = s.compra && s.compra.extra ? '<p class="cmp-ok">Sumaste la taza de la marca a tu pack: su precio lo confirma tu ejecutivo.</p>' : '';
     return '<section class="cmp-sec" aria-labelledby="cmp-pack-t"><div class="cmp-wrap">' +
       cabecera('Tu pack', titulo, '', 'cmp-pack-t') + saludo +
-      '<div class="cmp-maquina"><img src="' + esc(mq.photo) + '" alt="' + esc(mq.name) + '" loading="lazy" data-zoom data-zoom-grupo="maquina"><div><b>' + esc(mq.name) + '</b><span>' + esc(mq.cupsTxt) + '</span><small>' + esc(mq.staff) + '</small><p class="cmp-motivo">' + esc(motivo) + '</p></div></div>' +
+      '<div class="cmp-maquina"><img src="' + esc(mq.photo) + '" alt="' + esc(mq.name) + '" width="160" height="140" loading="lazy" data-zoom data-zoom-grupo="maquina"><div><b>' + esc(mq.name) + '</b><span>' + esc(mq.cupsTxt) + '</span><small>' + esc(mq.staff) + '</small><p class="cmp-motivo">' + esc(motivo) + '</p></div></div>' +
       '<div id="pack-resumen"><div class="cmp-linea"><div class="cmp-minis">' + miniaturas(p) + '</div><p>' + p.enPack.length + ' productos, más el kit de instalación y el filtro.' + (com ? ' Elegidos para ' + esc(etiq) + '.' : '') + '</p></div>' +
-      '<div class="cmp-total premium-quote-total"><span>Total neto referencial</span><strong data-pack-total="' + p.total + '" data-vida="cuenta" data-valor="' + p.total + '">' + clp(p.total) + '</strong><span>+ IVA</span></div>' +
+      '<div class="cmp-total premium-quote-total mc-price"><span class="mc-price-label">Total neto referencial</span><strong class="mc-price-value" data-pack-total="' + p.total + '" data-vida="cuenta" data-valor="' + p.total + '">' + clp(p.total) + '</strong><small>+ IVA · referencial</small></div>' +
       '<p class="cmp-nota">Precios netos referenciales, de la cotización del 19-oct-2026. Modelo, mínimo mensual y plazo de entrega: los confirma el equipo.</p>' +
       extra + accionesPack() + '</div>' + (ui.verProductos ? detalle(p) : '<div id="pack-productos" hidden></div>') + (ui.contacto ? contactoHTML(s) : '') + ejemplo +
-      '<p class="cmp-pie"><button type="button" class="cmp-link" data-pack-accion="cambiar-maquina" data-evt="pack-cambiar-maquina">Cambiar máquina</button> · <button type="button" class="cmp-link" data-pack-accion="cambiar-respuestas" data-evt="pack-cambiar-respuestas">Cambiar respuestas</button> · <button type="button" class="cmp-link" data-pack-accion="guardar-despues" data-evt="guardar-propuesta">Guardar y seguir después</button> · <a class="cmp-link" href="' + esc(guiaHref(s)) + '" data-evt="lead-magnet-guia-maquina">Guía para elegir máquina</a> · <button type="button" class="cmp-link" data-m7-open="ayuda" data-evt="pack-abrir-ayuda">Te ayudamos a decidir</button></p>' +
+      '<section class="cmp-cambios mc-card" aria-label="Cambios a tu pack"><details><summary>¿Necesitas cambiar algo?</summary><div class="cmp-cambios-lista"><button type="button" class="cmp-link" data-pack-accion="cambiar-maquina" data-evt="pack-cambiar-maquina">Cambiar máquina</button><button type="button" class="cmp-link" data-pack-accion="cambiar-respuestas" data-evt="pack-cambiar-respuestas">Cambiar respuestas</button><button type="button" class="cmp-link" data-pack-accion="guardar-despues" data-evt="guardar-propuesta">Guardar y seguir después</button><details><summary>Guías y ayuda</summary><a class="cmp-link" href="' + esc(guiaHref(s)) + '" data-evt="lead-magnet-guia-maquina">Guía para elegir máquina</a><button type="button" class="cmp-link" data-m7-open="ayuda" data-evt="pack-abrir-ayuda">Te ayudamos a decidir</button></details></div></details></section>' +
       '<div class="cmp-cierre"><div class="cmp-acciones">' + botonAceptar() + '</div></div>' +
       '</div></section>';
   }
   function selectorHTML(s) {
     var cartas = ['bar', 'pods', 'cafe_al_paso', 'oficina'].map(function (k) {
       var m = maq(k);
-      return '<button type="button" class="cmp-maq" data-maquina-id="' + k + '" data-evt="maquina-elegida"><img src="' + esc(m.photo) + '" alt="' + esc(m.name) + '" loading="lazy" data-zoom data-zoom-grupo="maquinas">' +
-        '<span class="cmp-maq-txt"><b>' + esc(m.name) + '</b><span>' + esc(m.kind) + '</span><small>' + esc(m.cupsTxt) + ' · ' + esc(m.format) + ' · ' + esc(m.staff) + '</small><em>Elegir esta máquina</em></span></button>';
+      return '<article class="cmp-maq mc-card"><img src="' + esc(m.photo) + '" alt="' + esc(m.name) + '" width="160" height="140" loading="lazy" data-zoom data-zoom-grupo="maquinas">' +
+        '<div class="cmp-maq-txt"><b>' + esc(m.name) + '</b><span>' + esc(m.kind) + '</span><small>' + esc(m.cupsTxt) + ' · ' + esc(m.format) + ' · ' + esc(m.staff) + '</small><button type="button" class="mc-btn mc-btn--sec" data-maquina-id="' + k + '" data-evt="maquina-elegida">Elegir ' + esc(m.name) + '</button></div></article>';
     }).join('');
     return '<section class="cmp-sec cmp-sel"><div class="cmp-wrap">' + cabecera('Ya sabes lo que quieres', 'Elige tu máquina', 'Cada máquina rinde distinto según sus funciones. Elige la que ya conoces y saltamos las preguntas.', 'cmp-sel-t') +
       '<div class="cmp-maquinas">' + cartas + '</div><p class="cmp-pie"><button type="button" class="cmp-link" data-solucion-accion="volver-preguntas">Volver a las preguntas</button> · <a class="cmp-link" href="' + esc(guiaHref(s)) + '" data-evt="lead-magnet-guia-maquina">Guía para elegir máquina</a></p></div></section>';
   }
   function bloqueSalida() {
-    return '<div class="cmp-salida"><button type="button" class="cmp-link-btn" data-solucion-accion="ya-se-maquina" data-evt="ya-se-maquina">Ya sé qué máquina quiero</button><span>Elígela y saltamos las preguntas.</span></div>';
+    return '<div class="cmp-salida"><button type="button" class="mc-btn mc-btn--sec" data-solucion-accion="ya-se-maquina" data-evt="ya-se-maquina">Ya sé qué máquina quiero</button><span>Elígela y saltamos las preguntas.</span></div>';
   }
   function pantallaC06(s, p) {
     var mq = maquinaDe(s);
     var extra = s.compra && s.compra.extra ? '<p class="cmp-nota">Taza mug negro Marley Coffee: precio con tu ejecutivo. No suma al total.</p>' : '';
     return '<section class="cmp-sec cmp-confirm"><div class="cmp-wrap">' +
       cabecera('Listo', 'Tu pack quedó confirmado', 'Guardamos tu solicitud. El equipo confirma precio, disponibilidad e instalación antes de formalizar. La confirmación de esta prueba es <mark data-vida="clave">simulada</mark>.', 'cmp-c06-t') +
-      '<div class="cmp-resumen-card"><b>' + esc(mq.m.name) + '</b> en comodato · ' + p.enPack.length + ' productos · Total neto referencial ' + clp(p.total) + ' + IVA</div>' + extra +
-      '<div class="cmp-acciones"><a class="m5-btn r3-main" href="#C09" data-go="C09" data-cierra-tarea="T3" data-cta-principal="ir-portal" data-evt="ir-a-mi-portal">Ir a mi portal</a></div>' +
+      '<div class="cmp-resumen-card mc-card"><p><b>' + esc(mq.m.name) + '</b> en comodato · ' + p.enPack.length + ' productos</p><p class="mc-price"><span class="mc-price-label">Total neto referencial</span><strong class="mc-price-value">' + clp(p.total) + '</strong><small>+ IVA · referencial</small></p></div>' + extra +
+      '<div class="cmp-acciones"><a class="m5-btn mc-btn mc-btn--main" href="#C09" data-go="C09" data-cierra-tarea="T3" data-cta-principal="ir-portal" data-evt="ir-a-mi-portal">Ir a mi portal</a></div>' +
       '</div></section>';
   }
 
@@ -208,6 +208,7 @@
   }
   envolver('C04', function (orig) {
     var s = M.get();
+    if (C.ui.machineShortcut) { delete C.ui.machineShortcut; ui.selector = true; }
     if (ui.selector) return selectorHTML(s);
     if (s.diag && s.diag.done && !ui.editando) { setTimeout(function () { ir('C05'); }, 0); return orig(); }
     var html = orig();
@@ -215,7 +216,7 @@
     html = html.replace(/<h1 id="r4-titulo">[^<]*<\/h1>/, '<h1 id="r4-titulo" data-vida="titulo">' + (tramo2 ? 'Te ayudamos a elegir tu solución' : 'Cuéntanos de tu negocio') + '</h1>');
     if (tramo2) html = html.replace(/<p class="r5-c04-bajada">[^<]*<\/p>/, '<p class="r5-c04-bajada">Te ayudamos a elegir la máquina según sus funciones: café para tu volumen y tu forma de servir.</p>');
     html = html.replace(/data-r4-next>/g, 'data-r4-next data-cta-principal="continuar-c04" data-evt="cta-continuar">');
-    return tramo2 ? html.replace('<div class="r5-single-question"', bloqueSalida() + '<div class="r5-single-question"') : html;
+    return html.replace('<div class="r5-single-question"', bloqueSalida() + '<div class="r5-single-question"');
   });
   envolver('C05', function (orig) {
     var s = M.get();
@@ -248,10 +249,10 @@
   function montarPortal() {
     var host = document.getElementById('portal-host');
     if (!host || host.getAttribute('data-montado')) return;
-    cargarCss('recursos/portal/portal.css');
+    cargarCss('recursos/portal/portal.css?v=20261126');
     if (window.MarleyPortal) { renderPortal(host); return; }
     if (!portalCarga) portalCarga = new Promise(function (resolve, reject) {
-      var sc = document.createElement('script'); sc.src = 'recursos/portal/portal.js';
+      var sc = document.createElement('script'); sc.src = 'recursos/portal/portal.js?v=20261126';
       sc.onload = resolve; sc.onerror = reject; document.body.appendChild(sc);
     }).catch(function () { portalCarga = null; });
     portalCarga.then(function () { renderPortal(host); });

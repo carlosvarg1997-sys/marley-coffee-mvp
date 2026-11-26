@@ -213,7 +213,7 @@
     return `<div class="crm2-list">${rows}</div>`;
   }
   function staticRow(title, subtitle, meta, badge = '') {
-    return `<div class="crm2-row crm2-row--static"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small></span></div>`;
+    return `<div class="crm2-row crm2-row--static"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge" data-estado="${estado}">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small></span></div>`;
   }
   function referralStatus(lead) {
     if (lead?.referralPending) return 'Permiso del referido por confirmar';
@@ -374,7 +374,8 @@
     return `<section class="crm2-block ${extra}"><header class="crm2-block-head"><div class="crm2-block-title"><h2>${esc(title)}</h2>${short ? `<p>${esc(copy)}</p>` : ''}</div>${more}</header>${body}</section>`;
   }
   function row(title, subtitle, meta, action, badge = '') {
-    return `<button class="crm2-row" type="button" ${action} aria-label="${esc(title)}. ${esc(subtitle)}"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small>${icon('arrow')}</span></button>`;
+    const estado = /riesgo/i.test(badge) ? 'riesgo' : /list[oa]|cliente activo|confirmad[oa]/i.test(badge) ? 'listo' : 'revisar';
+    return `<button class="crm2-row" type="button" ${action} aria-label="${esc(title)}. ${esc(subtitle)}"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge" data-estado="${estado}">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small>${icon('arrow')}</span></button>`;
   }
   function empty(title, detail) { return `<div class="crm2-empty"><b>${esc(title)}</b><p>${esc(detail)}</p></div>`; }
   function limitedList(items, renderer, label = 'Ver todos', limit = 4) {

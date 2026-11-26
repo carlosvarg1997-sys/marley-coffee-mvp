@@ -181,6 +181,7 @@
     }
     var items = p ? soloItems(p.items) : soloItems(journey() && journey().baseItems ? journey().baseItems(s) : []);
     var subtotal = totalItems(items);
+    var totalPropuesta = window.MC_TOTAL_PROPUESTA?.(s);
     var kit = precios.kit ? Number(precios.kit.precio) : 0;
     var filtro = precios.filter ? Number(precios.filter.precio) : 0;
     return {
@@ -194,7 +195,7 @@
       subtotal: subtotal,
       kit: kit,
       filtro: filtro,
-      total: p ? (Number(p.total) || subtotal) : subtotal + kit + filtro,
+      total: p ? (Number(p.total) || subtotal) : (totalPropuesta ?? ((subtotal + kit + filtro) || null)),
       comp: comprador(s),
       d: d
     };
@@ -320,16 +321,16 @@
     var lista = x.items.map(function (it) {
       var l = linea(it.k) || {};
       return '<li class="mp-prod">' +
-        (l.foto ? '<img class="mp-thumb" src="' + esc(l.foto) + '" alt="" width="56" height="56" loading="lazy" data-zoom data-zoom-grupo="pedido-productos">' : '<span class="mp-thumb mp-thumb--vacia" aria-hidden="true"></span>') +
-        '<span class="mp-prod-txt"><b>' + esc(l.t || it.k) + '</b><small>' + (l.d ? '<span class="mp-solo-escritorio">' + esc(l.d) + ' · </span>' : '') + it.qty + (it.qty === 1 ? ' unidad' : ' unidades') + '</small></span>' +
+        (l.foto ? '<img class="mp-thumb" src="' + esc(l.foto) + '" alt="' + esc(l.t) + '" width="56" height="56" loading="lazy" data-zoom data-zoom-grupo="pedido-productos">' : '<span class="mp-thumb mp-thumb--vacia" aria-hidden="true"></span>') +
+        '<span class="mp-prod-txt"><b>' + esc(l.t || it.k) + '</b><small>' + (it.qty > 1 ? it.qty + ' formatos · ' : '') + esc(l.d || 'Formato a confirmar') + '</small>' + (l.foto_nota ? '<small>Foto de referencia de 227 g</small>' : '') + '</span>' +
         '<span class="mp-prod-precio">' + fmt((l.precio || 0) * it.qty) + '</span>' +
         '</li>';
     }).join('');
-    var total = '<div class="mp-total">' +
+    var total = x.total == null ? '' : '<div class="mp-total">' +
       '<p><span>' + (x.p ? 'Total del pedido' : 'Pack de partida') + '</span>' +
       '<b data-vida="cuenta" data-valor="' + Math.round(x.total) + '">' + fmt(x.total) + '</b></p>' +
       (x.p ? '' : '<small>Incluye kit de instalación (' + fmt(x.kit) + ') y filtro (' + fmt(x.filtro) + ').</small>') +
-      '<small>Neto, más IVA. Referencial.</small></div>';
+      '<small>+ IVA · referencial</small></div>';
     return '<div class="mp-bloque" aria-labelledby="mp-h-pediste">' +
       '<h2 id="mp-h-pediste" class="mp-h3">Lo que pediste</h2>' +
       '<p class="mp-folio-linea">Folio <b>' + esc(folioDe(x.s) || 'por asignar') + '</b> · ' + (x.p ? 'Pedido ' + x.numero : 'Pack de partida, por confirmar') + '</p>' +
@@ -420,8 +421,8 @@
   function filaRepetir(k, qty) {
     var l = linea(k) || { t: k, d: '', precio: 0, foto: '' };
     return '<div class="mp-linea">' +
-      (l.foto ? '<img class="mp-thumb" src="' + esc(l.foto) + '" alt="" width="56" height="56" loading="lazy" data-zoom data-zoom-grupo="repetir-productos">' : '') +
-      '<div class="mp-linea-txt"><b>' + esc(l.t) + '</b><small>' + fmt(l.precio) + ' por línea</small></div>' +
+      (l.foto ? '<img class="mp-thumb" src="' + esc(l.foto) + '" alt="' + esc(l.t) + '" width="56" height="56" loading="lazy" data-zoom data-zoom-grupo="repetir-productos">' : '') +
+      '<div class="mp-linea-txt"><b>' + esc(l.t) + '</b><small>' + esc(l.d || 'Formato a confirmar') + '</small><small>' + fmt(l.precio) + ' + IVA · referencial</small></div>' +
       '<label class="mp-cant"><span>Cantidad de ' + esc(l.t) + '</span><input type="number" name="q-' + esc(k) + '" min="0" max="20" step="1" inputmode="numeric" value="' + esc(qty) + '"></label>' +
       '</div>';
   }
@@ -452,7 +453,7 @@
         var descartada = (x.c.orderComplementChoices || []).some(function (ch) { return ch.productId === sg.pid && ch.status === 'dismissed'; });
         var estadoTxt = agregada ? 'Agregado a tu repetición.' : (descartada ? 'Dejado para después.' : '');
         return '<li class="mp-sug">' +
-          (sg.l.foto ? '<img class="mp-thumb" src="' + esc(sg.l.foto) + '" alt="" width="56" height="56" loading="lazy" data-zoom data-zoom-grupo="repetir-sugeridos">' : '') +
+          (sg.l.foto ? '<img class="mp-thumb" src="' + esc(sg.l.foto) + '" alt="' + esc(sg.l.t) + '" width="56" height="56" loading="lazy" data-zoom data-zoom-grupo="repetir-sugeridos">' : '') +
           '<div class="mp-sug-txt"><b>' + esc(sg.l.t) + '</b><small>' + esc(sg.porQue) + '</small><small>' + fmt(sg.l.precio) + ' por línea</small>' + (estadoTxt ? '<small role="status">' + esc(estadoTxt) + '</small>' : '') + '</div>' +
           '<div class="mp-sug-acc">' +
           '<button type="button" class="mp-btn mp-btn--sec" data-portal-sugerencia="' + esc(sg.pid) + '" data-portal-decision="agregar" aria-pressed="' + (agregada ? 'true' : 'false') + '" data-evt="repetir_sugerencia_agregar">Agregar</button>' +
@@ -469,7 +470,7 @@
       '<div class="mp-bloque"><h3 class="mp-h3">Tus productos</h3>' + (filas ? '<div class="mp-lineas">' + filas + '</div>' : '<p class="mp-fino">Agrega al menos un producto para repetir tu pedido.</p>') + '</div>' +
       '</form>' +
       sugHTML +
-      '<div class="mp-total mp-total--repetir"><p><span>Total neto (más IVA)</span><b data-mp-total-repetir>' + fmt(total) + '</b></p><small>Neto, más IVA. Referencial.</small></div>' +
+      '<div class="mp-total mp-total--repetir"><p><span>Total neto (más IVA)</span><b data-mp-total-repetir>' + fmt(total) + '</b></p><small>+ IVA · referencial</small></div>' +
       recordatorio(x) +
       '<div class="mp-espaciador" aria-hidden="true"></div><div class="mp-cierre">' + ctaRep + '</div>' +
       '</section>';
@@ -714,6 +715,9 @@
     if (st.aviso && st.aviso.tab !== id) { st.aviso = null; }
     st.foco = '#mp-tab-' + id;
     renderLocal();
+    if (window.frameElement?.classList.contains('ag-journey-frame')) {
+      dispatchEvent(new CustomEvent('marley:portal-tab', { detail: id }));
+    }
   }
   function avanzarTiempo() {
     var J = journey();

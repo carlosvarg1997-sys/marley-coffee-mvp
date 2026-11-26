@@ -243,3 +243,7 @@ h1,h2,h3 { overflow-wrap:anywhere; }
   .ag-modal-actions { grid-template-columns:minmax(0,1fr); }
   .ag-seq-grid { gap:4px; }
 }
+
+.ag-journey-frame[inert], .ag-pill[inert] { pointer-events: none; }
+
+body.autoguiada-body { font-family: Fabriga, "Segoe UI", Arial, sans-serif; font-synthesis: none; }

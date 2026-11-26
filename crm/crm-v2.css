@@ -4,7 +4,7 @@
   --crm2-muted: #5d5d5d;
   --crm2-line: #dedede;
   --crm2-soft: #f5f5f5;
-  --crm2-yellow: #f3c900;
+  --crm2-yellow: #f7be00;
   --crm2-white: #fff;
   --crm2-sidebar: 224px;
   --space-1: 8px;
@@ -27,7 +27,7 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 #crm-v2-root * { box-sizing: border-box; }
 #crm-v2-root[hidden] { display: none !important; }
 #crm-v2-root { --crm2-canvas: #f1f1f1; --crm2-role-accent: #171717; --crm2-role-strong: #171717; --crm2-role-tint: #f6f6f6; --crm2-role-line: #d9d9d7; min-height: 100dvh; background: var(--crm2-canvas); font-family: var(--crm2-font); font-size: 16px; line-height: 1.5; color: var(--crm2-ink); }
-.crm2-role-ventas { --crm2-role-accent: #914411; --crm2-role-strong: #682f0d; --crm2-role-tint: #fde1cf; --crm2-role-line: #eeb994; }
+.crm2-role-ventas { --crm2-role-accent: #171717; --crm2-role-strong: #171717; --crm2-role-tint: #f6f6f6; --crm2-role-line: #e6e6e6; }
 .crm2-role-marketing { --crm2-role-accent: #5c3d80; --crm2-role-strong: #41265f; --crm2-role-tint: #f2ecf7; --crm2-role-line: #d2c2e0; }
 .crm2-role-jefatura { --crm2-role-accent: #87344a; --crm2-role-strong: #612336; --crm2-role-tint: #f8ecef; --crm2-role-line: #e4c1ca; }
 :where(#crm-v2-root) :is(button, input, select, textarea) { font: inherit; color: inherit; }
@@ -507,4 +507,57 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 @media (max-width: 900px) {
   .crm2-nav { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
   .crm2-nav-link { font-size: 12px; }
+}
+
+/* El trabajo del rol abre con la cola. Las metas quedan a un toque. */
+#crm-v2-root .crm2-content { gap: 16px; }
+#crm-v2-root .crm2-content > * { margin-block: 0 !important; }
+#crm-v2-root .crm2-content > .crm2-block { order: -2; }
+#crm-v2-root .crm2-content > #crm-agente-chat { order: -1; }
+#crm-v2-root .crm2-content > .crm2-cierre { order: 3; }
+#crm-v2-root .crm2-block, #crm-v2-root .crm2-fold {
+  border: 1px solid var(--mc-line);
+  border-radius: 12px;
+  background: white;
+}
+#crm-v2-root .crm2-tablero-fold > #crm-tablero { margin: 0; }
+#crm-v2-root .crm2-row-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 1px solid var(--mc-line);
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: var(--mc-ink);
+}
+#crm-v2-root .crm2-row-badge[data-estado="revisar"] { box-shadow: inset 3px 0 var(--mc-yellow); }
+#crm-v2-root .crm2-row-badge[data-estado="riesgo"] { border-color: #b3261e; color: #b3261e; background: white; }
+#crm-v2-root .crm2-row-badge[data-estado="listo"] { border-color: #5e7e29; color: #4c6722; background: white; }
+#crm-v2-root .crm2-row-badge[data-estado="listo"]::before { content: "✓"; margin-right: 4px; }
+#crm-v2-root .crm2-row-badge[data-estado="riesgo"]::before { content: "!"; margin-right: 4px; }
+#crm-v2-root :is(.crm2-status--wait,.crm2-status--good,.crm2-status--blocked) { background: white; }
+#crm-v2-root .crm2-status--wait { color: var(--mc-ink); border-color: var(--mc-line); box-shadow: inset 3px 0 var(--mc-yellow); }
+#crm-v2-root .crm2-status--good { color: #4c6722; border-color: #5e7e29; }
+#crm-v2-root .crm2-status--blocked { color: #b3261e; border-color: #b3261e; }
+#crm-v2-root .crm2-page-cta .crm2-btn--primary,
+#crm-v2-root .crm2-cierre .crm2-btn--primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--mc-ink);
+  color: white;
+}
+@media (max-width: 767px) {
+  body.crm-v2-active { scroll-padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+  #crm-v2-root .crm2-main { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
+  #crm-v2-root .crm2-sidebar { padding-inline: 8px !important; }
+  #crm-v2-root .crm2-sidebar > .crm2-nav { margin-inline: 0 !important; padding-inline: 0; }
+  #crm-v2-root .crm2-nav-link { font-size: 11px; padding-inline: 2px; }
+  #crm-v2-root .crm2-nav-link > span { display: block; overflow: visible; white-space: normal; }
+  #crm-v2-root .crm2-page-cta .crm2-btn--primary,
+  #crm-v2-root .crm2-cierre .crm2-btn--primary { width: 100%; min-height: 52px; }
+  #crm-v2-root .crm2-row { min-height: 64px; }
 }

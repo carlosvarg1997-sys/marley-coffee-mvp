@@ -40,7 +40,16 @@
   ];
   // Etapas del recorrido (12-nov): las preguntas van por lo que se está haciendo, no por pantalla.
   const STAGE_NAMES = { T1:'Buscar y considerar', T2:'Cotizar', T3:'Aceptar', T4:'Seguimiento', T5:'Recomprar', T6:'Ayuda y recomendación' };
-  const AG_VERSION = '2026-11-25-cta-cierra';
+  const AG_VERSION = '2026-11-26-compuerta';
+  const CLIENT_STAGE = { C01:'E0', C02:'E1', C08:'E1', C11:'E2', C10:'E2',
+    C04:'E2', C03:'E3', C05:'E4', C07:'E5', C06:'E6',
+    C12:'E7', C13:'E8', C14:'E8', C15:'E9' };
+  const PORTAL_STAGE = { pedido:'E6', repetir:'E7', ayuda:'E8', recomendar:'E9' };
+  const CRM_TASK = {
+    ventas: { R01:'C-V1', R02:'C-V1', R08:'C-V3', R10:'C-V4' },
+    marketing: { R11:'C-M1', R12:'C-M1', R06:'C-M1', R13:'C-M2', R16:'C-M4' },
+    jefatura: { R05:'C-J1', R06:'C-J1', R09:'C-J1', R07:'C-J2', R15:'C-J4' }
+  };
 
   let bank = null;
   let fichas = [];
@@ -52,6 +61,9 @@
   let evalAbierta = false;
   let pendingCta = null;
   let replayingCta = false;
+  const wiredDocuments = new WeakSet();
+  const loadedDocuments = new WeakSet();
+  let framePoll = null;
 
   const isoNow = () => new Date().toISOString();
   const parseStored = (key) => {
@@ -599,19 +611,19 @@
   // Cuestionario de la tarea: se abre al apretar el CTA que la cierra (data-cierra-tarea) o con «No encuentro cómo seguir».
   function openEvaluation(origin,el) {
     const task=state.tareas?.[state.taskIndex];
-    if(!task||state.phase!=='journey')return;
-    if(!state.evaluating) {
-      if(!task.empezo_en)startCurrentTask();
-      task.termino_en=isoNow();task.termino_ms=Date.now();
-      task.duracion_ms=Math.max(0,task.termino_ms-(Number(task.empezo_ms)||task.termino_ms));
-    }
+    if(!task||state.phase!=='journey'||state.evaluating)return;
+    if(!task.empezo_en)startCurrentTask();
+    task.termino_en=isoNow();task.termino_ms=Date.now();
+    task.duracion_ms=Math.max(0,task.termino_ms-(Number(task.empezo_ms)||task.termino_ms));
     state.evaluating=true;state.evaluando_origen=origin;
-    pendingCta=origin==='cta'?(el||null):null;
+    setFrameBlocked(true);
+    pendingCta=el||null;
     persist();
     renderEvaluation();
   }
   // «Volver a la tarea»: cierra sin avanzar y sin guardar. La tarea vuelve a estar en curso.
   function cancelEvaluation() {
+    if(state.evaluando_origen==='ruta')return;
     const task=state.tareas?.[state.taskIndex];
     if(task){task.termino_en='';task.termino_ms=0;task.duracion_ms=0;}
     state.evaluating=false;state.evaluando_origen='';pendingCta=null;
@@ -644,8 +656,15 @@
     state.evaluating=false;state.evaluando_origen='';
     closeLayer();
     const completed=state.taskIndex;
-    state.taskIndex+=1;
-    const jump=!isInternal()&&(completed===2?'jump3':completed===3?'jump30':'');
+    const destination=origen==='ruta'?Number(state.ruta_tarea_destino):completed+1;
+    state.taskIndex=Number.isInteger(destination)?Math.max(completed+1,destination):completed+1;
+    if(origen==='ruta'){
+      delete state.ruta_tarea_destino;
+      const next=state.tareas[state.taskIndex];
+      const url=routeName(state.last_iframe_url);
+      if(next&&url&&!next.pantallas.includes(url))next.pantallas.push(url);
+    }
+    const jump=origen!=='ruta'&&!isInternal()&&(completed===2?'jump3':completed===3?'jump30':'');
     if(jump) {state.phase=jump;persist();renderJourney();}
     else if(state.taskIndex>=state.tareas.length) {
       state.phase='final';state.questionIndex=0;persist();
@@ -655,6 +674,7 @@
     else {state.phase='journey';enterTask();persist();renderJourney();focusFranja();}
     // La tarea ya quedó terminada: se vuelve a disparar el clic original, marcado para no interceptarlo otra vez.
     if(origen==='cta')replayCta(replay&&replay.isConnected?replay:ctaFor(task));
+    if(origen==='ruta'&&replay?.isConnected)replayCta(replay);
   }
   function ctaFor(task) {
     try {
@@ -670,18 +690,26 @@
   }
   // Fase de captura dentro del iframe (se agrega en cada carga): solo intercepta el CTA que cierra la tarea actual.
   function onCierraClick(event) {
-    if(replayingCta||!state)return;
+    if(!state||replayingCta)return;
+    const win=event.currentTarget;
+    checkRoute(win);
     if(state.evaluating) {event.preventDefault();event.stopImmediatePropagation();return;}
     if(state.phase!=='journey')return;
     const task=state.tareas?.[state.taskIndex];
     if(!task)return;
     const target=event.target?.nodeType===1?event.target:event.target?.parentElement;
     const cta=target?.closest?.('[data-cierra-tarea]');
-    if(!cta||cta.getAttribute('data-cierra-tarea')!==task.etapa)return;
+    if(!cta)return;
+    const next=state.tareas.findIndex(item=>item.etapa===cta.dataset.cierraTarea);
+    if(next<state.taskIndex)return;
     if(cta.type==='submit'&&cta.form&&!cta.form.checkValidity())return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    openEvaluation('cta',cta);
+    if(loadedDocuments.has(win.document))onFrameClick(event,win.document);
+    if(next>state.taskIndex) {
+      state.ruta_tarea_destino=next;
+      openEvaluation('ruta',cta);
+    } else openEvaluation('cta',cta);
   }
   function renderJourney(first=false) {
     if(jumpPoll){clearInterval(jumpPoll);jumpPoll=null;} if(!state.tareas?.[state.taskIndex]){state.phase='final';state.questionIndex=0;persist();renderQuestion('final');return;}
@@ -695,6 +723,7 @@
       iframeRef=app.querySelector('.ag-journey-frame');
       iframeRef.addEventListener('marley:marco-preparado',instalarCierre);
       iframeRef.addEventListener('load',onFrameLoad);
+      watchFrame(iframeRef);
       iframeRef.src=(state.last_iframe_url&&allowedDestination(state.last_iframe_url)?.href)||destination.href;
       state.last_iframe_url=iframeRef.src;
       document.getElementById('ag-layer').addEventListener('keydown',trapFocus);
@@ -703,28 +732,87 @@
     renderCapa();
     app.setAttribute('aria-busy','false');
   }
+  function setFrameBlocked(blocked) {
+    if(iframeRef)iframeRef.inert=blocked;
+    const bar=document.getElementById('ag-pill');
+    if(bar)bar.inert=blocked;
+  }
+  function watchFrame(frame) {
+    if(framePoll)clearInterval(framePoll);
+    framePoll=setInterval(()=>{
+      if(!frame.isConnected){clearInterval(framePoll);framePoll=null;return;}
+      instalarCierre();
+      const doc=frame.contentDocument;
+      if(doc&&doc.readyState!=='loading')onFrameLoad();
+    },100);
+  }
+  function taskForRoute(win, id, tab) {
+    if(isInternal()) {
+      const role=state.rol;
+      // Las fichas y las aprobaciones comparten ruta. La vista abierta distingue la tarea.
+      const active=win.document.querySelector('[data-c2="review-approval"][aria-current="true"]');
+      const review=active?.textContent||win.document.querySelector('[data-approval]:focus-within')?.textContent||'';
+      if(role==='jefatura'&&id==='R07'&&/referido/i.test(review))return 'C-J3';
+      return CRM_TASK[role]?.[id];
+    }
+    const portalTab=tab||win.document.querySelector('#portal-tabs [aria-selected="true"]')?.dataset.portalTab||'pedido';
+    const stage=id==='C09'?PORTAL_STAGE[portalTab]:CLIENT_STAGE[id];
+    if(id==='C05'&&win.M4?.get?.()?.compra?.pendiente&&state.taskIndex===3)return 'T4';
+    return EXTERNAL_TASKS.find(task=>task.origen.includes(stage))?.id;
+  }
+  function checkRoute(win, tab) {
+    if(!win||state?.phase!=='journey'||state.evaluating)return;
+    try {
+      const url=allowedDestination(win.location.href);
+      const id=url?.hash.match(/^#([CR]\d{2})(?:$|[?&])/i)?.[1]?.toUpperCase();
+      if(!id||!/index\.html$/i.test(url.pathname))return;
+      const next=state.tareas.findIndex(task=>task.etapa===taskForRoute(win,id,tab));
+      if(next<=state.taskIndex)return;
+      state.ruta_tarea_destino=next;
+      state.last_iframe_url=url.href;
+      openEvaluation('ruta');
+    } catch (_) { /* El marco aún está cambiando de documento. */ }
+  }
   function instalarCierre() {
-    try { iframeRef?.contentWindow?.addEventListener('click',onCierraClick,true); } catch (_) { /* marco externo */ }
+    try {
+      const win=iframeRef?.contentWindow;
+      if(!win||!iframeRef.contentDocument||iframeRef.contentDocument.URL==='about:blank')return;
+      // El documento nuevo tiene su propio Window, incluso si el WindowProxy es el mismo.
+      const doc=iframeRef.contentDocument;
+      if(wiredDocuments.has(doc))return;
+      wiredDocuments.add(doc);
+      win.addEventListener('pagehide',()=>watchFrame(iframeRef),{once:true});
+      win.addEventListener('click',onCierraClick,true);
+      win.addEventListener('submit',event=>{
+        if(!state?.evaluating)return;
+        event.preventDefault();event.stopImmediatePropagation();
+      },true);
+      win.addEventListener('hashchange',()=>{
+        recordRoute('hashchange',win.location.href);
+        checkRoute(win);
+      });
+      win.addEventListener('marley:route',()=>checkRoute(win));
+      win.addEventListener('marley:portal-tab',event=>checkRoute(win,event.detail));
+      checkRoute(win);
+    } catch (_) { /* Marco externo o en tránsito. */ }
   }
   function onFrameLoad() {
     if(!iframeRef)return;
-    let win,doc;
-    try { win=iframeRef.contentWindow;doc=iframeRef.contentDocument; } catch (_) { return; }
-    if(!win||!doc)return;
-    try {
-      if(doc.head&&!doc.getElementById('ag-frame-air')) {
-        const style=doc.createElement('style');
-        style.id='ag-frame-air';
-        style.textContent='html{scroll-padding-bottom:80px!important;}body{padding-bottom:clamp(44px,7vh,80px)!important;}';
-        doc.head.appendChild(style);
-      }
-    } catch(_){}
-    const initial=win.location.href;
-    recordRoute('load',initial);
-    try { win.addEventListener('hashchange',()=>recordRoute('hashchange',win.location.href)); } catch(_){}
-    doc.addEventListener('click',onFrameClick,true);
-    // La captura en window debe ir antes de los manejadores del sitio en document.
     instalarCierre();
+    const win=iframeRef.contentWindow;
+    const doc=iframeRef.contentDocument;
+    if(!win||!doc||doc.URL==='about:blank'||doc.readyState==='loading'||loadedDocuments.has(doc))return;
+    loadedDocuments.add(doc);
+    if(framePoll){clearInterval(framePoll);framePoll=null;}
+    if(doc.head&&!doc.getElementById('ag-frame-air')) {
+      const style=doc.createElement('style');
+      style.id='ag-frame-air';
+      style.textContent='html{scroll-padding-bottom:80px!important;}body{padding-bottom:clamp(44px,7vh,80px)!important;}';
+      doc.head.appendChild(style);
+    }
+    recordRoute('load',win.location.href);
+    checkRoute(win);
+    doc.addEventListener('click',onFrameClick,true);
     observeDownloads(doc);
     startGoogleSimulation(win,doc);
   }
@@ -784,14 +872,13 @@
     scan();
     try { new MutationObserver(scan).observe(doc.body||doc.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['href','download']}); } catch(_){}
   }
-  function onFrameClick(event) {
+  function onFrameClick(event,doc=event.currentTarget) {
     if(replayingCta)return;
     const target=event.target?.nodeType===1?event.target:event.target?.parentElement;
     if(!target)return;
     // 13-nov: el texto de una casilla u opción (<label>) también es interactivo: al tocarlo se marca su control.
     // Antes esos clics se contaban como «sin respuesta» y la métrica salía inflada.
     const interactive=target.closest('a,button,input,select,textarea,summary,label,[role="button"],[role="link"],[onclick],[tabindex]:not([tabindex="-1"])');
-    const doc=event.currentTarget;
     const key=screenKey(doc);
     if(!state.clicksByScreen[key])state.clicksByScreen[key]={clics:0,interactivos:0,sin_respuesta:0};
     const screen=state.clicksByScreen[key];
@@ -946,7 +1033,8 @@
       + '<label class="ag-comment-label" for="task-comment">Comentario <span class="ag-task-progress">Opcional</span></label><textarea id="task-comment" class="ag-textarea" maxlength="500" placeholder="¿Algo te confundió o te hizo dudar? No escribas nombres ni datos de contacto."></textarea>'
       + '</div>'
       + '<div class="ag-eval-foot"><p class="ag-status" id="task-evaluation-status" role="status" aria-live="polite"></p>'
-      + '<div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="submit" id="task-save">Guardar y seguir</button><button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button></div></div>'
+      + '<div class="ag-modal-actions"><button class="ag-btn ag-btn--primary" type="submit" id="task-save">Guardar y seguir</button>'
+      + (state.evaluando_origen==='ruta'?'':'<button class="ag-btn" type="button" data-action="return-task">Volver a la tarea</button>') + '</div></div>'
       + '</form></div>';
   }
   function renderEvaluation() {
@@ -956,6 +1044,7 @@
     layer.innerHTML=evaluationMarkup(task,state.evaluando_origen==='no-encuentro');
     layer.hidden=false;
     evalAbierta=true;
+    setFrameBlocked(true);
     const form=document.getElementById('task-evaluation');
     const save=document.getElementById('task-save');
     const status=document.getElementById('task-evaluation-status');
@@ -979,6 +1068,7 @@
   }
   function closeLayer() {
     evalAbierta=false;
+    setFrameBlocked(false);
     const layer=document.getElementById('ag-layer');
     if(!layer)return;
     layer.hidden=true;
@@ -1007,7 +1097,7 @@
     if(!dialog||layer.hidden)return;
     if(event.key==='Escape'&&evalAbierta) {
       event.preventDefault();
-      if(state.evaluando_origen!=='cta')cancelEvaluation();
+      if(state.evaluando_origen==='no-encuentro')cancelEvaluation();
       return;
     }
     if(event.key!=='Tab')return;

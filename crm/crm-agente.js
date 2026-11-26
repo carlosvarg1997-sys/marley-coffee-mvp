@@ -1014,7 +1014,24 @@
     try { accionar(btn.dataset.crmAgenteAccion, btn.dataset.id || '', btn); }
     catch (err) { notaRol(`No pude completar esa acción: ${err && err.message ? err.message : 'error inesperado'}. Nada se cambió.`); }
   }
-  function quitarBarra() { if (barEl && barEl.parentNode) barEl.parentNode.removeChild(barEl); }
+  let barFold = null;
+  function quitarBarra() {
+    if (barFold?.contains(barEl)) barFold.remove();
+    else barEl?.remove();
+  }
+  function accionesParaHoy(ruta) {
+    if (ruta !== 'R01') return barEl;
+    if (!barFold) {
+      barFold = document.createElement('details');
+      barFold.id = 'crm-agente-controles';
+      barFold.className = 'crm2-fold';
+      const summary = document.createElement('summary');
+      summary.textContent = 'Acciones y registro del agente';
+      barFold.append(summary);
+    }
+    if (!barFold.contains(barEl)) barFold.append(barEl);
+    return barFold;
+  }
 
   // Monta la barra en el «Hoy» del rol (R01, R11, R05). crm-v2.js reemplaza el contenido en cada render; aquí se vuelve a poner.
   // Ficha del cliente (R04): la línea de tiempo multicanal del lead seleccionado.
@@ -1040,7 +1057,10 @@
     if (!rolHoy || !contenido || rolM4() !== rolHoy) { quitarBarra(); return; }
     construirBarra();
     if (S.rol !== rolHoy) { S.rol = rolHoy; renderSugerencias(); }
-    if (barEl.parentNode !== contenido || contenido.firstElementChild !== barEl) contenido.insertBefore(barEl, contenido.firstChild);
+    const acciones = accionesParaHoy(ruta);
+    if (acciones.parentNode !== contenido || contenido.firstElementChild !== acciones) {
+      contenido.insertBefore(acciones, contenido.firstChild);
+    }
     renderSugerencias();
     renderHilo();
     renderAvisos();
