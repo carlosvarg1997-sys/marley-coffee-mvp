@@ -379,3 +379,13 @@
 .crm-agente-lanzador-txt { display: grid; gap: 1px; min-width: 0; }
 .crm-agente-lanzador-txt b { color: var(--ag-strong); }
 .crm-agente-lanzador-txt small { color: var(--ag-muted); font-size: 13px; }
+.crm-agente-horarios {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  margin: 12px 0;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+}
+.crm-agente-horarios label { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.crm-agente-horarios input { accent-color: #2b2b2b; }

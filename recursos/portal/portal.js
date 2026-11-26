@@ -650,6 +650,7 @@
     var caso = x.c.supportCase;
     var mensajes = (x.c.supportMensajes || []).length;
     var solicitud = fichaPostventa(x.s, 'ayudas', x.p?.id);
+    var respuestaEquipo = x.s.crm2?.postventaGestion?.ayudas?.[x.c.accountId] || x.s.crm2?.postventaGestion?.ayudas?.[x.s.lead?.id];
     var rapidas = chipsRapidas('ayuda');
     var respuesta = st.textoRapida || '';
     var estadoCaso = caso ? '<div class="mp-tarjeta" role="status"><p class="mp-kicker">Tu caso</p><p><b>Caso abierto · ' + esc(caso.type) + '</b></p><p class="mp-fino">Estado: recibido. Una persona de Soporte te contactará; el estado se actualiza aquí.' + (mensajes ? ' Mensajes enviados: ' + mensajes + '.' : '') + '</p></div>' : '';
@@ -668,6 +669,7 @@
       '<label class="mp-campo"><span>Cuéntanos qué pasa</span><textarea name="detail" rows="3" minlength="3" maxlength="600" required>' + esc(f.detail || '') + '</textarea></label>' +
       '</form>' +
       estadoCaso +
+      (respuestaEquipo?.respuesta ? '<section class="mp-tarjeta"><h3>Respuesta de postventa</h3><p>' + esc(respuestaEquipo.respuesta) + '</p></section>' : '') +
       (solicitud ? '<details class="mp-tarjeta"><summary>Ver mi solicitud de postventa</summary><p>' + esc(solicitud.resumen) + '</p></details>' : '') +
       '<details class="mp-bloque mp-consultas" data-rapidas' + (respuesta ? ' open' : '') + '><summary>Ver preguntas rápidas para el asistente</summary><div class="mp-chips">' + rapidas + '</div>' +
       (respuesta ? '<p id="portal-rapida-respuesta" class="mp-respuesta" role="status">' + esc(respuesta) + '</p>' : '') + '</details>' +

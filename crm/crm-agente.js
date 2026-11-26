@@ -641,8 +641,8 @@
     const faltan = ref ? [!cl.permiso && 'permiso de promoción', !cl.b2b && 'vínculo B2B', !cl.beneficio && 'beneficio'].filter(Boolean) : [];
     const cuerpo = `${filas([['Solicitud', it.titulo], ['Tipo', it.tipo || 'Excepción'], ['Monto', it.monto ? money(it.monto) : 'Sin monto registrado'], ['Detalle', recorta(it.detalle || '', 200)]])}`;
     const accion = faltan.length
-      ? `<div class="crm-agente-acciones"><button type="button" class="crm-agente-btn" data-crm-agente-accion="confirmar-checklist" data-id="${esc(it.id)}">Confirmar permiso y beneficio (Jefatura)</button></div>`
-      : `<div class="crm-agente-acciones"><button type="button" class="crm-agente-btn crm-agente-btn--ok" data-crm-agente-accion="confirmar-aprobacion" data-id="${esc(it.id)}">Confirmar aprobación</button><button type="button" class="crm-agente-btn" data-crm-agente-accion="cancelar">Cancelar</button></div>`;
+      ? `<div class="crm-agente-acciones"><button type="button" class="crm-agente-btn" data-crm-agente-accion="confirmar-checklist" data-id="${esc(it.id)}">Confirmar permiso, vínculo y beneficio</button></div>`
+      : `<div class="crm-agente-acciones"><button type="button" class="crm-agente-btn crm-agente-btn--ok" data-crm-agente-accion="confirmar-aprobacion" data-id="${esc(it.id)}" data-cierra-tarea="${ref ? 'C-J3' : 'C-J2'}">Confirmar aprobación</button><button type="button" class="crm-agente-btn" data-crm-agente-accion="cancelar">Cancelar</button></div>`;
     const reglaTxt = ref ? (faltan.length ? `Falta: ${faltan.join(', ')}. Sin esto no se puede aprobar el referido.` : 'Permiso, vínculo B2B y beneficio verificados.') : 'Excepción comercial: se aprueba con monto y condiciones registrados.';
     return tarjeta('¿Confirmas esta aprobación?', cuerpo + accion, 'crm-agente-confirmar') +
       niveles({ regla: reglaTxt, ia: ref ? 'Orden sugerido: referidos primero por su efecto en el canal.' : 'Revisa que el monto esté dentro de lo que Jefatura aprueba.', persona: 'Jefatura confirma; el agente registra y avisa a Marketing.', registro: faltan.length ? '' : 'aprobación pedida' });
@@ -650,12 +650,17 @@
   function accionConfirmarChecklist(id) {
     const it = itemPorId(id);
     if (!it) return;
+    const cuenta = cuentasDe().find(a => String(a.id) === String(it.cuenta));
+    const beneficio = it.beneficio || cuenta?.referral;
+    if (permisoDe(cuenta || {}) !== 'yes' || !cuenta?.business || !beneficio) {
+      return notaRol('Falta registrar el permiso, el vínculo o el beneficio. Pide los datos a Marketing antes de aprobar.');
+    }
     escribirCrm((crm, s) => {
       s.jefeAprob = Array.isArray(s.jefeAprob) ? s.jefeAprob : [];
       let reg = s.jefeAprob.find(x => x.id === id);
       if (!reg) { reg = { id: it.id, leadId: it.leadId, cuenta: it.cuenta, titulo: it.titulo, tipo: it.tipo, monto: it.monto || null, motivo: it.motivo, detalle: it.detalle, estado: 'pendiente', dataTest: true, at: ahora() }; s.jefeAprob.push(reg); }
       reg.checklist = Object.assign({}, reg.checklist || {}, { permission: true, b2b: true, benefit: true });
-      reg.beneficio = reg.beneficio || (cuentasDe().find(a => String(a.id) === String(it.cuenta))?.referral) || 'Beneficio confirmado por Jefatura';
+      reg.beneficio = beneficio;
     });
     mutarAgente(st => anotar(st, S.rol, 'aprobacion:checklist', `permiso, B2B y beneficio de ${nombreItem(it)}`, 'Regla: requisitos del referido', 'persona', userDe('jefatura')));
     pushAgente(S.rol, htmlAprobacion(itemPorId(id) || it));
@@ -670,6 +675,9 @@
       if (!cl.permiso || !cl.b2b || !cl.beneficio) return pushAgente(S.rol, htmlAprobacion(it));
     }
     const nota = 'Aprobada desde el agente de Jefatura';
+    const referido = esReferido(it);
+    const destino = referido ? 'marketing' : 'ventas';
+    const nombreRol = referido ? 'Marketing' : 'Ventas';
     escribirCrm((crm, s) => {
       s.jefeAprob = Array.isArray(s.jefeAprob) ? s.jefeAprob : [];
       let reg = s.jefeAprob.find(x => x.id === id);
@@ -680,17 +688,23 @@
       if (it.leadId && s.marketingPasos?.[it.leadId]) s.marketingPasos[it.leadId].aprobacion = 'aprobada';
       crm.approvalHistory = Array.isArray(crm.approvalHistory) ? crm.approvalHistory : [];
       crm.approvalHistory.push({ id, decision: 'aprobada', note: nota, at: ahora() });
+      const quote = (crm.quotes || []).findLast(q => q.leadId === it.leadId && q.status === 'Esperando aprobación');
+      if (!referido && quote) quote.status = 'Aprobada por Jefatura';
+      if (referido) {
+        const ref = s.postventa?.referidos?.find(r => String(r.cuentaId) === String(it.cuenta));
+        if (ref) ref.estado = 'aprobado';
+      }
     });
     mutarAgente(st => {
-      avisar(st, 'marketing', `Jefatura aprobó: ${it.titulo}.`, { leadId: it.leadId || null, tipo: 'aprobacion' });
+      avisar(st, destino, `Jefatura aprobó: ${it.titulo}.`, { leadId: it.leadId || null, tipo: 'aprobacion' });
       anotar(st, S.rol, 'aprobacion:confirmar', it.titulo, 'Confirmación pedida por el agente', 'persona', userDe('jefatura'));
       // Lo que vino del recorrido sale de la lista de pendientes: su traspaso queda aprobado.
       const tr = st.traspasos.find(x => x.id === it.id) || null;
       if (tr) { tr.estado = 'aprobado'; tr.aprobadoPor = userDe('jefatura'); tr.aprobadoTs = ahora(); }
     });
     marcarEstadoFila(it.leadId || it.cuenta || id, 'aprobacion', `Aprobada hoy ${horaTexto(ahora())}`);
-    pushAgente(S.rol, tarjeta('Aprobación registrada', `${filas([['Solicitud', it.titulo], ['Estado', 'Aprobada'], ['Aviso', 'Marketing recibe el aviso']])}`, 'crm-agente-ok') +
-      niveles({ regla: esReferido(it) ? 'Permiso, B2B y beneficio confirmados antes de aprobar.' : 'Excepción registrada con su detalle.', ia: 'Aviso a Marketing redactado.', persona: `Aprobó ${userDe('jefatura')}.`, registro: 'aprobación confirmada' }));
+    pushAgente(S.rol, tarjeta('Aprobación registrada', `${filas([['Solicitud', it.titulo], ['Estado', 'Aprobada'], ['Aviso', nombreRol + ' recibe el aviso']])}`, 'crm-agente-ok') +
+      niveles({ regla: referido ? 'Permiso, B2B y beneficio confirmados antes de aprobar.' : 'Excepción registrada con su detalle.', ia: 'Aviso preparado para ' + nombreRol + '.', persona: `Aprobó ${userDe('jefatura')}.`, registro: 'aprobación confirmada' }));
   }
   function htmlPendientes() {
     const lista2 = aprobacionesPendientes();
@@ -1194,7 +1208,13 @@
   // conversaciones en espera y su toma. Solo este módulo y la barra escriben acciones del CRM; el motor interpreta.
   const PN = { hilo: [], borradores: {}, avisos: [], abierto: false, escribiendo: 0, rol: null, focoPrevio: null, ruta: null };
   let panelEl = null, pnCuerpoEl = null, pnLanzEl = null, pnContEl = null, pnHiloEl = null, pnEsperaEl = null, pnAvisoEl = null, pnSugEl = null, pnFormEl = null, pnInputEl = null, pnRegEl = null;
-  const ETIQ_TAREA = { correo: 'Correo', contactar: 'WhatsApp', visita: 'Visita (nota interna)', avisar: 'Aviso al equipo', resena: 'Invitación a reseña o referido', referido: 'Invitación a recomendar', detractor: 'Respuesta al detractor', traspaso: 'Traspaso a Ventas' };
+  const ETIQ_TAREA = { correo: 'Correo', contactar: 'Contacto', visita: 'Visita', recordatorio: 'Recordatorio de reposición', avisar: 'Aviso al equipo', resena: 'Invitación a dejar una reseña', referido: 'Invitación a recomendar', detractor: 'Respuesta al detractor', traspaso: 'Traspaso a Ventas', 'plan-marketing': 'Plan para Marketing' };
+  const TAREAS_ROL = {
+    ventas: ['contactar','correo','visita','recordatorio','avisar'],
+    marketing: ['correo','traspaso','detractor','resena','referido','avisar'],
+    jefatura: ['plan-marketing','avisar']
+  };
+  const CIERRES = { contactar:'C-V1', recordatorio:'C-V3', visita:'C-V4', traspaso:'C-M1', detractor:'C-M2', resena:'C-M3', referido:'C-M3', 'plan-marketing':'C-J1' };
   const MOTIVO_ESP = { falla: 'Falla o reclamo de la máquina', precio: 'Precio especial o crédito', persona: 'Pide hablar con una persona' };
   const pnRolActual = () => { const r = rolM4(); return ROLES.includes(r) ? r : null; };
   const pnUsuario = rol => (rol === 'ventas' ? (d4().ROLE_MENUS?.ventas?.user || 'Paula Díaz') : userDe(rol));
@@ -1234,14 +1254,16 @@
     const firma = `— ${ex.name || 'Equipo de Marley'}, ${zonaDe(ex)}`;
     if (b.tipo === 'correo') return `${saludo}te escribo de Marley Coffee Empresas. Revisamos tu propuesta de ${b.maquina} para ${i.empresa}. ${primerNombreCRM(ex.name) || 'Una persona de tu zona'} puede resolver tus dudas y ajustar lo que necesites, sin compromiso. Si no quieres recibir más mensajes, responde BAJA.\n${firma}`;
     if (b.tipo === 'contactar') return `${saludo}soy ${primerNombreCRM(ex.name) || 'del equipo'} de Marley Coffee. ¿Te acomoda que revisemos tu propuesta de ${b.maquina} para ${i.empresa}? Respondo por este mismo chat.\n${firma}`;
-    if (b.tipo === 'visita') return `Visita a ${i.empresa}: proponer ${b.horario}. Ejecutiva a cargo: ${ex.name || 'por confirmar'}, ${zonaDe(ex)}.`;
+    if (b.tipo === 'visita') return `Visita a ${i.empresa}${b.horario ? ' · ' + b.horario : ''}. A cargo de ${ex.name || 'la ejecutiva de la zona'}.`;
+    if (b.tipo === 'recordatorio') return `${saludo}¿quieres repetir tu pedido de café? En tu portal puedes revisar los productos y ajustar las cantidades antes de confirmar.`;
+    if (b.tipo === 'plan-marketing') return 'Marketing, revisemos el NPS frente a la meta 52 y los comentarios de postventa. Propongan una acción de mejora y el indicador que usarán para seguirla.';
     if (b.tipo === 'traspaso') return `Resumen para Ventas · ${i.empresa}: ${resumenDe(i.x)} Próximo paso sugerido: contactar y preparar la propuesta.`;
-    if (b.tipo === 'resena') return `${saludo}gracias por tu respuesta sobre el café de ${i.empresa}. Si te sirvió, ¿nos dejarías una reseña en Google? También puedes recomendar a otro negocio que necesite café, con este mismo mensaje. Es sin incentivos y sin compromiso.\n${firma}`;
+    if (b.tipo === 'resena') return `${saludo}¿quieres contar cómo te fue con el café de ${i.empresa}? En tu portal puedes ver cómo dejar una reseña en Google.\n${firma}`;
     if (b.tipo === 'referido') return `${saludo}¿conoces otro negocio al que le sirva el servicio de café de Marley? Te comparto el enlace para recomendarlo: el negocio decide si quiere cotizar, sin compromiso.\n${firma}`;
     if (b.tipo === 'detractor') {
       const caso = (window.MarleyCRM2?.postventa?.detractores?.() || []).find(item => String(item.cuentaId) === String(i.key));
       const motivo = caso?.ayuda?.motivo || caso?.abierta || 'lo que pasó con tu pedido';
-      return `${saludo}soy ${primerNombreCRM(ex.name) || 'del equipo'} de Marley Coffee. Vi tu respuesta${caso && caso.nps != null ? ` (NPS ${caso.nps}/10)` : ''} y quiero ayudarte: ${recorta(motivo, 120)}. Cuéntame qué necesitas y te contactamos hoy para resolverlo.\n${firma}`;
+      return `${saludo}soy ${primerNombreCRM(ex.name) || 'del equipo'} de Marley Coffee. Vi tu respuesta${caso && caso.nps != null ? ` (NPS ${caso.nps}/10)` : ''} y quiero ayudarte: ${recorta(motivo, 120)}. Cuéntame qué necesitas para que revisemos el caso.\n${firma}`;
     }
     return `${b.destinoNombre}: ${b.usuario} te pide que ${b.recado}. Cuenta: ${i.empresa}${i.contacto && i.contacto !== i.empresa ? ' (' + i.contacto + ')' : ''}.`;
   }
@@ -1363,12 +1385,17 @@
 
   // Tarea desde un botón de E (data-crm-agente-tarea) o desde texto: arma el borrador con los datos de la cuenta.
   function abrirTarea(tipo, cuentaId, texto) {
-    const info = infoDe(refDe(cuentaId));
+    const rol = pnRolActual();
+    if (!TAREAS_ROL[rol]?.includes(tipo)) {
+      PN.hilo.push({ tipo:'agente', html:'<p>Elige una de las acciones disponibles para tu rol.</p>' });
+      renderPanel();
+      return;
+    }
+    const info = tipo === 'plan-marketing' ? { key:'', empresa:'Marketing' } : infoDe(refDe(cuentaId));
     if (!info) { PN.hilo.push({ tipo: 'agente', html: tarjeta('Sin cuenta', '<p>No encuentro esa cuenta en el registro. Escribe su nombre o usa un botón de la lista.</p>', 'crm-agente-alerta') }); renderPanel(); return; }
-    const rol = pnRolActual() || 'ventas';
     abrirPanel();
     const b = { id: uid('BR'), tipo, info, estado: 'editando', maquina: info.maquina, horario: '', destino: 'ventas', destinoNombre: '', usuario: pnUsuario(rol), recado: '', rol };
-    if (tipo === 'visita') { const sl = slotsVisita()[0]; b.horario = sl ? sl.etiqueta : 'la próxima semana'; }
+    if (tipo === 'visita') b.horarios = slotsVisita();
     if (tipo === 'avisar') {
       // Avisar a un compañero no se manda al mismo rol: Ventas avisa a Marketing y viceversa.
       const pedido = norm(texto || '');
@@ -1414,7 +1441,7 @@
   // «Envíalo»: sin permiso del cliente no sale nada (regla sin IA). Con permiso, se envía en segundo plano.
   function enviarBorrador(id) {
     const b = PN.borradores[id];
-    if (!b || b.estado !== 'editando') return;
+    if (!b || b.estado !== 'editando' || b.tipo === 'visita' && !b.horario) return;
     const rol = pnRolActual() || 'ventas';
     if (b.tipo === 'correo' || b.tipo === 'contactar') {
       const canal = b.tipo === 'correo' ? 'correo' : 'whatsapp';
@@ -1437,7 +1464,7 @@
     b.estado = 'enviando';
     avisoPanel('Enviando en segundo plano: puedes seguir trabajando.');
     renderPanel(); renderAviso();
-    setTimeout(() => terminarEnvio(id), 600 + Math.round(Math.random() * 300));
+    setTimeout(() => terminarEnvio(id, b), 600 + Math.round(Math.random() * 300));
   }
   const horaTexto = ts => { try { return new Date(Number(ts)).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }); } catch (_) { return ''; } };
   // Estado visible de la fila + contador (contrato 26-nov, punto 3): se escribe en el estado del CRM,
@@ -1448,15 +1475,15 @@
       crm.rowState = crm.rowState || {};
       crm.rowState[String(id)] = { tipo, texto, kind: 'ok', at: ahora(), by: pnUsuario(pnRolActual() || 'ventas') };
       crm.counters = crm.counters || {};
-      const clave = { contactar: 'contactos', correo: 'correos', visita: 'visitas', avisar: 'avisos', resena: 'resenas', referido: 'referidos', detractor: 'respuestas', traspaso: 'traspasos', aprobacion: 'aprobaciones' }[tipo] || 'acciones';
+      const clave = { contactar: 'contactos', correo: 'correos', visita: 'visitas', recordatorio:'reposiciones', avisar: 'avisos', resena: 'resenas', referido: 'referidos', detractor: 'respuestas', traspaso: 'traspasos', aprobacion: 'aprobaciones' }[tipo] || 'acciones';
       crm.counters[clave] = Number(crm.counters[clave] || 0) + 1;
       if (extra) extra(crm, st);
     });
   }
-  function terminarEnvio(id) {
-    const b = PN.borradores[id];
+  function terminarEnvio(id, aprobado) {
+    const b = PN.borradores[id] || aprobado;
     if (!b || b.estado !== 'enviando') return;
-    const rol = pnRolActual() || b.rol || 'ventas';
+    const rol = b.rol || 'ventas';
     const quien = pnUsuario(rol);
     const info = b.info;
     let aviso = '';
@@ -1474,7 +1501,12 @@
         anotar(st, rol, 'envio:' + canal, recorta(b.texto, 90), 'Texto aprobado y enviado por la persona', 'persona', quien);
         avisar(st, otro, `${quien} envió un ${canal === 'correo' ? 'correo' : 'WhatsApp'} a ${info.contacto} (${info.empresa}).`, { leadId: info.key, tipo: 'envio' });
       });
-      marcarEstadoFila(info.key, b.tipo, `${b.tipo === 'correo' ? 'Correo enviado' : canal === 'web' ? 'Contactado por el chat del portal' : 'Contactado'} hoy ${horaTexto(ahora())}`);
+      marcarEstadoFila(info.key, b.tipo, `${b.tipo === 'correo' ? 'Correo enviado' : 'Contactado'} hoy ${horaTexto(ahora())}`, (crm, s) => {
+        if (b.tipo !== 'contactar') return;
+        const paso = (s.marketingPasos ||= {})[info.key] || {};
+        s.marketingPasos[info.key] = { ...paso, estado:'aceptado', motivo:'En seguimiento', at:ahora() };
+        (crm.handoffs ||= {})[info.key] = { status:'aceptado', reason:'En seguimiento', at:ahora() };
+      });
     } else if (b.tipo === 'visita') {
       b.estado = 'enviado';
       aviso = `Visita propuesta a ${info.empresa} registrada en la línea de tiempo.`;
@@ -1482,7 +1514,29 @@
         st.conversaciones[info.key] = (st.conversaciones[info.key] || []).concat([{ canal: 'nota', rol, texto: b.texto, ts: ahora(), aprobadoPor: quien }]);
         anotar(st, rol, 'visita:proponer', `horario ${b.horario}`, 'Nota interna para la ejecutiva de la zona', 'persona', quien);
       });
-      marcarEstadoFila(info.key, 'visita', 'Visita agendada');
+      marcarEstadoFila(info.key, 'visita', 'Visita agendada', crm => {
+        (crm.visitas ||= {})[info.key] = { horario:b.horario, fecha:b.fecha, at:ahora() };
+      });
+    } else if (b.tipo === 'recordatorio') {
+      const r = enviarSimulado({ canal:'web', cuentaId:info.key, para:'Portal del cliente', texto:b.texto, aprobadoPor:quien });
+      if (!r || r.ok === false) { b.estado = 'editando'; avisoPanel('No se pudo guardar el recordatorio en el portal.'); renderPanel(); return; }
+      b.estado = 'enviado';
+      aviso = 'Recordatorio enviado al portal.';
+      marcarEstadoFila(info.key, 'recordatorio', 'Recordatorio enviado', (crm, s) => {
+        const items = crm.replenishments ||= {};
+        items[info.key] = { ...items[info.key], status:'Recordatorio enviado', reminderAt:ahora() };
+        const c = s.customerCycle;
+        const p = c?.orders?.at(-1);
+        if (p?.receivedAt && [c.accountId,s.lead?.id].includes(info.key)) {
+          p.replenishDue = true;
+          p.replenishDueAt ||= ahora();
+        }
+      });
+    } else if (b.tipo === 'plan-marketing') {
+      b.estado = 'enviado';
+      aviso = 'Marketing recibió el pedido de plan en su Hoy.';
+      mutarAgente(st => avisar(st, 'marketing', b.texto, { tipo:'plan', por:quien }));
+      marcarEstadoFila('plan-marketing', 'avisar', 'Plan solicitado a Marketing');
     } else if (b.tipo === 'traspaso') {
       b.estado = 'enviado';
       const ex = ejecutivoDe(info.x);
@@ -1512,7 +1566,7 @@
         avisar(st, otro, `${quien} envió una ${b.tipo === 'detractor' ? 'respuesta al detractor' : b.tipo === 'resena' ? 'invitación a reseña' : 'invitación a recomendar'} de ${info.empresa}.`, { leadId: info.key, tipo: b.tipo });
       });
       marcarEstadoFila(info.key, b.tipo, `${etiqueta} hoy ${horaTexto(ahora())}`, crm => {
-        if (b.tipo === 'detractor') { crm.postventaGestion = crm.postventaGestion || {}; crm.postventaGestion.ayudas = crm.postventaGestion.ayudas || {}; crm.postventaGestion.ayudas[String(info.key)] = { estado: 'respondida', at: ahora(), by: quien }; }
+        if (b.tipo === 'detractor') { crm.postventaGestion = crm.postventaGestion || {}; crm.postventaGestion.ayudas = crm.postventaGestion.ayudas || {}; crm.postventaGestion.ayudas[String(info.key)] = { estado: 'respondida', respuesta:b.texto, at: ahora(), by: quien }; }
         if (b.tipo === 'resena') { crm.postventaGestion = crm.postventaGestion || {}; crm.postventaGestion.resenas = crm.postventaGestion.resenas || {}; crm.postventaGestion.resenas[String(info.key)] = { estado: 'pedida', canal: 'google', at: ahora(), by: quien }; }
         if (b.tipo === 'referido') { crm.postventaGestion = crm.postventaGestion || {}; crm.postventaGestion.referidos = crm.postventaGestion.referidos || {}; crm.postventaGestion.referidos[String(info.key)] = { estado: 'pedido', at: ahora(), by: quien }; }
       });
@@ -1533,6 +1587,7 @@
     avisarCliente(info.key);
     renderPanel(); renderAviso(); renderEspera(); renderLanzador(); renderRegistroPanel(); refrescarHilo();
     sincronizar();
+    window.dispatchEvent(new CustomEvent('marley:accion-completada', { detail: { tipo:b.tipo, cuentaId:info.key } }));
   }
   // «Tomar conversación»: la persona se une; el cliente lo ve en su chat con el resumen de lo que juntó el agente.
   function tomarConversacion(id) {
@@ -1630,6 +1685,8 @@
     const canal = b.tipo === 'correo' ? 'correo' : (b.tipo === 'contactar' ? 'whatsapp' : null);
     const permiso = canal ? (permisoPara(info, canal) ? 'Permiso de ' + (canal === 'correo' ? 'correo' : 'WhatsApp') + ' registrado' : (b.tipo === 'contactar' ? 'Sin permiso de WhatsApp: se envía por el chat del portal' : 'Sin permiso: no se envía')) : 'Nota interna: no sale al cliente';
     const estadoTxt = { enviando: 'Enviando en segundo plano…', enviado: 'Enviado', bloqueado: 'Bloqueado: falta permiso', descartado: 'Descartado' }[b.estado] || '';
+    const cierre = CIERRES[b.tipo] ? ` data-cierra-tarea="${CIERRES[b.tipo]}"` : '';
+    const opciones = b.tipo === 'visita' && editable ? `<fieldset class="crm-agente-horarios"><legend>Elige un horario</legend>${b.horarios.map(slot => `<label><input type="radio" name="visita-${esc(b.id)}" data-crm-agente-horario="${esc(b.id)}" value="${esc(slot.iso)}"${b.fecha === slot.iso ? ' checked' : ''}> ${esc(slot.etiqueta)}</label>`).join('')}</fieldset>` : '';
     const para = b.tipo === 'avisar' ? `para ${b.destinoNombre}` : b.tipo === 'traspaso' ? 'para Ventas (resumen editable)' : b.tipo === 'visita' ? `nota interna para ${info.empresa}` : `para ${info.contacto} (${info.empresa})`;
     return `<div class="crm-agente-burbuja crm-agente-burbuja--agente crm-agente-burbuja--borrador" data-crm-agente-burbuja="agente" data-crm-agente-borrador="${esc(b.id)}" data-tipo="${esc(b.tipo)}" data-estado="${esc(b.estado)}">
       <p class="crm-agente-canal"><b>Borrador · ${esc(ETIQ_TAREA[b.tipo])}</b> · ${esc(para)}</p>
@@ -1640,15 +1697,16 @@
         <button type="button" class="crm-agente-chip" data-crm-agente-ajuste="formal" data-id="${esc(b.id)}"${editable ? '' : ' disabled'}>Más formal</button>
         <button type="button" class="crm-agente-chip" data-crm-agente-ajuste="cercano" data-id="${esc(b.id)}"${editable ? '' : ' disabled'}>Más cercano</button>
       </div>
+      ${opciones}
       <div class="crm-agente-decision">
-        <button type="button" class="crm-agente-btn crm-agente-btn--ok" data-crm-agente-accion="enviar" data-id="${esc(b.id)}"${editable ? '' : ' disabled'}>Envíalo</button>
+        <button type="button" class="crm-agente-btn crm-agente-btn--ok" data-crm-agente-accion="enviar" data-id="${esc(b.id)}"${cierre}${editable && (b.tipo !== 'visita' || b.horario) ? '' : ' disabled'}>${b.tipo === 'visita' ? 'Agendar visita' : 'Enviar'}</button>
         <button type="button" class="crm-agente-btn" data-crm-agente-accion="descartar" data-id="${esc(b.id)}"${editable ? '' : ' disabled'}>Descartar</button>
         ${estadoTxt ? `<span class="crm-agente-estado-b" data-crm-agente-estado-b>${esc(estadoTxt)}</span>` : ''}
       </div>
       <dl class="crm-agente-niveles-b">
         <div><dt>Regla sin IA</dt><dd>${esc(permiso)}</dd></div>
         <div><dt>Sugerencia de IA</dt><dd>Borrador con los datos de la cuenta; puedes editarlo y pedir ajustes.</dd></div>
-        <div><dt>Decisión de persona</dt><dd>${editable ? 'La decides tú con «Envíalo» o «Descartar».' : 'Decidida por una persona.'}</dd></div>
+        <div><dt>Decisión de persona</dt><dd>${editable ? 'Revisa el borrador antes de confirmarlo.' : 'Decidida por una persona.'}</dd></div>
       </dl>
     </div>`;
   }
@@ -1770,6 +1828,19 @@
     pnRegEl = panelEl.querySelector('[data-crm-agente-registro-chat]');
     panelEl.addEventListener('click', onPanelClick);
     panelEl.addEventListener('input', ev => {
+      const radio = ev.target.closest?.('[data-crm-agente-horario]');
+      if (radio) {
+        const b = PN.borradores[radio.dataset.crmAgenteHorario];
+        const slot = b?.horarios?.find(item => item.iso === radio.value);
+        if (!slot || b.estado !== 'editando') return;
+        b.fecha = slot.iso;
+        b.horario = slot.etiqueta;
+        b.texto = textoInicial(b);
+        const form = radio.closest('[data-crm-agente-borrador]');
+        form.querySelector('textarea').value = b.texto;
+        form.querySelector('[data-crm-agente-accion="enviar"]').disabled = false;
+        return;
+      }
       const ta = ev.target && ev.target.closest ? ev.target.closest('[data-crm-agente-texto]') : null;
       if (ta && PN.borradores[ta.dataset.crmAgenteTexto]) PN.borradores[ta.dataset.crmAgenteTexto].texto = ta.value;
     });

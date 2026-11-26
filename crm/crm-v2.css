@@ -13,7 +13,7 @@
   --space-4: 40px;
   --space-5: 64px;
   --crm2-display: "Festivo", "Pressura", Arial, sans-serif;
-  --crm2-font: "Pressura", Arial, sans-serif;
+  --crm2-font: var(--mc-copy, Fabriga, Arial, sans-serif);
 }
 
 body.crm-v2-active { margin: 0; background: var(--crm2-white); color: var(--crm2-ink); }
@@ -671,9 +671,9 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 #crm-v2-root .crm2-alert-panel { border-left: 4px solid var(--crm2-role-accent); background: #f7f7f7; }
 #crm-v2-root .crm2-btn--secondary { background: var(--crm2-white); }
 
-/* Cifras en Pressura, como el resto del sistema de marca. El texto de lectura sigue en Fabriga. */
+/* Los importes y los indicadores usan la misma familia de lectura. */
 body:is([data-current^="R"]) #crm-v2-root :is(.crm2-metric > b,.crm2-team-grid article > b,.crm2-cac-result b,.crm2-approval-amount b,.crm2-quote-row > strong,.crm2-brand-mark,.crm2-entry-brand > span,.crm-kpi__valor,.crm2-row-side small,.crm2-metrics b) {
-  font-family: Pressura, Arial, sans-serif !important;
+  font-family: var(--mc-copy, Fabriga, Arial, sans-serif) !important;
   font-variant-numeric: tabular-nums;
 }
 
@@ -772,3 +772,69 @@ body:is([data-current^="R"]) #crm-v2-root :is(.crm2-metric > b,.crm2-team-grid a
 #crm-v2-root .crm2-medio-burbuja--ok { margin-left: 18px; border-radius: 10px 10px 3px 10px; background: var(--crm2-role-tint); }
 #crm-v2-root .crm2-medio-estrellas { color: #8a6d00; font-size: 16px; letter-spacing: 2px; }
 #crm-v2-root .crm2-medio-mock small { color: #5d5d5d; }
+/* Las filas separan origen, estado y acción. El texto del chip acompaña siempre el color. */
+#crm-v2-root .crm2-qitem {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 12px;
+  border: 0;
+  border-bottom: 1px solid #e6e6e6;
+  border-radius: 0;
+}
+#crm-v2-root .crm2-row {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(190px,auto);
+  gap: 8px 16px;
+  align-items: center;
+  min-width: 0;
+}
+#crm-v2-root .crm2-row-side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+#crm-v2-root .crm2-row-side small { text-align: right; }
+#crm-v2-root :is(.crm2-row-badge,.crm2-tipo,.crm2-status) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  min-width: 0;
+  min-height: 26px;
+  max-width: 100%;
+  border-radius: 6px;
+  line-height: 1.25;
+  font-size: 12px;
+}
+#crm-v2-root [data-estado="riesgo"] { color: #fff; background: #b3261e; border: 1px solid #b3261e; }
+#crm-v2-root [data-estado="hoy"] { color: #161616; background: #f7be00; border: 1px solid #f7be00; }
+#crm-v2-root [data-estado="revisar"] { color: #2b2b2b; background: #f1f1f1; border: 1px solid #dedede; border-left: 3px solid #f7be00; }
+#crm-v2-root [data-estado="listo"] { color: #fff; background: #5e7e29; border: 1px solid #5e7e29; }
+#crm-v2-root [data-tipo-lead] { color: #2b2b2b; background: #fff; border: 1px solid #b8b8b8; }
+#crm-v2-root [data-tipo-lead="nuevo"] { border-color: #c48f00; }
+#crm-v2-root [data-tipo-lead="mql"] { color: #161616; background: #f7be00; border-color: #f7be00; }
+#crm-v2-root [data-tipo-lead="sql"] { color: #fff; background: #2b2b2b; border-color: #2b2b2b; }
+#crm-v2-root [data-tipo-lead="referido"] { color: #161616; background: #c48f00; border-color: #c48f00; }
+#crm-v2-root [data-tipo-lead="reposicion"] { border: 2px solid #c48f00; }
+#crm-v2-root [data-tipo-lead="cliente"] { color: #fff; background: #5e7e29; border-color: #5e7e29; }
+#crm-v2-root [data-tipo-lead="riesgo"] { color: #b3261e; border: 2px solid #b3261e; }
+#crm-v2-root [data-tipo-lead="detractor"] { color: #fff; background: #b3261e; border-color: #b3261e; }
+#crm-v2-root :is(.crm2-kpi,.crm2-row,.crm2-approval-amount,.crm2-quote-row) { font-variant-numeric: tabular-nums; }
+.crm2-quote-products { display: grid; gap: 8px; padding: 0; list-style: none; }
+.crm2-quote-products li { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid #e6e6e6; }
+.crm2-quote-products span { flex: none; text-align: right; font-variant-numeric: tabular-nums; }
+#crm-v2-root :is(.crm2-qitem,.crm2-actionbar) > .crm2-qtool { min-height: 44px; padding-inline: 12px; }
+#crm-v2-root .crm2-content--hoy > section + section { margin-top: 12px !important; }
+@media (min-width: 768px) {
+  #crm-v2-root .crm2-main--hoy { padding-bottom: 64px; }
+}
+@media (max-width: 767px) {
+  #crm-v2-root .crm2-qitem { grid-template-columns: minmax(0,1fr); padding: 8px 0; }
+  #crm-v2-root .crm2-row { grid-template-columns: minmax(0,1fr); gap: 8px; }
+  #crm-v2-root .crm2-row-side { justify-content: flex-start; }
+  #crm-v2-root .crm2-qitem > :is(.crm2-btn,.crm2-qtool) { justify-self: start; }
+}

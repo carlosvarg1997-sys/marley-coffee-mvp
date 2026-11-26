@@ -418,8 +418,15 @@
   }
   function packDescription(lead) {
     const offer = machineFor(lead);
-    const amount = Number(offer.pack);
-    return { ...offer, amount: Number.isFinite(amount) && amount > 0 ? amount : null };
+    const active = currentState();
+    const source = (active.lead?.id === lead.id || active.proposal?.leadId === lead.id) ? active : { answers: answersForLead(lead) };
+    const quote = window.MC_COTIZACION?.(source);
+    const lines = (quote?.items || []).map(item => {
+      const line = quote.lineas.find(product => product.id === item.id || product.k === item.k);
+      return { name: line?.t || 'Producto del pack', quantity: item.qty, format: line?.d || 'Formato por confirmar' };
+    });
+    const amount = Number(quote?.total ?? offer.pack);
+    return { ...offer, lines, amount: Number.isFinite(amount) && amount > 0 ? amount : null };
   }
   function isMql(lead) {
     const score = Number(scoreInterest(lead)?.puntaje || 0);
@@ -480,15 +487,24 @@
   }
 
   function labelValue(label, value) { return `<div class="crm2-kv"><span>${esc(label)}</span><b>${esc(value || 'Sin dato registrado')}</b></div>`; }
-  function statusPill(text, kind = '') { return `<span class="crm2-status ${kind ? `crm2-status--${kind}` : ''}"><span aria-hidden="true">${kind === 'good' ? '✓' : kind === 'wait' ? '◷' : kind === 'blocked' ? '!' : '·'}</span>${esc(text)}</span>`; }
+  function statusPill(text, kind = '') { return `<span class="crm2-status ${kind ? `crm2-status--${kind}` : ''}" data-estado="${({good:'listo',wait:'revisar',blocked:'riesgo'})[kind] || urgencia(text)}"><span aria-hidden="true">${kind === 'good' ? '✓' : kind === 'wait' ? '◷' : kind === 'blocked' ? '!' : '·'}</span>${esc(text)}</span>`; }
   function block(title, copy, body, extra = '') {
     const short = Boolean(copy) && copy.length <= 45;
-    const more = copy && !short ? `<details class="crm2-note"><summary>Más información</summary><p>${esc(copy)}</p></details>` : '';
+    const more = copy && !short ? `<details class="crm2-note"><summary>Ver cómo funciona esta sección</summary><p>${esc(copy)}</p></details>` : '';
     return `<section class="crm2-block ${extra}"><header class="crm2-block-head"><div class="crm2-block-title"><h2>${esc(title)}</h2>${short ? `<p>${esc(copy)}</p>` : ''}</div>${more}</header>${body}</section>`;
   }
-  function row(title, subtitle, meta, action, badge = '') {
-    const estado = /riesgo/i.test(badge) ? 'riesgo' : /list[oa]|cliente activo|confirmad[oa]|contactad|visita agendada|resea|reseña|respondid|pedida|enviad|aprobad|pasado a ventas/i.test(badge) ? 'listo' : 'revisar';
-    return `<button class="crm2-row" type="button" ${action} aria-label="${esc(title)}. ${esc(subtitle)}"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge" data-estado="${estado}">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small>${icon('arrow')}</span></button>`;
+  const TIPO_LEAD = { nuevo:'Lead nuevo', mql:'MQL', sql:'SQL', referido:'Referido', reposicion:'Reposición', cliente:'Cliente activo', riesgo:'En riesgo', detractor:'Detractor' };
+  function urgencia(badge) {
+    if (/detractor|riesgo|vencid|atender ya/i.test(badge)) return 'riesgo';
+    if (/list[oa]|al día|cliente activo|confirmad|contactad|agendada|respondid|pedida|enviad|aprobad|en ventas|promotor/i.test(badge)) return 'listo';
+    return /hoy|nuevo/i.test(badge) ? 'hoy' : 'revisar';
+  }
+  function tipoChip(tipo) {
+    return TIPO_LEAD[tipo] ? `<span class="crm2-tipo" data-tipo-lead="${tipo}">${esc(TIPO_LEAD[tipo])}</span>` : '';
+  }
+  function row(title, subtitle, meta, action, badge = '', tipo = '') {
+    const estado = urgencia(badge);
+    return `<button class="crm2-row" type="button" ${action} aria-label="${esc(title)}. ${esc(subtitle)}"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${tipoChip(tipo)}${badge ? `<span class="crm2-row-badge" data-estado="${estado}"><span aria-hidden="true">${{riesgo:'!',listo:'✓',hoy:'◷',revisar:'·'}[estado]}</span> ${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small>${icon('arrow')}</span></button>`;
   }
   function empty(title, detail) { return `<div class="crm2-empty"><b>${esc(title)}</b><p>${esc(detail)}</p></div>`; }
   function limitedList(items, renderer, label = 'Ver todos', limit = 4) {
@@ -504,17 +520,15 @@
     const priority = priorityLabel(lead);
     const sub = `${companyName(lead)} · ${source}${mode === 'marketing' ? ` · ${permissionShort(lead)}` : ''}`;
     const meta = mode === 'marketing' ? `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100` : `${priority} · ${valueLabel(lead)}`;
-    // Tareas de la prueba interna: abrir un contacto de búsqueda (C-V1) o un referido (C-V6) es el cierre de esa tarea.
-    const tarea = mode !== 'sales' ? '' : /Google|búsqueda|orgánic/i.test(String(source)) ? ' data-cierra-tarea="C-V1"' : isReferral(lead) ? ' data-cierra-tarea="C-V6"' : '';
-    return row(contactName(lead), sub, meta, `data-c2="open-lead" data-id="${id}"${tarea}`, stage);
+    const tipo = isReferral(lead) ? 'referido' : /^SQL/.test(stage) ? 'sql' : isMql(lead) ? 'mql' : 'nuevo';
+    return row(contactName(lead), sub, meta, `data-c2="open-lead" data-id="${id}"`, stage, tipo);
   }
   function accountRow(account, mode = 'client') {
     const stats = accountStats(account);
     const meta = mode === 'reorder' ? (accountNeedsReorder(account) ? 'Toca reponer' : (stats.freqDays ? `Ciclo · ${stats.freqDays} días` : 'Ciclo por calcular')) : mode === 'risk' ? riskShort(account) : `Última compra · ${stats.lastAgo == null ? 'sin dato' : `hace ${stats.lastAgo} días`}`;
     const stateLabel = appState().replenishments?.[account.id]?.status || (mode === 'risk' ? 'En riesgo' : accountNeedsReorder(account) && accountAtRisk(account) ? 'Reposición · cuenta en riesgo' : accountNeedsReorder(account) ? 'Reposición por revisar' : accountAtRisk(account) ? 'En riesgo' : 'Cliente activo');
-    // Tarea C-V5: abrir una cuenta en riesgo es el cierre de esa tarea.
-    const tarea = mode === 'risk' ? ' data-cierra-tarea="C-V5"' : '';
-    return row(account.name || 'Cuenta sin nombre', `${account.business || 'Negocio sin dato'} · ${account.comuna || 'Comuna sin dato'}`, meta, `data-c2="open-account" data-id="${esc(account.id)}"${tarea}`, stateLabel);
+    const tipo = mode === 'risk' ? 'riesgo' : mode === 'reorder' || accountNeedsReorder(account) ? 'reposicion' : account.referral ? 'referido' : 'cliente';
+    return row(account.name || 'Cuenta sin nombre', `${account.business || 'Negocio sin dato'} · ${account.comuna || 'Comuna sin dato'}`, meta, `data-c2="open-account" data-id="${esc(account.id)}"`, stateLabel, tipo);
   }
   const permissionShort = item => permission(item).key === 'yes' ? 'Permiso sí' : permission(item).key === 'no' ? 'Sin permiso' : permission(item).key === 'reply' ? 'Solo respuesta solicitada' : 'Permiso por confirmar';
   function titleSub(route, role) {
@@ -594,39 +608,27 @@
   }
   function salesToday() {
     const passed = sortedNewest(passedLeads());
-    const qualified = sortedNewest(leads().filter(lead => lead.stage === 'MQL' && isMql(lead) && !progressFor(lead).estado));
+    const qualified = sortedNewest(leads().filter(lead => isMql(lead) && !progressFor(lead).estado));
     const due = accounts().filter(accountNeedsReorder).sort((a,b) => accountDue(a) - accountDue(b));
-    const dueIds = new Set(due.map(account => String(account.id)));
-    // La cuenta que llegó por un referido y todavía no cierra es trabajo comercial de Ventas: se confirma
-    // el permiso y se cierra la venta. Pedir reseñas o referidos es del programa de Marketing y no se ve aquí.
-    const referred = accounts().filter(account => account.referral && !dueIds.has(String(account.id)));
-    const entryLead = passed[0] || qualified[0] || null;
-    const queue = [
-      entryLead ? { kind:'lead', item:entryLead, label: passed.length ? 'Traspaso nuevo de Marketing' : 'Lead listo para aceptar', badge: passed.length ? 'Nuevo' : 'Por aceptar' } : null,
-      due[0] ? { kind:'account', item:due[0], label:'Reposición pendiente', badge:'Reposición' } : null,
-      referred[0] ? { kind:'account', item:referred[0], label:'Llegó por referido', badge:'Referido' } : null
-    ].filter(Boolean);
-    const queueBody = queue.length ? limitedList(queue, entry => {
-      const item = entry.item;
-      const isLead = entry.kind === 'lead';
-      // Tarea C-V6 (contrato anterior): abrir la cuenta que llegó por referido es el cierre de esa tarea.
-      const tarea = !isLead && item.referral ? ' data-cierra-tarea="C-V6"' : '';
-      const action = (isLead ? `data-c2="open-lead" data-id="${esc(item.id)}"` : `data-c2="open-account" data-id="${esc(item.id)}"`) + tarea;
-      const meta = isLead ? `${entry.label} · ${sourceOf(item)}` : `${entry.label} · ${item.business || 'Negocio sin dato'}`;
-      const badge = badgeConEstado(item.id, entry.badge);
-      return filaCola(row(isLead ? contactName(item) : item.name, isLead ? `${companyName(item)} · ${priorityLabel(item)}` : `${item.business || 'Negocio sin dato'} · ${item.comuna || 'Comuna sin dato'}`, meta, action, badge), item, !isLead, 'ventas', permission(item));
-    }, 'Ver toda la cola') : empty('Nada urgente por ahora', 'Aquí aparecen los traspasos de Marketing, las reposiciones y las cuentas que llegaron por referido.');
+    const contacted = leads().filter(lead => appState().rowState?.[lead.id]?.tipo === 'contactar');
+    const example = !passed.length && !contacted.length ? qualified.find(lead => !lead.live) : null;
+    const queue = [...passed, ...(example ? [example] : []), ...contacted.filter(lead => !passed.some(item => item.id === lead.id))];
+    const queueBody = queue.length ? limitedList(queue, lead => {
+      const hecho = contacted.includes(lead);
+      const local = row(contactName(lead), companyName(lead), hecho ? 'En seguimiento' : lead === example ? 'Traspaso de Marketing · ejemplo' : 'Traspaso de Marketing',
+        `data-c2="open-lead" data-id="${esc(lead.id)}"`, badgeConEstado(lead.id, 'Nuevo'), isReferral(lead) ? 'referido' : 'sql');
+      return `<div class="crm2-qitem">${local}${hecho ? '' : tareaBtn('contactar', lead.id, 'Contactar', false)}</div>`;
+    }, 'Ver todos los traspasos', 2) : empty('Sin traspasos nuevos', 'Los leads que Marketing pase a Ventas aparecen aquí.');
     const quotes = quotesPorCerrar();
-    const quotesBody = quotes.length ? limitedList(quotes, quote => {
-      const id = quote.leadId || quote.id;
-      const abrir = quote.leadId ? `data-c2="open-lead" data-id="${esc(quote.leadId)}"` : `data-c2-go="R08"`;
-      const persona = quote.leadId ? leadById(quote.leadId) : null;
-      return `<div class="crm2-qitem">${row(quote.company, `${quote.machine} · ${canalTexto(quote.channel)}`, quote.amount ? `${money(quote.amount)} · ${quote.status}` : quote.status, abrir, badgeConEstado(id, 'Por cerrar'))}${persona ? agenteAccionesFila(persona, false, 'ventas', permission(persona)) : ''}</div>`;
-    }, 'Ver todas las propuestas') : empty('Sin propuestas abiertas', 'Cuando prepares una propuesta aparece aquí hasta que la cuenta la acepte.');
-    const dueBody = due.length ? limitedList(due, account => filaCola(row(account.name || 'Cuenta', `${account.business || 'Negocio sin dato'} · ${account.comuna || 'Comuna sin dato'}`, `Última compra hace ${accountStats(account).lastAgo ?? 'sin dato'} días · ciclo ${accountStats(account).freqDays ?? 'por calcular'} días`, `data-c2="open-account" data-id="${esc(account.id)}"`, badgeConEstado(account.id, 'Reposición por revisar')), account, true, 'ventas', permission(account)), 'Ver todas las reposiciones', 2) : empty('Sin reposiciones pendientes', 'Las cuentas aparecen cuando su ciclo de compra vence.');
-    return block('A atender hoy', '', queueBody, 'crm2-block--cola')
-      + block(`Propuestas por cerrar${quotes.length ? ` · ${quotes.length}` : ''}`, '', quotesBody)
-      + block(`Cuentas por reponer${due.length ? ` · ${due.length}` : ''}`, '', dueBody);
+    const candidate = [leads().find(lead => quotes[0]?.leadId === lead.id), ...contacted, ...passed, ...qualified].find(Boolean);
+    const quotesBody = candidate ? `<div class="crm2-qitem">${row(contactName(candidate), companyName(candidate), quotes[0]?.amount ? money(quotes[0].amount) : 'Revisar productos y total', `data-c2="open-lead" data-id="${esc(candidate.id)}"`, badgeConEstado(candidate.id, 'Por revisar'), 'sql')}${primary('Preparar propuesta','quote',`data-id="${esc(candidate.id)}"`)}</div>` : empty('Sin propuestas abiertas', 'Las oportunidades de Ventas aparecen aquí.');
+    const dueBody = due.length ? limitedList(due, account => `<div class="crm2-qitem">${row(account.name, account.business, 'Según el ciclo de compra', `data-c2="open-account" data-id="${esc(account.id)}"`, badgeConEstado(account.id, 'Hoy'), 'reposicion')}${appState().replenishments?.[account.id]?.reminderAt ? '' : tareaBtn('recordatorio', account.id, 'Enviar recordatorio')}</div>`, 'Ver todas las reposiciones', 1) : empty('Sin reposiciones pendientes', 'Las cuentas aparecen cuando vence su ciclo de compra.');
+    const account = due[0] || accounts()[0];
+    const visit = account ? `<div class="crm2-qitem">${row(account.name, account.business, 'Abre la ficha para coordinar el horario', `data-c2="open-account" data-id="${esc(account.id)}"`, appState().visitas?.[account.id] ? 'Visita agendada' : 'Por revisar', 'cliente')}</div>` : '';
+    return block('Traspasos nuevos', '', queueBody, 'crm2-block--cola')
+      + block('Propuestas por cerrar', '', quotesBody)
+      + block('Cuentas por reponer', '', dueBody)
+      + (visit ? block('Visitas por coordinar', '', visit) : '');
   }
   function buyerCrmLink() {
     return '<p class="crm2-route-helper"><a href="#R17" data-c2-go="R17">Abrir CRM por comprador</a></p>';
@@ -667,22 +669,23 @@
   // Botones del agente para una fila de postventa o de recomendados (los atiende crm-agente.js por delegación).
   const tareaBtn = (tipo, id, etiqueta, isCuenta = true) => `<button type="button" class="crm2-qtool" data-crm-agente-tarea="${tipo}" data-cuenta-id="${esc(id)}" data-crm-tipo="${isCuenta ? 'cuenta' : 'lead'}" aria-label="${esc(etiqueta)} · ${esc(id)}">${icon(tipo === 'resena' ? 'campaign' : tipo === 'referido' ? 'people' : 'file')}<span>${esc(etiqueta)}</span></button>`;
   function marketingToday() {
-    const detractors = detractoresPostventa().filter(item => !item.resuelto);
-    const ready = leadsReady();
-    const promoters = promotoresPostventa().filter(item => !item.resena && !item.referido);
+    const detractors = detractoresPostventa().sort((a,b) => Number(a.resuelto) - Number(b.resuelto));
+    const ready = leadsReady().sort((a,b) => Number(Boolean(progressFor(a).estado)) - Number(Boolean(progressFor(b).estado)));
+    const promoters = promotoresPostventa();
     const nps = npsSummary();
     const detractorBody = detractors.length ? limitedList(detractors, item => {
       const estado = badgeConEstado(item.cuentaId, item.ejemplo ? 'Detractor · ejemplo' : 'Detractor');
-      return `<div class="crm2-qitem">${row(item.nombre, `${item.rubro} · ${item.momento ? momentoTexto(item.momento) : 'Respuesta del portal'} · NPS ${item.nps ?? 'sin nota'}/10`, item.abierta || (item.ayuda ? item.ayuda.resumen : 'Revisar la ayuda abierta antes de responder'), `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, estado)}<div class="crm2-qtools" role="group" aria-label="Responder al detractor">${tareaBtn('detractor', item.cuentaId, 'Responder')}</div></div>`;
-    }, 'Ver todos los detractores', 3) : empty('Sin detractores pendientes', 'Un NPS de 0 a 6 o una carita «no contento» aparece aquí con su ayuda abierta.');
-    const leadBody = ready.length ? limitedList(ready, lead => `<div class="crm2-qitem">${row(contactName(lead), `${companyName(lead)} · ${permissionShort(lead)}`, `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, badgeConEstado(lead.id, statusOfLead(lead)))}<div class="crm2-qtools" role="group" aria-label="Pasar a Ventas"><button type="button" class="crm2-qtool crm2-qtool--principal" data-crm-agente-tarea="traspaso" data-cuenta-id="${esc(lead.id)}" data-crm-tipo="lead">${icon('arrow')}<span>Pasar a Ventas</span></button></div></div>`, 'Ver todos los leads', 3) : empty('No hay un lead listo para pasar', 'La calificación requiere contacto identificado, negocio B2B, permiso y 40 puntos de interés.');
+      return `<div class="crm2-qitem">${row(item.nombre, `${item.rubro} · NPS ${item.nps ?? 'sin nota'}/10`, item.abierta || item.ayuda?.resumen || '', `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, estado, 'detractor')}${item.resuelto ? '' : tareaBtn('detractor', item.cuentaId, 'Responder')}</div>`;
+    }, 'Ver todos los detractores', 2) : empty('Sin detractores pendientes', 'Las respuestas con problemas aparecen aquí.');
+    const leadBody = ready.length ? limitedList(ready, lead => `<div class="crm2-qitem">${row(contactName(lead), companyName(lead), `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, badgeConEstado(lead.id, progressFor(lead).estado ? 'En Ventas' : 'Por revisar'), isReferral(lead) ? 'referido' : 'mql')}${progressFor(lead).estado ? '' : primary('Revisar lead','open-lead',`data-id="${esc(lead.id)}"`)}</div>`, 'Ver todos los leads', 1) : empty('No hay un lead listo para pasar', 'Revisa contacto, permiso y puntaje de interés.');
     const promoterBody = promoters.length ? limitedList(promoters, item => {
       const estado = badgeConEstado(item.cuentaId, item.ejemplo ? 'Promotor · ejemplo' : 'Promotor');
-      return `<div class="crm2-qitem">${row(item.nombre, `${item.rubro} · NPS ${item.nps}/10 · ${item.resena ? 'Reseña pedida' : 'Sin reseña pedida'}`, item.abierta || 'Todavía no recomienda por escrito', `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, estado)}<div class="crm2-qtools" role="group" aria-label="Pedir reseña o referido">${tareaBtn('resena', item.cuentaId, 'Reseña')}${tareaBtn('referido', item.cuentaId, 'Referido')}</div></div>`;
-    }, 'Ver todos los promotores', 3) : empty('Sin promotores por invitar', 'Cuando una cuenta responda 9 o 10 y no haya recomendado todavía, aparece aquí.');
+      return `<div class="crm2-qitem">${row(item.nombre, `${item.rubro} · NPS ${item.nps}/10`, '', `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, estado)}${item.resena ? '' : tareaBtn('resena', item.cuentaId, 'Pedir reseña')}</div>`;
+    }, 'Ver todos los promotores', 1) : empty('Sin promotores por invitar', 'Las cuentas que respondan 9 o 10 aparecen aquí.');
     return block(`Detractores por resolver${detractors.length ? ` · ${detractors.length}` : ''}`, '', detractorBody, 'crm2-block--cola')
       + block(`Leads por calificar${ready.length ? ` · ${ready.length}` : ''}`, '', leadBody)
-      + block(`Promotores a los que pedir reseña o referido${promoters.length ? ` · ${promoters.length}` : ''}`, '', promoterBody)
+      + block('Promotores', '', promoterBody)
+      + block('Campañas y contenido', '', primary('Ver medios', 'abrir-medios'))
       + `<details class="crm2-fold"><summary>Resumen de satisfacción y NPS</summary><div class="crm2-fold-body"><p><b>${nps.n ? `NPS ${nps.nps > 0 ? '+' : ''}${nps.nps}` : 'NPS pendiente'}</b> · meta 52 · ${nps.promoters} promotor(es), ${nps.passives} pasivo(s), ${nps.detractors} detractor(es) de ${nps.n} respuesta(s).</p><p><a href="#R18" data-c2-go="R18">Abrir Postventa</a> · <a href="#R19" data-c2-go="R19">Abrir Recomendados</a></p><p class="crm2-small-note">El NPS se calcula con las respuestas del portal; los ejemplos no suman al indicador.</p></div></details>`;
   }
   // Postventa (Marketing): satisfacción, NPS, detractores con su ayuda y seguimiento. Un flujo, una pestaña.
@@ -708,13 +711,13 @@
   function marketingReferrals() {
     const referidos = referidosPostventa();
     const resenas = resenasPostventa();
-    const promotores = promotoresPostventa().filter(item => !item.resena || !item.referido);
+    const promotores = promotoresPostventa();
     const refBody = referidos.length ? `<div class="crm2-list">${referidos.map(item => `<div class="crm2-qitem">${row(item.negocio, `${item.nombre} lo recomendó · contacto ${item.contacto}`, `Permiso ${item.permiso ? 'registrado' : 'por confirmar'} · ${fechaCorta(item.ts)}${item.ejemplo ? ' · ejemplo' : ''}`, `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, item.estado === 'aprobado' ? 'Aprobado' : item.estado === 'contactado' ? 'Contactado' : 'Enviado')}<div class="crm2-qtools" role="group" aria-label="Seguimiento del referido">${tareaBtn('avisar', item.cuentaId, 'Avisar')}</div></div>`).join('')}</div>${notaEjemplo('referidos')}` : empty('Sin referidos registrados', 'Cuando una cuenta recomiende a otro negocio, aparece aquí con su estado y su permiso.');
     const resenasBody = resenas.length ? `<div class="crm2-list">${resenas.map(item => { const etiqueta = item.estado === 'vista-previa' ? 'Vista previa' : item.estado === 'pedida' ? 'Reseña pedida' : 'Invitada'; return `<div class="crm2-qitem">${row(cuentaNombre(item.cuentaId), `${canalTexto(item.canal)} · invitación ${item.estado === 'vista-previa' ? 'vista previa' : item.estado}`, fechaCorta(item.ts) + (item.ejemplo ? ' · ejemplo' : ''), `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, etiqueta)}<div class="crm2-qtools" role="group" aria-label="Pedir reseña">${tareaBtn('resena', item.cuentaId, 'Reseña')}</div></div>`; }).join('')}</div>${notaEjemplo('resenas')}` : empty('Sin reseñas invitadas', 'Las invitaciones a reseña aparecen cuando se piden desde el portal o desde aquí.');
-    const promotorBody = promotores.length ? limitedList(promotores, item => `<div class="crm2-qitem">${row(item.nombre, `${item.rubro} · NPS ${item.nps}/10`, item.resena ? 'Reseña pedida; falta el referido' : item.referido ? 'Referido pedido; falta la reseña' : 'Todavía no recomienda', `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, badgeConEstado(item.cuentaId, item.ejemplo ? 'Promotor · ejemplo' : 'Promotor'))}<div class="crm2-qtools" role="group" aria-label="Pedir reseña o referido">${item.resena ? '' : tareaBtn('resena', item.cuentaId, 'Reseña')}${item.referido ? '' : tareaBtn('referido', item.cuentaId, 'Referido')}</div></div>`, 'Ver todos los promotores') : empty('Sin promotores pendientes', 'Todos los promotores registrados ya tienen su invitación.');
-    return block(`Referidos${referidos.length ? ` · ${referidos.length}` : ''}`, '', refBody, 'crm2-block--cola')
+    const promotorBody = promotores.length ? limitedList(promotores, item => `<div class="crm2-qitem">${row(item.nombre, `${item.rubro} · NPS ${item.nps}/10`, '', `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, badgeConEstado(item.cuentaId, item.ejemplo ? 'Promotor · ejemplo' : 'Promotor'))}${item.resena ? item.referido ? '' : tareaBtn('referido', item.cuentaId, 'Pedir referido') : tareaBtn('resena', item.cuentaId, 'Pedir reseña')}</div>`, 'Ver todos los promotores') : empty('Sin promotores pendientes', 'Las cuentas aparecen después de responder la encuesta.');
+    return block('Promotores', '', promotorBody, 'crm2-block--cola')
+      + block(`Referidos${referidos.length ? ` · ${referidos.length}` : ''}`, '', refBody)
       + block(`Reseñas invitadas${resenas.length ? ` · ${resenas.length}` : ''}`, '', resenasBody)
-      + block(`Promotores que aún no recomiendan${promotores.length ? ` · ${promotores.length}` : ''}`, '', promotorBody)
       + `<details class="crm2-fold"><summary>Cómo se pide una reseña</summary><div class="crm2-fold-body"><p>La invitación se ofrece a todos, nunca solo a los contentos. No se bloquea la reseña ni se ofrece un incentivo: las políticas de Google prohíben pedir reseñas positivas de forma selectiva.</p><p>Primero se resuelve la fricción; la invitación va después, en el momento justo.</p></div></details>`;
   }
   function recortaTexto(texto, max = 120) { const value = String(texto ?? '').replace(/\s+/g, ' ').trim(); return value.length > max ? value.slice(0, max - 1) + '…' : value; }
@@ -763,7 +766,7 @@
     const renderLead = lead => {
       const pass = progressFor(lead);
       // Tarea C-M1: abrir un prospecto reciente para ver de dónde llegó es el cierre de esa tarea.
-      const action = `data-c2="open-lead" data-id="${esc(lead.id)}" data-cierra-tarea="C-M1"`;
+      const action = `data-c2="open-lead" data-id="${esc(lead.id)}"`;
       return row(contactName(lead), `${companyName(lead)} · Llegó por ${sourceOf(lead)} · ${permissionShort(lead)}`, `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, action, pass.estado === 'devuelto' ? `Devuelto: ${pass.motivoDevolucion || pass.motivo || 'motivo registrado'}` : statusOfLead(lead));
     };
     const items = list.length ? limitedList(list, renderLead, 'Ver todos los leads') : empty('Sin leads registrados','No se encontraron contactos en M4D.PROSPECTS.');
@@ -799,7 +802,7 @@
       const restricted = entry.permission.key !== 'yes';
       const content = entry.type === 'account' ? 'Revisar servicio antes de una promoción.' : (D.SEGMENT_CONTENT?.[item.business]?.nutre || D.SEGMENT_CONTENT?.[item.business]?.explora || 'Pieza sugerida según el segmento; revisar antes de usar.');
       const requested = Boolean(item.requestedReply || item.request?.reply);
-      const replyControl = restricted ? requested ? secondary('Responder solicitud','reply-request',`data-id="${esc(id)}" data-cierra-tarea="C-M4" ${item.crm2DemoRequest ? 'data-demo-request="true"' : ''}`) : `<span class="crm2-blocked-copy">Sin solicitud de respuesta; no contactar.</span>` : secondary('Programar','schedule',`data-id="${esc(id)}" data-kind="${entry.type}"`);
+      const replyControl = restricted ? requested ? secondary('Responder solicitud','reply-request',`data-id="${esc(id)}" ${item.crm2DemoRequest ? 'data-demo-request="true"' : ''}`) : `<span class="crm2-blocked-copy">Sin solicitud de respuesta; no contactar.</span>` : secondary('Programar','schedule',`data-id="${esc(id)}" data-kind="${entry.type}"`);
       const permissionControl = !restricted ? secondary('Nutrir (con permiso)','nurture',`data-id="${esc(id)}"`) : `<span class="crm2-blocked-copy">Promoción bloqueada hasta registrar el permiso.</span>`;
       const openControl = entry.type !== 'account' ? secondary('Abrir ficha','open-lead',`data-id="${esc(id)}"`) : secondary('Abrir ficha','open-account',`data-id="${esc(id)}"`);
       return `<article class="crm2-recovery-row"><div><p class="crm2-eyebrow">${esc(entry.reason)}</p><h3>${esc(title)}</h3><p>${esc(entry.type === 'account' ? item.business || 'Cuenta' : companyName(item))} · ${esc(sourceOf(item))}</p><div class="crm2-recovery-meta">${statusPill(permissionLabel, restricted ? 'blocked' : 'good')}<span>${esc(content)}</span></div><div class="crm2-row-actions">${openControl}${replyControl}${permissionControl}${agenteBotones(item, entry.type === 'account', 'marketing', entry.permission)}</div></div></article>`;
@@ -844,7 +847,7 @@
   ];
   function medioMock(tipo, nombre) {
     if (tipo === 'whatsapp') return `<div class="crm2-medio-mock crm2-medio-mock--wa"><span class="crm2-medio-mock-t">WhatsApp</span><p class="crm2-medio-burbuja">Hola, soy Paula de Marley Coffee. ¿Te acomoda que revisemos tu propuesta de máquina para ${esc(nombre || 'tu negocio')}?</p><p class="crm2-medio-burbuja crm2-medio-burbuja--ok">Sí, mañana a las 10</p></div>`;
-    if (tipo === 'google') return `<div class="crm2-medio-mock crm2-medio-mock--google"><span class="crm2-medio-mock-t">Perfil de empresa</span><b>Marley Coffee Empresas</b><span class="crm2-medio-estrellas" aria-label="5 estrellas">★★★★★</span><p>«La instalación quedó impecable y el café se acabó en dos días.»</p><small>Reseña de un cliente · Google Maps</small></div>`;
+    if (tipo === 'google') return `<div class="crm2-medio-mock crm2-medio-mock--google"><span class="crm2-medio-mock-t">Perfil de empresa</span><b>Marley Coffee Empresas</b><span class="crm2-medio-estrellas" aria-hidden="true">☆☆☆☆☆</span><p>Vista previa del espacio para una reseña.</p><small>Perfil de ejemplo en Google Maps</small></div>`;
     if (tipo === 'correo') return `<div class="crm2-medio-mock crm2-medio-mock--correo"><span class="crm2-medio-mock-t">Correo</span><b>Tu guía para planificar el servicio de café</b><p>Hola: revisamos tu diagnóstico y preparamos la guía con productos, consumo y reposición.</p><small>De: Marley Coffee Empresas · con permiso registrado</small></div>`;
     return `<div class="crm2-medio-mock crm2-medio-mock--ref"><span class="crm2-medio-mock-t">Enlace de referido</span><b>Recomienda a otro negocio</b><p>«Te comparto el enlace de Marley Coffee Empresas: te ayudan a elegir la máquina.»</p><small>El negocio referido decide si quiere cotizar.</small></div>`;
   }
@@ -854,7 +857,7 @@
       const piezas = MEDIOS.filter(medio => medio.grupo === grupo);
       const cards = piezas.map(medio => `<article class="crm2-medio">
         <div class="crm2-medio-vista">${medio.mock ? medioMock(medio.mock, 'tu negocio') : `<img src="${esc(medio.pieza)}" alt="${esc(medio.alt || medio.nombre)}" loading="lazy">`}</div>
-        <div class="crm2-medio-txt"><h3>${esc(medio.nombre)}</h3><p class="crm2-medio-donde"><b>Dónde:</b> ${esc(medio.donde)}</p><p><b>Objetivo:</b> ${esc(medio.objetivo)}</p><p class="crm2-medio-kpi"><b>KPI:</b> ${esc(medio.kpi)}</p>${medio.enlace ? `<a class="crm2-text-link" href="${esc(medio.pieza)}" target="_blank" rel="noopener">Abrir la pieza</a>` : ''}</div>
+        <div class="crm2-medio-txt"><h3>${esc(medio.nombre)}</h3><p class="crm2-medio-donde"><b>Dónde:</b> ${esc(medio.donde)}</p><p><b>Objetivo:</b> ${esc(medio.objetivo)}</p><p class="crm2-medio-kpi"><b>KPI:</b> ${esc(medio.kpi)}</p>${appState().mediosRevisados?.[medio.nombre] ? statusPill('Indicador revisado','good') : secondary('Registrar indicador revisado','revisar-medio',`data-id="${esc(medio.nombre)}" data-cierra-tarea="C-M4"`)}${medio.enlace ? `<a class="crm2-text-link" href="${esc(medio.pieza)}" target="_blank" rel="noopener">Abrir la pieza</a>` : ''}</div>
       </article>`).join('');
       return `<section class="crm2-medios-grupo" aria-labelledby="crm2-medios-${esc(normKey(grupo))}"><h3 id="crm2-medios-${esc(normKey(grupo))}">${esc(grupo)}</h3><div class="crm2-medios-grid">${cards}</div></section>`;
     }).join('');
@@ -864,7 +867,7 @@
   function marketingCampaigns() {
     const campaigns = campaignRows();
     const body = campaigns.length ? campaigns.slice(0,4).map(campaign => {
-      const leadsHtml = campaign.people.slice(0,3).map(lead => `<button class="crm2-campaign-lead" type="button" data-c2="open-lead" data-cierra-tarea="C-M2" data-id="${esc(lead.id)}"><b>${esc(contactName(lead))}</b><span>${esc(sourceOf(lead))}</span></button>`).join('');
+      const leadsHtml = campaign.people.slice(0,3).map(lead => `<button class="crm2-campaign-lead" type="button" data-c2="open-lead" data-id="${esc(lead.id)}"><b>${esc(contactName(lead))}</b><span>${esc(sourceOf(lead))}</span></button>`).join('');
       return `<article class="crm2-campaign"><div><p class="crm2-eyebrow">CAMPAÑA · DATO DE PRUEBA</p><h3>${esc(campaign.name)}</h3><p>${campaign.people.length} contacto${campaign.people.length === 1 ? '' : 's'} con ese origen registrado.</p></div><details><summary>Ver piezas y contactos</summary><div class="crm2-campaign-details"><p><b>Origen:</b> ${esc(campaign.name)}</p><p><b>Pieza:</b> ${esc(pieceOf(campaign.people[0]))}</p><p><b>Contenido del rubro:</b> ${esc(D.SEGMENT_CONTENT?.[campaign.people[0]?.business]?.explora || 'Sin pieza asociada en el registro.')}</p>${leadsHtml}</div></details></article>`;
     }).join('') : empty('Sin campañas registradas','El origen del contacto se conserva aunque no haya una campaña asociada.');
     const tactics = Object.entries(D.FLY_TACTICS || {}).map(([stage, items]) => `<details><summary>${esc(stage)} · ${items.length} tácticas</summary><div class="crm2-tactic-list">${items.slice(0,3).map(item => `<p><b>${esc(item.t)}</b><span>${esc(item.m || item.d)}</span></p>`).join('')}</div></details>`).join('');
@@ -919,7 +922,9 @@
     // En el Hoy manda la cola de decisiones; las cuatro cifras van en el tablero compacto y el resto
     // (ventas netas, leads, reposición y NPS) queda a un toque en «Resultados del programa».
     const programa = `<details class="crm2-fold"><summary>Resultados del programa</summary><div class="crm2-fold-body">${metricGrid}${details}</div></details>`;
-    return block('Por aprobar', '', quickReview, 'crm2-approval-queue crm2-block--cola') + block('KPIs clave', '', kpiStrip) + programa;
+    const decision = `<details class="crm2-fold"><summary>Ver qué significa el NPS</summary><p>Porcentaje de promotores menos porcentaje de detractores de las respuestas válidas.</p></details>` +
+      tareaBtn('plan-marketing', '', 'Pedir un plan a Marketing');
+    return block('Espera tu aprobación', '', quickReview, 'crm2-approval-queue crm2-block--cola') + block('Metas y NPS', '', kpiStrip + decision) + programa;
   }
   function approvalSampleItems() {
     const s = currentState();
@@ -963,14 +968,14 @@
       const canApprove = !isReferralApproval || (permissionVerified && b2bVerified && benefitVerified);
       const decisionStatus = item.estado === 'pidio_info' ? 'Información solicitada a Ventas' : 'Pendiente de decisión';
       const checks = isReferralApproval ? `<ul class="crm2-checklist"><li>${statusPill(`Permiso del referido · ${permissionVerified ? 'registrado' : 'por confirmar'}`,permissionVerified ? 'good' : 'wait')}</li><li>${statusPill(`Negocio B2B · ${b2bVerified ? 'registrado' : 'por confirmar'}`,b2bVerified ? 'good' : 'wait')}</li><li>${statusPill(`Beneficio · ${benefitVerified ? 'registrado' : 'por confirmar'}`,benefitVerified ? 'good' : 'wait')}</li></ul>${!canApprove ? '<p class="crm2-small-note">Aprobar queda bloqueado hasta registrar los tres datos. No se asigna un monto al beneficio.</p>' : ''}` : `<ul class="crm2-checklist"><li>${statusPill('Excepción y motivo · revisar','wait')}</li><li>${statusPill('Monto del catálogo · referencial','wait')}</li></ul>`;
-      return `<article class="crm2-approval" data-approval="${esc(item.id)}"><div class="crm2-approval-head"><div><p class="crm2-eyebrow">${item.dataTest ? 'DATO DE PRUEBA' : 'SOLICITUD'} · ${esc(item.tipo || 'excepción')}</p><h3>${esc(item.titulo || 'Solicitud pendiente')}</h3><p>${esc(item.detalle || item.motivo || 'Motivo sin registro')}</p></div>${amount}</div>${statusPill(decisionStatus,item.estado === 'pidio_info' ? 'wait' : '')}${checks}<label class="crm2-note-field">Nota para Ventas<input type="text" data-approval-note="${esc(item.id)}" value="${esc(item.nota || '')}" placeholder="Escribe qué falta confirmar"></label><div class="crm2-row-actions">${primary('Aprobar','decide-approval',`data-id="${esc(item.id)}" data-decision="aprobada" data-cierra-tarea="${item.tipo === 'referido' ? 'C-J3' : 'C-J2'}" ${canApprove ? '' : 'disabled title="Faltan datos verificables del referido"'}`)}${secondary('Pedir información','decide-approval',`data-id="${esc(item.id)}" data-decision="pidio_info" data-cierra-tarea="${item.tipo === 'referido' ? 'C-J3' : 'C-J2'}"`)}${secondary('Rechazar','decide-approval',`data-id="${esc(item.id)}" data-decision="descartada" data-cierra-tarea="${item.tipo === 'referido' ? 'C-J3' : 'C-J2'}"`)}</div></article>`;
+      return `<article class="crm2-approval" data-approval="${esc(item.id)}"><div class="crm2-approval-head"><div><p class="crm2-eyebrow">${item.dataTest ? 'DATO DE PRUEBA' : 'SOLICITUD'} · ${esc(item.tipo || 'excepción')}</p><h3>${esc(item.titulo || 'Solicitud pendiente')}</h3><p>${esc(item.detalle || item.motivo || 'Motivo sin registro')}</p></div>${amount}</div>${statusPill(decisionStatus,item.estado === 'pidio_info' ? 'wait' : '')}${checks}<label class="crm2-note-field">Nota para Ventas<input type="text" data-approval-note="${esc(item.id)}" value="${esc(item.nota || '')}" placeholder="Escribe qué falta confirmar"></label><div class="crm2-row-actions">${primary('Aprobar','decide-approval',`data-id="${esc(item.id)}" data-decision="aprobada" ${canApprove ? '' : 'disabled title="Faltan datos verificables del referido"'}`)}${secondary('Pedir cambios','decide-approval',`data-id="${esc(item.id)}" data-decision="pidio_info"`)}${!canApprove && isReferralApproval ? secondary('Revisar datos del referido','review-referral-data',`data-id="${esc(item.id)}"`) : ''}${secondary('Rechazar','decide-approval',`data-id="${esc(item.id)}" data-decision="descartada"`)}</div></article>`;
     }).join('') : empty('No hay solicitudes pendientes','Las decisiones registradas quedan vinculadas a su propuesta o referido.');
     const followups = managerFollowups().sort(firstSelected);
     const followupHtml = followups.length ? `<div class="crm2-list">${followups.map(item => {
       const person = leadById(item.leadId) || accountById(item.leadId);
       const approvedPermission = permission(person).key === 'yes' && item.status === 'Requiere aprobación';
       const direct = approvedPermission ? primary('Aprobar recuperación', 'approve-recovery', `data-id="${esc(item.id)}"`) : '';
-      return `<article class="crm2-followup-review" data-followup="${esc(item.id)}"><p>${esc(item.name)} · ${esc(item.status === 'Bloqueado' ? 'Bloqueado: falta permiso' : item.status)}</p><p>${esc(item.reason)}</p><div class="crm2-row-actions">${direct}${secondary('Revisar permiso','review-followup',`data-id="${esc(item.leadId || item.id)}" data-cierra-tarea="C-J4"`)}</div></article>`;
+      return `<article class="crm2-followup-review" data-followup="${esc(item.id)}"><p>${esc(item.name)} · ${esc(item.status === 'Bloqueado' ? 'Bloqueado: falta permiso' : item.status)}</p><p>${esc(item.reason)}</p><div class="crm2-row-actions">${direct}${secondary('Revisar permiso','review-followup',`data-id="${esc(item.leadId || item.id)}"`)}</div></article>`;
     }).join('')}</div>` : `<div class="crm2-inline-note">Los seguimientos sin permiso de promoción permanecen bloqueados.</div>`;
     const proposals = block('Solicitudes de Ventas', 'Aprobar, pedir información o rechazar; la respuesta vuelve a la ficha.', body);
     const recovery = block('Seguimientos preparados', 'Un bloqueo de permiso no ofrece un botón para enviar.', followupHtml);
@@ -1128,7 +1133,7 @@
     // Solo aparece lo que el rol puede usar: «Preparar propuesta» y «Preparar reposición» son de Ventas (sus botones van en la barra).
     const actions = isAccount
       ? (role === 'ventas' ? '' : `<div class="crm2-detail-actions">${secondary('Agendar contacto', 'start-followup', `data-id="${esc(item.id)}"`)}</div>`) + agente
-      : (role === 'marketing' ? `<div class="crm2-detail-actions">${isMql(item) ? statusPill('MQL registrado','good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="mark-mql" data-cierra-tarea="C-M3" data-id="${esc(item.id)}">Marcar como calificado (MQL)</button>`}${progressFor(item).estado ? statusPill(statusOfLead(item),progressFor(item).estado==='devuelto'?'blocked':'good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="pass-sales" data-id="${esc(item.id)}">Pasar a Ventas</button>`}</div>` : '') + agente;
+      : (role === 'marketing' ? `<div class="crm2-detail-actions">${isMql(item) ? statusPill('MQL registrado','good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="mark-mql" data-id="${esc(item.id)}">Marcar como calificado (MQL)</button>`}${progressFor(item).estado ? statusPill(statusOfLead(item),progressFor(item).estado==='devuelto'?'blocked':'good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="pass-sales" data-id="${esc(item.id)}">Pasar a Ventas</button>`}</div>` : '') + agente;
     const referralDataAction = !isAccount && isReferral(item) && role === 'ventas' ? `<div class="crm2-detail-actions">${secondary('Pedir datos a Marketing','request-referral-data',`data-id="${esc(item.id)}"`)}</div>` : '';
     const permissionControls = !isAccount && role === 'marketing' ? `<p class="crm2-small-note">Registra una preferencia solo después de verificar la elección explícita del contacto.</p>${secondary('Confirmar permiso promocional','permission-yes',`data-id="${esc(item.id)}"`)} ${secondary('Registrar sin permiso','permission-no',`data-id="${esc(item.id)}"`)}` : '';
     const canSchedule = role !== 'marketing' || perm.key === 'yes';
@@ -1150,12 +1155,14 @@
       const reasonSelect = `<select class="crm2-action-select" data-return-reason="${esc(item.id)}" aria-label="Motivo de devolución"><option value="">Motivo para devolver</option><option>Falta volumen</option><option>No contesta</option><option>Cotiza a futuro</option><option>Falta presupuesto</option></select>`;
       const exceptionSelect = `<select class="crm2-action-select" data-approval-kind="${esc(item.id)}" aria-label="Tipo de excepción"><option value="">Tipo de excepción</option><option>Descuento fuera de lista</option><option>Comodato bajo volumen mínimo</option><option>Plazo o condición especial</option></select>`;
       const more = `<details class="crm2-action-more"><summary>Más</summary><div class="crm2-action-more-menu"><label>Motivo para devolver${reasonSelect}</label>${secondary('Devolver a Marketing','return-lead',`data-id="${esc(item.id)}"`)}<label>Tipo de excepción${exceptionSelect}</label>${secondary('Enviar a aprobación','send-approval',`data-id="${esc(item.id)}"`)}</div></details>`;
-      actionbar = actionBar(`${primary('Preparar propuesta','quote',`data-id="${esc(item.id)}"`)}${secondary('Aceptar como SQL','accept-sql',`data-id="${esc(item.id)}" data-cierra-tarea="C-V2" ${isMql(item) ? '' : 'disabled title="Marketing debe validar el MQL primero"'}`)}${more}`, true);
+      actionbar = actionBar(`${primary('Preparar propuesta','quote',`data-id="${esc(item.id)}"`)}${secondary('Aceptar como SQL','accept-sql',`data-id="${esc(item.id)}" ${isMql(item) ? '' : 'disabled title="Marketing debe validar el MQL primero"'}`)}${more}`, true);
     } else if (isAccount && role === 'ventas') {
       const id = `data-id="${esc(item.id)}"`;
       const more = `<details class="crm2-action-more"><summary>Más</summary><div class="crm2-action-more-menu">${secondary('Agendar contacto','start-followup',id)}${item.referral ? secondary('Revisar referido','open-referral',id) : ''}</div></details>`;
       // Recomendar es del programa de Marketing: Ventas prepara la reposición y cierra la cuenta.
-      actionbar = actionBar(`${primary('Preparar reposición','open-reorder',id)}${more}`, true);
+      actionbar = actionBar(`${tareaBtn('visita',item.id,'Agendar visita')}${primary('Preparar reposición','open-reorder',id)}${more}`, true);
+    } else if (!isAccount && role === 'marketing' && isMql(item) && !progressFor(item).estado) {
+      actionbar = actionBar(tareaBtn('traspaso', item.id, 'Pasar a Ventas', false), true);
     }
     else actionbar = actionBar('', true);
     return { content: (permissionFirst ? folded : '') + group1 + group2 + group3, actionbar };
@@ -1184,18 +1191,19 @@
     progress.innerHTML = [1,2,3].map(n=>`<span class="${quoteWizard.step >= n ? 'is-active' : ''}">${n}</span>`).join('');
     if (quoteWizard.step === 1) {
       const suggest = packDescription(lead);
-      target.innerHTML = `<h3>Máquina y pack sugeridos</h3><p>${esc(companyName(lead))} · ${esc(lead.business || 'Rubro sin dato')}</p><div class="crm2-suggestion"><b>${esc(suggest.name)}</b><span>${esc(suggest.kind)}</span><strong>${suggest.amount ? `${money(suggest.amount)} · valor referencial del catálogo` : 'Monto pendiente de confirmar'}</strong></div><p class="crm2-small-note">${esc(whyValue(lead,false))}</p><p>El catálogo no confirma disponibilidad ni condiciones de comodato.</p>`;
-      actions.innerHTML = `<button type="button" class="crm2-btn crm2-btn--quiet" data-c2="close-dialog">Cancelar</button>${primary('Siguiente','quote-next')}`;
+      const products = suggest.lines.length ? `<ul class="crm2-quote-products">${suggest.lines.map(line => `<li>${esc(line.name)} <span>${esc(line.quantity)} × ${esc(line.format)}</span></li>`).join('')}</ul>` : '<p>Productos por confirmar con la cuenta.</p>';
+      target.innerHTML = `<h3>Máquina y pack sugeridos</h3><p>${esc(companyName(lead))} · ${esc(lead.business || 'Rubro sin dato')}</p><div class="crm2-suggestion"><b>${esc(suggest.name)}</b><span>${esc(suggest.kind)}</span><strong>${suggest.amount ? `${money(suggest.amount)} · total neto referencial` : 'Monto pendiente de confirmar'}</strong></div>${products}<p>Incluye el kit de instalación y el filtro.</p><label>Condición comercial <select data-quote-excepcion><option value="">Sin condición especial</option><option>Descuento fuera de lista</option><option>Comodato bajo volumen mínimo</option><option>Plazo o condición especial</option></select></label><details><summary>Ver datos y canales antes de registrar el envío</summary><p>${esc(whyValue(lead,false))}</p>${secondary('Revisar envío simulado','quote-next')}</details>`;
+      actions.innerHTML = `${secondary('Cancelar','close-dialog')}${primary('Guardar propuesta','quote-save','data-cierra-tarea="C-V2"')}${primary('Enviar a aprobación','quote-approve','data-cierra-tarea="C-V2" hidden')}`;
     } else if (quoteWizard.step === 2) {
       target.innerHTML = `<h3>Datos que Ventas confirma</h3><ul class="crm2-checklist"><li>${statusPill('Contacto y permiso','wait')}<span>Confirmar quién recibirá la propuesta y qué permiso corresponde.</span></li><li>${statusPill('Volumen y pack','wait')}<span>Revisar consumo y productos base del negocio.</span></li><li>${statusPill('Precio, stock y condiciones','wait')}<span>Validar catálogo vigente, disponibilidad y oferta antes de compartir.</span></li></ul><p class="crm2-small-note">La propuesta de este prototipo es de prueba; estos datos no se envían fuera del navegador.</p>`;
       actions.innerHTML = `${secondary('Atrás','quote-back')}${primary('Siguiente','quote-next')}`;
     } else {
       target.innerHTML = `<h3>¿Cómo quieres dejar el envío simulado?</h3><p>Elige el canal para registrar la propuesta en el CRM. No se enviará un correo ni un mensaje real.</p><fieldset class="crm2-radio-set"><legend>Canal</legend><label><input type="radio" name="quote-channel" value="mensaje" ${quoteWizard.channel === 'mensaje' ? 'checked' : ''}> Mensaje en la conversación</label><label><input type="radio" name="quote-channel" value="correo" ${quoteWizard.channel === 'correo' ? 'checked' : ''}> Correo de prueba</label><label><input type="radio" name="quote-channel" value="ambos" ${quoteWizard.channel === 'ambos' ? 'checked' : ''}> Ambos · dentro del prototipo</label></fieldset>`;
-      actions.innerHTML = `${secondary('Atrás','quote-back')}${primary('Registrar envío simulado','quote-send','data-cierra-tarea="C-V3"')}`;
+      actions.innerHTML = `${secondary('Atrás','quote-back')}${primary('Registrar envío simulado','quote-send','data-cierra-tarea="C-V2"')}`;
       target.querySelectorAll('input[name="quote-channel"]').forEach(input => input.addEventListener('change', () => { quoteWizard.channel = input.value; }));
     }
   }
-  function saveQuote() {
+  function saveQuote(status = 'Enviada · simulación') {
     const lead = leadById(quoteWizard?.leadId);
     if (!lead) return;
     const offer = packDescription(lead);
@@ -1205,12 +1213,12 @@
       crm.conversations = crm.conversations || {};
       crm.quoteSeq = Number(crm.quoteSeq || 0) + 1;
       const folio = `MC-PROP-${String(crm.quoteSeq).padStart(4,'0')}`;
-      saved = { id:folio, folio, leadId:lead.id, company:companyName(lead), contact:contactName(lead), machine:offer.name, amount:offer.amount, channel:quoteWizard.channel, status:'Enviada · simulación', at:now(), dataTest:true, rationale:whyValue(lead,false) };
+      saved = { id:folio, folio, leadId:lead.id, company:companyName(lead), contact:contactName(lead), machine:offer.name, amount:offer.amount, channel:quoteWizard.channel, status, at:now(), dataTest:true, rationale:whyValue(lead,false) };
       crm.quotes.push(saved);
       crm.conversations[lead.id] = Array.isArray(crm.conversations[lead.id]) ? crm.conversations[lead.id] : [];
-      crm.conversations[lead.id].push({ from:'Ventas', text:`Propuesta ${folio} registrada por ${quoteWizard.channel} · solo simulación.`, at:now(), simulated:true });
+      crm.conversations[lead.id].push({ from:'Ventas', text:`Propuesta ${folio} · ${status}.`, at:now(), simulated:true });
       crm.rowState = crm.rowState || {};
-      crm.rowState[String(lead.id)] = { tipo:'propuesta', texto:`Propuesta ${folio} enviada hoy ${horaCorta(now())}`, kind:'ok', at:now(), by:userFor(currentState().role) };
+      crm.rowState[String(lead.id)] = { tipo:'propuesta', texto:`Propuesta ${folio} · ${status}`, kind:'ok', at:now(), by:userFor(currentState().role) };
       crm.counters = crm.counters || {};
       crm.counters.propuestas = Number(crm.counters.propuestas || 0) + 1;
       st.marketingPasos = st.marketingPasos || {};
@@ -1219,7 +1227,7 @@
     dialog?.close();
     quoteWizard?.focus?.focus?.();
     quoteWizard = null;
-    toast('Propuesta registrada',`${saved?.folio || ''} · Enviada solo en el prototipo.`);
+    toast('Propuesta registrada',`${saved?.folio || ''} · ${status}.`);
     render();
   }
 
@@ -1255,7 +1263,7 @@
     if (kind === 'draft') return Object.keys(D.SEGMENT_CONTENT || {}).length ? primary(appState().marketingDraft ? 'Generar otro borrador' : label, 'generate-marketing-draft') : '';
     if (kind.startsWith('go:')) return `<button type="button" class="crm2-btn crm2-btn--primary" data-c2-go="${kind.slice(3)}">${esc(label)}</button>`;
     // Tarea C-J1 (panel general): el CTA principal de Hoy de Jefatura es el cierre de esa tarea.
-    return primary(label, kind, pageName === 'managerSummary' ? 'data-cierra-tarea="C-J1"' : '');
+    return primary(label, kind);
   }
   function renderRoute(route, role) {
     let title, subtitle, content, bar = '';
@@ -1400,6 +1408,12 @@
       if (button.dataset.c2 === 'quote-next') { quoteWizard.step = Math.min(3, quoteWizard.step + 1); renderQuoteStep(dialog); dialog.querySelector('[data-quote-actions] button:last-child')?.focus(); }
       if (button.dataset.c2 === 'quote-back') { quoteWizard.step = Math.max(1, quoteWizard.step - 1); renderQuoteStep(dialog); dialog.querySelector('[data-quote-actions] button:last-child')?.focus(); }
       if (button.dataset.c2 === 'quote-send') saveQuote();
+      if (button.dataset.c2 === 'quote-save') saveQuote('Borrador listo');
+      if (button.dataset.c2 === 'quote-approve') {
+        const kind = dialog.querySelector('[data-quote-excepcion]')?.value;
+        const id = quoteWizard.leadId;
+        if (kind) { saveQuote('Esperando aprobación'); sendForApproval(id, kind); }
+      }
     });
   }
 
@@ -1496,9 +1510,9 @@
       render();
     });
   }
-  function sendForApproval(id) {
+  function sendForApproval(id, explicitKind) {
     const select = root()?.querySelector(`[data-approval-kind="${CSS.escape(id)}"]`);
-    const kind = select?.value || '';
+    const kind = explicitKind || select?.value || '';
     if (!kind) { toast('Elige qué necesita aprobación','Solo las excepciones comerciales pasan a Jefatura.'); select?.focus(); return; }
     withLead(id, lead => {
       const offer = packDescription(lead);
@@ -1508,6 +1522,7 @@
         st.jefeAprob.push({ id:`AP-CRM2-${next}`, leadId:id, cuenta:id, titulo:`${kind} · ${companyName(lead)}`, tipo:kind, monto:offer.amount, motivo:kind, detalle:`Solicitud de Ventas · ${whyValue(lead,false)}`, estado:'pendiente', por:userFor('ventas'), at:now(), dataTest:true });
         crm.handoffs = crm.handoffs || {};
         crm.handoffs[id] = { status:'pendiente de aprobación', reason:kind, at:now() };
+        (crm.rowState ||= {})[id] = { tipo:'propuesta', texto:'Esperando aprobación', kind:'wait', at:now() };
       });
       toast('Enviado a Jefatura','La solicitud aparece en “Por aprobar”.');
       render();
@@ -1560,7 +1575,7 @@
     const productList = orderItems.map(item => `<li><label>${esc(productLabel(item.p ?? item.k))}<input type="number" min="0" step="1" inputmode="numeric" data-reorder-qty="${esc(item.p)}" value="${esc(item.qty)}" aria-label="Cantidad de ${esc(productLabel(item.p ?? item.k))}"></label></li>`).join('') || '<li>Sin productos del último pedido para sugerir cantidades.</li>';
     const panel = root()?.querySelector('[data-inline-panel]');
     if (!panel) return;
-    panel.innerHTML = `<section class="crm2-inline-panel"><div><p class="crm2-eyebrow">REPOSICIÓN · DATO DE PRUEBA</p><h2>${esc(account.name)}</h2><p>Se sugieren las cantidades del último pedido; confirma con la cuenta qué necesita ahora.</p><ul>${productList}</ul><p class="crm2-small-note">Inventario, precio vigente y despacho no están conectados. Déjalos por confirmar.</p></div><label>Nota de preparación<input data-reorder-note placeholder="Dato por confirmar"></label><div class="crm2-row-actions">${primary('Dejar lista','save-reorder',`data-id="${esc(id)}" data-cierra-tarea="C-V4"`)}${secondary('Cancelar','close-inline')}</div></section>`;
+    panel.innerHTML = `<section class="crm2-inline-panel"><div><p class="crm2-eyebrow">REPOSICIÓN · DATO DE PRUEBA</p><h2>${esc(account.name)}</h2><p>Se sugieren las cantidades del último pedido; confirma con la cuenta qué necesita ahora.</p><ul>${productList}</ul><p class="crm2-small-note">Inventario, precio vigente y despacho no están conectados. Déjalos por confirmar.</p></div><label>Nota de preparación<input data-reorder-note placeholder="Dato por confirmar"></label><div class="crm2-row-actions">${primary('Dejar lista','save-reorder',`data-id="${esc(id)}"`)}${secondary('Cancelar','close-inline')}</div></section>`;
     panel.scrollIntoView({ block:'nearest', behavior:'smooth' });
   }
   function saveReorder(id) {
@@ -1682,6 +1697,7 @@
     if (action === 'accept-sql') { acceptSql(id); return; }
     if (action === 'return-lead') { returnLead(id); return; }
     if (action === 'send-approval') { sendForApproval(id); return; }
+    if (action === 'review-referral-data' && currentState().role === 'jefatura') { window.MarleyCRMAgente?.panel?.aprobar(id); return; }
     if (action === 'decide-approval') { approvalDecision(id,button.dataset.decision); return; }
     if (action === 'review-approval') { requestedReview = selectedReviewId = id; goto('R07'); return; }
     if (action === 'review-followup') { permissionReviewId = id; reviewPermissionOnDetail = true; detailOpen(id,accountById(id) ? 'account' : 'lead','R07'); return; }
@@ -1710,6 +1726,15 @@
     if (action === 'save-account-recommendation') { recommendAccount(id, true); return; }
     if (action === 'generate-marketing-draft') { generateMarketingDraft(false); return; }
     if (action === 'confirm-marketing-draft') { generateMarketingDraft(true); return; }
+    if (action === 'abrir-medios' && currentState().role === 'marketing') { save(crm => { crm.vistaMedios = true; }); goto('R13'); return; }
+    if (action === 'revisar-medio' && currentState().role === 'marketing') {
+      const medio = MEDIOS.find(item => item.nombre === id);
+      if (!medio) return;
+      save(crm => { (crm.mediosRevisados ||= {})[id] = { indicador:medio.kpi, at:now() }; });
+      toast('Indicador revisado', medio.kpi);
+      render();
+      return;
+    }
     if (action === 'vista-medios') { save(crm => { crm.vistaMedios = true; }); render(); return; }
     if (action === 'vista-campanas') { save(crm => { crm.vistaMedios = false; }); render(); return; }
     if (action === 'save-goal') { saveGoal(); return; }
@@ -1718,6 +1743,12 @@
   }
   function onChange(event) {
     const input = event.target;
+    if (input.matches('[data-quote-excepcion]')) {
+      const dialog = input.closest('dialog');
+      dialog.querySelector('[data-c2="quote-approve"]').hidden = !input.value;
+      dialog.querySelector('[data-c2="quote-save"]').hidden = Boolean(input.value);
+      return;
+    }
     if (input.matches('[data-c2-filter="origin"]')) {
       const value = input.value;
       save(crm=>{crm.filters=crm.filters||{};crm.filters.origin=value;}); render(); return;
