@@ -310,7 +310,8 @@
   color: var(--mp-ink);
   font: 700 17px/1.2 "Pressura", Arial, sans-serif;
 }
-.mp-sugerencias { margin-top: 24px; }
+/* DS5 · la sugerencia es un grupo del panel: 24 px como bloque (9.c) y el panel queda bajo el alto máximo. */
+.mp-sugerencias { margin-top: 24px !important; }
 .mp-sug-lista { margin-top: 12px; display: grid; gap: 12px; }
 .mp-sug {
   display: grid;
@@ -386,6 +387,14 @@
 /* Lead magnets (guías y recordatorio) */
 .mp-guia > * + * { margin-top: 8px; }
 .mp-guia .mp-btn { margin-top: 14px; }
+/* DS5 · la guía se pliega: el resumen es el título y al abrir aparece el enlace. */
+.mp-guia-resumen { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; list-style: none; font-weight: 700; }
+.mp-guia-resumen::-webkit-details-marker { display: none; }
+.mp-guia-resumen .mp-kicker { margin: 0; }
+.mp-guia-resumen::after { content: "+"; margin-left: auto; font: 700 22px/1 "Pressura", Arial, sans-serif; }
+.mp-guia[open] .mp-guia-resumen::after { content: "–"; }
+.mp-guia-cuerpo { display: grid; gap: 8px; }
+.mp-guia-cuerpo .mp-btn { margin-top: 6px; }
 
 /* Cuerpo del portal: en celular, pestaña y después el agente; en escritorio, el agente a un costado (sin posición fija). */
 .mp-cuerpo { display: block; min-width: 0; }

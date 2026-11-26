@@ -82,3 +82,33 @@ body[data-current="C09"]:has(#portal-host[data-montado]) :is(#m7-launcher, #mcm-
 .cmp-ejemplo > summary { min-height: 44px; padding: 12px; cursor: pointer; }
 .cmp-ejemplo img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; }
 .cmp-sub, .cmp-fijos { margin: 0; font-size: 14px; }
+
+/* DS4/DS5 · C05: en celular se apila; desde 1024 px la máquina queda a la
+   izquierda y el resumen (miniaturas, cantidad, total y acciones) en una
+   tarjeta fija a la derecha, visible en la primera pantalla. */
+.cmp-pack, .cmp-pack-main { min-width: 0; display: grid; gap: 24px; }
+.cmp-pack-card { min-width: 0; display: grid; gap: 16px; align-content: start; }
+.cmp-acciones--pack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.cmp-acciones--pack .m5-btn { width: 100%; justify-content: center; }
+/* En celular se conserva el orden de siempre: primero ver, después aceptar. */
+@media (max-width: 1023px) {
+  body[data-current="C05"] #app .cmp-acciones--pack .mc-btn--main { order: 0; }
+  body[data-current="C05"] #app .cmp-acciones--pack .mc-btn--sec { order: -1; }
+}
+@media (min-width: 1024px) {
+  body[data-current="C05"] #app .cmp-pack-wrap { max-width: 1080px; }
+  body[data-current="C05"] #app .cmp-pack { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; gap: 24px; }
+  body[data-current="C05"] #app .cmp-pack-main { gap: 24px; }
+  /* DS5: sin `position: sticky` (la prueba A1 la cuenta como capa que tapa);
+     la tarjeta queda arriba de su columna y el total se ve en la primera pantalla. */
+  body[data-current="C05"] #app #pack-resumen.cmp-pack-card {
+    gap: 16px;
+    padding: 24px;
+    border: 1px solid #e6e6e6;
+    border-radius: 16px;
+    background: #fff;
+  }
+  body[data-current="C05"] #app #pack-resumen .cmp-total { gap: 4px; padding-top: 0; border-top: 0; }
+  body[data-current="C05"] #app .cmp-pack .cmp-maquina { grid-template-columns: 280px minmax(0, 1fr); }
+  body[data-current="C05"] #app .cmp-pack .cmp-maquina img { width: 280px; max-width: 100%; }
+}

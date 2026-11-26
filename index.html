@@ -6427,7 +6427,7 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
 </section>
 <section class="ux-section" id="insumos"><div class="ux-wrap"><div class="ux-cafe-card"><div><span class="ux-eyebrow">Café e insumos</span><h2>¿Qué café e insumos puedo pedir?</h2><p class="r5-brandline">Elige café e insumos para tu negocio.</p><p>Elige una selección sugerida y ajústala, o selecciona tus productos uno por uno.</p></div><button type="button" class="m5-btn" data-m9-open>Ver packs y productos ${icon('arrow',18)}</button></div></div></section>
 <section class="ux-section" id="negocios" aria-labelledby="h-negocios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Para cada forma de servir</span><h2 id="h-negocios">¿Qué necesita tu tipo de negocio?</h2></div></div><div class="m5-buyer-groups" aria-label="Categorías de negocio">${tabs}</div>
-<div class="ux-buyer-panel" id="panel-biz" aria-live="polite">${V.WF()?'<div class="m5-ph ux-buyer-photo" role="img" aria-label="Servicio de café">Imagen del negocio</div>':`<img class="ux-buyer-photo" src="${biz==='Hotel'?'recursos/legado/hotel-automatica-portada.webp':D.SCENES[B.scene].fin}" alt="Servicio de café para ${esc(article(biz))}" loading="lazy" decoding="async" fetchpriority="low">`}<div class="ux-buyer-copy"><span class="ux-eyebrow" style="color:#F3C900">${esc(biz === 'OCS' ? 'Oficinas' : biz)}</span><h3><span class="r5-business-h3-line">Café para ${{Hotel: 'hoteles', Restaurante: 'restaurantes', Cafetería: 'cafeterías', 'Eventos o catering': 'eventos', Oficinas: 'oficinas', Conveniencia: 'tiendas de conveniencia', Panadería: 'panaderías'}[biz] || 'negocios'}</span>${esc(B.h)}</h3><p>${esc(B.p)}</p><button type="button" class="m5-btn" data-a="quote-biz" data-v="${esc(biz)}">Elegir productos ${icon('arrow',18)}</button></div></div></div></section>
+<div class="ux-buyer-panel" id="panel-biz" aria-live="polite">${V.WF()?'<div class="m5-ph ux-buyer-photo" role="img" aria-label="Servicio de café">Imagen del negocio</div>':`<img class="ux-buyer-photo" width="640" height="275" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-zoom data-zoom-grupo="inicio" data-comodato-foto="${biz==='Hotel'?'recursos/legado/hotel-automatica-portada.webp':D.SCENES[B.scene].fin}" alt="Servicio de café para ${esc(article(biz))}" loading="lazy" decoding="async" fetchpriority="low">`}<div class="ux-buyer-copy"><span class="ux-eyebrow" style="color:#F3C900">${esc(biz === 'OCS' ? 'Oficinas' : biz)}</span><h3><span class="r5-business-h3-line">Café para ${{Hotel: 'hoteles', Restaurante: 'restaurantes', Cafetería: 'cafeterías', 'Eventos o catering': 'eventos', Oficinas: 'oficinas', Conveniencia: 'tiendas de conveniencia', Panadería: 'panaderías'}[biz] || 'negocios'}</span>${esc(B.h)}</h3><p>${esc(B.p)}</p><button type="button" class="m5-btn" data-a="quote-biz" data-v="${esc(biz)}">Elegir productos ${icon('arrow',18)}</button></div></div></div></section>
 <section class="ux-section ux-machine-scroll" id="maquinas" data-driver><div class="ux-wrap ux-machine-scroll-stage"><div class="ux-machine-visual">${V.cam('barras',{label:'Animación de las máquinas Marley Coffee'})}</div><div class="ux-cafe-card"><div><span class="ux-eyebrow">Máquina en comodato</span><span class="ux-machine-caption" data-machine-caption role="status" aria-live="polite" aria-atomic="true">Máquina Bar</span><h2>¿Qué máquina de café me prestan en comodato?</h2><h3 class="r5-machine-answer">${esc(D.MACHINES[B.machine].name)}: ${esc(D.MACHINES[B.machine].kind)}</h3><p class="r5-brandline">Una máquina para tu forma de servir.</p><p>${esc(D.MACHINES[B.machine].line)}</p><p>Prestamos la máquina; compras insumos cada mes y te orientamos según tu operación.</p></div><button type="button" class="m5-btn" data-a="quote">Armar mi solución ${icon('arrow',18)}</button></div></div></section>
 <section class="ux-section" id="servicios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Más para tu negocio</span><h2>Servicios y experiencias.</h2></div><p>Agrega lo que te interese a tu propuesta.</p></div><details class="m5-more"><summary>Explorar servicios disponibles</summary>${bento}</details><p class="m5-cta-note">Servicios y condiciones sujetos a confirmación.</p><details class="m5-more"><summary>¿Creas contenido sobre café o gastronomía?</summary><p>Conversemos sobre una posible colaboración.</p><button type="button" class="m5-btn m5-btn--ghost" data-a="creator-interest">Conversar sobre una alianza</button></details></div></section>
 <section class="ux-section ux-faq" id="faq"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Estamos para ayudarte</span><h2>Preguntas frecuentes.</h2></div></div><div>${faq}</div></div></section>
@@ -9937,9 +9937,15 @@ ${HTTP ? '<button type="button" class="m4t-btn m4t-btn--sm" id="hmSrv">Cargar de
       const raw = localStorage.getItem(SKEY);
       if (raw) {
         const prev = JSON.parse(raw), resumeGoogle = TEST === 'sitio' && q.get('journey') === 'resume' && prev?.journey?.type === 'google-search-simulation';
-        if (prev && prev.v === 2 && !prev.fin && (resumeGoogle || confirm('Hay un test sin terminar en este dispositivo. ¿Continuarlo?'))) {
+        // DS5: dentro de un marco (el recorrido de la prueba) no se pregunta nada:
+        // el aviso nativo tapaba el sitio y el CTA no se podía apretar. Se retoma y ya.
+        let enMarco = false;
+        try { enMarco = window.self !== window.top; } catch (_) { enMarco = true; }
+        if (prev && prev.v === 2 && !prev.fin && (resumeGoogle || enMarco || confirm('Hay un test sin terminar en este dispositivo. ¿Continuarlo?'))) {
           S = prev; DEF = defs(S);
-          if (resumeGoogle) document.body.classList.add('m4t-session-started');
+          // DS5: al retomar dentro del marco la sesión ya está empezada; sin esta clase
+          // el cuerpo quedaba con overflow:hidden y el CTA no se podía alcanzar.
+          if (resumeGoogle || enMarco) document.body.classList.add('m4t-session-started');
           const lastEvent = S.eventos.length ? S.eventos[S.eventos.length - 1] : null;
           const lastEventTime = lastEvent ? Number(lastEvent.t) || 0 : 0;
           const startedAt = Number(q.get('journey_started_at')) || Number(S.journey?.startedAt) || 0;
@@ -13031,6 +13037,9 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
   }
   C.__r3Original = C.__r3Original || {};
   ["C02", "C04", "C05", "C06", "C09"].forEach(function (id) { if (!C.__r3Original[id]) C.__r3Original[id] = C.SCREENS[id]; });
+  // DS4: las fotos que se cargan al entrar en vista llevan un marcador transparente en src
+  // para que no aparezca el ícono de imagen rota mientras esperan.
+  const FOTO_PENDIENTE = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
   function c02Wrap() {
     const offer = buyerFor(M.get());
     if (offer && !(M.get().answers && M.get().answers.negocio)) C.ui.biz = offer.negocio;
@@ -13050,20 +13059,24 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       return sectionRun.slice(a, b + '</section>'.length);
     };
     let hero = getSection(originalStart, 'hero');
+    // DS5: la letra chica del comodato sale del hero y pasa a «Ver condiciones de la carga base»,
+    // para recuperar alto sin quitar aire entre bloques ni secciones.
     hero = hero
       .replace('<p class="r5-brandline">Café para empresas que mueve tu negocio.</p>', '')
+      .replace(/<p class="cmp-aclara">[\s\S]*?<\/p>/, '')
       .replace(/<p>(?:<strong>)?No necesitas saber qué máquina elegir\.(?:<\/strong>)?[\s\S]*?<\/p>/,
         '<p>Cuéntanos cómo sirves el café y te orientamos.</p>');
     const maquinas = Object.entries(DATA.offer.maquinas).map(([id, m]) => {
       const compradores = DATA.offer.buyers.filter(b => b.maquina === id).map(b => b.etiqueta);
-      return '<article class="mc-card cmp-home-maquina"><img data-comodato-foto="recursos/maquinas/' + id + '_foto.webp" alt="' + esc(m.nombre) + '" width="240" height="165" loading="lazy" decoding="async" data-zoom data-zoom-grupo="maquinas">' +
+      return '<article class="mc-card cmp-home-maquina"><img src="' + FOTO_PENDIENTE + '" data-comodato-foto="recursos/maquinas/' + id + '_foto.webp" alt="' + esc(m.nombre) + '" width="240" height="165" loading="lazy" decoding="async" data-zoom data-zoom-grupo="maquinas">' +
       '<h4>' + esc(m.nombre) + '</h4><p class="cmp-maquina-buyer">' + esc(compradores.join(' · ')) + '</p><p>' + esc(m.linea) + '</p>' +
       '<dl><dt>Capacidad</dt><dd>' + esc(m.tazas) + '</dd><dt>Atención</dt><dd>' + esc(m.atencion) + '</dd></dl></article>';
     }).join('');
-    const strip = getSection('<section class="ux-strip"', 'strip').replace('<!-- maquinas-comodato -->', maquinas);
+    const strip = getSection('<section class="ux-strip"', 'strip')
+      .replace('<summary>Ver condiciones de la carga base</summary><p>', '<summary>Ver condiciones de la carga base</summary><p>En comodato: la máquina queda en préstamo mientras compras café. ')
+      .replace('<!-- maquinas-comodato -->', maquinas);
     const coffee = getSection('<section class="ux-section" id="insumos"', 'coffee').replace(/<\/section>$/, '</section>');
-    const business = getSection('<section class="ux-section" id="negocios"', 'business')
-      .replace('<img class="ux-buyer-photo" src=', '<img class="ux-buyer-photo" width="640" height="275" data-zoom data-zoom-grupo="inicio" data-comodato-foto=');
+    const business = getSection('<section class="ux-section" id="negocios"', 'business');
     let machine = getSection('<section class="ux-section ux-machine-scroll" id="maquinas"', 'machine');
     let services = getSection('<section class="ux-section" id="servicios"', 'services');
     let faq = getSection('<section class="ux-section ux-faq" id="faq"', 'faq');
@@ -23235,6 +23248,13 @@ body[data-current="C10"] #m4-main .r7-copy-sentence+.r7-copy-sentence{margin:0}
   window.addEventListener('resize', refresh, {passive:true});
   window.addEventListener('scroll', refresh, {passive:true});
   reduced.addEventListener ? reduced.addEventListener('change', refresh) : reduced.addListener(refresh);
+  // DS5: el aviso flotante debe quedar en el mismo estado con y sin reducir movimiento.
+  // Se vuelve a medir cuando termina la carga y cuando cambia el alto del contenido.
+  window.addEventListener('load', () => { refresh(); setTimeout(refresh, 300); }, { once: true });
+  if (window.ResizeObserver) {
+    const observado = document.getElementById('m4-main');
+    if (observado) new ResizeObserver(refresh).observe(observado);
+  }
 })();
 </script>
 <!-- R6 · r7_aire_crm.html -->
@@ -25122,7 +25142,7 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
   }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && overlayEl && !overlayEl.hidden) closeMail(); });
 })();
-</script><link rel="stylesheet" href="recursos/marca/piloto-premium.css?v=20261123"><link rel="stylesheet" href="recursos/marca/componentes.css?v=20261126c">
+</script><link rel="stylesheet" href="recursos/marca/piloto-premium.css?v=20261123"><link rel="stylesheet" href="recursos/marca/componentes.css?v=20261126e">
 <script id="marley-crm-v2-loader">
 (() => {
   let requested = false;
@@ -25147,34 +25167,32 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
 (() => {
   const app = document.getElementById('app');
   const foto = '[data-comodato-foto]';
-  const observer = new IntersectionObserver(entries => {
-    for (const { target, isIntersecting } of entries) {
-      if (!isIntersecting) continue;
-      for (const image of target.querySelectorAll(foto)) {
-        image.src = image.dataset.comodatoFoto;
-        image.removeAttribute('data-comodato-foto');
-      }
-      observer.unobserve(target);
-    }
-  }, { rootMargin: '32px' });
-  const observe = () => {
-    for (const group of app.querySelectorAll('.cmp-home-maquinas, #panel-biz')) {
-      if (group.querySelector(foto)) observer.observe(group);
+  // DS4: las fotos se cargan al entrar a la vista, sin esperar una interacción.
+  // DS5: solo se carga lo que de verdad se ve (15 % del bloque, sin margen extra).
+  // La visibilidad se mide sobre el dibujado ya aquietado: un IntersectionObserver
+  // avisaba a mitad del render, cuando la sección parecía visible sin estarlo.
+  const visible = (caja) => {
+    const box = caja.getBoundingClientRect();
+    const vh = innerHeight || document.documentElement.clientHeight;
+    const alto = Math.min(box.bottom, vh) - Math.max(box.top, 0);
+    return alto > 0 && alto >= Math.min(box.height, vh) * 0.15;
+  };
+  const cargarVisibles = () => {
+    for (const image of app.querySelectorAll(foto)) {
+      const caja = image.closest('.cmp-home-maquinas, #panel-biz') || image;
+      if (!visible(caja)) continue;
+      image.src = image.dataset.comodatoFoto;
+      image.removeAttribute('data-comodato-foto');
     }
   };
-  const start = () => {
-    new MutationObserver(observe).observe(app, { childList: true, subtree: true });
-    observe();
-  };
-  if (!matchMedia('(max-width:767px)').matches) { start(); return; }
-  // El arranque móvil reserva la portada para la navegación y el hero.
-  const input = new AbortController();
-  for (const event of ['pointerdown', 'wheel', 'touchstart', 'keydown']) {
-    addEventListener(event, () => {
-      input.abort();
-      start();
-    }, { capture: true, passive: true, signal: input.signal });
-  }
+  let turno = 0;
+  const programar = () => { clearTimeout(turno); turno = setTimeout(cargarVisibles, 120); };
+  addEventListener('scroll', programar, { passive: true, capture: true });
+  addEventListener('resize', programar, { passive: true });
+  addEventListener('hashchange', programar);
+  addEventListener('load', () => { cargarVisibles(); setTimeout(cargarVisibles, 400); }, { once: true });
+  new MutationObserver(programar).observe(app, { childList: true, subtree: true });
+  setTimeout(cargarVisibles, 600);
 })();
 </script>
 <script>
@@ -25186,8 +25204,24 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
     const footer = app.querySelector('.r5-mobile-final-action');
     footer?.classList.toggle('is-inline-visible', entry.intersectionRatio >= .95);
   }, { rootMargin: '0px 0px -72px', threshold: .95 });
+  // DS5: la barra fija de C04 nunca tapa contenido; el espacio reservado se mide
+  // sobre la barra real y se aplica en línea, sin depender de la hoja de estilos.
+  const reservarEspacio = () => {
+    const barra = document.body.dataset.current === 'C04' ? app.querySelector('.r4-diag .r5-mobile-final-action') : null;
+    if (!barra) {
+      // Fuera de C04 no se reserva nada: el espacio en línea se retira y manda la hoja.
+      if (app.style.getPropertyValue('padding-bottom')) app.style.removeProperty('padding-bottom');
+      return;
+    }
+    const alto = Math.round(barra.getBoundingClientRect().height) || 69;
+    app.style.setProperty('padding-bottom', (alto + 7) + 'px', 'important');
+    app.querySelectorAll('.r4-acciones [data-r4-next]').forEach((boton) => {
+      boton.style.setProperty('scroll-margin-bottom', (alto + 15) + 'px', 'important');
+    });
+  };
   const update = () => {
     const next = app.querySelector('.r4-acciones [data-r4-next]');
+    reservarEspacio();
     if (next === actual) return;
     visibility.disconnect();
     actual = next;
@@ -25198,6 +25232,7 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
 })();
 </script>
 <script src="crm/crm-carga.js"></script>
-<script>(function(){var P=/^#C0[456]$|^#C09$/,L=0,T={C01:['Empresas →','empresas'],C08:['Armar mi solución','armar'],C10:['Continuar con mis datos →','datos'],C11:['Continuar a packs y productos','packs']};function ld(){if(L)return;L=1;var l=document.createElement('link');l.rel='stylesheet';l.href='recursos/compra/compra.css?v=20261126';document.head.appendChild(l);var j=document.createElement('script');j.src='recursos/compra/compra.js?v=20261126';j.onload=function(){window.MarleyApp&&MarleyApp.render&&MarleyApp.render()};document.body.appendChild(j)}function pend(r){var x=document.querySelector('.cta-pendiente'),st=window.M4&&M4.get(),on=r==='C02'&&st&&st.compra&&st.compra.pendiente&&st.proposal&&st.proposal.status!=='aceptada';if(!on){if(x)x.remove();return}if(x)return;var m=document.querySelector('#app main');if(!m)return;var d=document.createElement('div');d.className='cta-pendiente';d.style.cssText='margin:24px auto 0;padding:16px clamp(20px,3vw,32px);max-width:820px;display:grid;gap:10px;border:2px solid #161616';d.innerHTML='<p style="margin:0;font-weight:700">Tienes una propuesta pendiente: tu pack de inicio te espera.</p><a class="m5-btn r3-main" href="#C05" data-go="C05" data-cierra-tarea="T4" data-evt="retomar-propuesta" style="justify-self:start">Retomar mi propuesta</a>';m.insertBefore(d,m.firstChild)}function pl(){if(!/^(#C02)?$/.test(location.hash||''))return;var p=document.querySelector('.r3-c02-product-pair');if(!p)return;[['insumos','¿Qué café e insumos puedo pedir?'],['maquinas','¿Qué máquina me prestan en comodato?']].forEach(function(x){var e=p.querySelector('#'+x[0]);if(!e||e.parentNode.tagName==='DETAILS')return;var d=document.createElement('details');d.className='r7-fold r7-c02-fold';d.setAttribute('data-r7-fold',x[0]);var h=document.createElement('summary');h.innerHTML='<span class="r7-summary-heading" role="heading" aria-level="2">'+x[1]+'</span>';e.parentNode.insertBefore(d,e);d.appendChild(h);d.appendChild(e)})}function cta(){pl();var r=(location.hash||'#C01').slice(1).split('?')[0],ex=document.querySelector('.cta-cierre');pend(r);if(!T[r]){if(ex)ex.remove();return}if(ex&&ex.getAttribute('data-r')===r)return;if(ex)ex.remove();var m=document.querySelector('#app main');if(!m)return;var b=[].slice.call(document.querySelectorAll('#app a,#app button')).find(function(e){return e.textContent.indexOf(T[r][0])>=0&&e.getClientRects().length>0});if(!b)return;b.setAttribute('data-cta-principal',T[r][1]);var w=document.createElement('div');w.className='cta-cierre';w.setAttribute('data-r',r);w.style.cssText='margin:40px auto;padding:0 clamp(20px,3vw,32px);max-width:820px';var c=b.cloneNode(true);c.removeAttribute('id');w.appendChild(c);m.appendChild(w)}function ck(){if(P.test(location.hash))ld();cta()}addEventListener('hashchange',ck);document.addEventListener('r3:listo',pl);addEventListener('load',pl);new MutationObserver(cta).observe(document.body,{childList:true,subtree:true});ck()})();</script>
+<script>(function(){var P=/^#C0[456]$|^#C09$/,L=0,T={C01:['Empresas →','empresas'],C08:['Armar mi solución','armar'],C10:['Continuar con mis datos →','datos'],C11:['Continuar a packs y productos','packs']};function ld(){if(L)return;L=1;var l=document.createElement('link');l.rel='stylesheet';l.href='recursos/compra/compra.css?v=20261126d';document.head.appendChild(l);var j=document.createElement('script');j.src='recursos/compra/compra.js?v=20261126d';j.onload=function(){window.MarleyApp&&MarleyApp.render&&MarleyApp.render()};document.body.appendChild(j)}function pend(r){var x=document.querySelector('.cta-pendiente'),st=window.M4&&M4.get(),on=r==='C02'&&st&&st.compra&&st.compra.pendiente&&st.proposal&&st.proposal.status!=='aceptada';if(!on){if(x)x.remove();return}if(x)return;var m=document.querySelector('#app main');if(!m)return;var d=document.createElement('div');d.className='cta-pendiente';d.style.cssText='margin:24px auto 0;padding:16px clamp(20px,3vw,32px);max-width:820px;display:grid;gap:10px;border:2px solid #161616';d.innerHTML='<p style="margin:0;font-weight:700">Tienes una propuesta pendiente: tu pack de inicio te espera.</p><a class="m5-btn r3-main" href="#C05" data-go="C05" data-cierra-tarea="T4" data-evt="retomar-propuesta" style="justify-self:start">Retomar mi propuesta</a>';m.insertBefore(d,m.firstChild)}function pl(){if(!/^(#C02)?$/.test(location.hash||''))return;var p=document.querySelector('.r3-c02-product-pair');if(!p)return;[['insumos','¿Qué café e insumos puedo pedir?'],['maquinas','¿Qué máquina me prestan en comodato?']].forEach(function(x){var e=p.querySelector('#'+x[0]);if(!e||e.parentNode.tagName==='DETAILS')return;var d=document.createElement('details');d.className='r7-fold r7-c02-fold';d.setAttribute('data-r7-fold',x[0]);var h=document.createElement('summary');h.innerHTML='<span class="r7-summary-heading" role="heading" aria-level="2">'+x[1]+'</span>';e.parentNode.insertBefore(d,e);d.appendChild(h);d.appendChild(e)})}function cta(){pl();var r=(location.hash||'#C01').slice(1).split('?')[0],ex=document.querySelector('.cta-cierre');pend(r);if(!T[r]){if(ex)ex.remove();return}if(ex&&ex.getAttribute('data-r')===r)return;if(ex)ex.remove();var m=document.querySelector('#app main');if(!m)return;var b=[].slice.call(document.querySelectorAll('#app a,#app button')).find(function(e){return e.textContent.indexOf(T[r][0])>=0&&e.getClientRects().length>0});if(!b)return;b.setAttribute('data-cta-principal',T[r][1]);var w=document.createElement('div');w.className='cta-cierre';w.setAttribute('data-r',r);w.style.cssText='margin:40px auto;padding:0 clamp(20px,3vw,32px);max-width:820px';var c=b.cloneNode(true);c.removeAttribute('id');w.appendChild(c);m.appendChild(w)}function ck(){if(P.test(location.hash))ld();cta()}addEventListener('hashchange',ck);document.addEventListener('r3:listo',pl);addEventListener('load',pl);new MutationObserver(cta).observe(document.body,{childList:true,subtree:true});ck()})();</script>
+<style id="ds5-c04-reserva">@media (max-width:767px){body[data-current="C04"] #app{padding-bottom:calc(76px + env(safe-area-inset-bottom))!important}body[data-current="C04"] #app :is(button,input,select,textarea,a){scroll-margin-bottom:84px}}</style>
 <script src="recursos/vida/cargar-vida.js?v=20261126b" defer></script>
 </body></html>

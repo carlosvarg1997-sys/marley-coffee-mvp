@@ -446,7 +446,7 @@
     var filas = Object.keys(base).map(function (k) { return filaRepetir(k, base[k]); }).join('');
     var sug = sugerencias(x, base);
     var elegidas = agregadas(x).map(function (ch) { return ch.productId; });
-    var sugHTML = sug.length ? '<section class="mp-bloque mp-sugerencias" aria-labelledby="mp-h-sug"><h3 id="mp-h-sug" class="mp-h3">Te puede servir</h3>' +
+    var sugHTML = sug.length ? '<div class="mp-bloque mp-sugerencias" role="group" aria-labelledby="mp-h-sug"><h3 id="mp-h-sug" class="mp-h3">Te puede servir</h3>' +
       '<p class="mp-fino">Puedes agregarlas o dejarlas. Solo se suman si las aceptas.</p><ul class="mp-sug-lista">' +
       sug.map(function (sg) {
         var agregada = elegidas.indexOf(sg.pid) >= 0;
@@ -459,7 +459,7 @@
           '<button type="button" class="mp-btn mp-btn--sec" data-portal-sugerencia="' + esc(sg.pid) + '" data-portal-decision="agregar" aria-pressed="' + (agregada ? 'true' : 'false') + '" data-evt="repetir_sugerencia_agregar">Agregar</button>' +
           '<button type="button" class="mp-btn mp-btn--sec" data-portal-sugerencia="' + esc(sg.pid) + '" data-portal-decision="no" aria-pressed="' + (descartada ? 'true' : 'false') + '" data-evt="repetir_sugerencia_no">No, gracias</button>' +
           '</div></li>';
-      }).join('') + '</ul></section>' : '';
+      }).join('') + '</ul></div>' : '';
     var total = totalRepetir(x, base);
     var ctaRep = '<div class="mp-accion"><button type="submit" form="mp-form-repetir" class="mp-btn mp-btn--primario" data-cta-principal="repetir-confirmar" data-cierra-tarea="T5" data-evt="repetir_confirmar">Confirmar repetición</button></div>';
     return '<section id="mp-panel-repetir" class="mp-panel" role="tabpanel" aria-labelledby="mp-tab-repetir" data-portal-panel="repetir">' +
@@ -532,9 +532,10 @@
       '<details class="mp-bloque mp-consultas" data-rapidas' + (respuesta ? ' open' : '') + '><summary>Preguntas rápidas</summary><div class="mp-chips">' + rapidas + '</div>' +
       (respuesta ? '<p id="portal-rapida-respuesta" class="mp-respuesta" role="status">' + esc(respuesta) + '</p>' : '') + '</details>' +
       (formatoEscritorio.matches ? '' : agenteHTML(x)) +
-      '<section class="mp-tarjeta mp-guia" aria-labelledby="mp-h-guia"><p class="mp-kicker">Guía</p><h3 id="mp-h-guia" class="mp-h3">Guía de cuidado de tu máquina</h3>' +
-      '<p class="mp-fino">Qué revisar, cómo pedir ayuda y los datos de tu máquina.</p>' +
-      '<a class="mp-btn mp-btn--sec" href="' + esc(guia) + '" data-lead-magnet="guia-cuidado" data-evt="ayuda_guia_cuidado">Abrir la guía de cuidado</a></section>' +
+      // DS5: la guía es contenido secundario de la pestaña; se pliega para no pasar el alto máximo en celular.
+      '<details class="mp-tarjeta mp-guia"><summary class="mp-guia-resumen"><span class="mp-kicker">Guía</span><span class="mp-guia-t">Guía de cuidado de tu máquina</span></summary>' +
+      '<div class="mp-guia-cuerpo"><p class="mp-fino">Qué revisar, cómo pedir ayuda y los datos de tu máquina.</p>' +
+      '<a class="mp-btn mp-btn--sec" href="' + esc(guia) + '" data-lead-magnet="guia-cuidado" data-evt="ayuda_guia_cuidado">Abrir la guía de cuidado</a></div></details>' +
       '<div class="mp-espaciador" aria-hidden="true"></div><div class="mp-cierre"><button type="submit" form="mp-form-ayuda" class="mp-btn mp-btn--primario" data-cta-principal="ayuda-enviar" data-cierra-tarea="T6" data-evt="ayuda_enviar">Enviar</button></div>' +
       '</section>';
   }

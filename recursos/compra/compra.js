@@ -152,8 +152,8 @@
   function botonAceptar() {
     return '<button type="button" class="m5-btn mc-btn mc-btn--main" data-pack-accion="aceptar" data-cierra-tarea="T2" data-cta-principal="aceptar-pack" data-evt="pack-aceptar">Aceptar mi pack</button>';
   }
-  function accionesPack() {
-    return '<div class="cmp-acciones"><button type="button" class="m5-btn mc-btn mc-btn--sec" data-pack-accion="ver-productos" data-evt="pack-ver-productos" aria-controls="pack-productos" aria-expanded="' + ui.verProductos + '">' + (ui.verProductos ? 'Ocultar productos' : 'Ver mis productos') + '</button>' + botonAceptar() + '</div>';
+  function botonVerProductos() {
+    return '<button type="button" class="m5-btn mc-btn mc-btn--sec" data-pack-accion="ver-productos" data-evt="pack-ver-productos" aria-controls="pack-productos" aria-expanded="' + ui.verProductos + '">' + (ui.verProductos ? 'Ocultar productos' : 'Ver mis productos') + '</button>';
   }
   function pantallaC05(s, p) {
     if (s.compra && s.compra.paso === 'cruce') return '<section class="cmp-sec"><div class="cmp-wrap">' + cruceHTML() + '</div></section>';
@@ -163,13 +163,22 @@
     var saludo = com && com.mensaje ? '<p class="cmp-saludo">' + esc(com.mensaje) + '</p>' : '';
     var motivo = s.catalogJourney?.machineSource === 'cliente' ? 'Elegiste esta máquina directamente.' : window.R5?.porque?.(s, maquina.key) || mq.kind;
     var extra = s.compra && s.compra.extra ? '<p class="cmp-ok">Sumaste la taza de la marca a tu pack: su precio lo confirma tu ejecutivo.</p>' : '';
-    return '<section class="cmp-sec" aria-labelledby="cmp-pack-t"><div class="cmp-wrap">' +
+    // DS4: desde 1024 px, la máquina a la izquierda y una tarjeta fija a la derecha con
+    // el total y las acciones. DS5: la máquina sale de #pack-resumen; el resumen queda
+    // solo con miniaturas (≤96 px), cantidad, total + IVA y «Ver mis productos».
+    return '<section class="cmp-sec" aria-labelledby="cmp-pack-t"><div class="cmp-wrap cmp-pack-wrap">' +
       cabecera('Tu pack', titulo, '', 'cmp-pack-t') + saludo +
+      '<div class="cmp-pack">' +
+      '<div class="cmp-pack-main">' +
       '<div class="cmp-maquina"><img src="' + esc(mq.photo) + '" alt="' + esc(mq.name) + '" width="160" height="140" loading="lazy" data-zoom data-zoom-grupo="maquina"><div><b>' + esc(mq.name) + '</b><span>' + esc(mq.cupsTxt) + '</span><small>' + esc(mq.staff) + '</small><p class="cmp-motivo">' + esc(motivo) + '</p></div></div>' +
-      '<div id="pack-resumen"><div class="cmp-linea"><div class="cmp-minis">' + miniaturas(p) + '</div><p>' + p.enPack.length + ' productos, más el kit de instalación y el filtro.' + (com ? ' Elegidos para ' + esc(etiq) + '.' : '') + '</p></div>' +
+      extra +
+      '</div>' +
+      '<aside id="pack-resumen" class="cmp-pack-card" aria-label="Resumen de tu pack">' +
       '<div class="cmp-total premium-quote-total mc-price"><span class="mc-price-label">Total neto referencial</span><strong class="mc-price-value" data-pack-total="' + p.total + '" data-vida="cuenta" data-valor="' + p.total + '">' + clp(p.total) + '</strong><small>+ IVA · referencial</small></div>' +
-      extra + accionesPack() +
+      '<div class="cmp-acciones cmp-acciones--pack">' + botonAceptar() + botonVerProductos() + '</div>' +
+      '<div class="cmp-linea"><div class="cmp-minis">' + miniaturas(p) + '</div><p>' + p.enPack.length + ' productos, más el kit de instalación y el filtro.' + (com ? ' Elegidos para ' + esc(etiq) + '.' : '') + '</p></div>' +
       '<p class="cmp-nota">Precios netos referenciales, de la cotización del 19-oct-2026. Modelo, mínimo mensual y plazo de entrega: los confirma el equipo.</p>' +
+      '</aside>' +
       '</div>' + (ui.verProductos ? detalle(p) : '<div id="pack-productos" hidden></div>') + (ui.contacto ? contactoHTML(s) : '') + ejemplo +
       '<section class="cmp-cambios mc-card" aria-label="Cambios a tu pack"><details><summary>¿Necesitas cambiar algo?</summary><div class="cmp-cambios-lista"><button type="button" class="cmp-link" data-pack-accion="cambiar-maquina" data-evt="pack-cambiar-maquina">Cambiar máquina</button><button type="button" class="cmp-link" data-pack-accion="cambiar-respuestas" data-evt="pack-cambiar-respuestas">Cambiar respuestas</button><button type="button" class="cmp-link" data-pack-accion="guardar-despues" data-evt="guardar-propuesta">Guardar y seguir después</button><details><summary>Guías y ayuda</summary><a class="cmp-link" href="' + esc(guiaHref(s)) + '" data-evt="lead-magnet-guia-maquina">Guía para elegir máquina</a><button type="button" class="cmp-link" data-m7-open="ayuda" data-evt="pack-abrir-ayuda">Te ayudamos a decidir</button></details></div></details></section>' +
       '<div class="cmp-cierre"><div class="cmp-acciones">' + botonAceptar() + '</div></div>' +
@@ -250,10 +259,10 @@
   function montarPortal() {
     var host = document.getElementById('portal-host');
     if (!host || host.getAttribute('data-montado')) return;
-    cargarCss('recursos/portal/portal.css?v=20261126');
+    cargarCss('recursos/portal/portal.css?v=20261126b');
     if (window.MarleyPortal) { renderPortal(host); return; }
     if (!portalCarga) portalCarga = new Promise(function (resolve, reject) {
-      var sc = document.createElement('script'); sc.src = 'recursos/portal/portal.js?v=20261126';
+      var sc = document.createElement('script'); sc.src = 'recursos/portal/portal.js?v=20261126b';
       sc.onload = resolve; sc.onerror = reject; document.body.appendChild(sc);
     }).catch(function () { portalCarga = null; });
     portalCarga.then(function () { renderPortal(host); });

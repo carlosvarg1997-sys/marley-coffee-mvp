@@ -547,9 +547,23 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
 @media (max-width: 767px) {
   #app :is(.cmp-wrap,.mp-portal):not(.cmp-confirm > .cmp-wrap) { padding-inline: 4px; }
   #app [data-cta-principal="caso-comercial"] { width: 100%; justify-content: center; }
-  body[data-current="C10"] #app .r5-barra { gap: 8px; padding: 8px !important; }
-  body[data-current="C10"] #app .r5-barra-res { flex-basis: 100%; padding-block: 4px; }
-  body[data-current="C10"] #app .r5-barra #m9-continue { min-height: var(--mc-action-height); }
+  /* 26-nov (Claude): la barra fija de C10 debe ocupar como máximo el 15 % del alto en 390×844 (verify-r5-caminos). */
+  body[data-current="C10"] #app .r5-barra { gap: 6px; padding: 6px 8px !important; }
+  body[data-current="C10"] #app .r5-barra-res {
+    flex-basis: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-block: 0;
+  }
+  body[data-current="C10"] #app .r5-barra #m9-continue {
+    flex-basis: 100%;
+    min-height: var(--mc-action-height);
+    padding: 8px 12px;
+    justify-content: center;
+    line-height: 1.25;
+  }
   #app #mp-panel-repetir :is(.mp-sugerencias,.mp-tarjeta) { padding-block: 12px; }
   #app #mp-panel-repetir .mp-cierre { margin-bottom: 16px; }
   #app #mp-form-repetir .mp-linea { grid-template-columns: 40px minmax(0,1fr) 64px; column-gap: 8px; }
@@ -578,9 +592,137 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
     border-top: 1px solid var(--mc-line);
     background: white;
   }
-  body[data-current="C04"] #app { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
-  body[data-current="C04"] #app :is(button, input, select, textarea, a) { scroll-margin-bottom: 76px; }
+  /* DS5: la barra fija mide 69 px; se reserva su alto completo (76) para que nunca tape contenido. */
+  body[data-current="C04"] #app { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  body[data-current="C04"] #app :is(button, input, select, textarea, a) { scroll-margin-bottom: 84px; }
 }
 @media (max-width: 374px) {
   body[data-current="C02"] #app .m5-foot { padding-block: 12px !important; }
+}
+
+/* ============================================================
+   DS4 · Encuadre final (26-nov-2026)
+   Regla de Carlitos: nada toca el contorno; al menos 40 px de
+   relleno interior en escritorio y 24 px en celular; ritmo 8/12/16/24.
+   ============================================================ */
+
+/* 1 · Hero de C02: el texto deja de estar pegado al borde de la foto.
+   La portada se mide con el relleno interior, no con un alto fijo. */
+@media (min-width: 768px) {
+  body[data-current="C02"] #app .ux-hero-scroll { height: auto !important; min-height: 0 !important; }
+  body[data-current="C02"] #app .ux-hero-scroll > .ux-hero-stage {
+    height: auto !important;
+    min-height: 0 !important;
+    padding-block: 40px !important;
+  }
+  body[data-current="C02"] #app .ux-hero-scroll .ux-hero-grid { height: auto; }
+  body[data-current="C02"] #app .ux-hero-scroll .ux-hero-copy {
+    position: relative;
+    inset: auto;
+    transform: none;
+    box-sizing: border-box;
+    width: min(620px, calc(100% - 64px));
+    margin-left: max(32px, calc((100vw - 1200px) / 2));
+    margin-right: 32px;
+  }
+}
+@media (max-width: 767px) {
+  body[data-current="C02"] #app .ux-hero-scroll { height: auto !important; min-height: 0 !important; }
+  body[data-current="C02"] #app .ux-hero-scroll > .ux-hero-stage {
+    height: auto !important;
+    min-height: 0 !important;
+    padding-block: 24px !important;
+  }
+  body[data-current="C02"] #app .ux-hero-scroll .ux-hero-grid { height: auto; }
+  body[data-current="C02"] #app .ux-hero-scroll .ux-hero-copy {
+    position: relative;
+    inset: auto;
+    transform: none;
+    box-sizing: border-box;
+    width: auto;
+    margin-inline: 24px;
+  }
+}
+/* CTA principal del hero: amarillo de marca con texto negro, el mismo
+   componente de «Ver mi solución» de la cabecera. El secundario ya va
+   con contorno blanco (r5-btn-claro). */
+body[data-current="C02"] #app .ux-hero-scroll .ux-hero-actions [data-cta-principal="cuentanos"] {
+  background: #F7BE00 !important;
+  border-color: #F7BE00 !important;
+  color: #000 !important;
+}
+body[data-current="C02"] #app .ux-hero-scroll .ux-hero-actions [data-cta-principal="cuentanos"]:hover {
+  background: #e2bb00 !important;
+  border-color: #e2bb00 !important;
+}
+/* DS5 · En C02 la cabecera no se queda fija (en celular ya era así): al desplazar
+   la página, la barra tapaba el CTA del hero y el clic no llegaba al botón (8.b). */
+body[data-current="C02"] .m5 .m5-top { position: static !important; top: auto !important; }
+
+/* DS5 · En C02 el aviso flotante se ocultaba solo cuando el detector de choques
+   alcanzaba a medirlo: a veces quedaba visible y cambiaba entre con y sin reducir
+   movimiento (10.c). C02 ya tiene sus CTA y el aviso se montaba sobre las máquinas. */
+body[data-current="C02"] #m7-launcher { display: none !important; }
+
+/* DS5 · Ninguna capa decorativa del hero intercepta el clic del CTA:
+   la escena, el video y sus degradados quedan detrás y sin puntero. */
+body[data-current="C02"] #app .ux-hero-scroll .ux-hero-media,
+body[data-current="C02"] #app .ux-hero-scroll .ux-hero-media * ,
+body[data-current="C02"] #app .ux-hero-scroll .ux-hero-media::before,
+body[data-current="C02"] #app .ux-hero-scroll .ux-hero-media::after { pointer-events: none !important; }
+body[data-current="C02"] #app .ux-hero-scroll .ux-hero-copy { z-index: 6; }
+
+/* 3 y 4 · Fotos de máquina: marcador neutro mientras no cargan y
+   tamaño legible dentro de las tarjetas de C02. */
+#app .cmp-home-maquina img,
+#app #panel-biz .ux-buyer-photo,
+#app .cmp-pack .cmp-maquina img { background: #F2F2F2; }
+@media (min-width: 768px) {
+  #app .cmp-home-maquina img {
+    width: 100%;
+    height: 140px;
+    max-height: none;
+    aspect-ratio: auto;
+    object-fit: contain;
+  }
+}
+
+/* DS5 · La portada de C02 conserva su tope de alto (1.800 px en escritorio y
+   2.500 en celular) sin quitar aire: el alto se gana en la foto de 140 px, en
+   la letra chica que pasa a «Ver condiciones de la carga base» y, en celular,
+   en los chips de «Para cada forma de servir», que van en una fila desplazable.
+   Los espacios vuelven a 24 px entre bloques y 40 px entre secciones. */
+@media (min-width: 1024px) {
+  body[data-current="C02"] #app .ux-hero-scroll .ux-hero-copy h1 {
+    font-size: clamp(32px, 3.6vw, 48px) !important;
+  }
+}
+@media (min-width: 768px) {
+  /* DS5: 32 px de aire bajo el CTA repetido antes del pie (2.b pide ≥24 px). */
+  body[data-current="C02"] #app #m4-main { padding-block-end: 32px !important; }
+  body[data-current="C02"] #app #condiciones { margin-top: 40px !important; padding-block: 12px !important; }
+  body[data-current="C02"] #app #negocios { margin-top: 40px !important; }
+  body[data-current="C02"] #app .m5-buyer-groups { margin-block: 12px !important; }
+  body[data-current="C02"] #app #negocios .ux-buyer-copy { padding: 12px 16px !important; }
+  body[data-current="C02"] #app .cmp-opciones { margin-top: 40px !important; }
+  body[data-current="C02"] #app .r3-c02-end-actions { margin-top: 24px !important; padding-top: 8px !important; padding-bottom: 16px !important; }
+  body[data-current="C02"] #app .cmp-home-maquina { padding: 16px; }
+  body[data-current="C02"] #app .cmp-home-maquinas { padding-bottom: 0; }
+  body[data-current="C02"] #app .m5-foot-in { gap: 8px 28px; }
+}
+@media (max-width: 767px) {
+  body[data-current="C02"] #app #condiciones { margin-top: 40px !important; }
+  body[data-current="C02"] #app #negocios { margin-top: 40px !important; }
+  body[data-current="C02"] #app .m5-buyer-groups { margin-block: 12px !important; flex-wrap: nowrap; flex-direction: column; gap: 8px; }
+  body[data-current="C02"] #app #negocios .m5-buyer-group {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+  }
+  body[data-current="C02"] #app #negocios .m5-buyer-group > * { flex: 0 0 auto; }
+  body[data-current="C02"] #app .cmp-opciones { margin-top: 40px !important; }
+  body[data-current="C02"] #app .r3-c02-end-actions { margin-top: 24px !important; padding-top: 8px !important; }
 }
