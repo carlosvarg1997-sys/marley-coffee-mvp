@@ -16,7 +16,7 @@ const path = require('node:path');
 const { spawn } = require('node:child_process');
 
 const RAIZ = path.resolve(__dirname, '..');
-const EVIDENCIA = process.env.MARLEY_UX_FINAL_BASE || 'C:/Users/HP/Documents/Codex/2026-11-15/ten/work/marley-ux-final-25nov-evidencia/F';
+const EVIDENCIA = path.resolve(process.env.MARLEY_UX_FINAL_BASE || path.join(RAIZ, '..', 'marley-final-26nov-evidencia'));
 const opciones = Object.fromEntries(process.argv.slice(2).filter((a) => a.startsWith('--')).map((a) => {
   const [clave, valor = 'si'] = a.slice(2).split('=');
   return [clave, valor];
@@ -82,10 +82,18 @@ function correr(nombre, comando, argumentos, entorno, carpeta) {
     const salida = fs.openSync(path.join(carpeta, `${nombre}.out`), 'w');
     const error = fs.openSync(path.join(carpeta, `${nombre}.err`), 'w');
     const proceso = spawn(comando, argumentos, { cwd: RAIZ, env: { ...process.env, ...entorno }, stdio: ['ignore', salida, error], windowsHide: true });
+    const limite = nombre === 'ux-final' ? 30 * 60_000 : 6 * 60_000;
+    let agotado = false;
+    const reloj = setTimeout(() => {
+      agotado = true;
+      proceso.kill();
+    }, limite);
+    proceso.on('error', (e) => fs.writeSync(error, e.message + '\n'));
     proceso.on('close', (codigo) => {
+      clearTimeout(reloj);
       fs.closeSync(salida);
       fs.closeSync(error);
-      const linea = `${nombre} exit=${codigo} segundos=${Math.round((Date.now() - inicio) / 1000)}`;
+      const linea = `${nombre} exit=${codigo} segundos=${Math.round((Date.now() - inicio) / 1000)}${agotado ? ' tiempo agotado' : ''}`;
       fs.appendFileSync(path.join(carpeta, 'resumen.txt'), linea + '\n');
       process.stdout.write(linea + '\n');
       resolver(codigo);
@@ -106,15 +114,15 @@ async function main() {
     const b = `${BASE}`;
     const node = process.execPath;
     const corridas = [
-      ['a8-portal', node, ['qa/verify-a8-portal.cjs', `${b}/`], {}],
+      ['a8-portal', node, ['qa/verify-a8-portal.cjs', `${b}/`], { A8_VERIFY_OUT: path.join(carpeta, 'a8-portal') }],
       ['a1-final-a8-r3', node, ['qa/verify-a1-final-a8-r3.cjs', `${b}/`], { A1_FINAL_A8_R3_OUT: path.join(carpeta, 'a1-final-a8-r3') }],
       ['agente-conversacional', node, ['qa/verify-agente-conversacional.cjs', `${b}/`], { AGENTE_VERIFY_OUT: path.join(carpeta, 'agente-conversacional') }],
-      ['crm-v2', node, ['qa/verify-crm-v2.cjs', `${b}/index.html`], {}],
+      ['crm-v2', node, ['qa/verify-crm-v2.cjs', `${b}/index.html`], { CRM2_VERIFY_OUT: path.join(carpeta, 'crm-v2') }],
       ['r6-crm', node, ['qa/verify-r6-crm.cjs', `${b}/index.html`], {}],
       ['r6-mkt-jefatura', node, ['qa/verify-r6-mkt-jefatura.cjs', `${b}/index.html`], {}],
       ['r6-puntaje', node, ['qa/verify-r6-puntaje.cjs', b], {}],
       ['r5-caminos', node, ['qa/verify-r5-caminos.cjs', b], {}],
-      ['landing-w10', node, ['qa/verify-landing-w10.cjs', b], {}],
+      ['landing-w10', node, ['qa/verify-landing-w10.cjs', b], { W10_VERIFY_OUT: path.join(carpeta, 'landing-w10') }],
       ['prueba-final', node, ['qa/verify-prueba-final.cjs', `${b}/`, path.join(carpeta, 'prueba-final')], {}],
       ['piloto-premium', node, ['qa/verify-piloto-premium.cjs', b], { PILOTO_CLICK_OUT: path.join(carpeta, 'piloto-premium', 'verificacion.json') }],
       ['ux-final', node, ['qa/verify-ux-final.cjs', `${b}/`, ...(opciones.estricto ? ['--estricto'] : [])], { MARLEY_UX_FINAL_OUT: path.join(carpeta, 'ux-final') }],

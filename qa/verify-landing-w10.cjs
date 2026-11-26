@@ -113,7 +113,7 @@ async function main() {
       assert.equal(received.overflow, false, `Desborde en ${width}px: ${fuera.join(', ')}`);
       assert.equal(received.localEvents, null);
       assert.equal(received.sessionEvents, true);
-      await page.screenshot({ path: path.join(evidence, `W10_C04_${width}.png`) });
+      await page.screenshot({ path: path.join(evidence, `W10_C04_${width}.jpg`), type: 'jpeg', quality: 80 });
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.locator('.m5-qcard').waitFor({ state: 'visible' });
       const again = await page.evaluate(() => ({ score: M4.score(), events: M4.get().events.filter((e) => e.key === 'form1').length, emails: M4.get().emails.length, agents: M4.get().agents.length, focus: M4.landingFocus('C04') }));
@@ -145,14 +145,14 @@ async function main() {
       if (maqC04) assert.equal(propR5.maqC05, maqC04, 'R5: la máquina en C05 coincide con C04');
       assert.equal(await page.evaluate(() => M4.landingFocus('C05')), true);
       assert.equal(await page.locator('.m5-nav, .ux-mobile-nav').count(), 0);
-      await page.screenshot({ path: path.join(evidence, `W10_C05_${width}.png`) });
+      await page.screenshot({ path: path.join(evidence, `W10_C05_${width}.jpg`), type: 'jpeg', quality: 80 });
       await page.evaluate(() => { M4.setRole('ventas'); M4.select(M4.get().lead.id); location.hash = '#R04'; });
       const origin = page.locator('#crm-v2-root [data-crm2-landing-context]');
       await origin.locator('summary').click();
       assert.match(await origin.innerText(), /120 tazas al día/);
       assert.match(await origin.innerText(), /linkedin/i);
       assert.match(await origin.innerText(), /google/i);
-      await page.screenshot({ path: path.join(evidence, `W10_CRM_${width}.png`) });
+      await page.screenshot({ path: path.join(evidence, `W10_CRM_${width}.jpg`), type: 'jpeg', quality: 80 });
       await page.evaluate(() => { location.hash = '#C02'; });
       await page.locator('.m5-nav').waitFor({ state: 'attached' });
       assert.equal(await page.evaluate(() => M4.landingFocus('C02')), false);

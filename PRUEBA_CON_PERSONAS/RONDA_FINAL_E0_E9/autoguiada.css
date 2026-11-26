@@ -246,4 +246,37 @@ h1,h2,h3 { overflow-wrap:anywhere; }
 
 .ag-journey-frame[inert], .ag-pill[inert] { pointer-events: none; }
 
-body.autoguiada-body { font-family: Fabriga, "Segoe UI", Arial, sans-serif; font-synthesis: none; }
+:root { --ag-yellow: var(--mc-yellow); }
+body.autoguiada-body {
+  font-family: var(--mc-copy);
+  font-size: var(--mc-copy-size);
+  line-height: var(--mc-copy-leading);
+  font-synthesis: none;
+}
+.ag-screen,.ag-question-screen { padding-inline: var(--mc-gutter); }
+.ag-title { font-size: var(--mc-title-size); line-height: 1.1; }
+.ag-question-title,.ag-eval-title { font-size: var(--mc-section-size); line-height: 1.2; }
+.ag-kicker,.ag-step,.ag-label,.ag-task-progress { font-size: 12px; letter-spacing: .05em; }
+.ag-legend-kicker { letter-spacing: .05em; }
+.ag-card { border-radius: 16px; }
+.ag-brand-mark { font-weight: 500; }
+.ag-progress { height: 4px; }
+.ag-progress span { background: var(--ag-yellow); transition-duration: var(--mc-quick); }
+.ag-btn {
+  min-height: var(--mc-action-height);
+  border-radius: var(--mc-action-radius);
+  font-family: var(--mc-copy);
+  font-size: var(--mc-action-size);
+  transition: background-color var(--mc-quick) var(--mc-ease), border-color var(--mc-quick) var(--mc-ease);
+}
+.ag-btn:focus-visible,.ag-field:focus-visible,.ag-option:focus-within { outline-width: 2px; outline-offset: 3px; }
+@media (min-width: 600px) {
+  .ag-eval,.ag-salto { border-radius: var(--mc-panel-radius); }
+}
+@media (max-width: 599px) {
+  .ag-eval-body,.ag-eval-foot { padding-inline: var(--mc-gutter); }
+  .ag-eval-foot .ag-btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ag-btn,.ag-progress span { transition: none; }
+}

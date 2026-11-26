@@ -27,7 +27,7 @@ async function shot(page, folder, name, selector = null, full = false) {
     return !img.currentSrc || rect.width === 0 || rect.bottom <= 0 || rect.top >= innerHeight ||
       rect.right <= 0 || rect.left >= innerWidth || img.complete;
   }), null, { timeout: 4500 }).catch(() => {});
-  await page.screenshot({ path: path.join(folder, name + '.png'), fullPage: full });
+  await page.screenshot({ path: path.join(folder, name + '.jpg'), type: 'jpeg', quality: 80, animations: 'disabled', fullPage: full, timeout: 30000 });
 }
 
 async function open(page, route, selector) {

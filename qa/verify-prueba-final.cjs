@@ -198,7 +198,7 @@ async function blocked(page, folder, file) {
   });
   assert.deepEqual(fit, { inside: true, noOverflow: true, fillsMobile: true });
   assert.ok(await dialog.getByRole('button', { name: 'Guardar y seguir' }).isDisabled());
-  if (file) await page.screenshot({ path: path.join(folder, file) });
+  if (file) await page.screenshot({ path: path.join(folder, file.replace(/\.png$/, '.jpg')), type: 'jpeg', quality: 80 });
 }
 
 async function saveEvaluation(page) {

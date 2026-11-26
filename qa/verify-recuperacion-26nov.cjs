@@ -74,7 +74,21 @@ async function check(browser, width, height) {
       })));
     assert.ok(guide.length >= 3 && guide.every(label => label.height < 22 && label.fits), JSON.stringify(guide));
     await capture(page, key + '-c04-pasos');
-    return { width, height, initial, film, guide };
+    const scenes = [];
+    for (const [route, selector] of [['C03', '.m5-split-media'], ['C08', '.m5-stage-media']]) {
+      await page.evaluate(id => window.MarleyApp.go(id, { evaluation: true }), route);
+      await page.locator('body[data-current="' + route + '"] ' + selector + ' .m5-film').first().scrollIntoViewIfNeeded();
+      await page.waitForFunction(medium => {
+        const video = document.querySelector(medium + ' video');
+        return video && video.currentTime > .1 && !video.loop;
+      }, selector, { timeout: 14000 });
+      await capture(page, key + '-' + route.toLowerCase() + '-escena');
+      scenes.push(route);
+    }
+    await page.evaluate(() => window.MarleyApp.go('C10', { evaluation: true }));
+    await page.locator('body[data-current="C10"] h1').first().waitFor();
+    await capture(page, key + '-c10');
+    return { width, height, initial, film, guide, scenes };
   } finally { await page.close(); }
 }
 

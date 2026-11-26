@@ -296,12 +296,16 @@ const leerCtas = (p) => p.evaluate(() => {
   return Object.entries(grupos).map(([id, els]) => {
     const ultimo = els[els.length - 1];
     const abajoUltimo = ultimo.getBoundingClientRect().bottom + scrollY;
+    const panel = ultimo.closest('.mp-panel')?.getBoundingClientRect();
+    const posicionUltimo = panel
+      ? (ultimo.getBoundingClientRect().top - panel.top) / panel.height
+      : (ultimo.getBoundingClientRect().top + scrollY) / docH;
     return {
       id,
       veces: els.length,
       textos: els.map((e) => F.norm(e.innerText || e.getAttribute('aria-label') || '')),
       destinos: els.map(destino),
-      posicionUltimo: Math.round(((ultimo.getBoundingClientRect().top + scrollY) / docH) * 100),
+      posicionUltimo: Math.round(posicionUltimo * 100),
       aireUltimo: aire(ultimo),
       // Hay contenido (fuera del pie) debajo del último CTA: si el CTA está arriba, hace falta repetirlo al final.
       contenidoDebajo: hojas.some((o) => !o.closest('footer') && (o.getBoundingClientRect().top + scrollY) >= abajoUltimo + 40),
@@ -336,13 +340,20 @@ async function p2Inicio(s) {
     const cond = [...document.querySelectorAll('h1,h2,h3,h4,p,strong,span,div,section')]
       .filter((el) => F.vis(el) && F.norm(el.innerText).startsWith('asi funciona marley coffee empresas'))
       .sort((a, b) => a.innerText.length - b.innerText.length)[0];
-    const t1 = [...document.querySelectorAll('[data-cierra-tarea="T1"]')].find(F.vis);
+    const t1 = [...document.querySelectorAll('#condiciones [data-cierra-tarea="T1"]')].find(F.vis);
+    const maquinas = [...document.querySelectorAll('#condiciones .cmp-home-maquina')];
     const arriba = (el) => Math.round(el.getBoundingClientRect().top + scrollY);
-    return { condiciones: cond ? arriba(cond) : null, cta: t1 ? arriba(t1) : null };
+    return {
+      condiciones: cond ? arriba(cond) : null,
+      cta: t1 ? arriba(t1) : null,
+      maquinas: maquinas.length,
+      finMaquinas: Math.round(Math.max(0, ...maquinas.map(el => el.getBoundingClientRect().bottom + scrollY)))
+    };
   });
   if (r.condiciones === null) return pend('2.a', 'B1', 'falta el bloque «Así funciona Marley Coffee Empresas» en C02');
   if (r.cta === null) return pend('2.a', 'B1', 'falta el CTA T1 («Cuéntanos de tu negocio») en C02');
-  if (r.condiciones < r.cta) return ok('2.a', r);
+  if (r.condiciones < r.cta && r.maquinas === 4 && r.finMaquinas <= r.cta) return ok('2.a', r);
+  if (r.maquinas !== 4 || r.finMaquinas > r.cta) return falla('2.a', 'el CTA de condiciones debe venir después de las cuatro máquinas', r);
   return falla('2.a', `las condiciones (y=${r.condiciones}) van después del CTA al formulario (y=${r.cta})`, r);
 }
 
@@ -375,10 +386,14 @@ async function p2Pestanas(s, medirPestana) {
 async function p3Tarjetas(s) {
   const datos = await s.page.evaluate(() => {
     const F = window.__F;
-    return [...document.querySelectorAll('[data-maquina-id]')].filter(F.vis).map((el) => ({ id: el.dataset.maquinaId, foto: Boolean(el.querySelector('img')), letras: F.norm(el.innerText).length }));
+    return [...document.querySelectorAll('[data-maquina-id]')].filter(F.vis).map((el) => {
+      const tarjeta = el.closest('article') || el;
+      const foto = tarjeta.querySelector('img[data-zoom]');
+      return { id: el.dataset.maquinaId, foto: Boolean(foto?.getAttribute('src')), letras: F.norm(tarjeta.innerText).length };
+    });
   });
   const malas = datos.filter((d) => !d.foto || d.letras < 30);
-  if (datos.length < 2) return falla('3.a', `hay ${datos.length} tarjeta(s) de máquina; hacen falta al menos 2 con foto y funciones`, datos);
+  if (datos.length !== 4) return falla('3.a', `hay ${datos.length} tarjeta(s) de máquina; hacen falta las cuatro con foto y funciones`, datos);
   if (malas.length) return falla('3.a', `tarjetas sin foto o sin funciones: ${malas.map((m) => m.id).join(', ')}`, datos);
   return ok('3.a', { tarjetas: datos.length });
 }
@@ -1232,7 +1247,14 @@ async function barridoClics(p, s, texto) {
   const sinRespuesta = [];
   const muestra = controles.slice(0, texto.max);
   for (const item of muestra) {
-    if (texto.recarga) await irA(s, texto.ruta);
+    if (texto.recarga) {
+      await irA(s, texto.ruta);
+      if (texto.ruta === 'C02') {
+        await p.waitForFunction(() => Boolean(document.querySelector('.cmp-home-maquina')));
+        await p.evaluate(() => window.dispatchEvent(new Event('keydown')));
+        await p.waitForFunction(() => Boolean(document.querySelector('.cmp-home-maquina img[role="button"]')));
+      }
+    }
     const equivalentes = (control) => control.nombre === item.nombre && control.key === item.key;
     const ordinal = controles.filter(control => control.i < item.i && equivalentes(control)).length;
     const candidato = (await visiblesAhora()).filter(equivalentes)[ordinal];
@@ -1359,7 +1381,7 @@ async function corrida(c, selecciona) {
   const capturas = path.join(EVIDENCIA, 'capturas');
   fs.mkdirSync(capturas, { recursive: true });
   const capturar = async (s, nombre) => {
-    try { await s.page.screenshot({ path: path.join(capturas, `${c.navegador}-${c.w}x${c.h}-${nombre}.png`) }); } catch (_) { /* sin captura */ }
+    try { await s.page.screenshot({ path: path.join(capturas, `${c.navegador}-${c.w}x${c.h}-${nombre}.jpg`), type: 'jpeg', quality: 80, animations: 'disabled' }); } catch (_) { /* sin captura */ }
   };
   const pasoAire = async (s, pantalla) => { aire.push(await medirAire(s.page, pantalla)); };
   const ctasPantallas = [];
@@ -1603,7 +1625,7 @@ async function main() {
   const clearEnCodigo = escanearClear();
   if (clearEnCodigo.length) erroresGlobales.push({ tipo: 'localStorage.clear en el código', detalle: clearEnCodigo.join(', ') });
 
-  await correrPool(combos, 2, async (combo) => {
+  await correrPool(combos, 1, async (combo) => {
     const browser = await lanzar(combo);
     try {
       const r = await corrida({ ...combo, browser, base }, selecciona);

@@ -200,7 +200,7 @@ async function irA(page, ruta) {
 }
 
 async function captura(page, log, nombre) {
-  await page.screenshot({ path: path.join(OUT, `${log.etiqueta}-${nombre}.png`) });
+  await page.screenshot({ path: path.join(OUT, `${log.etiqueta}-${nombre}.jpg`), type: 'jpeg', quality: 80 });
 }
 
 // ---------- Localizar controles visibles ----------

@@ -72,7 +72,7 @@ async function click(locator, label) {
 async function screenshot(page, file) {
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(80);
-  await page.screenshot({ path: file, fullPage: false, animations: 'disabled' });
+  await page.screenshot({ path: file, type: 'jpeg', quality: 80, animations: 'disabled' });
 }
 async function checkRouteViews(browser) {
   for (const size of SIZES) {
@@ -145,7 +145,7 @@ async function checkRouteViews(browser) {
           assert.match(await page.locator('#crm-v2-root').innerText(), /Leads, MQL y SQL por origen/i, 'R06 en Marketing debe conservar el desglose por origen');
           assert.equal(await page.locator('.crm2-nav [data-c2-go]').count(), 4, 'el alias de R06 conserva el menú de cuatro entradas de Marketing');
         }
-        const file = path.join(OUT, 'vistas', `${routeKey}-${size.name}-${size.width}x${size.height}.png`);
+        const file = path.join(OUT, 'vistas', `${routeKey}-${size.name}-${size.width}x${size.height}.jpg`);
         await screenshot(page, file);
         report.viewCaptures += 1;
         report.routes.push({ route, routeKey, role, label, viewport: `${size.width}x${size.height}`, ...metrics, screenshot: path.basename(file) });
@@ -258,7 +258,7 @@ async function taskJourney(browser, size, task) {
 
     assert.ok(counted <= 2, `${id}: ${counted} clics para llegar a la tarea desde Hoy`);
     await page.evaluate(() => document.fonts.ready);
-    const file = path.join(OUT, 'tareas', `${id}-${size.width}x${size.height}.png`);
+    const file = path.join(OUT, 'tareas', `${id}-${size.width}x${size.height}.jpg`);
     if (browser._crm2Name === 'Chrome') { await screenshot(page, file); report.taskCaptures += 1; }
     assert.deepEqual(pageErrors, [], `${id}: ${pageErrors.join(' | ')}`);
     report.journeys.push({ id, title, browser: browser._crm2Name, viewport: `${size.width}x${size.height}`, clicksToTask: counted, evidenceRoute, errors: pageErrors.length });

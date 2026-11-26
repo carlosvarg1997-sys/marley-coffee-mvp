@@ -86,8 +86,8 @@ async function collect(page, expectedHash, viewport) {
   });
 
   if (evidenceHashes.has(expectedHash)) {
-    const evidenceName = `A1_A8_${expectedHash}_${viewport.width}.png`;
-    await page.screenshot({ path: path.join(outputDir, evidenceName), fullPage: true });
+    const evidenceName = `A1_A8_${expectedHash}_${viewport.width}.jpg`;
+    await page.screenshot({ path: path.join(outputDir, evidenceName), type: 'jpeg', quality: 80 });
   }
   return { expectedHash, viewport: viewport.width, ...metrics };
 }

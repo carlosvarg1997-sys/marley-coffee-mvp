@@ -157,7 +157,7 @@ async function main() {
         }, { hash, viewportHeight: viewport.height });
         if (viewport.width === 390 && ['C01', 'C03', 'C08', 'R01'].includes(hash)) {
           fs.mkdirSync(EVIDENCIA, { recursive: true });
-          await page.screenshot({ path: path.join(EVIDENCIA, `${hash}-390x844.png`) });
+          await page.screenshot({ path: path.join(EVIDENCIA, `${hash}-390x844.jpg`), type: 'jpeg', quality: 80 });
         }
         if (viewport.width < 768 && touchRoutes.has(hash) && data.small.length) touchFailures.push({ width: viewport.width, hash, controls: data.small });
         if (data.fixed.length && overlayRoutes.includes(hash) || data.fixed.length && ['R01', 'R02'].includes(hash)) overlayFailures.push({ width: viewport.width, hash, fixed: data.fixed });
@@ -216,7 +216,7 @@ async function main() {
     await login.locator('button[type="submit"]').click();
     loginError = await login.locator('[role="alert"]').innerText();
     fs.mkdirSync(EVIDENCIA, { recursive: true });
-    await loginPage.screenshot({ path: path.join(EVIDENCIA, 'R00-error-login-390x844.png'), fullPage: true });
+    await loginPage.screenshot({ path: path.join(EVIDENCIA, 'R00-error-login-390x844.jpg'), type: 'jpeg', quality: 80 });
     await loginContext.close();
 
     const videoContext = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'no-preference' });
