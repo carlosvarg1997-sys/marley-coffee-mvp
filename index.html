@@ -13151,8 +13151,8 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const cta = strip.match(/<button\b[^>]*data-cierra-tarea="T1"[^>]*>[\s\S]*?<\/button>/)?.[0] || '';
     const ctaEnd = '<div class="r3-c02-end-actions" aria-label="Siguiente paso">' + cta + '</div>';
     const pair = '<div class="r3-c02-product-pair">' + coffee + machine + '</div>';
-    const opciones = '<section class="mc-home-recursos" aria-label="Productos, servicios y ayuda"><h2>Productos, servicios y ayuda</h2>' + pair + services + faq + '</section>';
-    return html.slice(0, heroStart) + hero + strip + business + opciones + ctaEnd + html.slice(faqEnd);
+    const opciones = '<section class="mc-home-recursos" aria-label="Productos, servicios y ayuda"><h2>Productos, servicios y ayuda</h2>' + pair + services + faq + ctaEnd + '</section>';
+    return html.slice(0, heroStart) + hero + strip + business + opciones + html.slice(faqEnd);
   }
   function c04Wrap() {
     let html = ensureGuide(C.__r3Original.C04(), 1), offer = buyerFor(M.get());

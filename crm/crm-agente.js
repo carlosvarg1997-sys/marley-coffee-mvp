@@ -651,8 +651,11 @@
     const it = itemPorId(id);
     if (!it) return;
     const cuenta = cuentasDe().find(a => String(a.id) === String(it.cuenta));
-    const beneficio = it.beneficio || cuenta?.referral;
-    if (permisoDe(cuenta || {}) !== 'yes' || !cuenta?.business || !beneficio) {
+    const referido = window.MarleyCRM2?.postventa?.referidos().find(r => String(r.cuentaId) === String(it.cuenta) && Boolean(r.ejemplo) === Boolean(it.dataTest));
+    const beneficio = it.beneficio || (referido?.permiso === true ? d4().LM?.LM7?.gives : '');
+    const permiso = referido ? referido.permiso === true : permisoDe(cuenta || {}) === 'yes';
+    const negocio = referido?.negocio || cuenta?.business;
+    if (!permiso || !negocio || !beneficio) {
       return notaRol('Falta registrar el permiso, el vínculo o el beneficio. Pide los datos a Marketing antes de aprobar.');
     }
     escribirCrm((crm, s) => {
@@ -1725,6 +1728,10 @@
     });
     if (PN.escribiendo > 0) partes.push('<p class="crm-agente-escribe" data-crm-agente-escribe role="status">escribiendo…</p>');
     pnHiloEl.innerHTML = partes.join('') || '<p class="crm-agente-vacio">Pídele algo al agente: «mándale un correo a…», «avísale a Ventas que llame mañana a…», o toca una tarea de la lista.</p>';
+    const decididas = new Set((est().jefeAprob || []).filter(item => item.estado === 'aprobada').map(item => String(item.id)));
+    for (const button of pnHiloEl.querySelectorAll('[data-crm-agente-accion="confirmar-aprobacion"], [data-crm-agente-accion="confirmar-checklist"]')) {
+      if (decididas.has(button.dataset.id)) button.remove();
+    }
     if (idTexto) {
       const ta = pnHiloEl.querySelector(`[data-crm-agente-texto="${CSS.escape(idTexto)}"]`);
       if (ta) { try { ta.focus({ preventScroll: true }); ta.setSelectionRange(selIni, selFin); } catch (_) { /* foco opcional */ } }

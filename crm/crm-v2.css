@@ -830,7 +830,19 @@ body:is([data-current^="R"]) #crm-v2-root :is(.crm2-metric > b,.crm2-team-grid a
 #crm-v2-root :is(.crm2-qitem,.crm2-actionbar) > .crm2-qtool { min-height: 44px; padding-inline: 12px; }
 #crm-v2-root .crm2-content--hoy > section + section { margin-top: 12px !important; }
 @media (min-width: 768px) {
-  #crm-v2-root .crm2-main--hoy { padding-bottom: 64px; }
+  #crm-v2-root .crm2-main--hoy { padding-bottom: 24px; }
+  #crm-v2-root .crm2-content--hoy {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    align-items: start;
+  }
+  #crm-v2-root .crm2-content--hoy > .crm2-block--cola,
+  #crm-v2-root .crm2-content--hoy > :not(.crm2-block),
+  #crm-v2-root[data-role="jefatura"] .crm2-content--hoy > .crm2-block {
+    grid-column: 1 / -1;
+  }
+  #crm-v2-root .crm2-content--hoy > #crm-agente-barra { order: -1; }
+  #crm-v2-root .crm2-content--hoy > #crm-agente-chat { order: -3; }
+  #crm-v2-root .crm2-content--hoy > section + section { margin-top: 0 !important; }
 }
 @media (max-width: 767px) {
   #crm-v2-root .crm2-qitem { grid-template-columns: minmax(0,1fr); padding: 8px 0; }

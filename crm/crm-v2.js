@@ -237,7 +237,7 @@
     return out.sort((a, b) => Number(b.nps || 0) - Number(a.nps || 0));
   }
   function referidosPostventa() {
-    return postventaDe('referidos').map(item => ({ cuentaId: item.cuentaId, nombre: cuentaNombre(item.cuentaId), negocio: item.negocio || 'Negocio por confirmar', contacto: item.contacto || 'Por confirmar', permiso: item.permiso !== false, estado: item.estado || 'enviado', ts: item.ts, ejemplo: Boolean(item.ejemplo) })).sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0));
+    return postventaDe('referidos').map(item => ({ cuentaId: item.cuentaId, nombre: cuentaNombre(item.cuentaId), negocio: item.negocio || 'Negocio por confirmar', contacto: item.contacto || 'Por confirmar', permiso: item.permiso === true, estado: item.estado || 'enviado', ts: item.ts, ejemplo: Boolean(item.ejemplo) })).sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0));
   }
   function resenasPostventa() {
     const reales = postventaDe('resenas').map(item => ({ cuentaId: item.cuentaId, nombre: cuentaNombre(item.cuentaId), canal: item.canal || 'google', estado: item.estado || 'invitada', ts: item.ts, ejemplo: Boolean(item.ejemplo) }));
@@ -960,10 +960,9 @@
     const body = items.length ? items.map(item => {
       const isReferralApproval = item.tipo === 'referido';
       const amount = item.monto ? `<div class="crm2-approval-amount"><small>${item.tipo === 'referido' ? 'Monto de beneficio no registrado' : 'Pack de catálogo · referencial'}</small><b>${money(item.monto)}</b></div>` : '<span class="crm2-inline-note">Monto no registrado</span>';
-      const referralAccount = isReferralApproval ? accountById(item.cuenta) : null;
       const referralChecklist = item.checklist || {};
-      const permissionVerified = referralChecklist.permission === true && permission(referralAccount).key === 'yes';
-      const b2bVerified = referralChecklist.b2b === true && Boolean(referralAccount?.business);
+      const permissionVerified = referralChecklist.permission === true;
+      const b2bVerified = referralChecklist.b2b === true;
       const benefitVerified = referralChecklist.benefit === true && Boolean(item.benefit || item.beneficio);
       const canApprove = !isReferralApproval || (permissionVerified && b2bVerified && benefitVerified);
       const decisionStatus = item.estado === 'pidio_info' ? 'Información solicitada a Ventas' : 'Pendiente de decisión';

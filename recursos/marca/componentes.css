@@ -104,7 +104,7 @@ body[data-current] #app :is(.mc-price-value,.mp-prod-precio,.mp-fila-precio,.mp-
   color: var(--mc-ink);
   line-height: 1.15;
   font-family: var(--mc-copy) !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   font-size: 20px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -845,18 +845,19 @@ body[data-current="C02"] #app .mc-compare-media {
 }
 body[data-current="C02"] #app .cmp-home-maquina {
   display: grid;
-  grid-template-rows: 112px auto minmax(38px,auto) 1fr auto;
+  grid-template-rows: 104px auto minmax(38px,auto) 1fr auto;
   gap: 8px;
   height: auto;
 }
 body[data-current="C02"] #app .cmp-home-maquina img {
   width: 100%;
-  height: 112px;
+  height: 104px;
   object-fit: contain;
+  background: #fff;
 }
 body[data-current="C02"] #app .cmp-home-maquina :is(h4,p,dl) { margin: 0; }
-body[data-current="C02"] #app .cmp-home-maquina dl { display: grid; gap: 4px; }
-body[data-current="C02"] #app .cmp-home-maquina dl > div { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+body[data-current="C02"] #app .cmp-home-maquina dl { display: grid; grid-template-columns: 1fr; gap: 4px; }
+body[data-current="C02"] #app .cmp-home-maquina dl > div { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 8px; }
 body[data-current="C02"] #app .cmp-home-maquina dd { margin: 0; text-align: right; }
 body[data-current="C02"] #app #negocios #panel-biz {
   display: block;
@@ -875,21 +876,28 @@ body[data-current="C02"] #app #negocios .mc-buyer-scene .m5-film { min-height: 0
 body[data-current="C02"] #app .mc-home-recursos > h2 { margin: 0; }
 body[data-current="C02"] #app .mc-home-recursos > .ux-section,
 body[data-current="C02"] #app .mc-home-recursos > .r3-c02-product-pair { margin: 16px 0 0 !important; padding: 0 !important; }
-body[data-current="C02"] #app .mc-home-recursos .ux-head { display: none; }
+body[data-current="C02"] #app .mc-home-recursos .ux-head { display: none !important; }
 body[data-current="C02"] #app .mc-home-recursos .ux-wrap { max-width: none; padding: 0; }
-body[data-current="C02"] #app .mc-home-recursos details > summary { border-bottom: 1px solid #e6e6e6; }
+body[data-current="C02"] #app .mc-home-recursos > #faq { padding: 0 !important; }
+body[data-current="C02"] #app .mc-home-recursos > #faq .ux-wrap { width: 100%; padding: 0 !important; }
+body[data-current="C02"] #app .mc-home-recursos :is(.r7-c02-fold,.r3-services-fold,.cmp-plegado) {
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  background: #fff;
+}
+body[data-current="C02"] #app .mc-home-recursos > .r3-c02-end-actions { margin-top: 16px; }
 @media (min-width: 768px) {
   body[data-current="C02"] #app .m5-c02 #m4-main { width: min(calc(100% - 80px),1360px); gap: 80px; padding-block: 32px 48px !important; }
   body[data-current="C02"] #app .cmp-home-maquinas { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-inline: 0; }
   body[data-current="C02"] #app .m5-c02 #m4-main > #negocios { margin: 0 !important; }
   body[data-current="C02"] #app .mc-home-recursos { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; align-items: start; }
-  body[data-current="C02"] #app .mc-home-recursos > h2 { grid-column: 1 / -1; }
+  body[data-current="C02"] #app .mc-home-recursos > :is(h2,.r3-c02-end-actions) { grid-column: 1 / -1; }
   body[data-current="C02"] #app .mc-home-recursos > .r3-c02-product-pair { display: contents; }
   body[data-current="C02"] #app .mc-home-recursos > .ux-section,
   body[data-current="C02"] #app .mc-home-recursos :is(.r7-fold,.r3-services-fold,.cmp-plegado) { margin: 0 !important; }
   body[data-current="C02"] #app #condiciones details.cmp-detalle-c { margin-top: 0 !important; }
   body[data-current="C02"] #app #condiciones .cmp-inicio-cta { margin: 0 !important; }
-  body[data-current="C02"] #app #negocios .mc-buyer-scene { height: 220px; }
+  body[data-current="C02"] #app #negocios .mc-buyer-scene { height: 208px; }
   body[data-current="C02"] #app .m5-c02 .m5-foot { padding-block: 12px; }
 }
 @media (max-width: 767px) {
