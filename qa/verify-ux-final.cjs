@@ -906,7 +906,10 @@ async function p8Prueba(c) {
     const frame = await handle.contentFrame();
     // Este caso prueba el cierre de tarea dentro del marco. La entrada por búsqueda se verifica en su propio recorrido.
     await frame.goto(new URL('index.html?test=sitio#C02', s.base).href, { waitUntil: 'load', timeout: 25000 });
-    await frame.waitForFunction(() => window.MarleyApp && document.body.dataset.current === 'C02', null, { timeout: 12000 });
+    // Aquí se prueba el CTA ya instalado. El clic antes de load lo cubre verify-prueba-final.
+    await frame.waitForFunction(() => window.MarleyApp && window.__r3Listo &&
+      document.body.dataset.current === 'C02' && document.querySelectorAll('#condiciones .cmp-home-maquina').length === 4,
+    null, { timeout: 12000 });
     await frame.evaluate(() => document.fonts.ready);
     const enCurso = await p.evaluate(() => { const e = JSON.parse(localStorage.getItem('mc_prueba_autoguiada_v1') || 'null'); return e?.tareas?.[e.taskIndex]?.etapa || null; });
     const etapa = enCurso || 'T1';
