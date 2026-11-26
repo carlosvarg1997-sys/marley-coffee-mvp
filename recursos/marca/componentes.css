@@ -1,11 +1,12 @@
 /* Marley Empresas. Capa final de botones, precios, tarjetas, pestañas y chips. */
+@import url("tipografia.css?v=20261126ultima");
 :root {
   --mc-ink: #161616;
   --mc-paper: #fff;
   --mc-line: #e6e6e6;
   --mc-muted: #5c5c5c;
   --mc-yellow: #f7be00;
-  --mc-copy: Fabriga, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --mc-copy: Fabriga, Arial, sans-serif;
   /* Medidas de referencia Figma, ajustadas al alto máximo de Marley. */
   --mc-gutter: 16px;
   --mc-wrap: 1360px;
@@ -36,7 +37,8 @@ body { font-synthesis: none; }
 body:is([data-current^="C"],[data-current^="R"]) :is(#app,#crm-v2-root),
 body:is([data-current^="C"],[data-current^="R"]) :is(#app,#crm-v2-root) :where(*) {
   font-family: var(--mc-copy) !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
+  font-variant-numeric: tabular-nums;
 }
 body:is([data-current^="C"],[data-current^="R"]) :is(#app,#crm-v2-root) :is(h1,h2,h3,.cmp-home-maquina h4) {
   font-family: Festivo, Impact, sans-serif !important;
@@ -101,7 +103,7 @@ body[data-current] #app :is(.mc-price-value,.mp-prod-precio,.mp-fila-precio,.mp-
   justify-self: end;
   color: var(--mc-ink);
   line-height: 1.15;
-  font-family: Pressura, Arial, sans-serif !important;
+  font-family: var(--mc-copy) !important;
   font-weight: 500 !important;
   font-size: 20px;
   font-variant-numeric: tabular-nums;
@@ -896,4 +898,9 @@ body[data-current="C02"] #app .mc-home-recursos details > summary { border-botto
 }
 body[data-current="C04"] #app .r4-diag .r5-single-question .m5-opts {
   grid-template-columns: minmax(0,1fr) !important;
+}
+html body :is(#app,#crm-v2-root) :is(.mc-price-value,.mp-total b,.mp-prod-precio,.crm2-kpi b,.crm2-quote-row strong,.crm2-approval-amount b,.cmp-total strong,.r4-res-total b) {
+  font-family: var(--mc-copy) !important;
+  font-weight: 400 !important;
+  font-variant-numeric: tabular-nums;
 }

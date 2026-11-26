@@ -258,10 +258,10 @@
   function montarPortal() {
     var host = document.getElementById('portal-host');
     if (!host || host.getAttribute('data-montado')) return;
-    cargarCss('recursos/portal/portal.css?v=20261126nps');
+    cargarCss('recursos/portal/portal.css?v=20261126ultima');
     if (window.MarleyPortal) { renderPortal(host); return; }
     if (!portalCarga) portalCarga = new Promise(function (resolve, reject) {
-      var sc = document.createElement('script'); sc.src = 'recursos/portal/portal.js?v=20261126nps';
+      var sc = document.createElement('script'); sc.src = 'recursos/portal/portal.js?v=20261126ultima';
       sc.onload = resolve; sc.onerror = reject; document.body.appendChild(sc);
     }).catch(function () { portalCarga = null; });
     portalCarga.then(function () { renderPortal(host); });

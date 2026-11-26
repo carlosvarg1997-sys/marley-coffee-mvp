@@ -1,4 +1,5 @@
-﻿/* ==========================================================================
+﻿@import url("../../recursos/marca/tipografia.css?v=20261126ultima");
+/* ==========================================================================
    Landing por comprador Â· Marley Coffee Empresas
    Una sola decisiÃ³n: sin menÃº, sin enlaces de salida, un CTA repetido.
    Depende de ../marca/negro-marley.css
@@ -907,3 +908,24 @@ html body p,html body li{font-size:16px!important}
 html body .nm-btn{min-height:44px!important;font-size:16px!important;padding:11px 16px!important}
 html body .nm-seccion{padding-block:24px!important}
 }
+
+.nm {
+  --nm-text: Fabriga, Arial, sans-serif;
+  --nm-display: Festivo, Impact, sans-serif;
+  --nm-hueso: #fff;
+  --nm-humo: #ccc;
+  --nm-ceniza: #aaa;
+  --nm-oro: #f7be00;
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+}
+html body.nm :where(*) {
+  font-family: var(--nm-text) !important;
+  font-weight: 400 !important;
+}
+html body.nm :is(h1,h2,h3,.nm-h1,.nm-h2,.nm-h3) {
+  font-family: var(--nm-display) !important;
+  font-weight: 500 !important;
+}
+html body.nm :is(input,select,textarea,button) { font: inherit; }
+html body.nm .ld-buyer-routes__disclosure { margin-block: 16px 0; }
