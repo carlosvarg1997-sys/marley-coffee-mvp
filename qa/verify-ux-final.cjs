@@ -1029,7 +1029,8 @@ const medirAire = (p, pantalla) => p.evaluate((nombre) => {
       if (!solapa || b.top < a.bottom - 1) continue;
       const hueco = b.top - a.bottom;
       const seccion = padre.matches('main,.mp-panel') && (hijos[i].tagName === 'SECTION' || hijos[i + 1].tagName === 'SECTION');
-      if (hueco < (seccion ? 40 : 24)) {
+      // DOMRect devuelve fracciones incluso cuando el CSS declara un espacio entero.
+      if (Math.round(hueco) < (seccion ? 40 : 24)) {
         const selector = el => `${el.tagName.toLowerCase()}${el.classList.length ? `.${el.classList[0]}` : ''}`;
         huecos.push({ tipo: seccion ? 'seccion' : 'bloque', px: Math.round(hueco), antes: selector(hijos[i]), despues: selector(hijos[i + 1]), texto: F.norm(hijos[i].innerText || hijos[i].tagName).slice(0, 40) });
       }
