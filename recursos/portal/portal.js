@@ -229,6 +229,7 @@
     var contenido = resuelta
       ? '<p>Tu solicitud quedó resuelta. Cuéntanos cómo te fue y deja tu reseña cuando quieras.</p>' +
         boton('mp-btn--sec', 'data-mp-postaccion="seguimiento" data-pedido="' + esc(p.id) + '"', 'Contar cómo me fue')
+      : ayuda?.estado === 'resuelta' ? '<p role="status">Gracias por contarnos cómo te fue con Soporte.</p>'
       : ayuda ? '<p role="status">Tu solicitud está ' + (ayuda.estado === 'tomada' ? 'en manos de Soporte.' : 'en espera de Soporte.') + '</p>'
       : r?.nps != null ? '<p role="status">Gracias por contarnos cómo te fue.</p>'
       : '<div class="mp-caritas">' + caras + '</div>';
@@ -473,13 +474,15 @@
     var P = PASOS[x.paso] || PASOS['sin-propuesta'];
     var av = avance(x);
     var cta = '<div class="mp-accion">' + ctaPedido(x) + '</div>';
-    var tecnico = '<details class="mp-tecnico"><summary>Ver datos técnicos del pedido</summary><ul class="mp-tecnico-lista">' +
+    var tecnico = '<details class="mp-tecnico"><summary>Ver datos del pedido y días simulados</summary><ul class="mp-tecnico-lista">' +
       '<li>Cuenta de prueba: ' + esc(x.c.accountId || '—') + '</li>' +
       '<li>Contrato simulado: ' + esc(x.c.contractId || 'sin firmar') + '</li>' +
       '<li>Días simulados: ' + esc(String(x.c.simulatedDays || 0)) + '</li>' +
       (x.p ? '<li>Registro del pedido: ' + esc(x.p.id) + '</li>' : '') +
-      '</ul></details>';
-    return '<section id="mp-panel-pedido" class="mp-panel" role="tabpanel" aria-labelledby="mp-tab-pedido" data-portal-panel="pedido">' +
+      '</ul>' + (x.c.contractSignedAt && !av.hecho.instalado
+        ? boton('mp-btn--sec', 'data-portal-accion="avanzar-tiempo" data-dias="30" data-evt="pedido_avance_mes"', 'Simular que pasó un mes')
+        : '') + '</details>';
+    return '<section id="mp-panel-pedido" class="mp-panel' + (av.hecho.instalado ? ' mp-pedido-entregado' : '') + '" role="tabpanel" aria-labelledby="mp-tab-pedido" data-portal-panel="pedido">' +
       '<header class="mp-cabeza-panel">' +
       '<h2 class="mp-h2" data-vida="titulo">' + esc(P.titulo) + '</h2>' +
       '<p class="mp-lead">' + P.lead + '</p></header>' +
@@ -490,8 +493,8 @@
       resumenPedido(x) +
       '<div class="mp-bloque" aria-labelledby="mp-h-avance"><h2 id="mp-h-avance" class="mp-h3">Cómo va tu pedido</h2>' +
       franja(x, av) +
-      '<div class="mp-rapidas-pedido" data-rapidas><p class="mp-fino">¿Tienes una duda sobre tu pedido?</p><div class="mp-chips">' + chipsRapidas('pedido') + '</div>' +
-      (st.textoRapida && st.rapida === 'donde' ? '<p id="portal-rapida-respuesta" class="mp-respuesta" role="status">' + esc(st.textoRapida) + '</p>' : '') + '</div>' +
+      '<details class="mp-rapidas-pedido" data-rapidas' + (st.textoRapida && st.rapida === 'donde' ? ' open' : '') + '><summary>Ver qué puedes preguntar sobre tu pedido</summary><div class="mp-chips">' + chipsRapidas('pedido') + '</div>' +
+      (st.textoRapida && st.rapida === 'donde' ? '<p id="portal-rapida-respuesta" class="mp-respuesta" role="status">' + esc(st.textoRapida) + '</p>' : '') + '</details>' +
       '</div>' +
       avisoCorreo(x) +
       '<div class="mp-espaciador" aria-hidden="true"></div><div class="mp-cierre">' + cta + '</div>' +
@@ -642,6 +645,7 @@
     var f = st.formularios.ayuda || {};
     var caso = x.c.supportCase;
     var mensajes = (x.c.supportMensajes || []).length;
+    var solicitud = fichaPostventa(x.s, 'ayudas', x.p?.id);
     var rapidas = chipsRapidas('ayuda');
     var respuesta = st.textoRapida || '';
     var estadoCaso = caso ? '<div class="mp-tarjeta" role="status"><p class="mp-kicker">Tu caso</p><p><b>Caso abierto · ' + esc(caso.type) + '</b></p><p class="mp-fino">Estado: recibido. Una persona de Soporte te contactará; el estado se actualiza aquí.' + (mensajes ? ' Mensajes enviados: ' + mensajes + '.' : '') + '</p></div>' : '';
@@ -660,6 +664,7 @@
       '<label class="mp-campo"><span>Cuéntanos qué pasa</span><textarea name="detail" rows="3" minlength="3" maxlength="600" required>' + esc(f.detail || '') + '</textarea></label>' +
       '</form>' +
       estadoCaso +
+      (solicitud ? '<details class="mp-tarjeta"><summary>Ver mi solicitud de postventa</summary><p>' + esc(solicitud.resumen) + '</p></details>' : '') +
       '<details class="mp-bloque mp-consultas" data-rapidas' + (respuesta ? ' open' : '') + '><summary>Ver preguntas rápidas para el asistente</summary><div class="mp-chips">' + rapidas + '</div>' +
       (respuesta ? '<p id="portal-rapida-respuesta" class="mp-respuesta" role="status">' + esc(respuesta) + '</p>' : '') + '</details>' +
       (formatoEscritorio.matches ? '' : agenteHTML(x)) +
@@ -876,12 +881,12 @@
       dispatchEvent(new CustomEvent('marley:portal-tab', { detail: id }));
     }
   }
-  function avanzarTiempo() {
+  function avanzarTiempo(dias) {
     var J = journey();
     var x = contexto(estado());
     var p = x.p;
     if (!J) { return; }
-    if (!J.jumpDays(p?.receivedAt ? 30 : 3)) return;
+    if (!J.jumpDays(dias === '30' || p?.receivedAt ? 30 : 3)) return;
     st.etapa = null;
     refresh();
     var encuesta = st.host?.querySelector('[data-mp-satisfaccion]');
@@ -1125,9 +1130,16 @@
     mutar(s => {
       var r = fichaPostventa(s, 'respuestas', e.pedido);
       var pedido = s.customerCycle?.orders.find(p => p.id === e.pedido);
-      if (!r || !pedido?.receivedAt || r.nps != null) return;
+      if (!r || !pedido?.receivedAt) return;
+      if (e.seguimiento) {
+        if (r.seguimientoAt || fichaPostventa(s, 'ayudas', e.pedido)?.estado !== 'resuelta') return;
+        r.seguimientoAt = window.M4.now();
+        r.seguimiento = { nps, abierta, canales };
+        evento(s, 'postventa_seguimiento', 'Seguimiento de soporte registrado', { order_id: e.pedido, nps_score: nps });
+        return;
+      }
+      if (r.nps != null) return;
       Object.assign(r, { nps, abierta, canales });
-      if (e.seguimiento) r.seguimientoAt = window.M4.now();
       Object.assign(pedido, { npsScore: nps, npsComment: abierta, npsAt: window.M4.now() });
       s.customerCycle.npsScore = nps;
       s.customerCycle.npsComment = abierta;
@@ -1165,8 +1177,26 @@
       if (st.tab !== 'ayuda' || !destino) return;
       if (!window.MarleyAgenteClienteNucleo && intentos++ < 40) { setTimeout(entregar, 150); return; }
       if (window.MarleyAgenteClienteNucleo) {
-        var texto = 'Necesito hablar con una persona de Soporte. ' + resumen;
+        var agente = window.MarleyAgente;
+        var cuenta = window.M4.get().lead?.id;
+        var texto = motivo === MOTIVOS[0] ? 'La máquina no funciona. Necesito soporte.' : 'Tengo un reclamo sobre mi pedido.';
+        var vinculados = 0;
+        var vincularResumen = function () {
+          var traspaso = agente?.espera.estado(cuenta).traspaso;
+          if (!traspaso || traspaso.tipo !== 'soporte' || !['esperando', 'tomada'].includes(traspaso.estado)) {
+            if (vinculados++ < 30) setTimeout(vincularResumen, 150);
+            return;
+          }
+          var estado = agente.estado.get();
+          var actual = estado.traspasos.find(t => t.id === traspaso.id);
+          if (!actual || (actual.resumen || '').includes(resumen)) return;
+          actual.resumen = [actual.resumen, resumen].filter(Boolean).join('\n');
+          actual.postventaPedidoId = e.pedido;
+          agente.estado.guardar(estado);
+          agente.eventos.emitir('traspaso', actual);
+        };
         destino.dispatchEvent(new CustomEvent('marley:portal-pregunta', { bubbles: true, detail: { texto } }));
+        setTimeout(vincularResumen, 1000);
       }
     };
     entregar();
@@ -1202,7 +1232,7 @@
     if (!accion) { return; }
     ev.preventDefault();
     if (accion === 'firmar-contrato') { st.dialogo = true; renderLocal(); return; }
-    if (accion === 'avanzar-tiempo') { avanzarTiempo(); return; }
+    if (accion === 'avanzar-tiempo') { avanzarTiempo(el.dataset.dias); return; }
     if (accion === 'confirmar-recepcion') { confirmarRecepcion(); return; }
     if (accion === 'ir-repetir') { setTab('repetir'); return; }
     if (accion === 'recordatorio') { activarRecordatorio(); return; }

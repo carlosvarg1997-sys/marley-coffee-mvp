@@ -100,10 +100,10 @@ async function buyer(page) {
   await click(page, 'C09', '#portal-tabs [data-portal-tab="pedido"]', () => open(page, '#portal-franja'));
   await click(page, 'C09', '[data-portal-accion="firmar-contrato"]', () => open(page, '[data-mp-dialogo]'));
   await click(page, 'C09', '[data-portal-accion="confirmar-firma"]', () => open(page, '[data-etapa="firmado"][aria-current="step"]'));
-  await click(page, 'C09', '[data-portal-accion="avanzar-tiempo"]', () => open(page, '[data-portal-accion="confirmar-pedido"]'));
-  await click(page, 'C09', '[data-portal-accion="confirmar-pedido"]', () => open(page, '[data-portal-accion="avanzar-tiempo"]'));
-  await click(page, 'C09', '[data-portal-accion="avanzar-tiempo"]', () => open(page, '[data-etapa="camino"][aria-current="step"]'));
-  await click(page, 'C09', '[data-portal-accion="confirmar-recepcion"]', () => open(page, '[data-etapa="instalado"][aria-current="step"]'));
+  await click(page, 'C09', '[data-portal-accion="avanzar-tiempo"]', async () => {
+    await open(page, '[data-etapa="instalado"][aria-current="step"]');
+    await open(page, '[data-mp-satisfaccion]');
+  });
   await click(page, 'C09', '[data-portal-accion="avanzar-tiempo"]', () => open(page, '[data-portal-accion="ir-repetir"]'));
   await click(page, 'C09', '[data-portal-accion="ir-repetir"]', () => open(page, '#mp-form-repetir'));
   await click(page, 'C09', '[data-cierra-tarea="T5"]', () => text(page, '.mp-aviso-ok', /Repetición confirmada/i));

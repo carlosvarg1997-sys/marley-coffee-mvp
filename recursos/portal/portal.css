@@ -550,6 +550,7 @@
   border-radius: 12px;
 }
 .mp-explicaciones summary,
+.mp-rapidas-pedido summary,
 .mp-productos-entregados summary,
 .mp-canales-detalle summary {
   min-height: 44px;
@@ -560,6 +561,7 @@
 .mp-explicaciones :is(p,ul) { margin: 8px 0 0; }
 .mp-explicaciones ul { padding-left: 20px; list-style: disc; }
 #portal-host .mp-satisfaccion { margin-top: 24px; padding: 12px; }
+#portal-host .mp-pedido-entregado :is(.mp-explicaciones,.mp-satisfaccion) { margin-top: 16px; }
 .mp-satisfaccion h3 { margin: 0 0 8px; }
 .mp-caritas { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
 .mp-carita {

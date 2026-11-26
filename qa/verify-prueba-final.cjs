@@ -233,11 +233,8 @@ async function runCustomerCtas(page, frame, folder) {
   await page.locator('#ag-salto [data-action="jump"]').click();
   await close('T4');
   await page.locator('#ag-salto [data-action="jump"]').click();
-  await frame.locator('[data-portal-accion="confirmar-pedido"]').first().click();
-  const time = frame.locator('[data-portal-accion="avanzar-tiempo"]').first();
-  await time.click();
-  await frame.locator('[data-portal-accion="confirmar-recepcion"]').first().click();
-  await time.click();
+  await frame.locator('#portal-franja [data-etapa="instalado"][aria-current="step"]').waitFor();
+  await frame.locator('[data-mp-satisfaccion]').waitFor();
   await frame.locator('[data-portal-accion="ir-repetir"]').first().click();
   await close('T5');
   await frame.locator('#portal-tabs [data-portal-tab="ayuda"]').click();
