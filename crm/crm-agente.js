@@ -1831,7 +1831,11 @@
     ev.preventDefault();
     if (!panelEl || !panelEl.isConnected) sincronizarPanel();
     const cuenta = b.dataset.cuentaId || '';
-    conEspera(() => abrirTarea(tipo, cuenta));
+    // 26-nov (Claude): si la persona ya cambió de pantalla o de rol mientras el motor cargaba,
+    // no se abre el panel con un borrador viejo encima de otra pantalla.
+    const rutaClic = location.hash;
+    const rolClic = pnRolActual();
+    conEspera(() => { if (location.hash !== rutaClic || pnRolActual() !== rolClic) return; abrirTarea(tipo, cuenta); });
   });
   // Escape cierra la conversación y devuelve el foco al control que la abrió (contrato 26-nov, punto 3).
   document.addEventListener('keydown', ev => {

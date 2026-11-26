@@ -280,6 +280,15 @@
 }
 #crm-v2-root .crm2-content > #crm-agente-chat.is-abierto .crm-agente-cerrar { min-height: 44px; }
 #crm-v2-root .crm2-content > #crm-agente-chat.is-abierto .crm-agente-hilo-chat { max-height: none; }
+/* 26-nov (Claude): en escritorio el panel del agente se acopla al costado. El contenido le deja su espacio
+   y ningún botón de la pantalla queda tapado mientras la conversación está abierta (E-0f6207). */
+@media (min-width: 901px) {
+  #crm-v2-root .crm2-content:has(> #crm-agente-chat.is-abierto) { margin-right: calc(min(460px, 100vw - 32px) + 24px); }
+}
+@media (min-width: 901px) and (max-width: 1440px) {
+  #crm-v2-root .crm2-content > #crm-agente-chat.is-abierto { width: 400px; }
+  #crm-v2-root .crm2-content:has(> #crm-agente-chat.is-abierto) { margin-right: 424px; }
+}
 @media (max-width: 900px) {
   #crm-v2-root .crm2-content > #crm-agente-chat.is-abierto {
     top: auto;

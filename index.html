@@ -12919,10 +12919,10 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       .replace(/>([^<>]*)</g, function (whole, text) { return ">" + text.replace(/\bOCS\b/g, "Oficinas") + "<"; })
       .replace(/\b(aria-label|title|alt)="([^"]*)"/g, function (whole, attr, value) { return attr + '="' + value.replace(/\bOCS\b/g, "Oficinas") + '"'; });
   }
-  function machinePhoto(offer) { return DATA.offer.maquinas[offer.maquina] && DATA.offer.maquinas[offer.maquina].foto || D.MACHINES[offer.maquina] && D.MACHINES[offer.maquina].img || ""; }
+  function machinePhoto(offer) { const mq = (DATA && DATA.offer && DATA.offer.maquinas) || {}; return mq[offer.maquina] && mq[offer.maquina].foto || D.MACHINES[offer.maquina] && D.MACHINES[offer.maquina].img || ""; }
   function machineImage(key, alt) {
     const offer = buyerFor(M.get());
-    const src = offer && offer.maquina === key ? machinePhoto(offer) : DATA.offer.maquinas[key] && DATA.offer.maquinas[key].foto || D.MACHINES[key] && D.MACHINES[key].img || "";
+    const mq = (DATA && DATA.offer && DATA.offer.maquinas) || {}; const src = offer && offer.maquina === key ? machinePhoto(offer) : mq[key] && mq[key].foto || D.MACHINES[key] && D.MACHINES[key].img || "";
     return src ? '<img class="r3-machine-photo" src="' + esc(src) + '" alt="' + esc(alt || D.MACHINES[key].name) + '" width="240" height="165" loading="lazy" data-zoom data-zoom-grupo="maquinas">' : "";
   }
   function stepGuide(stage) {
@@ -12965,8 +12965,8 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
   function proposalMachineBlock(offer) {
     if (!offer) return "";
     const s5 = M.get(), mk5 = (window.R5 && window.R5.maquina(s5, offer)) || offer.maquina;
-    const machine = DATA.offer.maquinas[mk5] || {};
-    return '<article class="mcp-bloque r3-proposal-machine" aria-labelledby="mcp-b1"><h2 id="mcp-b1">1 · Tu máquina</h2><div class="r3-proposal-machine-row"><div><b>' + esc(machine.nombre || mk5) + '</b><p>' + esc(machine.tipo || "Tipo a confirmar") + ' · Capacidad por confirmar' + '</p><p>' + esc(DATA.offer.modalidad_maquina) + '</p></div></div>' + (window.R5 ? '<p class="r5-porque">' + esc(window.R5.porque(s5, mk5, offer)) + '</p><p class="r5-enlaces"><a href="#C04" data-go="C04">Cambiar respuestas</a><a href="#C11" data-go="C11">Ver otras máquinas</a></p>' : "") + '</article>';
+    const machine = ((DATA && DATA.offer && DATA.offer.maquinas) || {})[mk5] || {};
+    return '<article class="mcp-bloque r3-proposal-machine" aria-labelledby="mcp-b1"><h2 id="mcp-b1">1 · Tu máquina</h2><div class="r3-proposal-machine-row"><div><b>' + esc(machine.nombre || mk5) + '</b><p>' + esc(machine.tipo || "Tipo a confirmar") + ' · Capacidad por confirmar' + '</p><p>' + esc(DATA && DATA.offer ? DATA.offer.modalidad_maquina : "") + '</p></div></div>' + (window.R5 ? '<p class="r5-porque">' + esc(window.R5.porque(s5, mk5, offer)) + '</p><p class="r5-enlaces"><a href="#C04" data-go="C04">Cambiar respuestas</a><a href="#C11" data-go="C11">Ver otras máquinas</a></p>' : "") + '</article>';
   }
   function proposalQuoteBlocks(html, s, offer) {
     const quote = quotationFor(s, offer), label = quote.selected ? "Insumos" : "Productos del pack", totalLabel = quote.selected ? "Total neto antes de instalar" : "Total del pack de partida";
@@ -14664,7 +14664,7 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
     function resultado(sv) {
       const offer = R.buyerFor(sv), mk = maquina(sv, offer); if (!mk) return "";
       const f = fichaMaquina(mk);
-      return '<div class="r5-resultado" data-r5-maq="' + esc(mk) + '"><span class="r5-k">Tu máquina en comodato</span><div class="r5-res-fila"><img src="' + esc(f.foto) + '" alt="' + esc(f.nombre) + '" loading="lazy" width="72" height="72"><div><h3>Tu máquina en comodato: ' + esc(f.nombre) + "</h3><small>" + esc([f.tipo, f.tazas, f.atencion].filter(Boolean).join(" · ")) + '</small></div></div><p class="r5-porque">' + esc(porque(sv, mk, offer)) + '</p><p class="r5-res-nota">' + esc(DATA.offer.modalidad_maquina) + "</p></div>";
+      return '<div class="r5-resultado" data-r5-maq="' + esc(mk) + '"><span class="r5-k">Tu máquina en comodato</span><div class="r5-res-fila"><img src="' + esc(f.foto) + '" alt="' + esc(f.nombre) + '" loading="lazy" width="72" height="72"><div><h3>Tu máquina en comodato: ' + esc(f.nombre) + "</h3><small>" + esc([f.tipo, f.tazas, f.atencion].filter(Boolean).join(" · ")) + '</small></div></div><p class="r5-porque">' + esc(porque(sv, mk, offer)) + '</p><p class="r5-res-nota">' + esc(DATA && DATA.offer ? DATA.offer.modalidad_maquina : "") + "</p></div>";
     }
     function preguntas(sv, field, chips, multi) {
       const claves = ["volumen"].concat(multi ? ["puntos"] : []).concat(["operacion", "preferencias"]);
