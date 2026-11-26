@@ -75,3 +75,37 @@
   #crm-tablero .crm-tablero__grid { grid-template-columns: 1fr; }
   #crm-tablero .crm-kpi__cifras { grid-template-columns: 1fr; }
 }
+
+/* 26-nov (DS2): el «Hoy» de Jefatura muestra cuatro cifras compactas con su meta y su «¿Qué significa?». */
+#crm-tablero.crm-tablero--compacto {
+  margin: 0;
+  padding: 16px;
+  border-top-width: 4px;
+  background: #fff;
+}
+#crm-tablero.crm-tablero--compacto .crm-tablero__cab--compacto { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 8px; }
+#crm-tablero.crm-tablero--compacto .crm-tablero__cab--compacto .crm-tablero__titulo { margin: 0; font-size: 18px; }
+#crm-tablero.crm-tablero--compacto .crm-tablero__cab--compacto .crm-tablero__general { margin: 0; }
+#crm-tablero.crm-tablero--compacto .crm-tablero__titulo { margin: 2px 0 6px; font-size: 19px; }
+#crm-tablero.crm-tablero--compacto .crm-tablero__general { margin-bottom: 8px; padding: 6px 10px; }
+#crm-tablero.crm-tablero--compacto .crm-tablero__mas { display: inline-flex; align-items: center; min-height: 44px; color: var(--tab-fuerte); font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+#crm-tablero.crm-tablero--compacto .crm-tablero__grid--compacto { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+#crm-tablero .crm-kpi--compacto { gap: 6px; padding: 10px; }
+#crm-tablero .crm-kpi--compacto .crm-kpi__cab h3 { font-size: 14px; line-height: 1.2; }
+#crm-tablero .crm-kpi--compacto .crm-kpi__cifras { grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+#crm-tablero .crm-kpi--compacto .crm-kpi__valor { font-size: 15px; }
+#crm-tablero .crm-kpi--compacto .crm-kpi__bloque--meta .crm-kpi__valor { font-size: 14px; font-weight: 500; }
+#crm-tablero .crm-kpi--compacto .crm-kpi__objetivo { font-size: 12px; line-height: 1.3; }
+#crm-tablero .crm-kpi--compacto .crm-kpi__explica { margin-top: auto; }
+#crm-tablero .crm-kpi--compacto .crm-kpi__explica summary { min-height: 44px; font-size: 13px; }
+#crm-tablero.crm-tablero--compacto .crm-tablero__nota { margin: 8px 0 0; font-size: 12px; }
+@media (max-width: 900px) {
+  #crm-tablero.crm-tablero--compacto .crm-tablero__grid--compacto { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  #crm-tablero.crm-tablero--compacto { padding: 12px; }
+  #crm-tablero.crm-tablero--compacto .crm-tablero__grid--compacto { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #crm-tablero.crm-tablero--compacto .crm-tablero__titulo { font-size: 17px; }
+  /* Dos cifras por tarjeta no caben en 180 px: se apilan para que «Simulación» y «Meta» no se corten. */
+  #crm-tablero .crm-kpi--compacto .crm-kpi__cifras { grid-template-columns: 1fr; }
+}

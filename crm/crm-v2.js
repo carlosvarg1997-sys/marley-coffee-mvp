@@ -451,7 +451,7 @@
       </aside>
       <div class="crm2-workspace">
         <header class="crm2-topbar"><div class="crm2-mobile-brand"><span class="crm2-brand-mark">M</span><b>${esc(roleTitle(role))}</b></div><div class="crm2-search-wrap">${icon('search')}<input type="search" data-c2-search placeholder="Buscar" aria-label="Buscar contacto o cuenta" autocomplete="off"><div class="crm2-search-results" data-c2-search-results hidden></div></div><button class="crm2-alerts" type="button" data-c2-go="${role === 'jefatura' ? 'R07' : role === 'marketing' ? 'R16' : 'R01'}" aria-label="Ver avisos">${icon('bell')}<span>Avisos</span><b>${alertCount(role)}</b></button></header>
-        <main class="crm2-main"><header class="crm2-page-head"><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}${cta ? `<div class="crm2-page-cta">${cta}</div>` : ''}</header><div class="crm2-content">${content}${cta ? `<div class="crm2-cierre" data-crm2-cierre>${cta}</div>` : ''}</div></main>
+        <main class="crm2-main"><header class="crm2-page-head${ES_HOY(route) ? ' crm2-page-head--hoy' : ''}"><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}${cta ? `<div class="crm2-page-cta">${cta}</div>` : ''}</header><div class="crm2-content${ES_HOY(route) ? ' crm2-content--hoy' : ''}">${content}${cta ? `<div class="crm2-cierre" data-crm2-cierre>${cta}</div>` : ''}</div></main>
       </div>
       ${actionbar}
       <div class="crm2-toast-host" data-crm2-toast aria-live="polite" aria-atomic="true"></div>
@@ -498,7 +498,7 @@
       const meta = isLead ? sourceOf(item) : isReferralAccount ? item.referral : riskReason(item);
       const badge = isLead ? priorityLabel(item) : isReferralAccount ? 'Referido' : (accountNeedsReorder(item) ? 'Reposición' : 'En riesgo');
       const company = isLead ? companyName(item) : item.business || 'Cuenta';
-      return row(isLead ? contactName(item) : item.name, isLead ? `${entry.label} · ${company}` : entry.label, meta, action, badge);
+      return filaCola(row(isLead ? contactName(item) : item.name, isLead ? `${entry.label} · ${company}` : entry.label, meta, action, badge), item, !isLead, 'ventas', permission(item));
     }, 'Ver todas las prioridades') : empty('Nada urgente por ahora', 'Aquí aparecen traspasos, reposiciones y casos de postventa.');
     const responseBody = waiting.length ? limitedList(waiting, item => row(item.name || item.accountName || 'Contacto', `${item.channel || 'Canal por confirmar'} · ${item.date ? fmtDate(item.date) : 'Seguimiento registrado'}`, item.status || 'Esperando respuesta', `data-c2="open-lead" data-id="${esc(item.leadId || item.id)}"`, 'Esperan respuesta')) : `<div class="crm2-inline-note">Las conversaciones y propuestas viven en la ficha del contacto.</div>`;
     return block('A atender hoy', '', queueBody) + `<details class="crm2-fold"><summary>Referidos nuevos</summary>${referralNewBody()}</details><details class="crm2-fold"><summary>Esperan respuesta</summary>${responseBody}</details>`;
@@ -545,10 +545,13 @@
     const sales = salesInPeriod();
     const sql = leads().filter(lead => statusOfLead(lead).startsWith('SQL')).length;
     const mql = leads().filter(isMql).length;
-    const leadBody = ready.length ? limitedList(ready, lead => row(contactName(lead), companyName(lead), `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, permissionShort(lead)), 'Ver todos los leads') : empty('No hay un lead listo para pasar', 'La calificación requiere contacto identificado, negocio B2B, permiso y 40 puntos de interés.');
+    const leadBody = ready.length ? limitedList(ready, lead => filaCola(row(contactName(lead), companyName(lead), `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, permissionShort(lead)), lead, false, 'marketing', permission(lead)), 'Ver todos los leads') : empty('No hay un lead listo para pasar', 'La calificación requiere contacto identificado, negocio B2B, permiso y 40 puntos de interés.');
     const returnedBody = returned.length ? limitedList(returned, lead => row(contactName(lead), `${companyName(lead)} · ${sourceOf(lead)}`, `Motivo: ${progressFor(lead).motivoDevolucion || progressFor(lead).motivo || 'revisar ficha'}`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, 'Devuelto por Ventas')) : `<div class="crm2-inline-note">Sin devoluciones pendientes.</div>`;
     const referralBody = referralRequests.length ? `<div class="crm2-list">${limitedList(referralRequests, item => { const lead = leadById(item.leadId) || {}; return row(contactName(lead), `${companyName(lead)} · ${item.reason}`, item.status, `data-c2="open-lead" data-id="${esc(item.leadId)}"`, 'Referido'); }, 'Ver todos los referidos')}</div>` : '';
-    return block('Para pasar a Ventas', '', leadBody) + `<details class="crm2-fold"><summary>Traspaso y ventas</summary><div class="crm2-fold-body"><p>${mql} MQL · ${sql} SQL aceptados</p><p>Ventas del período de prueba <b>${money(sales)}</b></p>${returnedBody}${referralBody}</div></details>` + marketingDraftBlock();
+    // El borrador de campaña es trabajo de otra pestaña: en el Hoy queda plegado para que la cola mande.
+    const draft = marketingDraftBlock();
+    const draftFold = draft ? `<details class="crm2-fold crm2-fold--trabajo"><summary>Borrador de campaña por negocio</summary><div class="crm2-fold-body">${draft}</div></details>` : '';
+    return block('Para pasar a Ventas', '', leadBody) + `<details class="crm2-fold"><summary>Traspaso y ventas</summary><div class="crm2-fold-body"><p>${mql} MQL · ${sql} SQL aceptados</p><p>Ventas del período de prueba <b>${money(sales)}</b></p>${returnedBody}${referralBody}</div></details>` + draftFold;
   }
   function marketingDraftBlock() {
     const segments = Object.keys(D.SEGMENT_CONTENT || {});
@@ -697,13 +700,21 @@
       ['Referidos', approvals.find(item => item.tipo === 'referido')],
       ['Recuperación', followups.find(item => item.status === 'Requiere aprobación')],
       ['Permisos', followups.find(item => item.status === 'Bloqueado')],
-    ].map(([label, item]) => item
-      ? row(label, item.titulo || item.name, '', `data-c2="review-approval" data-id="${esc(item.id)}"`, item.status === 'Bloqueado' ? 'Falta permiso' : '')
-      : `<p class="crm2-queue-empty"><strong>${label}</strong> · Sin pendientes</p>`).join('');
+    ].map(([label, item]) => {
+      if (!item) return `<p class="crm2-queue-empty"><strong>${label}</strong> · Sin pendientes</p>`;
+      const fila = row(label, item.titulo || item.name, '', `data-c2="review-approval" data-id="${esc(item.id)}"`, item.status === 'Bloqueado' ? 'Falta permiso' : '');
+      // La persona detrás de la solicitud: el agente arma el aviso o el correo con sus datos.
+      const persona = item.lead || item.account || leadById(item.leadId) || accountById(item.leadId) || accountById(item.cuenta);
+      if (!persona) return fila;
+      return filaCola(fila, persona, Boolean(item.account || accountById(item.cuenta)), 'jefatura', permission(persona));
+    }).join('');
     const salesNote = goal > 0 ? `${Math.round(sales / goal * 100)} % de la meta ingresada (${money(goal)}); datos de prueba` : 'Meta comercial sin registrar · muestra financiera de prueba';
     const metricGrid = `<div class="crm2-metrics">${metric('Ventas netas · 90 días', money(sales), salesNote, true)}${metric('Leads calificados', String(qualified), `${sql} SQL aceptados · meta del informe: +25 % vs base; base sin registrar`)}${metric('Reposición digital', digital.value, digital.note)}${npsMetric(npsInfo)}</div>`;
     const details = `<details class="crm2-fold"><summary>Todos los indicadores</summary><div class="crm2-fold-body crm2-kpi-details">${labelValue('Retención','Meta 90 % · base 86 %')}${labelValue('Quiebres OCS','Meta: −30 %')}${labelValue('OTIF','Meta: 96 %')}${labelValue('Ticket neto','Meta: +10 % en cuentas activadas')}${labelValue('Cuentas activadas','Meta: 100 en doce meses')}${labelValue('CAC','Escenario del piloto · revisar en Metas y canales')}</div></details>`;
-    return block('Por aprobar', '', quickReview, 'crm2-approval-queue') + `<details class="crm2-fold"><summary>Resultados del programa</summary><div class="crm2-fold-body">${metricGrid}${details}</div></details>`;
+    // En el Hoy manda la cola de decisiones; las cuatro cifras van en el tablero compacto y el resto
+    // (ventas netas, leads, reposición y NPS) queda a un toque en «Resultados del programa».
+    const programa = `<details class="crm2-fold"><summary>Resultados del programa</summary><div class="crm2-fold-body">${metricGrid}${details}</div></details>`;
+    return block('Por aprobar', '', quickReview, 'crm2-approval-queue') + programa;
   }
   function approvalSampleItems() {
     const s = currentState();
@@ -831,14 +842,30 @@
   // Botones que pasan por el agente del CRM (crm-agente.js los atiende por delegación). Solo aparecen si el rol puede usarlos:
   // el correo exige permiso del contacto; contactar y agendar visita son de Ventas; avisar a un compañero es para todos.
   const AGENTE_TXT = { correo: 'Enviar correo', contactar: 'Contactar', visita: 'Agendar visita', avisar: 'Avisar a un compañero' };
-  function agenteBotones(item, isAccount, role, perm) {
+  // En la cola del Hoy las mismas tareas van con nombre corto, para no empujar las filas hacia abajo.
+  const AGENTE_MINI = { correo: 'Correo', contactar: 'Contactar', visita: 'Visita', avisar: 'Avisar' };
+  const AGENTE_GLYPH = { correo: 'file', contactar: 'people', visita: 'clock', avisar: 'bell' };
+  function agenteTareas(item, isAccount, role, perm) {
     const tareas = [];
     const porCanal = window.MarleyAgente?.canales?.permiso?.(item.id, 'correo');
     if (porCanal === true || porCanal == null && perm?.key === 'yes') tareas.push('correo');
     if (role === 'ventas') tareas.push('contactar', 'visita');
     tareas.push('avisar');
-    return tareas.map(tarea => `<button type="button" class="crm2-btn crm2-btn--secondary" data-crm-agente-tarea="${tarea}" data-cuenta-id="${esc(item.id)}" data-crm-tipo="${isAccount ? 'cuenta' : 'lead'}">${esc(AGENTE_TXT[tarea])}</button>`).join('');
+    return tareas;
   }
+  function agenteBotones(item, isAccount, role, perm) {
+    return agenteTareas(item, isAccount, role, perm).map(tarea => `<button type="button" class="crm2-btn crm2-btn--secondary" data-crm-agente-tarea="${tarea}" data-cuenta-id="${esc(item.id)}" data-crm-tipo="${isAccount ? 'cuenta' : 'lead'}">${esc(AGENTE_TXT[tarea])}</button>`).join('');
+  }
+  // Acciones rápidas del agente en una fila de la cola: van fuera del botón de la fila (nada de botones anidados).
+  function agenteAccionesFila(item, isAccount, role, perm, etiqueta) {
+    const nombre = etiqueta || (isAccount ? item.name : contactName(item)) || 'este registro';
+    return `<div class="crm2-qtools" role="group" aria-label="Pedir al agente por ${esc(nombre)}">${agenteTareas(item, isAccount, role, perm).map(tarea => `<button type="button" class="crm2-qtool" data-crm-agente-tarea="${tarea}" data-cuenta-id="${esc(item.id)}" data-crm-tipo="${isAccount ? 'cuenta' : 'lead'}" aria-label="${esc(AGENTE_TXT[tarea])} · ${esc(nombre)}">${icon(AGENTE_GLYPH[tarea])}<span>${esc(AGENTE_MINI[tarea])}</span></button>`).join('')}</div>`;
+  }
+  // Fila de cola: la fila sigue siendo un botón; las tareas del agente van en una columna aparte, a la vista.
+  function filaCola(html, item, isAccount, role, perm) {
+    return `<div class="crm2-qitem">${html}${agenteAccionesFila(item, isAccount, role, perm)}</div>`;
+  }
+  const ES_HOY = route => route === 'R01' || route === 'R11' || route === 'R05';
   function detailPage(role) {
     const s = appState();
     const { lead, account } = getSelected();

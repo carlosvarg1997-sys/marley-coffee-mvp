@@ -308,13 +308,14 @@
     const cuenta = cuentasDe().find(a => String(a.id) === String(it.cuenta)) || null;
     return { permiso: cl.permission === true || permisoDe(cuenta || {}) === 'yes', b2b: cl.b2b === true || Boolean(cuenta?.business), beneficio: cl.benefit === true && Boolean(reg.beneficio || it.beneficio) };
   }
+  // Tres o cuatro opciones por rol, a la vista en la tarjeta del asistente (26-nov, pedido de Carlitos).
   function sugerenciaTexto(rol) {
     const l = leadFoco(rol) || leadPrioritario();
     const nombre = l ? empresaDe(l) : 'este lead';
-    if (rol === 'marketing') return [`¿Qué cotizó ${nombre}?`, '¿Cumple para MQL?', '¿Pidió ejecutivo?', '¿Cuántas tazas?', '¿Qué dudas tuvo?', 'Pásalo a Ventas'];
-    if (rol === 'ventas') return ['Resume la cuenta', 'Propón la canasta', 'Prepara la propuesta', 'Agenda la visita'];
+    if (rol === 'marketing') return [`¿Qué cotizó ${nombre}?`, '¿Cumple para MQL?', 'Pásalo a Ventas'];
+    if (rol === 'ventas') return ['Resume mi día', `Mándale un correo a ${nombre}`, `Agenda una visita a ${nombre}`];
     const pend = aprobacionesPendientes()[0];
-    return ['¿Qué espera mi aprobación?', pend ? `Aprueba ${esReferido(pend) ? 'el referido' : 'la propuesta'} de ${nombreItem(pend)}` : 'Aprueba la propuesta especial'];
+    return ['¿Qué espera mi aprobación?', pend ? `Aprueba ${esReferido(pend) ? 'el referido' : 'la propuesta'} de ${nombreItem(pend)}` : 'Aprueba la propuesta especial', 'Resume mi día'];
   }
   const leadFoco = rol => (S.foco[rol] ? leadPorId(S.foco[rol]) : null);
   function leadPrioritario() {
@@ -712,6 +713,7 @@
     if (/(canast|propon|recomiend|sugier)/.test(t)) return { tipo: 'canasta' };
     if (/propuest|prepar|arm\b/.test(t)) return { tipo: 'propuesta' };
     if (/(visit|agend|reunion|cita)/.test(t)) return { tipo: 'visita' };
+    if (/(mi dia|del dia|mi jornada|agenda de hoy|que tengo hoy)/.test(t)) return { tipo: 'dia' };
     if (/(resum|cuenta|historial|como va)/.test(t)) return { tipo: 'resumen' };
     if (/(cumpl|mql|calific)/.test(t)) return { tipo: 'mql' };
     if (/(ejecut|llam|telefon|hablar con)/.test(t)) return { tipo: 'ejecutivo' };
@@ -770,6 +772,27 @@
         if (intent.tipo === 'canasta') return htmlCanasta(l);
         if (intent.tipo === 'propuesta') return htmlPropuesta(l, texto);
         return htmlVisita(l);
+      }
+      case 'dia': {
+        // Resumen del día con las mismas cifras que ve el rol en su Hoy; nada inventado.
+        const leads = leadsDe();
+        const cuentas = cuentasDe();
+        const stats = c => (c && c.st) || (m4() && m4().accountStats ? m4().accountStats(c) : {});
+        const porReponer = cuentas.filter(c => Number.isFinite(Number(stats(c).dueIn)) && Number(stats(c).dueIn) <= 0).length;
+        const enRiesgo = cuentas.filter(c => { const s = stats(c); return s.lastAgo != null && s.freqDays != null && Number(s.lastAgo) > Number(s.freqDays); }).length;
+        const listos = leads.filter(l => criteriosMql(l).cumple && !enVentas(l)).length;
+        const devueltos = leads.filter(l => pasoDe(l).estado === 'devuelto').length;
+        const aprob = aprobacionesPendientes().length;
+        if (rol === 'jefatura') {
+          return tarjeta('Tu día en el CRM', `<p>Hoy tienes <b>${aprob}</b> solicitud(es) esperando tu decisión.</p>${filas([['Aprobaciones pendientes', String(aprob)], ['Cuentas en riesgo', String(enRiesgo)], ['Reposiciones por revisar', String(porReponer)]])}`) +
+            chips(['¿Qué espera mi aprobación?']) + niveles({ regla: 'Solo excepciones llegan a Jefatura.', ia: 'Ordené la cola por lo que espera tu decisión.', persona: 'Tú apruebas, pides información o rechazas.', registro: 'consulta del día' });
+        }
+        if (rol === 'marketing') {
+          return tarjeta('Tu día en el CRM', `<p>Hoy hay <b>${listos}</b> lead(s) listos para pasar a Ventas y <b>${devueltos}</b> devuelto(s) por revisar.</p>${filas([['Listos para Ventas', String(listos)], ['Devueltos por Ventas', String(devueltos)], ['Contactos en el registro', String(leads.length)]])}`) +
+            chips(sugerenciaTexto('marketing')) + niveles({ regla: 'MQL = contacto, negocio B2B, permiso e interés de 40 o más.', ia: 'Conté lo que ya cumple los cuatro criterios.', persona: 'Tú revisas y apruebas el traspaso.', registro: 'consulta del día' });
+        }
+        return tarjeta('Tu día en el CRM', `<p>Hoy tienes <b>${porReponer}</b> cuenta(s) por reponer, <b>${enRiesgo}</b> en riesgo y <b>${listos}</b> lead(s) listos para aceptar.</p>${filas([['Cuentas por reponer', String(porReponer)], ['Cuentas en riesgo', String(enRiesgo)], ['Leads listos para aceptar', String(listos)]])}`) +
+          chips(['Propón la canasta', 'Agenda la visita']) + niveles({ regla: 'Reposición y riesgo salen del historial de compra y los tickets abiertos.', ia: 'Ordené el día por lo que vence primero.', persona: 'Tú eliges a quién atender y qué enviar.', registro: 'consulta del día' });
       }
       case 'resumen': {
         const l = leadDe(texto) || (rol === 'ventas' && traspasoActivo() ? leadPorId(traspasoActivo().leadId) : null);
@@ -850,6 +873,15 @@
     S.hilo[rol].unshift({ tipo: 'agente', html: r.html || '', tl: r.tl !== undefined ? r.tl : (tl || null) });
     if (S.hilo[rol].length > 8) S.hilo[rol].length = 8;
     renderHilo();
+    // La tarjeta del Hoy no tiene hilo propio: lo que responde el agente se ve en el panel de conversación.
+    if (!hiloEl) {
+      const objetivo = r.tl !== undefined ? r.tl : (tl || null);
+      const lead = objetivo ? leadPorId(objetivo) : null;
+      if (r.borradorId) PN.hilo.push({ tipo: 'agente', borradorId: r.borradorId });
+      PN.hilo.push({ tipo: 'agente', html: (r.html || '') + (lead ? timelineHtml(lead, true) : '') });
+      PN.hilo = PN.hilo.slice(-30);
+      if (panelEl) { abrirPanel(); renderPanel(); }
+    }
     renderAvisos();
     renderRegistro();
   }
@@ -963,51 +995,60 @@
   }
   function setEstado(texto) { S.estadoTxt = texto; if (estadoEl) estadoEl.textContent = texto; }
 
+  // Tarjeta del asistente en el «Hoy»: ícono, nombre, las opciones del rol a la vista y el campo para escribir.
+  // Al tocar una opción o enviar, la conversación se abre en el panel (#crm-agente-chat), con burbujas y «escribiendo…».
+  const ICONO_AGENTE = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>';
   function construirBarra() {
     if (barEl) return;
     barEl = document.createElement('section');
     barEl.id = 'crm-agente-barra';
-    barEl.className = 'crm-agente';
+    barEl.className = 'crm-agente crm-agente-tarjeta-asistente';
     barEl.setAttribute('aria-labelledby', 'crm-agente-titulo');
     barEl.innerHTML = `
       <header class="crm-agente-head">
-        <div>
-          <p class="crm-agente-eyebrow">AGENTE DEL CRM · SIMULACIÓN</p>
-          <h2 id="crm-agente-titulo" class="crm-agente-titulo">Pídele al agente</h2>
+        <span class="crm-agente-icono" aria-hidden="true">${ICONO_AGENTE}</span>
+        <div class="crm-agente-head-txt">
+          <h2 id="crm-agente-titulo" class="crm-agente-titulo">Asistente de IA del CRM</h2>
           <p class="crm-agente-sub" data-crm-agente-estado>Responde con datos del registro. Nada sale sin aprobación de una persona.</p>
         </div>
       </header>
+      <div class="crm-agente-sugerencias" data-crm-agente-sugerencias role="group" aria-label="Qué le puedes pedir"></div>
       <form class="crm-agente-form" data-crm-agente-form role="search">
-        <label class="crm-agente-label" for="crm-agente-entrada">Escribe o toca una sugerencia</label>
+        <label class="crm-agente-label" for="crm-agente-entrada">Escríbele o toca una opción</label>
         <div class="crm-agente-campo">
-          <input id="crm-agente-entrada" name="pregunta" type="text" autocomplete="off" maxlength="240" placeholder="Ej.: ¿qué cotizó este lead?">
+          <input id="crm-agente-entrada" name="pregunta" type="text" autocomplete="off" maxlength="240" placeholder="Ej.: mándale un correo a Hotel Sol">
           <button type="submit" class="crm-agente-enviar">Pedir</button>
         </div>
       </form>
-      <div class="crm-agente-sugerencias" data-crm-agente-sugerencias role="group" aria-label="Sugerencias"></div>
-      <div class="crm-agente-avisos" data-crm-agente-avisos></div>
-      <div class="crm-agente-hilo" id="crm-agente-hilo" aria-live="polite" aria-relevant="additions"></div>
-      <details class="crm-agente-registro"><summary>Registro del agente</summary><div data-crm-agente-registro></div></details>`;
-    hiloEl = barEl.querySelector('#crm-agente-hilo');
+      <div class="crm-agente-avisos" data-crm-agente-avisos></div>`;
+    hiloEl = null;
     avisosEl = barEl.querySelector('[data-crm-agente-avisos]');
     sugEl = barEl.querySelector('[data-crm-agente-sugerencias]');
     inputEl = barEl.querySelector('#crm-agente-entrada');
     estadoEl = barEl.querySelector('[data-crm-agente-estado]');
-    regEl = barEl.querySelector('[data-crm-agente-registro]');
+    regEl = null;
     if (S.estadoTxt) estadoEl.textContent = S.estadoTxt;
     barEl.querySelector('[data-crm-agente-form]').addEventListener('submit', ev => {
       ev.preventDefault();
       const texto = inputEl.value;
       inputEl.value = '';
       S.enfocar = true;
-      procesar(texto);
+      abrirConversacion(texto);
     });
     barEl.addEventListener('click', onClick);
-    renderRegistro();
+  }
+  // La tarjeta no guarda la conversación: la abre en el panel y le pasa lo que la persona pidió.
+  function abrirConversacion(texto) {
+    if (!panelEl || !panelEl.isConnected) sincronizarPanel();
+    procesarPanel(texto);
+    if (panelEl && panelEl.isConnected) {
+      try { panelEl.scrollIntoView({ block: 'nearest' }); } catch (_) { /* vista opcional */ }
+      if (pnInputEl) { try { pnInputEl.focus({ preventScroll: true }); } catch (_) { /* foco opcional */ } }
+    }
   }
   function onClick(ev) {
     const sug = ev.target.closest('[data-crm-agente-sugerencia]');
-    if (sug && barEl.contains(sug)) { ev.preventDefault(); procesar(sug.dataset.crmAgenteSugerencia); return; }
+    if (sug && barEl.contains(sug)) { ev.preventDefault(); abrirConversacion(sug.dataset.crmAgenteSugerencia); return; }
     const btn = ev.target.closest('[data-crm-agente-accion]');
     if (!btn || !barEl.contains(btn)) return;
     ev.preventDefault();
@@ -1019,18 +1060,9 @@
     if (barFold?.contains(barEl)) barFold.remove();
     else barEl?.remove();
   }
-  function accionesParaHoy(ruta) {
-    if (ruta !== 'R01') return barEl;
-    if (!barFold) {
-      barFold = document.createElement('details');
-      barFold.id = 'crm-agente-controles';
-      barFold.className = 'crm2-fold';
-      const summary = document.createElement('summary');
-      summary.textContent = 'Acciones y registro del agente';
-      barFold.append(summary);
-    }
-    if (!barFold.contains(barEl)) barFold.append(barEl);
-    return barFold;
+  // La tarjeta va a la vista en el Hoy de los tres roles: nada de plegarla.
+  function accionesParaHoy() {
+    return barEl;
   }
 
   // Monta la barra en el «Hoy» del rol (R01, R11, R05). crm-v2.js reemplaza el contenido en cada render; aquí se vuelve a poner.
@@ -1150,8 +1182,11 @@
     if (ajuste === 'corto') {
       const s = sentencias(cuerpo);
       if (s.length >= 3) nuevo = [s[0], s[1], s[s.length - 1]].join(' ');
-      nuevo = nuevo.replace(/,?\s*sin compromiso/i, '').replace(/\s{2,}/g, ' ').trim();
-      if (nuevo === cuerpo) nuevo = cuerpo.replace(/\s*Respondo por este mismo chat\.?/, '');
+      else if (s.length === 2) nuevo = s[0];
+      nuevo = nuevo.replace(/,?\s*sin compromiso/i, '').replace(/\s*Respondo por este mismo chat\.?/, '').replace(/\s{2,}/g, ' ').trim();
+      // Un aviso corto repite el nombre al empezar («Paula Díaz (Ventas): Paula Díaz te pide…»): se quita la repetición.
+      if (nuevo === cuerpo) nuevo = cuerpo.replace(/^([^:\n]{2,60}):\s*\1\b\s*/i, '$1: ');
+      if (nuevo === cuerpo) nuevo = cuerpo.replace(/\b(por favor|en cuanto puedas|cuando puedas)\b[,]?\s*/gi, '').trim();
     }
     if (ajuste === 'formal') {
       nuevo = nuevo.replace(/^Hola\s+([^,]+),/, 'Estimado/a $1,').replace(/^Hola,/, 'Estimado/a,')
@@ -1259,8 +1294,15 @@
   function ajustarBorrador(b, aj) {
     const ta = pnHiloEl ? pnHiloEl.querySelector(`[data-crm-agente-texto="${b.id}"]`) : null;
     if (ta) b.texto = ta.value;
-    b.texto = ajustarTexto(b.texto, aj.tipo, aj.valor);
+    const original = b.texto;
+    const siguiente = ajustarTexto(original, aj.tipo, aj.valor);
     const etiqueta = { corto: 'más corto', formal: 'más formal', cercano: 'más cercano', agrega: 'con lo que agregaste' }[aj.tipo] || 'como lo pediste';
+    if (siguiente === original) {
+      // Sin cambio real no se dice que cambió: la persona decide editar a mano.
+      PN.hilo.push({ tipo: 'agente', html: `<p>Este texto ya está ${esc(etiqueta === 'más corto' ? 'lo más corto que puedo dejarlo sin perder lo esencial' : 'así')}. Puedes editarlo aquí mismo y enviarlo cuando quieras.</p>` });
+      return null;
+    }
+    b.texto = siguiente;
     PN.hilo.push({ tipo: 'agente', html: `<p>Listo: lo dejé ${esc(etiqueta)}. Revísalo aquí y envíalo cuando quieras.</p>` });
     return null;
   }
@@ -1330,7 +1372,9 @@
       });
     }
     avisoPanel(aviso);
-    PN.hilo.push({ tipo: 'agente', html: `<p>${esc(aviso)}</p>` });
+    // El envío queda a la vista en la línea de tiempo del lead, sin tener que abrir la ficha.
+    const leadEnvio = leadPorId(info.key);
+    PN.hilo.push({ tipo: 'agente', html: `<p>${esc(aviso)}</p>${leadEnvio ? timelineHtml(leadEnvio, true) : ''}` });
     avisarCliente(info.key);
     renderPanel(); renderAviso(); renderEspera(); renderLanzador(); renderRegistroPanel(); refrescarHilo();
     sincronizar();
@@ -1500,6 +1544,9 @@
     pnContEl.setAttribute('aria-label', total ? `${total} pendientes del agente` : '');
     pnLanzEl.setAttribute('aria-expanded', PN.abierto ? 'true' : 'false');
     pnCuerpoEl.hidden = !PN.abierto;
+    if (panelEl) panelEl.classList.toggle('is-abierto', PN.abierto);
+    // Con la conversación abierta, la tarjeta se queda en su cabecera: un solo campo para escribir.
+    if (barEl) barEl.classList.toggle('is-conversando', Boolean(PN.abierto && panelEl && panelEl.classList.contains('crm-agente-chat--en-hoy')));
   }
   function renderAviso() {
     if (!pnAvisoEl) return;
@@ -1524,10 +1571,15 @@
     panelEl.setAttribute('aria-label', 'Agente del CRM');
     panelEl.innerHTML = `
       <button type="button" class="crm-agente-lanzador" data-crm-agente-accion="alternar" aria-expanded="false" aria-controls="crm-agente-chat-cuerpo">
-        <span class="crm-agente-lanzador-txt"><b>Agente del CRM</b> · pídele una tarea o una consulta</span>
+        <span class="crm-agente-icono" aria-hidden="true">${ICONO_AGENTE}</span>
+        <span class="crm-agente-lanzador-txt"><b>Asistente de IA del CRM</b><small>Pídele una tarea o una consulta</small></span>
         <span class="crm-agente-lanzador-n" data-crm-agente-contador hidden></span>
       </button>
       <div id="crm-agente-chat-cuerpo" class="crm-agente-cuerpo" hidden>
+        <div class="crm-agente-chat-cab">
+          <b>Asistente de IA del CRM</b>
+          <button type="button" class="crm-agente-cerrar" data-crm-agente-accion="alternar" aria-label="Ocultar la conversación">Ocultar</button>
+        </div>
         <div class="crm-agente-espera" data-crm-espera hidden></div>
         <div class="crm-agente-hilo-chat" data-crm-agente-hilo-chat aria-live="polite" aria-relevant="additions"></div>
         <p class="crm-agente-avisos-chat" data-crm-aviso role="status" aria-live="polite" hidden></p>
@@ -1582,7 +1634,8 @@
     if (acc === 'tomar-conversacion') { conEspera(() => tomarConversacion(id)); return; }
     accionarPanel(acc, id, btn);
   }
-  // Sitio del panel: justo después de la barra del «Hoy» (si la hay) o al principio del contenido de la ruta R.
+  // Sitio del panel: justo después de la tarjeta del «Hoy» (si la hay) o al principio del contenido de la ruta R.
+  // En el Hoy la tarjeta es la que invita; el panel solo aparece cuando hay conversación abierta.
   function sincronizarPanel() {
     const host = document.getElementById(ROOT_ID);
     const ruta = (location.hash || '#R00').slice(1).split('?')[0];
@@ -1590,7 +1643,10 @@
     const rol = pnRolActual();
     if (!contenido || !rol || !/^R\d{2}$/.test(ruta)) { quitarPanel(); return; }
     construirPanel();
+    const enHoy = ruta === 'R01' || ruta === 'R11' || ruta === 'R05';
+    panelEl.classList.toggle('crm-agente-chat--en-hoy', enHoy);
     if (PN.rol !== rol) { PN.rol = rol; PN.hilo = []; PN.borradores = {}; PN.avisos = []; PN.abierto = false; renderSugPanel(); renderRegistroPanel(); }
+    renderLanzador();
     const antes = barEl && barEl.parentNode === contenido ? barEl : null;
     const bien = antes ? panelEl.previousElementSibling === antes : contenido.firstElementChild === panelEl;
     if (panelEl.parentNode !== contenido || !bien) {

@@ -10,7 +10,7 @@
   const RAIZ_ID = 'crm-v2-root';
   const DIA = 86400000;
   const POR_MEDIR = 'por medir en el piloto';
-  const RUTA_ROL = { R01: 'ventas', R11: 'marketing', R06: 'jefatura' };
+  const RUTA_ROL = { R01: 'ventas', R11: 'marketing', R06: 'jefatura', R05: 'jefatura' };
 
   // Cifras del modelo V5 (Excel) y del informe revisado. Cada una indica su celda o página.
   const V5 = {
@@ -25,6 +25,7 @@
   };
   const OBJ_GENERAL = 'Ventas food service +12 %';
   const NOTA_BASE = 'Simulación = datos de prueba del CRM. Meta del informe = informe revisado (nov-2026) y modelo V5 (Excel). Lo que el CRM aún no registra dice «por medir en el piloto».';
+  const NOTA_COMPACTA = 'Datos de prueba; metas del informe revisado (nov-2026) y modelo V5. Lo que falta dice «por medir en el piloto».';
 
   const CABECERAS = {
     ventas: {
@@ -395,7 +396,32 @@
         fuente: 'Excel «KPIs explicados» fila 5; «Supuestos» B13 (base pendiente); «V5 Resumen» N6 (4,4 %). Informe p. 37-38.'
       },
       {
-        id: 'margen', nombre: 'Margen de contribución', fase: 'Finanzas',
+        id: 'ticket', nombre: 'Ticket promedio', nombreCorto: 'Ticket promedio', fase: 'Deleitar',
+        valor: d.ticket == null ? POR_MEDIR : clp(d.ticket), valorDetalle: 'promedio por pedido (datos de prueba)',
+        meta: '+10 % en cuentas activadas',
+        metaDetalle: `Referencias del modelo: primera compra ${clp(V5.ticketPrimera)}; reposición mensual ${clp(V5.ticketReposicion)}.`,
+        avance: null, avanceTexto: 'Avance: por medir (falta la base de cuentas activadas)',
+        objetivo: 'Responde a: Ticket +10 % en cuentas activadas (hipótesis del equipo).',
+        que: 'Valor medio de cada pedido.',
+        como: 'Ventas netas dividido por el número de pedidos válidos.',
+        importa: 'Es la palanca para crecer con las mismas cuentas. El modelo supone +10 % de compra adicional por activación (Supuestos B6).',
+        fuente: 'Excel «KPIs explicados», fila 19; «V5 Resumen» B12:B13; informe p. 12 (Tabla 8).'
+      },
+      {
+        id: 'cuentas', nombre: 'Cuentas activadas', nombreCorto: 'Cuentas activadas', fase: 'Todo el ciclo',
+        valor: `${numero(d.nuevas)} cuentas`, valorDetalle: 'con primera compra en los últimos 90 días (datos de prueba)',
+        meta: `${numero(V5.altasCentral)} altas en el año 1`,
+        metaDetalle: `Escenario central V5. Prudente ${numero(V5.altasPrudente)}; expansión ${numero(V5.altasExpansion)}.`,
+        avance: (d.nuevas / (V5.altasCentral * 90 / 365)) * 100,
+        avanceTexto: `Avance: ${pct(acotar((d.nuevas / (V5.altasCentral * 90 / 365)) * 100))} del ritmo de 90 días`,
+        objetivo: 'Responde a: altas del modelo y ventas food service +12 % (objetivo general).',
+        que: 'Cuentas que compran por primera vez y pasan a la base de clientes.',
+        como: 'Cuentas cuya primera factura cae en los últimos 90 días. La meta anual se reparte en 90 días de forma lineal (supuesto de este tablero).',
+        importa: 'Es el motor principal del modelo. Sin altas, el +12 % depende solo de las cuentas actuales.',
+        fuente: 'Excel «V5 Resumen» B5:B7 (24, 39,25 y 60 altas en Y1); informe p. 38.'
+      },
+      {
+        id: 'margen', nombre: 'Margen de contribución', nombreCorto: 'Margen', fase: 'Finanzas',
         valor: `${numero(V5.margen)} %`, valorDetalle: 'supuesto de contribución, no margen real de Marley',
         meta: 'Validar con Finanzas (no es meta)', metaDetalle: `Sensibilidad de 25 % a 45 %. Histórico EP5 y V3: ${numero(V5.margenHistorico)} %.`,
         avance: null, avanceTexto: 'Avance: no aplica; es un supuesto.',
@@ -442,7 +468,7 @@
         fuente: 'Informe p. 12 (Tabla 8). Excel «KPIs explicados» fila 17 y «Supuestos» B10:B11.'
       },
       {
-        id: 'otif', nombre: 'OTIF (entrega completa y a tiempo)', fase: 'Deleitar',
+        id: 'otif', nombre: 'OTIF (entrega completa y a tiempo)', nombreCorto: 'OTIF', fase: 'Deleitar',
         valor: POR_MEDIR, valorDetalle: 'el CRM de prueba no registra entregas a tiempo',
         meta: '≥ 96 %', metaDetalle: 'Meta del brief (Tabla 8). Sin línea base medida.',
         avance: null, avanceTexto: `Avance: ${POR_MEDIR}`,
@@ -507,6 +533,50 @@
     </article>`;
   }
 
+  // Versión compacta para el «Hoy» de Jefatura: la cifra, su meta, su objetivo y su «¿Qué significa?».
+  function kpiCompacto(k) {
+    const pendiente = k.valor === POR_MEDIR ? ' crm-kpi__valor--pendiente' : '';
+    return `<article class="crm-kpi crm-kpi--compacto" data-kpi="${esc(k.id)}">
+      <header class="crm-kpi__cab"><h3>${esc(k.nombreCorto || k.nombre)}</h3></header>
+      <div class="crm-kpi__cifras">
+        <div class="crm-kpi__bloque"><span class="crm-kpi__rotulo">Simulación</span><b class="crm-kpi__valor${pendiente}">${esc(k.valor)}</b></div>
+        <div class="crm-kpi__bloque crm-kpi__bloque--meta"><span class="crm-kpi__rotulo">Meta</span><b class="crm-kpi__valor">${esc(k.meta)}</b></div>
+      </div>
+      <p class="crm-kpi__objetivo" data-meta-objetivo>${esc(k.objetivo)}</p>
+      <details class="crm-kpi__explica" data-kpi-explicacion>
+        <summary>¿Qué significa?</summary>
+        <dl>
+          <dt>Qué es</dt><dd>${esc(k.que)}</dd>
+          <dt>Cómo se calcula</dt><dd>${esc(k.como)}</dd>
+          <dt>Por qué importa</dt><dd>${esc(k.importa)}</dd>
+          <dt>Fuente</dt><dd>${esc(k.fuente)}</dd>
+        </dl>
+      </details>
+    </article>`;
+  }
+  function construirCompacto() {
+    let kpis = [];
+    let aviso = '';
+    try {
+      const d = calcular();
+      const todos = kpisJefatura(d);
+      kpis = ['ticket', 'margen', 'cuentas', 'otif'].map(id => todos.find(k => k.id === id)).filter(Boolean);
+    } catch (error) {
+      console.warn('[crm-tablero] no se pudieron calcular las cifras compactas', error);
+      aviso = '<p class="crm-tablero__nota">No se pudieron calcular las cifras en este momento.</p>';
+    }
+    return `<section id="crm-tablero" class="crm-tablero crm-tablero--compacto" data-rol="jefatura" data-ruta="R05" data-compacto="true" aria-labelledby="crm-tablero-titulo">
+      <header class="crm-tablero__cab crm-tablero__cab--compacto">
+        <h2 id="crm-tablero-titulo" class="crm-tablero__titulo">Las cuatro cifras que sigues</h2>
+        <div class="crm-tablero__general"><span>Objetivo general</span><b>${esc(OBJ_GENERAL)}</b></div>
+        <a class="crm-tablero__mas" href="#R06" data-c2-go="R06">Ver todos los indicadores</a>
+        ${aviso}
+      </header>
+      <div class="crm-tablero__grid crm-tablero__grid--compacto">${kpis.map(kpiCompacto).join('')}</div>
+      <p class="crm-tablero__nota">${esc(NOTA_COMPACTA)}</p>
+    </section>`;
+  }
+
   function construir(rol, ruta) {
     const cab = CABECERAS[rol];
     let kpis = [];
@@ -551,7 +621,14 @@
     if (existente && existente.dataset.rol === rol && existente.dataset.ruta === ruta
       && bloque.parentElement === contenido) return;
     if (bloque) bloque.remove();
-    // El trabajo va primero: el tablero queda después de la cola o lista de la pantalla y antes del cierre con la acción principal.
+    // El trabajo va primero: en el Hoy de Jefatura las cuatro cifras van compactas y a la vista;
+    // en Ventas y Marketing el tablero completo queda a un toque, plegado.
+    if (ruta === 'R05') {
+      const cierreCompacto = contenido.querySelector(':scope > .crm2-cierre');
+      if (cierreCompacto) cierreCompacto.insertAdjacentHTML('beforebegin', construirCompacto());
+      else contenido.insertAdjacentHTML('beforeend', construirCompacto());
+      return;
+    }
     const tablero = construir(rol, ruta);
     const html = ruta === 'R01' || ruta === 'R11'
       ? '<details class="crm2-fold crm2-tablero-fold"><summary>Metas e indicadores</summary>' + tablero + '</details>'

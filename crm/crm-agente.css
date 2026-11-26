@@ -240,3 +240,78 @@
   .crm-agente-niveles-b > div { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .crm-agente-escribe::after { animation: none; } }
+
+/* 26-nov (DS2): la tarjeta del asistente en el Hoy. Ícono, nombre, opciones del rol a la vista y campo para escribir.
+   En escritorio las opciones y el campo comparten una línea; en celular se apilan. */
+.crm-agente-tarjeta-asistente { padding: 14px 16px; border-radius: 16px; }
+.crm-agente-tarjeta-asistente .crm-agente-head { display: flex; align-items: flex-start; gap: 10px; }
+:is(.crm-agente-tarjeta-asistente, .crm-agente-lanzador) .crm-agente-icono {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: 1px solid var(--ag-line);
+  border-radius: 10px;
+  background: #f6f6f6;
+  color: var(--ag-strong);
+}
+:is(.crm-agente-tarjeta-asistente, .crm-agente-lanzador) .crm-agente-icono svg { display: block; width: 20px; height: 20px; }
+.crm-agente-tarjeta-asistente .crm-agente-titulo { font-size: 17px; }
+.crm-agente-tarjeta-asistente .crm-agente-sub { margin: 2px 0 0; font-size: 13px; }
+.crm-agente-tarjeta-asistente .crm-agente-eyebrow { display: none; }
+.crm-agente-tarjeta-asistente .crm-agente-sugerencias { margin: 10px 0 0; }
+.crm-agente-tarjeta-asistente .crm-agente-chip { padding: 6px 12px; background: #fff; font-size: 13px; }
+/* Campo de 52 px: la medida del sistema para escribir (referencia figma.com, 26-nov). */
+.crm-agente-tarjeta-asistente .crm-agente-campo input,
+.crm-agente-tarjeta-asistente .crm-agente-enviar,
+.crm-agente-chat .crm-agente-campo input,
+.crm-agente-chat .crm-agente-enviar { min-height: 52px; }
+.crm-agente-tarjeta-asistente .crm-agente-form { margin: 10px 0 0; }
+.crm-agente-tarjeta-asistente .crm-agente-label { font-size: 12px; }
+@media (min-width: 900px) {
+  .crm-agente-tarjeta-asistente {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+    align-items: center;
+    gap: 8px 16px;
+  }
+  .crm-agente-tarjeta-asistente .crm-agente-tarjeta-asistente .crm-agente-head { grid-column: 1; grid-row: 1; }
+  .crm-agente-tarjeta-asistente .crm-agente-form { grid-column: 2; grid-row: 1; margin: 0; }
+  .crm-agente-tarjeta-asistente .crm-agente-sugerencias { grid-column: 1 / -1; grid-row: 2; margin: 0; }
+  .crm-agente-tarjeta-asistente .crm-agente-avisos { grid-column: 1 / -1; grid-row: 3; }
+  .crm-agente-tarjeta-asistente .crm-agente-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+.crm-agente-tarjeta-asistente .crm-agente-avisos { margin-top: 8px; }
+
+/* Panel de conversación: en el Hoy la tarjeta invita y el panel solo aparece cuando hay conversación. */
+/* Con la conversación abierta se esconden las opciones (ya están en el panel); el campo de la tarjeta sigue a la vista. */
+.crm-agente-tarjeta-asistente.is-conversando .crm-agente-sugerencias { display: none; }
+.crm-agente-chat--en-hoy:not(.is-abierto) { display: none; }
+.crm-agente-chat--en-hoy .crm-agente-lanzador { display: none; }
+.crm-agente-chat-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0 0; }
+.crm-agente-chat-cab b { color: var(--ag-strong); font-size: 15px; }
+.crm-agente-cerrar {
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid var(--ag-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ag-strong);
+  font: 500 13px/1.2 var(--crm2-font, Arial, sans-serif);
+  cursor: pointer;
+}
+.crm-agente-cerrar:hover { background: var(--ag-tint); }
+.crm-agente-lanzador { align-items: center; justify-content: flex-start; gap: 10px; padding: 10px 14px; }
+.crm-agente-lanzador .crm-agente-icono { width: 34px; height: 34px; }
+.crm-agente-lanzador-n { margin-left: auto; }
+.crm-agente-lanzador-txt { display: grid; gap: 1px; min-width: 0; }
+.crm-agente-lanzador-txt b { color: var(--ag-strong); }
+.crm-agente-lanzador-txt small { color: var(--ag-muted); font-size: 13px; }

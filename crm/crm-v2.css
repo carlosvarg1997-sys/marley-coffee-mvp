@@ -561,3 +561,154 @@ body.crm-v2-active .m7o-bar { display: none !important; }
   #crm-v2-root .crm2-cierre .crm2-btn--primary { width: 100%; min-height: 52px; }
   #crm-v2-root .crm2-row { min-height: 64px; }
 }
+
+/* 26-nov (DS2): el Hoy trabaja primero —cabecera compacta, cola con sus tareas del agente y el resto plegado—.
+   Superficies blancas o gris neutro; el color del rol va en barras y bordes, nunca en el fondo de una etiqueta. */
+#crm-v2-root { font-synthesis: none; }
+#crm-v2-root :where(*) { font-weight: 500; }
+
+#crm-v2-root .crm2-page-head--hoy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  padding: 0 0 10px;
+}
+#crm-v2-root .crm2-page-head--hoy h1 { font-size: clamp(24px, 2vw, 28px); }
+#crm-v2-root .crm2-page-head--hoy .crm2-page-cta { flex: none; margin: 0; }
+
+/* El ritmo del CRM es 8/12/16/24: el margen de 40 px entre secciones del sitio no corre aquí (lo fija el gap). */
+#crm-v2-root .crm2-content > section + section { margin-top: 0 !important; }
+
+/* Orden del Hoy: cola · tarjeta del asistente · conversación · pliegues · metas · cierre. */
+#crm-v2-root .crm2-content > .crm2-block { order: -3; }
+#crm-v2-root .crm2-content > #crm-agente-barra { order: -2; }
+#crm-v2-root .crm2-content > #crm-agente-chat { order: -1; }
+#crm-v2-root .crm2-content > .crm2-fold { order: 0; }
+#crm-v2-root .crm2-content > #crm-tablero { order: 1; }
+#crm-v2-root .crm2-content > .crm2-cierre { order: 2; }
+
+#crm-v2-root .crm2-block { padding: 14px; }
+/* La barra de acciones solo existe en la ficha; en las listas 96 px alcanzan para el aviso flotante. */
+#crm-v2-root .crm2-main { padding-bottom: 96px; }
+#crm-v2-root .crm2-block-head { margin-bottom: 12px; }
+#crm-v2-root .crm2-qitem { padding: 0; }
+#crm-v2-root .crm2-qitem > .crm2-row { min-height: 52px; padding: 4px 0; }
+#crm-v2-root .crm2-qitem > .crm2-row .crm2-row-side { max-width: 46%; }
+#crm-v2-root .crm2-qitem > .crm2-row .crm2-row-side > .crm2-icon { display: none; }
+#crm-v2-root .crm2-qitem > .crm2-row .crm2-row-side small { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+#crm-v2-root .crm2-block h2 { font-size: 19px; }
+/* El Hoy usa el ritmo corto (8/12/16/24); la ficha y las listas respiran con 24 px entre bloques. */
+#crm-v2-root .crm2-content { gap: var(--space-3); }
+#crm-v2-root .crm2-content--hoy { gap: 12px; }
+#crm-v2-root .crm2-content > .crm2-fold { margin: 0; }
+
+/* Fila de la cola: la fila sigue siendo el botón que abre la ficha; las tareas del agente van al lado. */
+#crm-v2-root .crm2-qitem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 2px 0;
+  border-top: 1px solid var(--crm2-role-line);
+}
+#crm-v2-root .crm2-qitem:first-child { border-top: 0; }
+#crm-v2-root .crm2-qitem > .crm2-row { min-height: 58px; padding: 6px 0; border-top: 0; }
+#crm-v2-root .crm2-qtools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 320px; }
+#crm-v2-root .crm2-qtool {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+  padding: 5px 10px;
+  border: 1px solid var(--crm2-role-line);
+  border-radius: 8px;
+  background: var(--crm2-white);
+  color: var(--crm2-ink);
+  font-size: 13px;
+  line-height: 1.1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+#crm-v2-root .crm2-qtool .crm2-icon { width: 16px; height: 16px; color: var(--crm2-role-accent); }
+#crm-v2-root .crm2-qtool:hover { border-color: var(--crm2-role-accent); }
+#crm-v2-root .crm2-qtool:focus-visible { outline: 3px solid var(--crm2-role-accent); outline-offset: 2px; }
+
+/* Etiquetas de estado: superficie blanca o gris, color del rol en la barra, y texto o ícono además del color. */
+#crm-v2-root .crm2-row-badge {
+  border: 1px solid var(--crm2-role-line);
+  border-left: 4px solid var(--crm2-role-accent);
+  border-radius: 8px;
+  background: #f4f4f4;
+  color: var(--crm2-ink);
+  box-shadow: none;
+}
+#crm-v2-root .crm2-row-badge[data-estado="revisar"] { box-shadow: none; }
+#crm-v2-root .crm2-row-badge[data-estado="riesgo"] { border-color: #b3261e; background: var(--crm2-white); color: #8f1e17; box-shadow: none; }
+#crm-v2-root .crm2-row-badge[data-estado="listo"] { border-color: #5e7e29; background: var(--crm2-white); color: #465f20; box-shadow: none; }
+#crm-v2-root .crm2-status { background: var(--crm2-white); border: 1px solid var(--crm2-role-line); border-left: 4px solid var(--crm2-role-accent); box-shadow: none; }
+#crm-v2-root :is(.crm2-status--wait,.crm2-status--good,.crm2-status--blocked) { background: var(--crm2-white); }
+#crm-v2-root .crm2-status--wait { color: var(--crm2-ink); border-color: var(--crm2-role-line); border-left-color: var(--crm2-role-accent); box-shadow: none; }
+#crm-v2-root .crm2-status--good { color: #465f20; border-color: #5e7e29; border-left-color: #5e7e29; box-shadow: none; }
+#crm-v2-root .crm2-status--blocked { color: #8f1e17; border-color: #b3261e; border-left-color: #b3261e; box-shadow: none; }
+#crm-v2-root .crm2-status > span:first-child { font-weight: 500; }
+
+/* Roles del ingreso: tarjeta blanca y el color del rol en el borde y el ícono. */
+#crm-v2-root .crm2-role-card[data-role="ventas"],
+#crm-v2-root .crm2-role-card[data-role="marketing"],
+#crm-v2-root .crm2-role-card[data-role="jefatura"] { background: var(--crm2-white); border-color: var(--crm2-line); border-left: 5px solid; }
+#crm-v2-root .crm2-role-card[data-role="ventas"] { border-left-color: #171717; }
+#crm-v2-root .crm2-role-card[data-role="marketing"] { border-left-color: #5c3d80; }
+#crm-v2-root .crm2-role-card[data-role="jefatura"] { border-left-color: #87344a; }
+#crm-v2-root .crm2-role-card:hover { background: #fafafa; }
+
+/* Botones de decisión: blancos, con el color del rol en el borde; el amarillo queda para la acción principal. */
+#crm-v2-root .crm2-btn[data-c2="pass-sales"] { border-color: #5c3d80; background: var(--crm2-white); color: #41265f; }
+#crm-v2-root .crm2-btn[data-c2="mark-mql"] { border-color: #5c3d80; background: var(--crm2-white); color: #41265f; }
+#crm-v2-root .crm2-btn[data-c2="decide-approval"][data-decision="pidio_info"] { border-color: #9a7610; background: var(--crm2-white); color: #5a4700; }
+#crm-v2-root .crm2-btn[data-c2="decide-approval"][data-decision="descartada"] { border-color: #87344a; background: var(--crm2-white); color: #612336; }
+#crm-v2-root .crm2-alert-panel { border-left: 4px solid var(--crm2-role-accent); background: #f7f7f7; }
+#crm-v2-root .crm2-btn--secondary { background: var(--crm2-white); }
+
+/* Cifras en Pressura, como el resto del sistema de marca. El texto de lectura sigue en Fabriga. */
+body:is([data-current^="R"]) #crm-v2-root :is(.crm2-metric > b,.crm2-team-grid article > b,.crm2-cac-result b,.crm2-approval-amount b,.crm2-quote-row > strong,.crm2-brand-mark,.crm2-entry-brand > span,.crm-kpi__valor,.crm2-row-side small,.crm2-metrics b) {
+  font-family: Pressura, Arial, sans-serif !important;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  #crm-v2-root .crm2-qtools { max-width: none; }
+}
+@media (max-width: 640px) {
+  #crm-v2-root .crm2-page-head--hoy { flex-wrap: wrap; gap: 8px; padding-bottom: 8px; }
+  #crm-v2-root .crm2-page-head--hoy h1 { font-size: 24px; }
+  #crm-v2-root .crm2-page-head--hoy .crm2-page-cta { flex: 1 1 100%; }
+  #crm-v2-root .crm2-qitem { grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 4px 0; }
+  #crm-v2-root .crm2-qitem > .crm2-row { min-height: 0; padding: 4px 0; }
+  #crm-v2-root .crm2-qitem > .crm2-row .crm2-row-side { max-width: 52%; }
+  #crm-v2-root .crm2-qitem > .crm2-row .crm2-row-side small { -webkit-line-clamp: 3; }
+  #crm-v2-root .crm2-qtools { justify-content: flex-start; }
+  #crm-v2-root .crm2-qtool { flex: 1 1 auto; justify-content: center; min-height: 44px; }
+  /* Barra de acciones (74 px) + barra de navegación (64 px): el final del contenido siempre queda a la vista. */
+  #crm-v2-root .crm2-main { padding-bottom: calc(152px + env(safe-area-inset-bottom)); }
+  #crm-v2-root .crm2-sidebar { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* Tokens de referencia de figma.com (MEDIDAS_REFERENCIA_FIGMA_26NOV.md, 26-nov): escala 4/8,
+   botón de 46 px con radio 10, tarjeta con radio 16, contenedor de 1200 px y lectura 16/1,45.
+   El color de cada rol y el peso único 500 se conservan: son decisión aprobada. */
+#crm-v2-root {
+  --m-r-btn: 10px;
+  --m-r-card: 16px;
+  --m-btn-h-desktop: 46px;
+  line-height: 1.45;
+}
+#crm-v2-root .crm2-main { max-width: 1200px; }
+#crm-v2-root .crm2-block,
+#crm-v2-root .crm2-fold { border-radius: var(--m-r-card); }
+#crm-v2-root .crm2-btn { min-height: var(--m-btn-h-desktop); border-radius: var(--m-r-btn); }
+#crm-v2-root .crm2-btn--primary { border-radius: var(--m-r-btn); }
+#crm-v2-root .crm2-qtool { min-height: var(--m-btn-h-desktop); border-radius: var(--m-r-btn); }
+#crm-v2-root .crm2-eyebrow { letter-spacing: .05em; }
+#crm-v2-root .crm2-row-badge { letter-spacing: .02em; }
