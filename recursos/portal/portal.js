@@ -386,7 +386,7 @@
     var evt = 'data-cta-principal="pedido-principal"';
     switch (x.paso) {
       case 'firma':
-        return boton('mp-btn--primario', 'data-portal-accion="firmar-contrato" data-cierra-tarea="T4" ' + evt + ' data-evt="pedido_firmar_contrato"', 'Firmar contrato (simulación)');
+        return boton('mp-btn--primario', 'data-portal-accion="firmar-contrato" ' + evt + ' data-evt="pedido_firmar_contrato"', 'Firmar contrato (simulación)');
       case 'aviso':
       case 'preparacion':
       case 'recibido':
@@ -765,7 +765,7 @@
       '<p class="mp-fino">Condiciones comerciales, disponibilidad y formalización a confirmar con el equipo.</p>' +
       '<ul class="mp-dialogo-lista"><li><b>Máquina:</b> ' + esc(m.nombre) + '</li>' + lista + '<li><b>Total neto, más IVA:</b> ' + fmt(x.total) + '</li></ul>' +
       '<div class="mp-acciones">' +
-      '<button type="button" class="mp-btn mp-btn--primario" data-portal-accion="confirmar-firma" data-evt="pedido_firmar_confirmar">Firmar contrato (simulación)</button>' +
+      '<button type="button" class="mp-btn mp-btn--primario" data-portal-accion="confirmar-firma" data-cierra-tarea="T4" data-evt="pedido_firmar_confirmar">Confirmar firma</button>' +
       '<button type="button" class="mp-btn mp-btn--sec" data-mp-cerrar data-evt="pedido_contrato_cerrar">Cerrar</button>' +
       '</div>' +
       '<p class="mp-fino">La firma registra un evento de prueba. No crea un contrato legal ni un cobro.</p>' +

@@ -77,9 +77,15 @@ async function compra(page, folder) {
     await page.getByRole('button', {name:'Cerrar el asistente'}).click();
   }
   const altoInicio = await inspect(page, 'C02');
-  await media(page, '.mc-machine-scene', false);
-  await page.mouse.wheel(0, 1);
-  await page.waitForFunction(() => [...document.querySelectorAll('.cmp-home-maquina img')].every(img => img.complete && img.naturalWidth > 1));
+  const fichas = page.locator('.cmp-home-maquina img');
+  assert.equal(await fichas.count(), 4);
+  for (let i = 0; i < 4; i++) {
+    await fichas.nth(i).scrollIntoViewIfNeeded();
+    await page.waitForFunction(index => {
+      const img = document.querySelectorAll('.cmp-home-maquina img')[index];
+      return img?.complete && img.naturalWidth > 1;
+    }, i);
+  }
   await shot(page, folder, '01-c02-maquinas');
   await media(page, '.mc-buyer-scene', true);
   await shot(page, folder, '02-c02-video-negocio');
@@ -94,8 +100,15 @@ async function compra(page, folder) {
   await page.locator('#pack-resumen [data-pack-accion="aceptar"]').click();
   await page.locator('#m4FName').fill('Ana Prueba');
   await page.locator('#m4FEmail').fill('ana.prueba@example.test');
+  await page.locator('#m4FComuna').selectOption('Las Condes');
   await page.locator('#pack-contacto [name="consent"]').check();
   await page.locator('[data-pack-accion="confirmar-contacto"]').click();
+  const ubicacion = await page.evaluate(() => {
+    const state = M4.get();
+    const value = R6P.valor(state);
+    return { comuna: value.comuna, zona: value.zona, owner: state.lead.execId };
+  });
+  assert.deepEqual(ubicacion, { comuna: 'Las Condes', zona: 'A', owner: 'paula' });
   await page.locator('[data-cross="no-gracias"]').click();
   await page.locator('[data-cierra-tarea="T3"]').click();
   await page.locator('#mp-panel-pedido').waitFor();

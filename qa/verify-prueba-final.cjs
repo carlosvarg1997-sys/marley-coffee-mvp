@@ -238,7 +238,9 @@ async function runCustomerCtas(page, frame, folder) {
   await click(frame.locator('[data-cross="no-gracias"]'));
   await close('T3');
   await click(page.locator('#ag-salto [data-action="jump"]'));
-  await close('T4');
+  await click(frame.locator('[data-portal-accion="firmar-contrato"]').first());
+  await close('T4', '[data-portal-accion="confirmar-firma"]');
+  await frame.waitForFunction(() => Boolean(M4.get().customerCycle.contractSignedAt));
   await click(page.locator('#ag-salto [data-action="jump"]'));
   await frame.locator('#portal-franja [data-etapa="instalado"][aria-current="step"]').waitFor();
   await frame.locator('[data-mp-satisfaccion]').waitFor();

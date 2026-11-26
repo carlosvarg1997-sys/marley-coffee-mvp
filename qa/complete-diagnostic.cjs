@@ -27,12 +27,8 @@ async function completeDiagnostic(page, { business = 'Restaurante', commune = 'L
       await form.locator('[name="consent"]').check();
     }
     if (await page.evaluate(() => document.body.dataset.current !== 'C04')) return;
-    // En celular se usa la acción dentro de la vista. En escritorio queda la del formulario.
-    const dock = page.locator('.r5-mobile-final-action:not(.is-inline-visible) [data-r4-next]:visible');
-    const next = await dock.evaluateAll(elements => elements.some(element => {
-      const r = element.getBoundingClientRect();
-      return r.top >= 0 && r.bottom <= innerHeight;
-    })) ? dock : form.locator('[data-r4-next]:visible');
+    const next = form.locator('[data-r4-next]:visible');
+    await next.scrollIntoViewIfNeeded();
     await next.click();
     if (!key && !isCommune) {
       await page.waitForFunction(() => document.body.dataset.current !== 'C04');
@@ -56,6 +52,8 @@ async function completePack(page) {
   if (await contacto.isVisible()) {
     await contacto.locator('[name="name"]').fill('Prueba de compra');
     await contacto.locator('[name="email"]').fill('compra@example.test');
+    const commune = contacto.locator('[name="comuna"]');
+    if (await commune.isVisible()) await commune.selectOption('Las Condes');
     await contacto.locator('[name="consent"]').check();
     await contacto.locator('[type="submit"]').click();
   }

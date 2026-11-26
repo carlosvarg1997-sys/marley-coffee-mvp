@@ -131,7 +131,7 @@ async function main() {
       await page.locator('.m5-qcard').waitFor({ state: 'visible' });
       // R4 (13-nov): «Tu negocio» en una pantalla. El negocio ya viene de la landing y no se vuelve a preguntar; solo falta la comuna.
       assert.equal(await page.locator('#r4Datos [data-a="answer"][data-k="negocio"]').count(), 0, 'C04 no vuelve a preguntar el negocio que trae la landing');
-      await page.locator('#m5Comuna').selectOption({ label: 'Las Condes' });
+      assert.equal(await page.locator('#m5Comuna').count(), 0, 'La comuna se pide al aceptar el pack');
       const maqC04 = await page.evaluate(() => window.R5?.maquina?.() || null); // coordinador (14-nov): clave de la máquina
       await completeDiagnostic(page);
       // R5 (14-nov): desde la landing («Calcula tu solución») C04 pasa directo a la propuesta C05, sin pasar por C10.
@@ -146,6 +146,16 @@ async function main() {
       assert.equal(await page.evaluate(() => M4.landingFocus('C05')), true);
       assert.equal(await page.locator('.m5-nav, .ux-mobile-nav').count(), 0);
       await page.screenshot({ path: path.join(evidence, `W10_C05_${width}.jpg`), type: 'jpeg', quality: 80 });
+      await page.locator('#pack-resumen [data-pack-accion="aceptar"]').click();
+      await page.locator('#m4FComuna').selectOption('Las Condes');
+      await page.locator('#pack-contacto [data-pack-accion="confirmar-contacto"]').click();
+      await page.locator('#cross-sell').waitFor();
+      const ubicacion = await page.evaluate(() => {
+        const state = M4.get();
+        const value = R6P.valor(state);
+        return { comuna: value.comuna, zona: value.zona, owner: state.lead.execId };
+      });
+      assert.deepEqual(ubicacion, { comuna: 'Las Condes', zona: 'A', owner: 'paula' });
       await page.evaluate(() => { M4.setRole('ventas'); M4.select(M4.get().lead.id); location.hash = '#R04'; });
       const origin = page.locator('#crm-v2-root [data-crm2-landing-context]');
       await origin.locator('summary').click();
@@ -266,6 +276,27 @@ async function main() {
       }
       results.push({ qaControls: 'moderator only' });
       await ctx.close();
+    }
+    for (const width of [390, 1280]) {
+      const { ctx, page } = await context(browser, width);
+      try {
+        const slugs = ['empresas', 'cafeterias', 'conveniencia', 'eventos-catering', 'hoteles', 'oficinas', 'panaderias', 'restaurantes'];
+        let common;
+        for (const slug of slugs) {
+          await page.goto(`${base}/captacion/landing/${slug}.html`, { waitUntil: 'domcontentloaded' });
+          const composition = await page.locator('main').evaluate(main => ({
+            sections: [...main.querySelectorAll(':scope > section')].map(section => section.className),
+            title: main.querySelector('h1').textContent.trim(),
+            actions: [...main.querySelectorAll('#ld-hero-accion a')].map(link => link.textContent.trim()),
+            overflow: document.documentElement.scrollWidth > innerWidth + 1
+          }));
+          assert.equal(composition.overflow, false, `${slug} desborda en ${width}px`);
+          assert.deepEqual(composition.actions, ['Arma tu propuesta', 'Ver packs y productos']);
+          common ||= composition;
+          assert.deepEqual(composition, common, `${slug} cambia el orden o la acción en ${width}px`);
+        }
+        results.push({ width, composition: 'PASS', landings: slugs.length });
+      } finally { await ctx.close(); }
     }
     process.stdout.write(JSON.stringify({ status: 'PASS', origin: 'HTTP local', results, evidence }, null, 2) + '\n');
   } finally { await browser.close(); if (server.listening) await new Promise(resolve => server.close(resolve)); }

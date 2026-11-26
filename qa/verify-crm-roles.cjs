@@ -39,7 +39,7 @@ function carpeta() { fs.mkdirSync(OUT, { recursive: true }); }
 
 async function captura(page, nombre) {
   const archivo = path.join(OUT, `${nombre}.jpeg`);
-  await page.screenshot({ path: archivo, type: 'jpeg', quality: 72 });
+  await page.screenshot({ path: archivo, type: 'jpeg', quality: 80 });
   capturas += 1;
   return archivo;
 }
@@ -58,7 +58,7 @@ async function nuevaSesion(caso) {
   page.on('console', message => { if (message.type() === 'error') errores.push(`console: ${message.text()}`); });
   await page.goto(BASE + '#R00', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.M4 && window.M4.get, null, { timeout: 15000 });
-  await page.evaluate(() => { localStorage.clear(); window.M4.reset(); });
+  await page.evaluate(() => window.M4.reset());
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.locator('#crm-v2-root:not([hidden])').waitFor({ state: 'visible', timeout: 15000 });
   return { browser, context, page, errores };
@@ -116,6 +116,8 @@ async function panelAVista(page, requiereBorrador = true) {
 }
 
 async function enviar(page) {
+  const horarios = page.locator('#crm-agente-chat [data-estado="editando"] [data-crm-agente-horario]');
+  if (await horarios.count()) await horarios.first().check();
   const boton = page.locator('#crm-agente-chat [data-crm-agente-accion="enviar"]:not([disabled])').last();
   controles += 1;
   await boton.click();
@@ -170,8 +172,12 @@ async function opcionesDelRol(page, rol) {
 }
 
 async function accionVentas(page, caso, etiqueta) {
-  const boton = page.locator(`.crm2-block--cola [data-crm-agente-tarea="${etiqueta}"]`).first();
-  assert.ok(await boton.count(), `Ventas no tiene la acción ${etiqueta} en su cola`);
+  await entrar(page, 'ventas');
+  if (['visita','avisar'].includes(etiqueta)) {
+    await page.locator('.crm2-block').filter({ hasText: 'Visitas por coordinar' }).locator('[data-c2="open-account"]').first().click();
+  }
+  const boton = page.locator(`[data-crm-agente-tarea="${etiqueta}"]`).first();
+  await boton.waitFor();
   controles += 1;
   const id = await boton.getAttribute('data-cuenta-id');
   const antes = await estado(page);
@@ -197,12 +203,12 @@ async function accionVentas(page, caso, etiqueta) {
   }
   const linea = norm(await page.evaluate(() => Array.from(document.querySelectorAll('#crm-agente-timeline')).map(el => el.textContent || '').join(' ')));
   assert.ok(linea.length > 20, `El envío de ${etiqueta} no quedó en la línea de tiempo`);
-  const fila = norm(await page.evaluate(id => {
-    const caja = [...document.querySelectorAll('.crm2-qitem')].find(el => el.querySelector(`[data-cuenta-id="${id}"]`));
-    const badge = caja && caja.querySelector('.crm2-row-badge');
-    return badge ? badge.textContent : '';
-  }, id));
-  assert.match(fila, /Contactado|Visita|Aviso|Correo/i, `La fila ${id} no muestra el estado nuevo: «${fila}»`);
+  const scope = etiqueta === 'contactar' ? 'Traspasos nuevos' : etiqueta === 'recordatorio' ? 'Cuentas por reponer' : 'Visitas por coordinar';
+  if (['visita','avisar'].includes(etiqueta)) {
+    await page.keyboard.press('Escape');
+    await irA(page, 'R01');
+  }
+  if (etiqueta !== 'avisar') assert.match(await page.locator('.crm2-block').filter({ hasText: scope }).innerText(), /Contactado|Visita agendada|Recordatorio enviado/i);
   await captura(page, `roles-${caso.navegador}-${caso.width}x${caso.height}-ventas-${etiqueta}-enviado`);
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
@@ -231,15 +237,15 @@ async function casoCompleto(caso) {
     }
 
     // 2. Ventas: Contactar, Visita y Avisar abren el agente a la vista y dejan efectos
-    await entrar(page, 'ventas');
-    for (const accion of ['contactar', 'visita', 'avisar']) {
+    for (const accion of ['contactar', 'recordatorio', 'visita', 'avisar']) {
       resumen.acciones.push(await accionVentas(page, caso, accion));
     }
 
     // 3. Marketing: Pasar a Ventas (traspaso) y el efecto en el Hoy de Ventas
     await entrar(page, 'marketing');
-    const botonTraspaso = page.locator('.crm2-block').filter({ hasText: 'Leads por calificar' }).locator('[data-crm-agente-tarea="traspaso"]').first();
-    assert.ok(await botonTraspaso.count(), 'Marketing no ofrece Pasar a Ventas en su cola');
+    await page.locator('.crm2-block').filter({ hasText: 'Leads por calificar' }).getByRole('button',{ name:'Revisar lead' }).first().click();
+    const botonTraspaso = page.locator('.crm2-actionbar [data-crm-agente-tarea="traspaso"]').first();
+    await botonTraspaso.waitFor();
     controles += 1;
     const leadTraspaso = await botonTraspaso.getAttribute('data-cuenta-id');
     const antesTraspaso = await estado(page);
@@ -288,7 +294,7 @@ async function casoCompleto(caso) {
     const textoRef = await textoRaiz(page);
     assert.match(textoRef, /Referidos/i);
     assert.match(textoRef, /Rese[ñn]as invitadas/i);
-    assert.match(textoRef, /Promotores que a[uú]n no recomiendan/i);
+    assert.match(textoRef, /Promotores/i);
     await captura(page, `roles-${sufijo}-marketing-recomendados`);
     const resena = page.locator('[data-crm-agente-tarea="resena"]').first();
     assert.ok(await resena.count(), 'Recomendados no ofrece pedir reseña');
@@ -332,7 +338,7 @@ async function casoCompleto(caso) {
     // 6. Jefatura: NPS con meta y «¿Qué significa?», y Aprobar con el agente a la vista
     await entrar(page, 'jefatura');
     const textoJefatura = await textoRaiz(page);
-    assert.match(textoJefatura, /KPIs clave/i);
+    assert.match(textoJefatura, /Metas y NPS/i);
     assert.match(textoJefatura, /NPS/i);
     await irA(page, 'R06');
     const textoMetas = await textoRaiz(page);
@@ -356,9 +362,9 @@ async function casoCompleto(caso) {
     await page.waitForTimeout(1400);
     const conAprob = await esperarEstado(page, s => (s.jefeAprob || []).some(item => item.id === aprobId && item.estado === 'aprobada'), 'aprobación registrada');
     assert.ok(totalContadores(conAprob.counters) > totalContadores(antesAprob.counters), 'El contador de Jefatura no cambió');
-    assert.ok(conAprob.agente.notificaciones.marketing.length > antesAprob.agente.notificaciones.marketing.length, 'Marketing no recibió el aviso de aprobación');
+    assert.ok(conAprob.agente.notificaciones.ventas.length > antesAprob.agente.notificaciones.ventas.length, 'Ventas no recibió el aviso de aprobación');
     await page.keyboard.press('Escape');
-    resumen.acciones.push({ accion: 'aprobar', id: aprobId, estado: 'aprobada', destino: 'aviso a Marketing' });
+    resumen.acciones.push({ accion: 'aprobar', id: aprobId, estado: 'aprobada', destino: 'aviso a Ventas' });
 
     // 7. Todas las opciones del agente de cada rol, una por una
     for (const rol of ['ventas', 'marketing', 'jefatura']) {

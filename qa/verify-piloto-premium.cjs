@@ -89,6 +89,7 @@ async function buyer(page) {
   if (await page.locator('#pack-contacto').isVisible()) {
     await page.locator('#pack-contacto [name="name"]').fill('Prueba Piloto');
     await page.locator('#pack-contacto [name="email"]').fill('piloto@example.test');
+    await page.locator('#m4FComuna').selectOption('Las Condes');
     await page.locator('#pack-contacto [name="consent"]').check();
     await click(page, 'C05', '[data-pack-accion="confirmar-contacto"]', () => open(page, '#cross-sell'));
   }
@@ -209,7 +210,10 @@ async function seo(page) {
     assert.deepEqual(current.metadata, old.metadata, `${file}: metadatos`);
     assert.deepEqual(current.ld, old.ld, `${file}: JSON-LD`);
     const esPrototipo = file === 'index.html' || file === 'prototipo.html';
-    const enlacesEsperados = esPrototipo ? [...old.links, '#condiciones'].sort() : old.links;
+    const destinosComprador = file.startsWith('captacion/landing/') && file !== 'captacion/landing/empresas.html'
+      ? pages.filter(name => name.startsWith('captacion/landing/') && name !== 'captacion/landing/empresas.html').map(name => path.basename(name) + '#oferta')
+      : [];
+    const enlacesEsperados = [...new Set([...old.links, ...(esPrototipo ? ['#condiciones'] : []), ...destinosComprador])].sort();
     assert.deepEqual(current.links, enlacesEsperados, `${file}: destinos HTML`);
     if (esPrototipo) assert.ok(current.tieneCondiciones, `${file}: ancla de condiciones del HTML inicial`);
     assert.deepEqual(current.images, old.images, `${file}: imágenes y texto alternativo`);

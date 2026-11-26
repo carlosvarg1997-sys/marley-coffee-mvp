@@ -51,7 +51,7 @@ En el sitio, cada tarea de la prueba autoguiada se cierra con un CTA. Pulsarlo a
 | T1 | El primer CTA que lleva a «Cuéntanos de tu negocio» |
 | T2 | «Aceptar mi pack» |
 | T3 | «Ir a mi portal» |
-| T4 | «Firmar contrato (simulación)» en «Mi pedido» |
+| T4 | «Confirmar firma» en el resumen de «Mi pedido», o «Retomar mi propuesta» si quedó pendiente |
 | T5 | «Confirmar repetición» |
 | T6 | «Enviar» de Ayuda, o «Enviar recomendación» |
 | C-V1 | «Enviar» del agente tras pulsar «Contactar» en «Traspasos nuevos» |

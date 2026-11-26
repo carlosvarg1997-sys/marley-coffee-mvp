@@ -87,10 +87,11 @@ async function verifyOnBrowser(target, base) {
         M4.startQuote();
         M4.answer('negocio', negocio);
         M4.confirmStep();
-        M4.setComuna(comuna);
         M4.answer('volumen', volumen);
+        M4.update(s => { s.answers.puntos = '1 punto'; });
         M4.confirmStep();
         M4.confirmStep();
+        M4.saveContact({ comuna, consent: true });
         const s = M4.get();
         return {
           score: M4.score(s),
@@ -137,9 +138,10 @@ async function verifyOnBrowser(target, base) {
       M4.startQuote();
       M4.answer('negocio', 'Hotel');
       M4.confirmStep();
-      M4.setComuna('Vitacura');
+      M4.update(s => { s.answers.puntos = '1 punto'; });
       M4.confirmStep();
       M4.confirmStep();
+      M4.saveContact({ comuna: 'Vitacura', consent: true });
       const sSinEditar = M4.get();
       const scoreSinEditarSugerido = M4.score(sSinEditar);
       const valSinEditar = R6P.valor(sSinEditar);

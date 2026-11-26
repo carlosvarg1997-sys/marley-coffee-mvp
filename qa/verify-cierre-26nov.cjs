@@ -8,7 +8,7 @@ const { chromium: edge } = require('C:/Users/HP/Desktop/1_ECOSISTEMA_ENSUTEX/02_
 const base = process.argv[2] || 'http://127.0.0.1:8910/';
 const destination = path.resolve(process.argv[3] || '../marley-final-26nov-evidencia');
 const version = process.argv[4] || 'despues';
-const capture = new Set(['1280x551', '390x844', '360x640']);
+const capture = new Set(['1280x551', '1440x900', '390x844', '360x640']);
 const sizes = [[1280, 551], [1366, 625], [1536, 730], [1912, 733], [1440, 900], [390, 844], [360, 640]];
 const data = [];
 const only = process.env.MARLEY_CAPTURE_SIZE;
@@ -53,9 +53,10 @@ async function measure(page, query, row, label) {
     for (const el of [root, ...root.querySelectorAll('*')]) {
       if (el.closest('[hidden]') || !el.getClientRects().length) continue;
       const style = getComputedStyle(el);
-      if (style.visibility !== 'visible') continue;
+      const hasText = [...el.childNodes].some(node => node.nodeType === Node.TEXT_NODE && /[\p{L}\p{N}]/u.test(node.textContent));
+      if (style.visibility !== 'visible' || !hasText && !el.matches('input:not([type=hidden]), select, textarea')) continue;
       const family = style.fontFamily.split(',')[0].replaceAll('"', '').replace(/^MC /, '');
-      if (!/^(Festivo|Pressura)$/.test(family) || available.get(family)?.has(style.fontWeight)) continue;
+      if (/^(Festivo|Fabriga)$/.test(family) && available.get(family)?.has(style.fontWeight) && style.fontSynthesis === 'none') continue;
       const key = family + ' ' + style.fontWeight;
       if (!bad.has(key)) bad.set(key, { family, weight: style.fontWeight, count: 0, example: el.className?.toString() || el.tagName });
       bad.get(key).count++;
@@ -95,7 +96,14 @@ async function customer(browser, viewport, folder, row) {
       if (await machine.count()) {
         await page.mouse.wheel(0, 1);
         await machine.evaluate(el => el.scrollIntoView({ block: 'start' }));
-        await page.waitForFunction(() => [...document.querySelectorAll('.cmp-home-maquina img')].every(img => img.complete && img.naturalWidth > 0));
+        for (const [i, photo] of (await machine.locator('img').all()).entries()) {
+          await photo.scrollIntoViewIfNeeded();
+          await page.waitForFunction(index => {
+            const img = document.querySelectorAll('.cmp-home-maquina img')[index];
+            return img?.complete && img.naturalWidth > 1;
+          }, i);
+        }
+        await machine.evaluate(el => { el.scrollLeft = 0; });
         await shot(page, folder, '02-c02-maquinas', '.cmp-compara-titulo');
         if (viewport.width < 768) {
           for (const [i, card] of (await machine.locator('article').all()).entries()) {
@@ -105,6 +113,14 @@ async function customer(browser, viewport, folder, row) {
           await machine.evaluate(el => { el.scrollLeft = 0; });
         }
       } else await shot(page, folder, '02-c02-maquinas', '#condiciones');
+      const poster = page.locator('.mc-buyer-scene .m5-film-poster');
+      if (version !== 'antes' && await poster.count()) {
+        await poster.scrollIntoViewIfNeeded();
+        await page.waitForFunction(() => {
+          const img = document.querySelector('.mc-buyer-scene .m5-film-poster');
+          return img?.complete && img.naturalWidth > 1;
+        });
+      }
       await shot(page, folder, '03-c02-completa', null, true);
     }
     await page.locator('[data-cierra-tarea="T1"]').first().click();
@@ -116,6 +132,9 @@ async function customer(browser, viewport, folder, row) {
     });
     const shortcut = page.locator('[data-solucion-accion="ya-se-maquina"]');
     await shortcut.waitFor();
+    if (version !== 'antes' && !/Paso [1-5] de 5/.test(await page.locator('.r5-q-progress > span').first().innerText())) {
+      row.errors.push('C04 no muestra cinco pasos');
+    }
     await measure(page, '#app', row, 'C04');
     await shot(page, folder, '04-c04-formulario');
     await shortcut.click();
@@ -138,6 +157,7 @@ async function customer(browser, viewport, folder, row) {
     await page.locator('[data-pack-accion="aceptar"]').first().click();
     await page.locator('#m4FName').fill('Ana Prueba');
     await page.locator('#m4FEmail').fill('ana.prueba@example.test');
+    await page.locator('#m4FComuna').selectOption('Las Condes');
     await page.locator('#pack-contacto [name="consent"]').check();
     await page.locator('[data-pack-accion="confirmar-contacto"]').click();
     await page.locator('#cross-sell').waitFor();
@@ -171,6 +191,18 @@ async function customer(browser, viewport, folder, row) {
     await move(page, 'C08', 'body[data-current="C08"] main');
     await shot(page, folder, '17-c08-pestanas', '.m5-stage-tabs');
   } finally { await context.close(); }
+  for (const [role, route] of [['marketing', 'R11'], ['jefatura', 'R05']]) {
+    const extra = await browser.newContext({ viewport, isMobile: viewport.width < 768, hasTouch: viewport.width < 768, reducedMotion: 'reduce' });
+    try {
+      const rolePage = await extra.newPage();
+      const choose = `[data-c2="choose-role"][data-role="${role}"]`;
+      await open(rolePage, 'R00', choose);
+      await rolePage.locator(choose).click();
+      await rolePage.locator(`body[data-current="${route}"] .crm2-content`).waitFor();
+      await measure(rolePage, '#crm-v2-root', row, route);
+      await shot(rolePage, folder, `${route.toLowerCase()}-hoy`);
+    } finally { await extra.close(); }
+  }
 }
 
 async function crm(browser, viewport, folder, row) {
@@ -229,7 +261,7 @@ async function main() {
             if (checks.overflow > 0 || checks.unsupportedWeights.length) {
               row.errors.push(route + ' tiene desborde o un peso tipográfico sin archivo');
             }
-            const max = route === 'R01' ? (mobile ? 2500 : 1300) :
+            const max = ['R01', 'R05', 'R11'].includes(route) ? (mobile ? 2500 : 1300) :
               route.startsWith('C') ? (mobile ? 2500 : 1800) : Infinity;
             if (checks.height > max) row.errors.push(route + ' mide ' + checks.height + ' px (máximo ' + max + ')');
           }

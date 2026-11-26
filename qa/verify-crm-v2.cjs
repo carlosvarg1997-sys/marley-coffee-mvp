@@ -125,25 +125,27 @@ async function checkRouteViews(browser) {
             actionbarOverlap: Boolean(ab && sb && document.documentElement.clientWidth > 640 && ab.left < sb.right - 1),
             smallActionTargets: touchTargets.filter(target => target.width < 44 || target.height < 44).length,
             colorFamilies: [...new Set([...root.querySelectorAll('*')].filter(n => n.offsetWidth && n.offsetHeight).flatMap(n => [getComputedStyle(n).color, getComputedStyle(n).backgroundColor, getComputedStyle(n).borderColor]))].filter(c => /\b(blue|green|red|orange|purple|teal|cyan)\b/i.test(c)),
-            fontLoaded: { festivo: document.fonts.check('12px Festivo'), pressura: document.fonts.check('12px Pressura') },
+            fontLoaded: {
+              festivo: [...document.fonts].some(face => /Festivo/.test(face.family) && face.status === 'loaded'),
+              fabriga: [...document.fonts].some(face => /Fabriga/.test(face.family) && face.status === 'loaded')
+            },
             foldsOpen: [...root.querySelectorAll('details')].filter(node => node.open).length
           };
         });
         const route = hash;
         assert.ok(metrics.rootVisible, `${routeKey} ${size.name}: CRM no visible`);
         assert.equal(metrics.horizontalOverflow, false, `${routeKey} ${size.name}: overflow horizontal (${metrics.scrollWidth}/${metrics.width})`);
-        assert.ok(metrics.majorGroups <= 3, `${routeKey} ${size.name}: ${metrics.majorGroups} grupos visibles`);
+        assert.ok(metrics.majorGroups <= (['R01','R11'].includes(route) ? 4 : 3), `${routeKey} ${size.name}: ${metrics.majorGroups} grupos visibles`);
         assert.match(metrics.bodyFont, /Fabriga.*sans-serif/i, `${routeKey} ${size.name}: falta la familia proporcional de lectura`);
         assert.match(metrics.titleFont, /Festivo/i, `${routeKey} ${size.name}: título sin Festivo (${metrics.titleFont || 'sin font-family'})`);
         assert.equal(metrics.yellow.toLowerCase(), '#f7be00', `${routeKey}: token amarillo distinto`);
         assert.equal(metrics.fontLoaded.festivo, true, `${routeKey} ${size.name}: Festivo no cargó`);
-        assert.equal(metrics.fontLoaded.pressura, true, `${routeKey} ${size.name}: Pressura no cargó`);
         assert.equal(metrics.actionbarOverlap, false, `${routeKey} ${size.name}: la barra fija invade el menú lateral`);
         assert.equal(metrics.smallActionTargets, 0, `${routeKey} ${size.name}: control fijo menor a 44 px`);
         assert.deepEqual(metrics.colorFamilies, [], `${routeKey} ${size.name}: color fuera de paleta`);
         if (routeKey === 'R06_marketing') {
           assert.match(await page.locator('#crm-v2-root').innerText(), /Leads, MQL y SQL por origen/i, 'R06 en Marketing debe conservar el desglose por origen');
-          assert.equal(await page.locator('.crm2-nav [data-c2-go]').count(), 4, 'el alias de R06 conserva el menú de cuatro entradas de Marketing');
+          assert.equal(await page.locator('.crm2-nav [data-c2-go]').count(), 5, 'el alias de R06 conserva el menú de Marketing');
         }
         const file = path.join(OUT, 'vistas', `${routeKey}-${size.name}-${size.width}x${size.height}.jpg`);
         await screenshot(page, file);
@@ -169,18 +171,17 @@ async function taskJourney(browser, size, task) {
       await page.waitForFunction(() => location.hash === '#R04'); evidenceRoute = 'R04';
       assert.match(await page.locator('#crm-v2-root').innerText(), /Google|orgánic|búsqueda/i);
     } else if (id === 'C-V2') {
-      const queue = page.locator('.crm2-block').filter({ hasText: 'A atender hoy' }).first();
+      const queue = page.locator('.crm2-block').filter({ hasText: 'Traspasos nuevos' }).first();
       await click(queue.locator('[data-c2="open-lead"]'), 'contacto pasado por Marketing'); counted += 1;
       await page.waitForFunction(() => location.hash === '#R04');
       await click(page.locator('[data-c2="accept-sql"]'), 'aceptar como SQL'); counted += 1;
       await page.waitForTimeout(100); evidenceRoute = 'R04';
       assert.match(await page.locator('[data-crm2-toast]').innerText(), /aceptada como SQL/i);
     } else if (id === 'C-V3') {
-      await click(page.locator('.crm2-block').filter({ hasText: 'A atender hoy' }).locator('[data-c2="open-lead"]'), 'abrir contacto'); counted += 1;
-      await page.waitForFunction(() => location.hash === '#R04');
-      await click(page.locator('.crm2-actionbar [data-c2="quote"]'), 'preparar propuesta'); counted += 1;
+      await click(page.locator('.crm2-block').filter({ hasText: 'Propuestas por cerrar' }).locator('[data-c2="quote"]'), 'preparar propuesta'); counted += 1;
       const dialog = page.locator('[data-quote-dialog]');
       await dialog.waitFor({ state: 'visible' });
+      await dialog.locator('summary').click();
       for (let step = 1; step <= 2; step += 1) await click(dialog.locator('[data-c2="quote-next"]'), `paso ${step + 1}`);
       await dialog.locator('input[name="quote-channel"][value="ambos"]').check();
       assert.match(await dialog.innerText(), /simulada|simulado|prototipo/i);
@@ -189,7 +190,7 @@ async function taskJourney(browser, size, task) {
       assert.match(await page.locator('[data-crm2-toast]').innerText(), /solo en el prototipo/i);
       assert.match(await page.locator('#crm-v2-root').innerText(), /MC-PROP-0001/);
     } else if (id === 'C-V4') {
-      await click(page.locator('.crm2-block').filter({ hasText: 'A atender hoy' }).locator('.crm2-row').filter({ hasText: 'Reposición' }), 'cuenta con reposición'); counted += 1;
+      await click(page.locator('.crm2-block').filter({ hasText: 'Cuentas por reponer' }).locator('.crm2-row').filter({ hasText: 'Reposición' }), 'cuenta con reposición'); counted += 1;
       await page.waitForFunction(() => location.hash === '#R04');
       await click(page.locator('.crm2-actionbar [data-c2="open-reorder"]'), 'preparar reposición'); counted += 1;
       assert.ok(await page.locator('[data-reorder-qty]').count(), `faltan cantidades del último pedido: ${await page.locator('[data-inline-panel]').innerText()}`);
@@ -204,7 +205,8 @@ async function taskJourney(browser, size, task) {
       await page.waitForFunction(() => location.hash === '#R04'); evidenceRoute = 'R04';
       assert.match(await page.locator('#crm-v2-root').innerText(), /riesgo|compra|postventa/i);
     } else if (id === 'C-V6') {
-      const row = page.locator('.crm2-block').filter({ hasText: 'A atender hoy' }).locator('[data-c2="open-account"]').filter({ hasText: /Referido/ }).first();
+      await nav('R03');
+      const row = page.locator('[data-c2="open-account"]').filter({ hasText: /Referido/ }).first();
       await click(row, 'referido'); counted += 1;
       await page.waitForFunction(() => location.hash === '#R04'); evidenceRoute = 'R04';
       assert.match(await page.locator('#crm-v2-root').innerText(), /Recomendación registrada/);

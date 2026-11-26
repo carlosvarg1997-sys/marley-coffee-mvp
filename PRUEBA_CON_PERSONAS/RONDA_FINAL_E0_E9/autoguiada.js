@@ -32,7 +32,7 @@
       ad:'Abre la publicación y pulsa «Arma tu propuesta». Completa el formulario y termina en «Continuar con el diagnóstico».' } },
     { id:'T2', origen:['E2','E3','E4'], titulo:'Revisa tu propuesta', consigna:'Responde las preguntas o elige una máquina directamente. Revisa el resumen de tu pack y termina con «Aceptar mi pack».' },
     { id:'T3', origen:['E6'], titulo:'Entra a tu portal', consigna:'Completa tus datos de contacto y decide sobre la sugerencia. En la confirmación pulsa «Ir a mi portal».' },
-    { id:'T4', origen:['E5'], titulo:'Firma en Mi pedido', consigna:'En tu portal abre «Mi pedido». Revisa el comodato y pulsa «Firmar contrato (simulación)» para retomar y dejar listo el pedido.' },
+    { id:'T4', origen:['E5'], titulo:'Firma en Mi pedido', consigna:'En «Mi pedido», pulsa «Firmar contrato (simulación)». Revisa el resumen del comodato y termina con «Confirmar firma».' },
     { id:'T5', origen:['E7'], titulo:'Repite tu pedido', consigna:'Revisa la entrega en «Mi pedido». Abre «Repetir pedido», revisa las cantidades y confirma la repetición.' },
     { id:'T6', origen:['E8','E9'], titulo:'Pide ayuda o recomienda', consigna:'En el portal, abre «Ayuda y postventa», cuéntanos qué pasa y pulsa «Enviar». También puedes terminar enviando una recomendación desde «Recomendar».' }
   ];
@@ -937,8 +937,9 @@
     const task=state.tareas?.[state.taskIndex];
     if(!task||task.etapa!=='T4')return;
     task.propuesta_aceptada_al_saltar=Boolean(accepted);
-    task.titulo=accepted?'Revisa tu pedido en el portal':'Retoma tu decisión';
-    task.consigna=accepted?'Revisa en tu portal qué pasa con tu pedido.':'Retoma tu decisión.';
+    const firma=EXTERNAL_TASKS.find(def=>def.id==='T4');
+    task.titulo=accepted?firma.titulo:'Abre tu propuesta pendiente';
+    task.consigna=accepted?firma.consigna:'En el inicio de Empresas, busca el aviso de tu propuesta pendiente. La tarea termina con «Retomar mi propuesta».';
   }
   function taskKicker(task) {
     return 'Tarea ' + (state.taskIndex+1) + ' de ' + state.tareas.length + (task?.etapa_nombre ? ' · ' + task.etapa_nombre : '');

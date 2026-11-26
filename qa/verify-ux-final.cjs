@@ -1211,6 +1211,8 @@ async function completarFormulario(p) {
 async function completarContacto(p, nombre = 'Prueba ficticia') {
   const campos = await esperarVisible(p, 'input[type="email"]', null, 2500);
   if (!campos.length) return false;
+  const comuna = p.locator('#m4FComuna');
+  if (await comuna.isVisible()) await comuna.selectOption('Las Condes');
   await p.evaluate((nombre) => {
     const F = window.__F;
     document.querySelectorAll('input').forEach((t) => {
