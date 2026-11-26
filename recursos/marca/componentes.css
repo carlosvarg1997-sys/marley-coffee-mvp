@@ -761,7 +761,8 @@ body[data-current="C02"] #app .ux-hero-scroll .ux-hero-copy { z-index: 6; }
   .mc-compare-media { grid-template-columns: minmax(0,3.6fr) minmax(0,1fr); align-items: center; }
   .mc-compare-media .mc-machine-scene { grid-column: 2; grid-row: 1; }
   .mc-compare-media .cmp-home-maquinas { grid-column: 1; grid-row: 1; min-width: 0; }
-  #app .mc-compare-media .cmp-home-maquina img { height: 112px; }
+  /* 26-nov (Claude): 104 px deja C02 bajo el tope de 1.800 px en escritorio sin tocar el aire (antes medía 1.801). */
+  #app .mc-compare-media .cmp-home-maquina img { height: 104px; }
   body[data-current="C02"] #app #m4-main #negocios { margin-top: 42px !important; }
 }
 @media (max-width: 374px) {

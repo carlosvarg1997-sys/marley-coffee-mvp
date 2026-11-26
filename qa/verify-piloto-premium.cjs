@@ -129,7 +129,7 @@ async function buyer(page) {
 }
 
 const firstCrmAction = {
-  R02: '[data-c2="toggle-referrals"]', R03: '[data-c2="open-account"]', R04: '[data-c2="recommend-account"]',
+  R02: '[data-c2="toggle-referrals"]', R03: '[data-c2="open-account"]', R04: '[data-crm-agente-tarea="contactar"]',
   R06: '.crm2-main details > summary', R08: '.crm2-main details > summary', R09: '.crm2-main details > summary',
   R10: '[data-c2="open-account"]', R12: '[data-c2="open-lead"]', R13: '.crm2-campaign details > summary',
   R14: '.crm2-main details > summary', R15: '[data-c2="open-account"]',
@@ -140,8 +140,9 @@ async function crm(page) {
   await page.goto(`${base}/index.html?motion=off#R00`, { waitUntil: 'load' });
   await click(page, 'R00', '[data-c2="choose-role"][data-role="ventas"]', () => screen(page, 'R01'));
   await click(page, 'R01', '#crm-v2-root [data-c2="open-account"]:visible', () => screen(page, 'R04'));
-  await click(page, 'R04', firstCrmAction.R04, () => text(page, '#crm2-recommend-title', /Recomendar/));
-  await click(page, 'R04', '[data-c2="save-account-recommendation"]', () => text(page, '[data-inline-panel]', /Invitación de prueba guardada/));
+  // 26-nov: recomendar es de Marketing (decisión de Carlitos). En la ficha de Ventas, la acción es contactar por el agente.
+  await click(page, 'R04', firstCrmAction.R04, () => text(page, '#crm-agente-chat', /Asistente de IA del CRM|borrador/i));
+  await page.keyboard.press('Escape');
   await go(page, 'R05');
   for (const label of ['Referidos', 'Recuperación', 'Permisos']) {
     const selector = `.crm2-approval-queue [data-c2="review-approval"]:has-text("${label}")`;

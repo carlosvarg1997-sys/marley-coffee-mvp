@@ -244,30 +244,29 @@ async function runCustomerCtas(page, frame, folder) {
   await page.locator('#question-next').waitFor();
 }
 
-async function openClientAtC02(frame, waitUntil) {
-  await frame.waitForURL(/\/index\.html/);
-  await frame.waitForFunction(() => Boolean(window.MarleyApp));
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      await frame.goto(local('index.html?test=sitio#C02'), { waitUntil });
-      return;
-    } catch (error) {
-      if (attempt === 2 || !/net::ERR_ABORTED|interrupted by another navigation/.test(String(error.message))) throw error;
+async function beginClientAtC02(page, waitUntil = 'domcontentloaded') {
+  // Estas pruebas aíslan la compuerta del recorrido. La entrada por Google se prueba en acquisition().
+  await page.addInitScript(() => {
+    if (window.frameElement?.classList.contains('ag-journey-frame') &&
+        location.pathname.endsWith('/index.html') && location.hash === '#C01') {
+      history.replaceState(null, '', '#C02');
     }
-  }
+  });
+  const frame = await begin(page);
+  await frame.waitForURL(/#C02$/, { waitUntil });
+  return frame;
 }
 
 async function journeyGate(context, folder) {
   const early = await context.newPage();
   const viewport = early.viewportSize();
   try {
-    const frame = await begin(early);
     // Un recurso lento mantiene el iframe antes de load; el CTA ya debe estar protegido.
     await early.route('**/recursos/escenas/hero/poster*.webp', async route => {
       await new Promise(resolve => setTimeout(resolve, 1200));
       await route.continue();
     });
-    await openClientAtC02(frame, 'commit');
+    const frame = await beginClientAtC02(early, 'commit');
     const reallyEarly = await frame.waitForFunction(() => {
       const button = document.querySelector('[data-cierra-tarea="T1"]');
       if (!button?.isConnected) return null;
@@ -289,8 +288,7 @@ async function journeyGate(context, folder) {
   });
   const alt = await altContext.newPage();
   try {
-    const frame = await begin(alt);
-    await openClientAtC02(frame, 'domcontentloaded');
+    const frame = await beginClientAtC02(alt);
     await frame.locator('.ux-hero [data-m9-open]').click();
     await blocked(alt, folder, '02-ruta-alternativa.png');
     assert.equal(await alt.locator('#ag-eval [data-action="return-task"]').count(), 0);
@@ -315,8 +313,7 @@ async function journeyGate(context, folder) {
   });
   try {
     const page = await historyContext.newPage();
-    const frame = await begin(page);
-    await openClientAtC02(frame, 'domcontentloaded');
+    const frame = await beginClientAtC02(page);
     // Una página posterior puede quedar en el historial de una sesión reanudada.
     await frame.evaluate(() => {
       history.pushState(null, '', '#C09');
