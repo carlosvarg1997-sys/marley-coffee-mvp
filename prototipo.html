@@ -5863,7 +5863,7 @@ window.M5UI = (() => {
     if (WF()) return `<div class="m5-film"><div class="m5-ph"><b>ANIMACIÓN</b><span>${esc(label || s.alt)}</span><span>Cámara sobre la foto en alta · avanza al bajar y retrocede al subir; cada lámpara se enciende al llegar</span></div></div>`;
     const lazy = deferred ? 'data-escena-vista' : '';
     if (M.STATIC || reduce()) return `<div class="m5-film" ${lazy}>${scenePoster(s.fin, null, label || s.alt, deferred, false)}</div>`;
-    return `<div class="m5-film m5-cam" data-cam="${key}" ${lazy}>${scenePoster(s.poster, s.posterM, label || s.alt, deferred, false)}<canvas class="m5-cam-cv" aria-hidden="true"></canvas></div>`;
+    return `<div class="m5-film m5-cam" data-cam="${key}" ${lazy}>${scenePoster(deferred ? s.fin : s.poster, deferred ? null : s.posterM, label || s.alt, deferred, false)}<canvas class="m5-cam-cv" aria-hidden="true"></canvas></div>`;
   }
   const machineImg = (mk, cls = '') => { const m = D.MACHINES[mk]; return WF() ? `<div class="m5-ph m5-ph--inline ${cls}" role="img" aria-label="Máquina ${esc(m.name)}"><b>FOTO</b><span>Máquina ${esc(m.name)} (foto oficial sin fondo)</span></div>` : `<img class="${cls}" src="${m.img}" alt="Máquina ${esc(m.name)} de Marley Coffee" loading="lazy" decoding="async">`; };
   const lm = (id, { title, text, list, light = false, mini = false } = {}) => { const x = D.LM[id]; return `<div class="m5-lm ${light ? 'm5-lm--light' : ''} ${mini ? 'm5-lm--mini' : ''}" data-lm="${id} · ${esc(x.name)}">${icon('gift', 20)}<div><b>${esc(title || x.promise)}</b></div>${text ? `<p>${text}</p>` : ''}${list ? `<ul>${list.map((li) => `<li>${icon('check', 16)}<span>${esc(li)}</span></li>`).join('')}</ul>` : ''}</div>`; };
@@ -6032,7 +6032,7 @@ window.M5UI = (() => {
     const f = ease((t - CAM.full[0]) / (CAM.full[1] - CAM.full[0])); if (f > 0.003 && camDrawable(set.lit)) { g.globalAlpha = f; g.drawImage(set.lit, 0, 0, c.W, c.H); }
     g.globalAlpha = 1;
     el._cam = { t, x0, y0, cw, sc: sc / dpr };
-    if (!el.classList.contains('is-ready')) el.classList.add('is-ready');
+    el.classList.toggle('is-ready', !el.hasAttribute('data-escena-vista') || t >= .16);
     return Math.abs(target - d._sp) > 0.0004;
   }
   // ---------- Bucle de scroll ----------

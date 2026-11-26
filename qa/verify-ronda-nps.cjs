@@ -150,7 +150,10 @@ async function positiva(page, id, cara, folder, momento) {
     if (canal === 'google') assert.match(await preview.innerText(), /Google Maps[\s\S]*búsqueda local/);
     if (canal === 'whatsapp') assert.match(await preview.innerText(), /mc_referral_account=/);
     if (canal === 'instagram') assert.match(await preview.innerText(), /@marleycoffee\.chile/);
-    if (['google','whatsapp'].includes(canal)) await shot(page, folder, '04-' + momento + '-' + canal);
+    if (folder && ['google','whatsapp'].includes(canal)) {
+      await preview.locator('h3').scrollIntoViewIfNeeded();
+      await shot(page, folder, '04-' + momento + '-' + canal);
+    }
   }
   await dialogo.getByRole('button', { name: 'Guardar respuesta' }).click();
   const fila = await page.evaluate(pid => M4.get().postventa.respuestas.find(r => r.pedidoId === pid), id);
@@ -175,7 +178,8 @@ async function negativa(page, id, folder, momento) {
   await dialogo.locator('[name="horario"]').fill('En la mañana');
   await dialogo.locator('[name="foto"]').setInputFiles({ name:'maquina.png', mimeType:'image/png', buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jPioAAAAASUVORK5CYII=', 'base64') });
   await dialogo.getByRole('button', { name:'Pedir ayuda' }).click();
-  await page.locator('#mp-panel-ayuda #agente-portal').waitFor();
+  await page.locator('#mp-panel-ayuda').waitFor();
+  await page.locator('#agente-portal').waitFor();
   const r = await page.evaluate(pid => {
     const post = M4.get().postventa;
     return { cara:post.respuestas.find(r=>r.pedidoId===pid), ayuda:post.ayudas.find(r=>r.pedidoId===pid), reseña:post.resenas.find(r=>r.pedidoId===pid) };

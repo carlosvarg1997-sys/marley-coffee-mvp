@@ -449,7 +449,7 @@
       '<p class="mp-folio-linea">Folio <b>' + esc(folioDe(x.s) || 'por asignar') + '</b> · ' + (x.p ? 'Pedido ' + x.numero : 'Pack de partida, por confirmar') + '</p>' +
       maquinaHTML +
       productos +
-      '<p class="mp-fino mp-modalidad">Modalidad: comodato. La máquina queda en préstamo mientras compras café.</p>' +
+      (x.p?.receivedAt ? '' : '<p class="mp-fino mp-modalidad">Modalidad: comodato. La máquina queda en préstamo mientras compras café.</p>') +
       total +
       '</div>';
   }
@@ -474,6 +474,7 @@
     var P = PASOS[x.paso] || PASOS['sin-propuesta'];
     var av = avance(x);
     var cta = '<div class="mp-accion">' + ctaPedido(x) + '</div>';
+    var correo = avisoCorreo(x);
     var tecnico = '<details class="mp-tecnico"><summary>Ver datos del pedido y días simulados</summary><ul class="mp-tecnico-lista">' +
       '<li>Cuenta de prueba: ' + esc(x.c.accountId || '—') + '</li>' +
       '<li>Contrato simulado: ' + esc(x.c.contractId || 'sin firmar') + '</li>' +
@@ -496,7 +497,7 @@
       '<details class="mp-rapidas-pedido" data-rapidas' + (st.textoRapida && st.rapida === 'donde' ? ' open' : '') + '><summary>Ver qué puedes preguntar sobre tu pedido</summary><div class="mp-chips">' + chipsRapidas('pedido') + '</div>' +
       (st.textoRapida && st.rapida === 'donde' ? '<p id="portal-rapida-respuesta" class="mp-respuesta" role="status">' + esc(st.textoRapida) + '</p>' : '') + '</details>' +
       '</div>' +
-      avisoCorreo(x) +
+      (correo && av.hecho.instalado ? '<details class="mp-correo-pedido"><summary>Ver aviso de correo de tu pedido</summary>' + correo + '</details>' : correo) +
       '<div class="mp-espaciador" aria-hidden="true"></div><div class="mp-cierre">' + cta + '</div>' +
       tecnico +
       '</section>';

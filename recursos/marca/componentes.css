@@ -727,6 +727,17 @@ body[data-current="C02"] #app .ux-hero-scroll .ux-hero-copy { z-index: 6; }
   body[data-current="C02"] #app .r3-c02-end-actions { margin-top: 24px !important; padding-top: 8px !important; }
 }
 .mc-ayuda-movil { display: none; }
+#portal-host .mp-pedido-entregado .mp-explicaciones + .mp-bloque,
+#portal-host .mp-pedido-entregado .mp-bloque + .mp-bloque { margin-top: 24px; }
+#portal-host .mp-pedido-entregado .mp-cierre { min-height: 94px; padding-block: 16px; margin-block: 24px 16px; }
+#portal-host .mp-pedido-entregado .mp-tecnico { margin-top: 12px; padding-block: 0; }
+#portal-host .mp-correo-pedido { margin-top: 16px; }
+#portal-host .mp-correo-pedido summary { min-height: 44px; padding-block: 10px; cursor: pointer; }
+@media (min-width: 768px) {
+  #portal-host .mp-toast { width: min(680px, 100%); }
+  #portal-host .mp-portal:has(.mp-pedido-entregado) { padding-bottom: 24px; }
+  #portal-host .mp-portal:has(.mp-pedido-entregado) .mp-nota { margin-top: 12px; }
+}
 .mc-compare-media { display: grid; gap: 12px; }
 #app .mc-compare-media .mc-machine-scene,
 #app .mc-pack-scene { min-width: 0; margin: 0; }

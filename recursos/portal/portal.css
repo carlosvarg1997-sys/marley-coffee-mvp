@@ -582,7 +582,7 @@
 .mp-carita[aria-pressed="true"] { border-color: #161616; box-shadow: inset 0 -3px #f7be00; }
 .mp-satisfaccion > .mp-link { margin-top: 4px; }
 .mp-encuesta {
-  width: min(560px,calc(100% - 32px));
+  width: min(610px,calc(100% - 32px));
   max-height: calc(100dvh - 32px);
   max-width: 100%;
   padding: 0;
