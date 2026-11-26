@@ -76,7 +76,7 @@
     M.answer('negocio', biz);
     var d = (M.DEFAULTS || {})[biz] || {};
     ['volumen', 'operacion', 'preferencias'].forEach(function (k) { var v = M.get().answers[k]; if (d[k] && (v == null || (Array.isArray(v) ? !v.length : !v))) M.answer(k, d[k]); });
-    M.update(function (st) { st.diag.step = 2; }); // salta comuna y tazas: cierra el servicio y arma la propuesta
+    M.update(function (st) { st.diag.step = 2; }); // Salta las preguntas y arma la propuesta con la máquina elegida.
     if (!M.get().diag.done) M.confirmStep();
     M.setQuote({ machine: id });
     M.update(function (st) {
@@ -122,10 +122,17 @@
   }
   function contactoHTML(s) {
     var l = s.lead || {};
+    var D = window.M4D;
+    var comuna = D.comuna(s.answers.comuna) ? '' : '<label><span>Comuna de tu local</span><select id="m4FComuna" name="comuna" required><option value="">Elige tu comuna</option>' +
+      Object.values(D.ZONES).map(function (z) {
+        var lugares = z.id === 'regiones' ? D.REGIONES : D.COMUNAS.filter(function (c) { return c.zone === z.id; });
+        return '<optgroup label="' + esc(z.name) + '">' + lugares.map(function (c) { return '<option>' + esc(c.name) + '</option>'; }).join('') + '</optgroup>';
+      }).join('') + '</select></label>';
     return '<form id="pack-contacto" class="cmp-form" novalidate><h2>¿A dónde te escribimos?</h2><p>Lo último es dejar tus datos: así guardamos tu pack y el equipo te contacta.</p>' +
       '<label><span>Nombre</span><input id="m4FName" name="name" autocomplete="name" value="' + esc(l.name || '') + '" placeholder="Tu nombre"></label>' +
       '<label><span>Correo electrónico</span><input id="m4FEmail" name="email" type="email" autocomplete="email" value="' + esc(l.email || '') + '" placeholder="nombre@empresa.cl"></label>' +
       '<label><span>Celular (opcional)</span><input id="m4FPhone" name="phone" type="tel" inputmode="numeric" placeholder="+56 9"></label>' +
+      comuna +
       '<label class="cmp-check"><input type="checkbox" name="consent"><span>Autorizo que Marley Coffee use estos datos para responder esta solicitud.</span></label>' +
       '<p class="cmp-error" role="status">' + esc(ui.error) + '</p>' +
       '<button type="submit" class="m5-btn mc-btn mc-btn--main" data-pack-accion="confirmar-contacto" data-evt="pack-aceptar-con-datos">Aceptar mi pack</button></form>';
@@ -147,7 +154,7 @@
   function pantallaC05(s, p) {
     if (s.compra && s.compra.paso === 'cruce') return '<section class="cmp-sec"><div class="cmp-wrap">' + cruceHTML() + '</div></section>';
     var maquina = maquinaDe(s), mq = maquina.m, com = p.comprador, etiq = com && com.etiqueta ? com.etiqueta.toLowerCase() : '';
-    var titulo = com ? 'Tu pack de inicio para ' + etiq : 'Tu pack de inicio';
+    var titulo = 'Tu pack de inicio';
     var scene = window.M4D.BUSINESS[s.answers?.negocio || com?.negocio]?.scene || 'hotel';
     var ejemplo = '<figure class="mc-pack-scene"><figcaption>Así se vería el café en tu ' +
       esc(({Hotel:'hotel',Restaurante:'restaurante','Cafetería':'cafetería',Oficinas:'oficina',OCS:'oficina'})[s.answers?.negocio] || 'negocio') +
@@ -306,7 +313,7 @@
       if (k === 'cambiar-respuestas') { ui.editando = true; M.update(function (st) { st.diag.done = false; st.diag.step = 0; }); ir('C04'); }
       if (k === 'aceptar') {
         var s = M.get();
-        if (!C.contactReady(s)) { ui.contacto = true; ui.error = ''; pintar(); setTimeout(function () { var n = document.getElementById('m4FName'); if (n) n.focus(); }, 0); }
+        if (!C.contactReady(s) || !window.M4D.comuna(s.answers.comuna)) { ui.contacto = true; ui.error = ''; pintar(); setTimeout(function () { var n = document.getElementById('m4FName'); if (n) n.focus(); }, 0); }
         else aceptar();
       }
       return;
@@ -342,8 +349,10 @@
     function error(campo, texto) { f.querySelector('.cmp-error').textContent = texto; f.elements.namedItem(campo).focus(); }
     if (!name) return error('name', 'Escribe tu nombre para guardar el pack.');
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) return error('email', 'Escribe un correo válido, por ejemplo nombre@empresa.cl.');
+    var comuna = campos.get('comuna') || M.get().answers.comuna;
+    if (!window.M4D.comuna(comuna)) return error('comuna', 'Elige la comuna de tu local para saber quién te atiende.');
     if (!campos.has('consent')) return error('consent', 'Marca el permiso para que el equipo te responda.');
-    M.saveContact({ name: name, email: mail, phone: phone, consent: true, marketingConsent: false });
+    M.saveContact({ name: name, email: mail, phone: phone, comuna: comuna, consent: true, marketingConsent: false });
     aceptar();
   }, true);
   window.addEventListener('hashchange', function () {

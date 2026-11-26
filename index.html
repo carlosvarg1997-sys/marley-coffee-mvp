@@ -4821,8 +4821,7 @@ window.M4 = (() => {
   function startQuote(biz) {
     return update((s) => {
       if (track(s, 'cotizar')) agent(s, 'mkt', 'orq', 'Una persona inició una cotización desde Empresas. Guardamos la intención en esta sesión; todavía no creamos contacto ni asignamos puntaje. El puntaje comienza tras el formulario válido.', ['Intención anónima registrada ✓']);
-      // Si ya eligió su negocio (pestaña o botón «Quiero esto en mi…»), no se le vuelve a preguntar: parte en el paso 2.
-      if (biz && !s.diag.done) { setBiz(s, biz); if (track(s, 'negocio')) agentOnAnswer(s, 'negocio'); if (s.diag.step === 0) s.diag.step = 1; s.diag.r5IncludeBusiness = false; s.diag.r5QuestionStep = 'comuna'; }
+      if (biz && !s.diag.done) setBiz(s, biz);
     });
   }
   function saveCreatorInterest({ name, email: mail, phone, creatorProfile }) {
@@ -4834,7 +4833,7 @@ window.M4 = (() => {
       notify(s, 'crm', 'Interés de alianza · creador/a', `${L.name || L.id} · revisión humana pendiente`);
     });
   }
-  function saveContactInState(s, { name, email: mail, phone, consent, marketingConsent }) {
+  function saveContactInState(s, { name, email: mail, phone, comuna, consent, marketingConsent }) {
       const L = ensureLead(s);
       Object.assign(L, { name: name || L.name, email: mail || L.email, phone: phone || L.phone, consent: Boolean(consent) || L.consent });
       if (typeof marketingConsent === 'boolean') {
@@ -4859,7 +4858,8 @@ window.M4 = (() => {
         agent(s, 'cal', 'orq', `${L.name || 'El contacto'} dejó su teléfono, sin correo. El teléfono se conserva como dato; el seguimiento comercial requiere correo. Cuenta como identificado (M2) cuando deje su correo con permiso.`, ['Registrar contacto ✓']);
         notify(s, 'crm', 'Nuevo contacto', `${L.name || 'Sin nombre'} · ${L.phone}`);
       }
-      promote(s);
+      if (D.comuna(comuna)) setComunaInState(s, comuna);
+      else promote(s);
   }
   function saveContact(data) { return update((s) => saveContactInState(s, data)); }
   function passStart() { return update((s) => { const L = ensureLead(s); if (!L.formSeen) L.formSeen = now(); }); }
@@ -4876,7 +4876,7 @@ window.M4 = (() => {
   const Q = Object.fromEntries(QUESTIONS.map((q) => [q.key, q]));
   const STEPS = [
     { id: 'negocio', keys: ['negocio'], title: '¿Qué tipo de negocio tienes?', help: 'Elige la categoría que mejor describe tu operación.' },
-    { id: 'local', keys: ['comuna', 'volumen'], title: 'Tu local', help: 'Indica tu comuna y el consumo diario. Puedes marcar que aún no lo sabes.' },
+    { id: 'local', keys: ['volumen', 'puntos'], title: 'Tu local', help: 'Indica el consumo diario y los puntos que requieren café.' },
     { id: 'servicio', keys: ['operacion', 'preferencias'], title: 'Tu operación', help: 'Cuéntanos qué necesitas; las condiciones se validan con el equipo.' }
   ];
   const MULTI_SITE = ['OCS', 'Conveniencia'];
@@ -4908,11 +4908,11 @@ window.M4 = (() => {
     if (key === 'preferencias' && PREFERENCE_OPTIONS[biz]) return { ...q, options: PREFERENCE_OPTIONS[biz] };
     return q;
   };
-  const questionsFor = (s) => QUESTIONS.filter((q) => q.key !== 'puntos' || MULTI_SITE.includes(s.answers.negocio)).map((q) => question(s, q.key));
-  const stepKeys = (s, i) => { const st = STEPS[i] || STEPS[0]; return st.id === 'local' && MULTI_SITE.includes(s.answers.negocio) ? [...st.keys, 'puntos'] : st.keys; };
+  const questionsFor = (s) => QUESTIONS.filter((q) => q.key !== 'comuna').map((q) => question(s, q.key));
+  const stepKeys = (_, i) => (STEPS[i] || STEPS[0]).keys;
   const stepInfo = (s, i) => {
     const st = STEPS[i] || STEPS[0]; const biz = s.answers.negocio;
-    if (st.id === 'local' && MULTI_SITE.includes(biz)) return { title: 'Tus puntos de atención', help: 'Indica comuna, demanda diaria por punto y cantidad de ubicaciones. Marca «No lo sé» si está por confirmar.' };
+    if (st.id === 'local' && MULTI_SITE.includes(biz)) return { title: 'Tus puntos de atención', help: 'Indica la demanda diaria y las ubicaciones. Marca «No lo sé» si está por confirmar.' };
     if (biz === 'OCS' && st.id === 'servicio') return { title: 'Tu servicio de café en oficina', help: 'Define si necesitas reposición, disponibilidad por punto o soporte. El equipo valida el alcance.' };
     if (biz === 'Conveniencia' && st.id === 'servicio') return { title: 'Tu operación por tienda', help: 'Cuéntanos qué necesitas coordinar por local. Inventario y reportes requieren validación humana.' };
     if (biz === 'Panadería' && st.id === 'servicio') return { title: 'Preparación y limpieza', help: 'Identifica el estándar operativo que necesita tu equipo; formato y capacitación se confirman después.' };
@@ -4963,9 +4963,8 @@ window.M4 = (() => {
       track(s, 'diag_inicio');
     });
   }
-  // La comuna se recoge en el diagnóstico C04 y sirve para sugerir la zona; no requiere contacto previo.
-  function setComuna(c) {
-    return update((s) => {
+  // La ubicación se guarda en contacto y determina el puntaje y la persona a cargo de la zona.
+  function setComunaInState(s, c) {
       const previous = s.answers.comuna;
       s.answers.comuna = c;
       const event = s.events.find((item) => item.key === 'comuna');
@@ -4981,8 +4980,8 @@ window.M4 = (() => {
         agentOnAnswer(s, 'comuna');
       }
       promote(s);
-    });
   }
+  function setComuna(c) { return update((s) => setComunaInState(s, c)); }
   const stepReady = (s, i = s.diag.step) => stepKeys(s, i).every((k) => { const v = s.answers[k]; return Array.isArray(v) ? v.length > 0 : Boolean(v); });
   function confirmStep() {
     return update((s) => {
@@ -6377,12 +6376,10 @@ window.M4C = (() => {
     // v6: «Máquinas» va primero (los productos antes que la solución).
     const navJourney = M.get().catalogJourney || {};
     const nav = [['C02', 'Inicio'], ['C10', 'Productos'], ['C11', 'Máquinas'], ['negocios', 'Soluciones'], ['servicios', 'Servicios'], ['C08', 'Casos y guías']].map(([k, l]) => { const current = k === route || (k === 'negocios' && ['C04'].includes(route)) || (k === 'C10' && ['C05','C06'].includes(route) && navJourney.productsAt) || (k === 'negocios' && ['C05','C06'].includes(route) && !navJourney.productsAt); const active = current ? ' aria-current="page" class="is-current"' : ''; return k[0] === 'C' ? `<a href="#${k}" data-go="${k}" ${k==='C10'?'data-m9-open':''}${active}>${l}</a>` : `<a href="#C02" data-a="anchor" data-v="${k}"${active}>${l}</a>`; }).join('');
-    // En Empresas, «Ver mi solución» del encabezado aparece después de ver las máquinas (25-ui5.js, frame).
-    const late = false;
     return `<div class="m4 m5 m4-client ${cls}">
 <header class="m5-top"><div class="m5-top-in"><a class="m5-brand" href="#C02" data-go="C02" aria-label="Marley Coffee Empresas, inicio">${U.logo()}<span>Empresas</span></a>
 ${focus ? '' : `<nav class="m5-nav" aria-label="Secciones">${nav}</nav><details class="ux-mobile-nav"><summary aria-label="Abrir menú de secciones">Menú</summary><nav aria-label="Secciones en móvil">${nav}<a href="#C09" data-go="C09" ${route === 'C09' ? 'aria-current="page" class="is-current"' : ''}>Ya soy cliente</a><a href="#C01" data-go="C01">Tienda</a></nav></details>`}
-<div class="m5-top-actions">${focus ? idChip : `${window.M9Catalog.headerHTML()}${idChip}${portal}<a href="#C09" data-go="C09" class="m5-top-link">${icon('users', 18)}<span>Ya soy cliente</span></a><a href="#C01" data-go="C01" class="m5-top-link">${icon('back', 16)}<span>Tienda</span></a>${route === 'C02' || route === 'C08' ? `<button type="button" class="m5-btn m5-btn--hide-m ${late ? 'm5-btn--late' : ''}" data-a="quote" ${late ? 'inert' : ''}>${qTxt(false)}</button>` : ''}`}</div></div>
+<div class="m5-top-actions">${focus ? idChip : `${window.M9Catalog.headerHTML()}${idChip}${portal}<a href="#C09" data-go="C09" class="m5-top-link">${icon('users', 18)}<span>Ya soy cliente</span></a><a href="#C01" data-go="C01" class="m5-top-link">${icon('back', 16)}<span>Tienda</span></a>${route === 'C08' ? `<button type="button" class="m5-btn m5-btn--hide-m" data-a="quote">${qTxt(false)}</button>` : ''}`}</div></div>
 ${route.slice(0,3) !== 'C09' ? `<div class="mc-ayuda-movil"><button type="button" ${/^C0[1-8]/.test(route) ? 'data-m7-open="ayuda"' : 'data-mc-ayuda-ruta'}>¿Necesitas ayuda?</button></div>` : ''}</header>
 <main id="m4-main">${inner}</main>
 <footer class="m5-foot"><div class="m5-wrap m5-foot-in"><span>Marley Coffee Empresas · ${M.MODE === 'prototype' ? 'prototipo académico con datos de prueba' : M.MODE === 'mockups' ? 'mockup con datos de prueba' : 'wireframe'}</span><span>Precios profesionales, disponibilidad y condiciones se confirman con el equipo. Prueba sin envíos ni cobros reales.</span><a class="m5-foot-guide" href="guia-servicio-cafe.html">Guía práctica para planificar el café de tu negocio</a></div></footer>
@@ -6394,20 +6391,17 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
   // ---------- C02 · Empresas ----------
   function svcPrice(sv) { return 'Por cotizar'; }
   function c02() {
-    const s = M.get(); const known = bizOf(s); const chosen = ui.biz || known; const biz = chosen || 'Hotel'; const B = D.BUSINESS[biz];
+    const s = M.get(); const chosen = ui.biz || bizOf(s); const biz = D.BUSINESS[chosen] ? chosen : 'Hotel'; const B = D.BUSINESS[biz];
+    const espacio = { Hotel:'hotel', Restaurante:'restaurante', 'Cafetería':'cafetería', 'Eventos o catering':'evento', OCS:'oficina', Conveniencia:'tienda', 'Panadería':'panadería' }[biz];
     const swap = ui.bizSwap; ui.bizSwap = false;
     const tabs = D.BUSINESS_GROUPS.map((group) => `<div class="m5-buyer-group" role="group" aria-label="${esc(group.label)}"><span class="m5-buyer-label">${esc(group.label)}</span>${group.keys.map((k) => `<button type="button" class="m5-tab" id="tab-${D.BUSINESS[k].k}" aria-pressed="${k === biz}" data-a="biz-tab" data-v="${esc(k)}">${esc(k === 'Eventos o catering' ? 'Eventos' : k === 'OCS' ? 'Oficinas' : k)}</button>`).join('')}</div>`).join('');
     const picked = new Set([...(s.lmi || []).map((x) => x.k), ...((s.proposal && s.proposal.status !== 'aceptada' && s.proposal.services) || [])]);
-    // Servicios: si la persona ya eligió su negocio, ve primero los 3 recomendados para él y el resto queda a un toque.
     const ALL = ['evento', 'catering', 'pop', 'activacion', 'capacitacion', 'ocs'];
-    const reco = chosen ? D.BUSINESS[chosen].services.filter((k) => D.SERVICES[k]) : [];
     const svcCard = (k, i, tag = '') => {
       const sv = D.SERVICES[k]; const on = picked.has(k); const size = i === 0 ? 'a' : i < 3 ? 'b' : 'c';
       return `<button type="button" class="m5-svc m5-svc--${size}" data-a="lm-interest" data-v="${k}" aria-pressed="${on}" data-reveal style="--d:${i}">${V.photo(sv.img, sv.t, { label: sv.t + ': ' + sv.d })}<span class="m5-svc-add">${icon(on ? 'check' : 'gift', 14)} ${on ? 'En tu propuesta' : 'Me interesa'}</span>${tag ? `<span class="m5-svc-reco">${esc(tag)}</span>` : ''}<b>${esc(sv.t)}</b><p>${esc(sv.d)}</p><span class="m5-svc-price">${svcPrice(sv)}</span></button>`;
     };
-    const bento = chosen
-      ? `<div class="m5-bento m5-bento--3">${reco.map((k, i) => svcCard(k, i, 'Recomendado para ' + article(chosen))).join('')}</div><details class="m5-more"><summary>Ver todos los servicios (${ALL.filter((k) => !reco.includes(k)).length} más)</summary><div class="m5-bento m5-bento--rest">${ALL.filter((k) => !reco.includes(k)).map((k, i) => svcCard(k, i + 3)).join('')}</div></details>`
-      : `<div class="m5-bento">${ALL.map((k, i) => svcCard(k, i)).join('')}</div>`;
+    const bento = `<div class="m5-bento">${ALL.map((k, i) => svcCard(k, i)).join('')}</div>`;
     // Momento wow v2 (13-10): carrusel al scroll. La cámara se detiene en cada máquina, la enciende y su ficha entra de lado;
     // al final se aleja y se ven las 4 juntas con la pregunta «¿Cuál me conviene?». Mismos tiempos que build/barras_carrusel.py.
     // Cada ficha cambia a mitad del paneo de la cámara (25-ui5.js, CAM): 0,215 · 0,415 · 0,615 · 0,84 (al alejarse).
@@ -6425,7 +6419,7 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
     const faq = D.FAQ.map(([q, a]) => `<details><summary><h3>${esc(q)}</h3></summary><p>${esc(a)}</p></details>`).join('');
     return shell(`
 <section class="ux-hero ux-hero-scroll" data-driver aria-labelledby="ux-hero-title"><div class="ux-wrap ux-hero-grid ux-hero-stage">
-  <div class="ux-hero-copy"><span class="ux-eyebrow">Marley Coffee Empresas</span><h1 id="ux-hero-title" data-vida="titulo">Café para empresas con máquina en comodato</h1><p class="cmp-aclara">En comodato: la máquina queda en préstamo mientras compras café.</p><p class="r5-brandline">Café para empresas que mueve tu negocio.</p><p>No necesitas saber qué máquina elegir. Cuéntanos cómo sirves el café y te orientamos; si ya tienes una en mente, puedes partir por ahí.</p><div class="ux-hero-actions"><a class="m5-btn" href="#condiciones" data-evt="guia-como-funciona">Ver cómo funciona ${icon('arrow',18)}</a><button type="button" class="m5-link" data-go="C11">Ya sé cuál me interesa</button></div><p class="m5-hero-products">¿Prefieres empezar por el café? <button type="button" class="m5-link" data-m9-open>Ver packs y productos</button></p></div>
+  <div class="ux-hero-copy"><span class="ux-eyebrow">Marley Coffee Empresas</span><h1 id="ux-hero-title" data-vida="titulo">Café para empresas con máquina en comodato</h1><p>${esc(D.BUSINESS[chosen] ? B.h + '.' : 'Cuéntanos cómo sirves el café y te orientamos.')}</p><div class="ux-hero-actions"><a class="m5-btn" href="#condiciones" data-evt="guia-como-funciona">Ver cómo funciona ${icon('arrow',18)}</a><button type="button" class="m5-link" data-go="C11">Ya sé cuál me interesa</button></div></div>
   <div class="ux-hero-media">${V.film('hero',{mode:'once',eager:true,label:'Café Marley Coffee para empresas'})}</div>
 </div></section>
 <section class="ux-strip" id="condiciones" aria-label="Así funciona Marley Coffee Empresas">
@@ -6438,14 +6432,16 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
   <details class="cmp-detalle-c"><summary>Ver condiciones de la carga base</summary><p>La referencia corresponde a negocios de flujo bajo o medio. Se paga antes de instalar y no corresponde a una mensualidad. El equipo confirma modelo, mínimo mensual y plazo.</p></details>
   <div class="mc-compare-head"><h3 class="cmp-compara-titulo">Cuatro máquinas para distintas formas de servir</h3></div>
   <div class="mc-compare-media">
-    <figure class="mc-machine-scene" data-driver aria-label="Escena de las cuatro máquinas">${V.cam('barras', { label:'Las cuatro máquinas Marley Coffee en sus barras', deferred:true })}</figure>
     <div class="cmp-home-maquinas" role="region" aria-label="Compara las cuatro máquinas" tabindex="0"><!-- maquinas-comodato --></div>
   </div>
   <div class="cmp-inicio-cta"><button type="button" class="m5-btn r3-main" data-m10-unknown data-cierra-tarea="T1" data-cta-principal="cuentanos" data-evt="cta-cuentanos">Cuéntanos de tu negocio ${icon('arrow',18)}</button><button type="button" class="mc-btn mc-btn--sec" data-a="machine-shortcut" data-evt="ya-se-maquina">Ya sé qué máquina quiero</button></div>
 </section>
 <section class="ux-section" id="insumos"><div class="ux-wrap"><div class="ux-cafe-card"><div><span class="ux-eyebrow">Café e insumos</span><h2>¿Qué café e insumos puedo pedir?</h2><p class="r5-brandline">Elige café e insumos para tu negocio.</p><p>Elige una selección sugerida y ajústala, o selecciona tus productos uno por uno.</p></div><button type="button" class="m5-btn" data-m9-open>Ver packs y productos ${icon('arrow',18)}</button></div></div></section>
-<section class="ux-section" id="negocios" aria-labelledby="h-negocios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Para cada forma de servir</span><h2 id="h-negocios">¿Qué necesita tu tipo de negocio?</h2></div></div><div class="m5-buyer-groups" aria-label="Categorías de negocio">${tabs}</div>
-<div class="ux-buyer-panel" id="panel-biz" aria-live="polite"><div class="ux-buyer-photo mc-buyer-scene">${V.film(B.scene, { mode:'once', deferred:true, label:'Cómo se vería el café para ' + article(biz) })}</div><div class="ux-buyer-copy"><span class="ux-eyebrow" style="color:#F3C900">${esc(biz === 'OCS' ? 'Oficinas' : biz)}</span><h3><span class="r5-business-h3-line">Café para ${{Hotel: 'hoteles', Restaurante: 'restaurantes', Cafetería: 'cafeterías', 'Eventos o catering': 'eventos', Oficinas: 'oficinas', Conveniencia: 'tiendas de conveniencia', Panadería: 'panaderías'}[biz] || 'negocios'}</span>${esc(B.h)}</h3><p>${esc(B.p)}</p><button type="button" class="m5-btn" data-a="quote-biz" data-v="${esc(biz)}">Elegir productos ${icon('arrow',18)}</button></div></div></div></section>
+<section class="ux-section" id="negocios" aria-labelledby="h-negocios"><div class="ux-wrap">
+  <div class="ux-head"><h2 id="h-negocios">Así se vería en tu ${esc(espacio)}</h2></div>
+  <div class="m5-buyer-groups" aria-label="Categorías de negocio">${tabs}</div>
+  <div class="ux-buyer-panel" id="panel-biz" aria-live="polite"><div class="ux-buyer-photo mc-buyer-scene">${V.film(B.scene, { mode:'once', deferred:true, label:'Cómo se vería el café para ' + article(biz) })}</div></div>
+</div></section>
 <section class="ux-section ux-machine-scroll" id="maquinas" data-driver><div class="ux-wrap ux-machine-scroll-stage"><div class="ux-machine-visual">${V.cam('barras',{label:'Animación de las máquinas Marley Coffee'})}</div><div class="ux-cafe-card"><div><span class="ux-eyebrow">Máquina en comodato</span><span class="ux-machine-caption" data-machine-caption role="status" aria-live="polite" aria-atomic="true">Máquina Bar</span><h2>¿Qué máquina de café me prestan en comodato?</h2><h3 class="r5-machine-answer">${esc(D.MACHINES[B.machine].name)}: ${esc(D.MACHINES[B.machine].kind)}</h3><p class="r5-brandline">Una máquina para tu forma de servir.</p><p>${esc(D.MACHINES[B.machine].line)}</p><p>Prestamos la máquina; compras insumos cada mes y te orientamos según tu operación.</p></div><button type="button" class="m5-btn" data-a="quote">Armar mi solución ${icon('arrow',18)}</button></div></div></section>
 <section class="ux-section" id="servicios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Más para tu negocio</span><h2>Servicios y experiencias.</h2></div><p>Agrega lo que te interese a tu propuesta.</p></div><details class="m5-more"><summary>Explorar servicios disponibles</summary>${bento}</details><p class="m5-cta-note">Servicios y condiciones sujetos a confirmación.</p><details class="m5-more"><summary>¿Creas contenido sobre café o gastronomía?</summary><p>Conversemos sobre una posible colaboración.</p><button type="button" class="m5-btn m5-btn--ghost" data-a="creator-interest">Conversar sobre una alianza</button></details></div></section>
 <section class="ux-section ux-faq" id="faq"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Estamos para ayudarte</span><h2>Preguntas frecuentes.</h2></div></div><div>${faq}</div></div></section>
@@ -13121,7 +13117,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       const compradores = DATA.offer.buyers.filter(b => b.maquina === id).map(b => b.etiqueta);
       return '<article class="mc-card cmp-home-maquina"><img src="' + FOTO_PENDIENTE + '" data-comodato-foto="recursos/maquinas/' + id + '_foto.webp" alt="' + esc(m.nombre) + '" width="240" height="165" loading="lazy" decoding="async" data-zoom data-zoom-grupo="maquinas">' +
       '<h4>' + esc(m.nombre) + '</h4><p class="cmp-maquina-buyer">' + esc(compradores.join(' · ')) + '</p><p>' + esc(m.linea) + '</p>' +
-      '<dl><dt>Capacidad</dt><dd>' + esc(m.tazas) + '</dd><dt>Atención</dt><dd>' + esc(m.atencion) + '</dd></dl></article>';
+      '<dl><div><dt>Capacidad</dt><dd>' + esc(m.tazas) + '</dd></div><div><dt>Atención</dt><dd>' + esc(id === 'bar' ? 'Con barista' : m.atencion) + '</dd></div></dl></article>';
     }).join('');
     const strip = getSection('<section class="ux-strip"', 'strip')
       .replace('<summary>Ver condiciones de la carga base</summary><p>', '<summary>Ver condiciones de la carga base</summary><p>En comodato: la máquina queda en préstamo mientras compras café. ')
@@ -13155,7 +13151,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const cta = strip.match(/<button\b[^>]*data-cierra-tarea="T1"[^>]*>[\s\S]*?<\/button>/)?.[0] || '';
     const ctaEnd = '<div class="r3-c02-end-actions" aria-label="Siguiente paso">' + cta + '</div>';
     const pair = '<div class="r3-c02-product-pair">' + coffee + machine + '</div>';
-    const opciones = '<details class="cmp-plegado cmp-opciones"><summary>Explorar café, máquinas y preguntas frecuentes</summary>' + pair + services + faq + '</details>';
+    const opciones = '<section class="mc-home-recursos" aria-label="Productos, servicios y ayuda"><h2>Productos, servicios y ayuda</h2>' + pair + services + faq + '</section>';
     return html.slice(0, heroStart) + hero + strip + business + opciones + ctaEnd + html.slice(faqEnd);
   }
   function c04Wrap() {
@@ -13855,27 +13851,18 @@ body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
         '<small class="r4-res-nota">' + total + ". Precios netos referenciales; condiciones por confirmar.</small>" +
         '<a class="m5-link" href="#C10" data-go="C10">Ver o cambiar productos</a></aside>';
     }
-    function questionKeys(s, biz) {
-      const actualBiz = (s.answers && s.answers.negocio) || biz;
-      const keys = [];
-      if (C.ui.r4EditBiz || !actualBiz || s.diag.r5IncludeBusiness || (Number(s.diag && s.diag.step) === 0 && s.diag.r5QuestionStep === "negocio")) keys.push("negocio");
-      keys.push("comuna", "volumen");
-      if (MULTI.indexOf(actualBiz) >= 0) keys.push("puntos");
-      keys.push("operacion", "preferencias");
-      return keys;
-    }
+    const questionKeys = () => ["negocio", "volumen", "puntos", "operacion", "preferencias"];
     function currentQuestion(s, biz) {
       if (s.diag && s.diag.done) return "contact";
       const keys = questionKeys(s, biz), saved = s.diag && s.diag.r5QuestionStep;
       if (saved && keys.indexOf(saved) >= 0) return saved;
-      if (keys[0] === "negocio") return "negocio";
       if (Number(s.diag && s.diag.step) >= 2) return "operacion";
-      if (Number(s.diag && s.diag.step) === 1) return s.answers.comuna ? "volumen" : "comuna";
-      return "comuna";
+      if (Number(s.diag && s.diag.step) === 1) return "volumen";
+      return "negocio";
     }
     function questionGroup(key) {
       if (key === "negocio") return 0;
-      if (["comuna", "volumen", "puntos"].indexOf(key) >= 0) return 1;
+      if (["volumen", "puntos"].includes(key)) return 1;
       return 2;
     }
     function seccion(s, biz) {
@@ -13887,9 +13874,9 @@ body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
       const suggestedBiz = actualBiz && key !== "negocio" ? '<p class="r4-bizchip">Tu negocio: <b>' + esc(actualBiz) + '</b> <button type="button" class="m5-link" data-r4-cambiar-negocio>Cambiar</button></p>' : "";
       const contactReady = C.contactReady(s);
       const question = key === "contact" ? (contactReady ? "" : contacto(s)) : key === "negocio" ? field(sv, "negocio", chips(sv, "negocio", true)) :
-        key === "comuna" ? field(sv, "comuna", comunaPicker(a.comuna)) : field(sv, key, chips(sv, key));
-      const progress = key === "contact" ? keys.length + (contactReady ? 0 : 1) : index + 1;
-      const totalSteps = keys.length + (contactReady ? 0 : 1);
+        field(sv, key, chips(sv, key));
+      const progress = key === "contact" ? keys.length : index + 1;
+      const totalSteps = keys.length;
       const nextLabel = key === "contact" ? "Ver mi propuesta" : "Continuar";
       const backKey = key === "contact" ? keys[keys.length - 1] : keys[index - 1];
       const backGroup = backKey === "contact" ? 2 : questionGroup(backKey);
@@ -13978,8 +13965,7 @@ body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
       if (key !== "contact") {
         if (key !== "negocio" && !s.answers.negocio) { M.answer("negocio", biz); if (!confirmCurrentStep()) return false; M.update(function (st) { st.diag.r5IncludeBusiness = false; st.diag.r5QuestionStep = key; }); s = M.get(); }
         const value = key === "negocio" ? s.answers.negocio : s.answers[key];
-        if (key === "comuna" && !value) return say("Elige la comuna donde está tu local.", "comuna");
-        if (key !== "comuna" && (!value || (Array.isArray(value) && !value.length))) {
+        if (!value || (Array.isArray(value) && !value.length)) {
           return say("Elige una opción para continuar.");
         }
         const keys = questionKeys(s, biz), index = keys.indexOf(key), next = keys[index + 1] || "contact";
@@ -25228,33 +25214,20 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
 <script>
 (() => {
   const app = document.getElementById('app');
-  const foto = '[data-comodato-foto]';
-  // DS4: las fotos se cargan al entrar a la vista, sin esperar una interacción.
-  // DS5: solo se carga lo que de verdad se ve (15 % del bloque, sin margen extra).
-  // La visibilidad se mide sobre el dibujado ya aquietado: un IntersectionObserver
-  // avisaba a mitad del render, cuando la sección parecía visible sin estarlo.
-  const visible = (caja) => {
-    const box = caja.getBoundingClientRect();
-    const vh = innerHeight || document.documentElement.clientHeight;
-    const alto = Math.min(box.bottom, vh) - Math.max(box.top, 0);
-    return alto > 0 && alto >= Math.min(box.height, vh) * 0.15;
-  };
-  const cargarVisibles = () => {
-    for (const image of app.querySelectorAll(foto)) {
-      const caja = image.closest('.cmp-home-maquinas, #panel-biz') || image;
-      if (!visible(caja)) continue;
-      image.src = image.dataset.comodatoFoto;
-      image.removeAttribute('data-comodato-foto');
+  const fotos = '[data-comodato-foto]';
+  const visibilidad = new IntersectionObserver(entradas => {
+    for (const entrada of entradas) {
+      if (!entrada.isIntersecting) continue;
+      const foto = entrada.target;
+      visibilidad.unobserve(foto);
+      if (!foto.isConnected || !foto.dataset.comodatoFoto) continue;
+      foto.src = foto.dataset.comodatoFoto;
+      delete foto.dataset.comodatoFoto;
     }
-  };
-  let turno = 0;
-  const programar = () => { clearTimeout(turno); turno = setTimeout(cargarVisibles, 120); };
-  addEventListener('scroll', programar, { passive: true, capture: true });
-  addEventListener('resize', programar, { passive: true });
-  addEventListener('hashchange', programar);
-  addEventListener('load', () => { cargarVisibles(); setTimeout(cargarVisibles, 400); }, { once: true });
-  new MutationObserver(programar).observe(app, { childList: true, subtree: true });
-  setTimeout(cargarVisibles, 600);
+  });
+  const montar = () => app.querySelectorAll(fotos).forEach(foto => visibilidad.observe(foto));
+  new MutationObserver(montar).observe(app, { childList: true, subtree: true });
+  montar();
 })();
 </script>
 <script>

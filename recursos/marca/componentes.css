@@ -1,5 +1,4 @@
-/* Marley Empresas. Capa final de botones, precios, tarjetas, pestañas y chips.
-   Festivo titula, la sans proporcional sirve la lectura y Pressura muestra importes. */
+/* Marley Empresas. Capa final de botones, precios, tarjetas, pestañas y chips. */
 :root {
   --mc-ink: #161616;
   --mc-paper: #fff;
@@ -789,4 +788,112 @@ body[data-current="C02"] #app .ux-hero-scroll .ux-hero-copy { z-index: 6; }
     cursor: pointer;
   }
   body[data-current^="C"] #m7-launcher { display: none !important; }
+}
+
+/* Inicio Empresas: un contenedor para el hero, la comparación y la escena. */
+body[data-current="C02"] #app .m5-c02 #m4-main {
+  display: grid;
+  gap: 40px;
+  width: min(calc(100% - 40px), 1360px);
+  max-width: none;
+  margin: 0 auto;
+  padding: 20px 0 40px !important;
+}
+body[data-current="C02"] #app .m5-c02 #m4-main > :is(section,div) {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  min-width: 0;
+}
+body[data-current="C02"] #app .m5-c02 #m4-main > :is(section,div) > .ux-wrap {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+body[data-current="C02"] #app .ux-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+body[data-current="C02"] #app :is(.ux-hero-actions,#condiciones,.r3-c02-end-actions) [data-cta-principal="cuentanos"] {
+  width: fit-content;
+  color: #161616 !important;
+  background: #f7be00 !important;
+  border: 1px solid #f7be00 !important;
+  box-shadow: none !important;
+}
+body[data-current="C02"] #app :is(.ux-hero-actions,#condiciones,.r3-c02-end-actions) [data-cta-principal="cuentanos"]:hover {
+  background: #eab300 !important;
+  border-color: #eab300 !important;
+}
+body[data-current="C02"] #app .ux-hero-actions .r5-btn-claro {
+  border: 1px solid #161616 !important;
+  background: #fff !important;
+  color: #161616 !important;
+}
+body[data-current="C02"] #app .r3-c02-end-actions {
+  display: flex;
+  justify-content: flex-start;
+  border: 0;
+  background: none;
+}
+body[data-current="C02"] #app .mc-compare-media {
+  display: block;
+}
+body[data-current="C02"] #app .cmp-home-maquina {
+  display: grid;
+  grid-template-rows: 112px auto minmax(38px,auto) 1fr auto;
+  gap: 8px;
+  height: auto;
+}
+body[data-current="C02"] #app .cmp-home-maquina img {
+  width: 100%;
+  height: 112px;
+  object-fit: contain;
+}
+body[data-current="C02"] #app .cmp-home-maquina :is(h4,p,dl) { margin: 0; }
+body[data-current="C02"] #app .cmp-home-maquina dl { display: grid; gap: 4px; }
+body[data-current="C02"] #app .cmp-home-maquina dl > div { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+body[data-current="C02"] #app .cmp-home-maquina dd { margin: 0; text-align: right; }
+body[data-current="C02"] #app #negocios #panel-biz {
+  display: block;
+  min-height: 0 !important;
+  background: none;
+  border-radius: 12px;
+}
+body[data-current="C02"] #app #negocios .mc-buyer-scene {
+  width: 100%;
+  height: clamp(168px,23vw,274px);
+  min-height: 0;
+  max-height: none;
+  border-radius: 12px;
+}
+body[data-current="C02"] #app #negocios .mc-buyer-scene .m5-film { min-height: 0; }
+body[data-current="C02"] #app .mc-home-recursos > h2 { margin: 0; }
+body[data-current="C02"] #app .mc-home-recursos > .ux-section,
+body[data-current="C02"] #app .mc-home-recursos > .r3-c02-product-pair { margin: 16px 0 0 !important; padding: 0 !important; }
+body[data-current="C02"] #app .mc-home-recursos .ux-head { display: none; }
+body[data-current="C02"] #app .mc-home-recursos .ux-wrap { max-width: none; padding: 0; }
+body[data-current="C02"] #app .mc-home-recursos details > summary { border-bottom: 1px solid #e6e6e6; }
+@media (min-width: 768px) {
+  body[data-current="C02"] #app .m5-c02 #m4-main { width: min(calc(100% - 80px),1360px); gap: 80px; padding-block: 32px 48px !important; }
+  body[data-current="C02"] #app .cmp-home-maquinas { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-inline: 0; }
+  body[data-current="C02"] #app .m5-c02 #m4-main > #negocios { margin: 0 !important; }
+  body[data-current="C02"] #app .mc-home-recursos { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; align-items: start; }
+  body[data-current="C02"] #app .mc-home-recursos > h2 { grid-column: 1 / -1; }
+  body[data-current="C02"] #app .mc-home-recursos > .r3-c02-product-pair { display: contents; }
+  body[data-current="C02"] #app .mc-home-recursos > .ux-section,
+  body[data-current="C02"] #app .mc-home-recursos :is(.r7-fold,.r3-services-fold,.cmp-plegado) { margin: 0 !important; }
+  body[data-current="C02"] #app #condiciones details.cmp-detalle-c { margin-top: 0 !important; }
+  body[data-current="C02"] #app #condiciones .cmp-inicio-cta { margin: 0 !important; }
+  body[data-current="C02"] #app #negocios .mc-buyer-scene { height: 220px; }
+  body[data-current="C02"] #app .m5-c02 .m5-foot { padding-block: 12px; }
+}
+@media (max-width: 767px) {
+  body[data-current="C02"] #app :is(.ux-hero-actions,#condiciones) [data-cta-principal="cuentanos"] { width: 100%; }
+  body[data-current="C02"] #app .m5-c02 #m4-main > .ux-hero .ux-hero-copy { padding-inline: 0 !important; }
+}
+body[data-current="C04"] #app .r4-diag .r5-single-question .m5-opts {
+  grid-template-columns: minmax(0,1fr) !important;
 }
