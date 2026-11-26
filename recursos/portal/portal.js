@@ -683,6 +683,7 @@
     }
     var x = contexto(s);
     if (st.dialogo && (x.c.contractSignedAt || !x.aceptada)) { st.dialogo = false; }
+    var desplazamiento = host.querySelector('#portal-tabs')?.scrollLeft || 0;
     host.innerHTML = '<div class="mp-portal" data-mp-portal data-vista="' + esc(st.tab) + '" data-comprador="' + esc(x.comp.id || '') + '">' +
       toastHTML() +
       cabecera(x) +
@@ -694,6 +695,15 @@
       nota() +
       dialogoHTML(x) +
       '</div>';
+    var tabs = host.querySelector('#portal-tabs');
+    var tabActiva = tabs.querySelector('[aria-selected="true"]');
+    if (tabActiva) {
+      tabs.scrollLeft = desplazamiento;
+      var ventana = tabs.getBoundingClientRect();
+      var botonActivo = tabActiva.getBoundingClientRect();
+      if (botonActivo.left < ventana.left + 4) tabs.scrollLeft += botonActivo.left - ventana.left - 4;
+      if (botonActivo.right > ventana.right - 16) tabs.scrollLeft += botonActivo.right - ventana.right + 16;
+    }
     var foco = st.foco;
     st.foco = null;
     if (st.dialogo) {
