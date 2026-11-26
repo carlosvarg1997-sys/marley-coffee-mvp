@@ -252,7 +252,7 @@ async function openClientAtC02(frame, waitUntil) {
       await frame.goto(local('index.html?test=sitio#C02'), { waitUntil });
       return;
     } catch (error) {
-      if (attempt === 2 || !String(error.message).includes('net::ERR_ABORTED')) throw error;
+      if (attempt === 2 || !/net::ERR_ABORTED|interrupted by another navigation/.test(String(error.message))) throw error;
     }
   }
 }

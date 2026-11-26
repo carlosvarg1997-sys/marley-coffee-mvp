@@ -3276,7 +3276,7 @@ body[data-current="C09"] .mcp-r3-records{scroll-margin-top:20px}
 .r3-next-step .r3-main{flex:0 0 auto}
 .r3-main{background:#f2cb00!important;border:1px solid #927a00!important;color:#161616!important;box-shadow:none!important;font-weight:800!important}
 body[data-current="C02"] .m5-btn:not(.r3-c02-main),body[data-current="C10"] .m5-btn:not(.r3-main),body[data-current="C11"] .m5-btn:not(.r3-main),body[data-current="C09"] .m5-btn:not(.r3-main){background:#fff!important;color:#172126!important;border:1px solid #7d878b!important;box-shadow:none!important}
-body[data-current="C02"] .m5-top button,body[data-current="C10"] .m5-top button{background:#fff!important;color:#172126!important;border:1px solid #7d878b!important;box-shadow:none!important}
+body[data-current="C02"] .m5-top button:not(.mc-ayuda-movil button),body[data-current="C10"] .m5-top button:not(.mc-ayuda-movil button){background:#fff!important;color:#172126!important;border:1px solid #7d878b!important;box-shadow:none!important}
 body[data-current="C09"] .r3-repeat-form .r3-main{background:#fff!important;color:#172126!important;border:1px solid #7d878b!important}
 body[data-current="C02"] .ux-hero-actions .r3-c02-main{background:#f2cb00!important;color:#161616!important}
 body[data-current="C04"] .m5-actions .m5-btn:not([data-a="next"]),body[data-current="C05"] .mcp-acc .m5-btn:not(.m5-btn--lg),body[data-current="C06"] .mcp-acc .m5-btn:not(.m5-btn--lg){background:#fff!important;color:#172126!important;border:1px solid #7d878b!important;box-shadow:none!important}
@@ -11180,17 +11180,18 @@ window.M4Journey = (() => {
     return changed;
   }
   function deliverOrder(s, c, order, at) {
-    if (order.receivedAt) return;
+    const yaEntregado = Boolean(order.receivedAt);
     order.waitPassed = true;
-    order.waitPassedAt ||= at;
-    order.receivedAt = at;
-    if (c.orders[0].id === order.id) order.installedAt = at;
+    order.waitPassedAt ||= order.receivedAt || at;
+    order.receivedAt ||= at;
+    if (c.orders[0].id === order.id) order.installedAt ||= order.receivedAt;
     order.status = order.installedAt ? 'Entregado e instalado' : 'Entregado';
     s.postventa ||= {};
     s.postventa.resenas ||= [];
     if (!s.postventa.resenas.some(r => r.pedidoId === order.id && r.canal === 'google')) {
-      s.postventa.resenas.push({ cuentaId: c.accountId, pedidoId: order.id, canal: 'google', estado: 'invitada', ts: at });
+      s.postventa.resenas.push({ cuentaId: c.accountId, pedidoId: order.id, canal: 'google', estado: 'invitada', ts: order.receivedAt });
     }
+    if (yaEntregado) return;
     pushMail(s, 'RECEP', 'Entrega registrada · ' + order.id, 'Registramos la entrega en la simulación. Ahora puedes contarnos cómo te fue.', { forOrder: order.id });
     record(s, 'order_received', order.status + ' (simulación)', { key: `cycle:${s.lead.id}:order_received:${order.id}`, order_id: order.id });
   }

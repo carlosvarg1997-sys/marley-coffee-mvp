@@ -183,12 +183,15 @@
   }
 
   function pedidoParaEncuesta(x) {
-    var pendientes = (x.c.orders || []).filter(p => {
+    var pedidos = x.c.orders || [];
+    var pendiente = pedidos.findLast(p => {
       if (!p.receivedAt) return false;
       var r = fichaPostventa(x.s, 'respuestas', p.id);
       return !r || r.nps === null && !(r.carita === 'no-contento' && fichaPostventa(x.s, 'ayudas', p.id));
     });
-    return pendientes.at(-1) || (x.p?.receivedAt ? x.p : null);
+    var seguimiento = pedidos.findLast(p => p.receivedAt && fichaPostventa(x.s, 'ayudas', p.id)?.estado === 'resuelta' &&
+      !fichaPostventa(x.s, 'respuestas', p.id)?.seguimientoAt);
+    return pendiente || seguimiento || (x.p?.receivedAt ? x.p : null);
   }
   function momento(x, pedidoId) { return x.c.orders?.[0]?.id === pedidoId ? 'primera' : 'recompra'; }
   function tarjetasCanales(conChecks, elegidos = []) {
@@ -234,7 +237,7 @@
       : r?.nps != null ? '<p role="status">Gracias por contarnos cómo te fue.</p>'
       : '<div class="mp-caritas">' + caras + '</div>';
     return '<div class="mp-satisfaccion mp-bloque" data-mp-satisfaccion="' + esc(p.id) + '">' +
-      '<h3>¿Cómo te fue con tu pedido?</h3>' + contenido +
+      '<h3>¿Cómo te fue con tu pedido?</h3>' + (p.id === x.p?.id ? '' : '<p class="mp-fino">Pedido ' + (x.c.orders.indexOf(p) + 1) + '</p>') + contenido +
       '<button type="button" class="mp-link" data-mp-postaccion="canal" data-canal="google" data-pedido="' + esc(p.id) +
       '">' + (r?.carita === 'no-contento' ? 'O deja tu reseña en Google' : 'Ver cómo dejar una reseña en Google') + '</button></div>';
   }
@@ -490,7 +493,7 @@
       avisosYErrores('pedido') +
       invitacion(x, pedidoParaEncuesta(x)) +
       cta +
-      (x.aceptada ? explicacionesPedido(x) : '') +
+      (x.aceptada || x.p ? explicacionesPedido(x) : '') +
       resumenPedido(x) +
       '<div class="mp-bloque" aria-labelledby="mp-h-avance"><h2 id="mp-h-avance" class="mp-h3">Cómo va tu pedido</h2>' +
       franja(x, av) +
