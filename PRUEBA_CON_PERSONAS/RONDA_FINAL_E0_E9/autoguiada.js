@@ -14,7 +14,6 @@
   };
   const ROLE_LABELS = { ventas:'Ventas', marketing:'Marketing', jefatura:'Jefatura' };
   const ROLE_CODES = { ventas:'I1', marketing:'I2', jefatura:'I3' };
-  const ROLE_TASKS = { ventas:6, marketing:4, jefatura:4 };
   const META_PROFILES = ['restaurante','cafeteria','panaderia','conveniencia'];
   const LINKEDIN_PROFILES = ['hotel','oficina','eventos'];
   const PATHS = new Set(['A','B-Meta','B-LinkedIn','B-Google','C']);
@@ -23,20 +22,19 @@
   const TASK_TITLES = {
     E0:'Empieza', E1:'Elige una alternativa', E2:'Conoce la propuesta', E3:'Contacto', E4:'Revisa la alternativa',
     E5:'Retoma tu decisión', E6:'Próximos pasos', E7:'Organiza el siguiente pedido', E8:'Busca ayuda', E9:'Recomienda',
-    'C-V1':'Origen del contacto','C-V2':'Calificación','C-V3':'Propuesta de prueba','C-V4':'Reposición',
-    'C-V5':'Cuenta en riesgo','C-V6':'Recomendación',
-    'C-M1':'Lead y origen','C-M2':'Contenido y campaña','C-M3':'Calificación','C-M4':'Permisos y seguimiento',
-    'C-J1':'Vista general','C-J2':'Propuesta y aprobación','C-J3':'Aprobación de referido','C-J4':'Recuperación y permisos'
+    'C-V1':'Contacto del traspaso','C-V2':'Propuesta','C-V3':'Recordatorio','C-V4':'Visita',
+    'C-M1':'Calificación y traspaso','C-M2':'Postventa','C-M3':'Reseña','C-M4':'Medios',
+    'C-J1':'Metas y NPS','C-J2':'Propuesta especial','C-J3':'Aprobación de referido'
   };
   const EXTERNAL_TASKS = [
     { id:'T1', origen:['E0','E1'], titulo:'Encuentra una solución para tu negocio', consigna:{
-      busqueda:'Busca una alternativa para tu negocio como lo harías normalmente y llega a una página que te interese.',
-      ad:'Explora la publicación como lo harías al buscar una alternativa y llega a una página que te interese.' } },
-    { id:'T2', origen:['E2','E3','E4'], titulo:'Revisa tu propuesta', consigna:'Revisa tu propuesta y explica qué máquina, qué productos y cuánto pagas.' },
-    { id:'T3', origen:['E6'], titulo:'Confirma y cuenta qué pasa después', consigna:'Confirma si quieres avanzar y cuenta qué pasa después.' },
-    { id:'T4', origen:['E5'], titulo:'Retoma tu decisión', consigna:'Retoma tu decisión desde donde quedaste.' },
-    { id:'T5', origen:['E7'], titulo:'Repite tu pedido', consigna:'Revisa tu entrega y repite el pedido desde el portal.' },
-    { id:'T6', origen:['E8','E9'], titulo:'Pide ayuda o recomienda a otro negocio', consigna:'Pide ayuda por un problema y, si quieres, recomienda a otro negocio.' }
+      busqueda:'Busca una máquina para tu negocio y abre el resultado de Marley Coffee Empresas. Pulsa «Arma tu propuesta» en la página de resultados de Marley o «Cuéntanos de tu negocio» en el inicio.',
+      ad:'Abre la publicación y pulsa «Arma tu propuesta». Completa el formulario y termina en «Continuar con el diagnóstico».' } },
+    { id:'T2', origen:['E2','E3','E4'], titulo:'Revisa tu propuesta', consigna:'Responde las preguntas o elige una máquina directamente. Revisa el resumen de tu pack y termina con «Aceptar mi pack».' },
+    { id:'T3', origen:['E6'], titulo:'Entra a tu portal', consigna:'Completa tus datos de contacto y decide sobre la sugerencia. En la confirmación pulsa «Ir a mi portal».' },
+    { id:'T4', origen:['E5'], titulo:'Firma en Mi pedido', consigna:'En tu portal abre «Mi pedido». Revisa el comodato y pulsa «Firmar contrato (simulación)» para retomar y dejar listo el pedido.' },
+    { id:'T5', origen:['E7'], titulo:'Repite tu pedido', consigna:'Revisa la entrega en «Mi pedido». Abre «Repetir pedido», revisa las cantidades y confirma la repetición.' },
+    { id:'T6', origen:['E8','E9'], titulo:'Pide ayuda o recomienda', consigna:'En el portal, abre «Ayuda y postventa», cuéntanos qué pasa y pulsa «Enviar». También puedes terminar enviando una recomendación desde «Recomendar».' }
   ];
   // Etapas del recorrido (12-nov): las preguntas van por lo que se está haciendo, no por pantalla.
   const STAGE_NAMES = { T1:'Buscar y considerar', T2:'Cotizar', T3:'Aceptar', T4:'Seguimiento', T5:'Recomprar', T6:'Ayuda y recomendación' };
@@ -46,9 +44,9 @@
     C12:'E7', C13:'E8', C14:'E8', C15:'E9' };
   const PORTAL_STAGE = { pedido:'E6', repetir:'E7', ayuda:'E8', recomendar:'E9' };
   const CRM_TASK = {
-    ventas: { R01:'C-V1', R02:'C-V1', R08:'C-V3', R10:'C-V4' },
-    marketing: { R11:'C-M1', R12:'C-M1', R06:'C-M1', R13:'C-M2', R16:'C-M4' },
-    jefatura: { R05:'C-J1', R06:'C-J1', R09:'C-J1', R07:'C-J2', R15:'C-J4' }
+    ventas: { R01:'C-V1', R02:'C-V1', R08:'C-V2', R10:'C-V3', R03:'C-V4' },
+    marketing: { R11:'C-M1', R12:'C-M1', R18:'C-M2', R19:'C-M3', R13:'C-M4' },
+    jefatura: { R05:'C-J1', R06:'C-J1', R09:'C-J1', R07:'C-J2' }
   };
 
   let bank = null;
@@ -668,7 +666,20 @@
     if(jump) {state.phase=jump;persist();renderJourney();}
     else if(state.taskIndex>=state.tareas.length) {
       state.phase='final';state.questionIndex=0;persist();
-      if(origen==='cta')replayCta(replay&&replay.isConnected?replay:ctaFor(task));
+      const cta = replay?.isConnected ? replay : ctaFor(task);
+      if(origen==='cta' && cta?.matches('[data-crm-agente-accion="enviar"]')) {
+        const win = iframeRef.contentWindow;
+        const terminar = () => {
+          clearTimeout(espera);
+          win.removeEventListener('marley:accion-completada', terminar);
+          renderQuestion('final');
+        };
+        const espera = setTimeout(terminar, 4000);
+        win.addEventListener('marley:accion-completada', terminar);
+        replayCta(cta);
+        return;
+      }
+      if(origen==='cta')replayCta(cta);
       renderQuestion('final');return;
     }
     else {state.phase='journey';enterTask();persist();renderJourney();focusFranja();}

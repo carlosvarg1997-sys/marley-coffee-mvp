@@ -486,77 +486,62 @@
       "ventas": [
         {
           "id": "C-V1",
-          "titulo": "Origen orgánico",
-          "texto": "Encuentra un prospecto que haya llegado desde una búsqueda y explica qué información te permite reconocer su origen."
+          "titulo": "Contacta un traspaso",
+          "texto": "En «Hoy», abre «Traspasos nuevos». Usa «Contactar» en el primer traspaso, revisa el borrador y pulsa «Enviar»."
         },
         {
           "id": "C-V2",
-          "titulo": "Aceptación humana",
-          "texto": "Revisa un contacto que Marketing haya considerado calificado. Decide si ya lo tomarías como oportunidad de ventas; si la pantalla te permite registrar esa decisión, hazlo y cuéntame qué revisaste."
+          "titulo": "Prepara una propuesta",
+          "texto": "En «Hoy», ve a «Propuestas por cerrar». Pulsa «Preparar propuesta» y revisa los productos y el total. Si eliges una condición especial, termina con «Enviar a aprobación». Si no, pulsa «Guardar propuesta»."
         },
         {
           "id": "C-V3",
-          "titulo": "Propuesta simulada",
-          "texto": "Prepara una propuesta de prueba para un negocio del listado. Deja identificados los datos que confirmarías antes de compartirla; no la envíes fuera del prototipo."
+          "titulo": "Envía el recordatorio",
+          "texto": "En «Hoy», ve a «Cuentas por reponer». Pulsa «Enviar recordatorio», revisa el mensaje y termina con «Enviar»."
         },
         {
           "id": "C-V4",
-          "titulo": "Reposición",
-          "texto": "Busca una cuenta que pueda necesitar una reposición. Revisa qué confirmarías antes de dejar la gestión preparada."
-        },
-        {
-          "id": "C-V5",
-          "titulo": "Cuenta en riesgo",
-          "texto": "Revisa una cuenta que haya reducido o pausado sus compras. Explica qué averiguarías antes de proponer un contacto."
-        },
-        {
-          "id": "C-V6",
-          "titulo": "Referido",
-          "texto": "Revisa una recomendación de otro negocio. Decide qué dato y permiso confirmarías antes de continuar."
+          "titulo": "Agenda una visita",
+          "texto": "En «Hoy», abre la cuenta de «Visitas por coordinar». Pulsa «Agendar visita», elige un horario y confirma con «Agendar visita»."
         }
       ],
       "marketing": [
         {
           "id": "C-M1",
-          "titulo": "Lead y origen",
-          "texto": "Encuentra un prospecto recién incorporado y explica cómo reconocerías de dónde llegó."
+          "titulo": "Pasa un lead a Ventas",
+          "texto": "En «Hoy», ve a «Leads por calificar» y pulsa «Revisar lead». Revisa su puntaje y el motivo. Pulsa «Pasar a Ventas» y termina con «Enviar»."
         },
         {
           "id": "C-M2",
-          "titulo": "Contenido y campaña",
-          "texto": "Revisa una pieza y un registro de campaña de ejemplo. Explica si puedes relacionar el contenido con el origen del contacto."
+          "titulo": "Responde a un detractor",
+          "texto": "En «Hoy», ve a «Detractores por resolver». Pulsa «Responder», revisa el mensaje de ayuda y termina con «Enviar»."
         },
         {
           "id": "C-M3",
-          "titulo": "Calificación MQL",
-          "texto": "Revisa un contacto y decide si hay información suficiente para considerarlo calificado por Marketing. Si la pantalla ofrece esa decisión, regístrala."
+          "titulo": "Pide una reseña",
+          "texto": "Abre «Recomendados» y busca la sección «Promotores». Pulsa «Pedir reseña», revisa el mensaje y termina con «Enviar»."
         },
         {
           "id": "C-M4",
-          "titulo": "Permisos y recuperación",
-          "texto": "Considera que un contacto pidió respuesta, pero no autorizó contenido promocional. Decide qué seguimiento sería apropiado y qué dejarías detenido."
+          "titulo": "Revisa un medio",
+          "texto": "En «Hoy», busca «Campañas y contenido» y pulsa «Ver medios». Elige una tarjeta, revisa dónde aparece y cuál es su indicador. Termina con «Registrar indicador revisado»."
         }
       ],
       "jefatura": [
         {
           "id": "C-J1",
-          "titulo": "Panel general",
-          "texto": "Revisa la vista general. Cuéntame qué decisión tomarías con la información disponible y qué dato te falta."
+          "titulo": "Decide a partir de las metas",
+          "texto": "En «Hoy», ve a «Metas y NPS». Revisa la meta y «Ver qué significa el NPS». Pulsa «Pedir un plan a Marketing», revisa el borrador y termina con «Enviar»."
         },
         {
           "id": "C-J2",
-          "titulo": "Propuesta y aprobación",
-          "texto": "Revisa una propuesta pendiente. Decide qué se puede aprobar o qué información pedirías antes de hacerlo."
+          "titulo": "Aprueba una propuesta",
+          "texto": "En «Hoy», abre «Propuestas» dentro de «Espera tu aprobación». Revisa la condición especial, pulsa «Aprobar» y termina con «Confirmar aprobación»."
         },
         {
           "id": "C-J3",
-          "titulo": "Aprobación de referido",
-          "texto": "Revisa una recomendación de cliente. Explica qué debería revisar una persona antes de aceptarla."
-        },
-        {
-          "id": "C-J4",
-          "titulo": "Recuperación y permisos",
-          "texto": "Revisa los seguimientos que el equipo dejó preparados. Decide qué acciones necesitan aprobación humana y cuáles deben respetar un permiso pendiente."
+          "titulo": "Aprueba un referido",
+          "texto": "Abre «Por aprobar» y busca el referido. Revisa su permiso, vínculo con el negocio y beneficio. Termina con «Confirmar aprobación»."
         }
       ]
     }

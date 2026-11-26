@@ -16,9 +16,9 @@ Usa un código por persona y los datos ficticios del kit. Antes de empezar, lee 
 |---|---|---|
 | C04 · Elegir máquina | «Quieres tener café en tu negocio. Averigua qué máquina te conviene y llega a una propuesta». | Encuentra cómo empezar, entiende qué eligió, puede seguir y reconoce por qué se le recomienda esa máquina. |
 | C09 · Mi portal | «Hiciste un pedido. Averigua en qué etapa está, confirma cuando llegue y encuentra dónde pedir ayuda y recomendar Marley». Si hay tiempo, simula un mes y pide reponer. | Distingue folio y estado, encuentra ayuda y recomendación sin indicaciones y entiende el siguiente paso. |
-| Ventas · Hoy | «Abre una cuenta que requiera atención y prepara una recomendación». | Cuenta los clics hasta encontrar «Recomendar» y comprueba qué quedó guardado. |
-| Marketing · Hoy | «Prepara un borrador para oficinas y revisa qué dice antes de confirmarlo». | Encuentra el borrador, reconoce el público y puede revisarlo antes de confirmar. |
-| Jefatura · Hoy | «Encuentra un referido por aprobar y revisa qué falta para decidir». | Encuentra la decisión, distingue un permiso pendiente y sabe dónde pedir datos. |
+| Ventas · Hoy | «Contacta el primer traspaso de Marketing. Revisa el borrador y pulsa Enviar». | Encuentra «Contactar» y ve el cambio a «Contactado». |
+| Marketing · Hoy | «Responde al primer detractor y comprueba qué pasa». | Encuentra «Responder», puede ajustar el borrador y ve el aviso de envío. |
+| Jefatura · Hoy | «Revisa la meta de NPS y pide un plan a Marketing». | Entiende el indicador y confirma el aviso a Marketing. |
 | C04 y C09 · Duda y pedido con el agente | «Pregúntale al asistente de Marley qué incluye el comodato. Después, en tu portal, pídele que repita tu último pedido.» | Encuentra el botón de ayuda, entiende la respuesta, confirma la repetición y ve que quedó como solicitud, sin cobro. |
 | C04 · Chat del comprador, pedido de llamada | «Pide que te llamen y responde lo que el asistente te pregunte: tu nombre, tu negocio, tu correo y los permisos. Si no quieres dar algún dato, elige «Prefiero no responder».» | Sigue las preguntas de a una, entiende qué permiso da, encuentra «Prefiero no responder» y sabe que el chat guarda solo lo que autorizó. |
 | Marketing · Hoy, con el agente | «Pregúntale al agente qué cotizó [el nombre de quien escribió en el chat], revisa lo que te muestra, pregúntale si cumple para MQL y pásalo a Ventas.» | Encuentra la barra «Pídele al agente», reconoce la cotización, los puntajes con su porqué, el origen «Chat del sitio» y la conversación; entiende si cumple MQL, aprueba el mensaje antes de enviarlo y ve el aviso que queda en Ventas. |
@@ -51,9 +51,20 @@ En el sitio, cada tarea de la prueba autoguiada se cierra con un CTA. Pulsarlo a
 | T1 | El primer CTA que lleva a «Cuéntanos de tu negocio» |
 | T2 | «Aceptar mi pack» |
 | T3 | «Ir a mi portal» |
-| T4 | «Retomar mi propuesta» o «Firmar contrato (simulación)» en el portal si ya aceptaste el pack |
+| T4 | «Firmar contrato (simulación)» en «Mi pedido» |
 | T5 | «Confirmar repetición» |
 | T6 | «Enviar» de Ayuda, o «Enviar recomendación» |
+| C-V1 | «Enviar» del agente tras pulsar «Contactar» en «Traspasos nuevos» |
+| C-V2 | «Guardar propuesta» o «Enviar a aprobación» si hay condición especial |
+| C-V3 | «Enviar» del agente tras pulsar «Enviar recordatorio» en «Cuentas por reponer» |
+| C-V4 | «Agendar visita» del agente tras elegir uno de los dos horarios |
+| C-M1 | «Enviar» del borrador de «Pasar a Ventas» en la ficha |
+| C-M2 | «Enviar» de la respuesta al detractor |
+| C-M3 | «Enviar» de «Pedir reseña» o «Pedir referido» en «Promotores» |
+| C-M4 | «Registrar indicador revisado» en la tarjeta del medio |
+| C-J1 | «Enviar» del borrador de «Pedir un plan a Marketing» |
+| C-J2 | «Confirmar aprobación» de la propuesta especial |
+| C-J3 | «Confirmar aprobación» del referido con permiso, vínculo y beneficio revisados |
 
 ## Cómo abrirla y guardar el informe
 

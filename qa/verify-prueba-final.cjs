@@ -58,14 +58,12 @@ async function guided(page, role, folder) {
     return estado?.tareas?.[estado.taskIndex]?.etapa || null;
   });
   assert.ok(enCurso, 'Debe haber una tarea en curso en la prueba');
-  // El CTA de cierre puede estar en otra pantalla del CRM (por ejemplo, la fila de un contacto de búsqueda en la cola de Ventas): se busca en las pantallas del rol.
-  const pantallasRol = { ventas: ['R01', 'R02'], marketing: ['R11', 'R12'], jefatura: ['R05'] }[role] || [];
-  const marco = await page.locator('.ag-journey-frame').elementHandle().then(h => h.contentFrame());
-  for (const ruta of pantallasRol) {
-    if (await inside.locator('[data-cierra-tarea="' + enCurso + '"]').first().isVisible().catch(() => false)) break;
-    await marco.evaluate((r) => window.MarleyApp.go(r, { evaluation: true }), ruta).catch(() => {});
-    await page.waitForTimeout(700);
+  if (role === 'ventas') await inside.locator('[data-crm-agente-tarea="contactar"]').first().click();
+  if (role === 'marketing') {
+    await inside.getByRole('button', {name:'Revisar lead', exact:true}).first().click();
+    await inside.locator('.crm2-actionbar [data-crm-agente-tarea="traspaso"]').click();
   }
+  if (role === 'jefatura') await inside.locator('[data-crm-agente-tarea="plan-marketing"]').click();
   const cierre = inside.locator('[data-cierra-tarea="' + enCurso + '"]').filter({ visible: true }).first();
   if (!(await cierre.waitFor({ state: 'visible', timeout: 8000 }).then(() => true, () => false))) {
     const visibles = await inside.locator('[data-cierra-tarea]').evaluateAll(els => els.map(el => el.getAttribute('data-cierra-tarea')));
@@ -213,31 +211,40 @@ async function saveEvaluation(page) {
 }
 
 async function runCustomerCtas(page, frame, folder) {
+  let clicks = 0;
+  let started = Date.now();
+  const click = async control => { clicks++; await control.click(); };
   const close = async (task, selector) => {
-    await frame.locator(selector || '[data-cierra-tarea="' + task + '"]').first().click();
+    await click(frame.locator(selector || '[data-cierra-tarea="' + task + '"]').first());
+    const elapsed = Date.now() - started;
+    assert.ok(clicks <= 4 && elapsed < 120000, `${task}: ${clicks} clics en ${elapsed} ms`);
     await blocked(page, folder, 'cta-' + task + '.png');
     const state = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), sessionKey);
     assert.equal(state.tareas[state.taskIndex].etapa, task);
     assert.equal(state.evaluando_origen, 'cta');
     await saveEvaluation(page);
+    console.log('Camino cliente', task, clicks + ' clics', Math.round(elapsed / 1000) + ' s');
+    clicks = 0;
+    started = Date.now();
   };
-  await frame.locator('[data-solucion-accion="ya-se-maquina"]').click();
-  await frame.locator('[data-maquina-id="bar"]').click();
+  await click(frame.locator('[data-solucion-accion="ya-se-maquina"]'));
+  await click(frame.locator('[data-maquina-id="bar"]'));
   await close('T2', '.cmp-cierre [data-cierra-tarea="T2"]');
   await frame.locator('#m4FName').fill('Ana Prueba');
   await frame.locator('#m4FEmail').fill('ana.prueba@example.test');
+  await frame.locator('#m4FComuna').selectOption('Las Condes');
   await frame.locator('#pack-contacto [name="consent"]').check();
-  await frame.locator('[data-pack-accion="confirmar-contacto"]').click();
-  await frame.locator('[data-cross="no-gracias"]').click();
+  await click(frame.locator('[data-pack-accion="confirmar-contacto"]'));
+  await click(frame.locator('[data-cross="no-gracias"]'));
   await close('T3');
-  await page.locator('#ag-salto [data-action="jump"]').click();
+  await click(page.locator('#ag-salto [data-action="jump"]'));
   await close('T4');
-  await page.locator('#ag-salto [data-action="jump"]').click();
+  await click(page.locator('#ag-salto [data-action="jump"]'));
   await frame.locator('#portal-franja [data-etapa="instalado"][aria-current="step"]').waitFor();
   await frame.locator('[data-mp-satisfaccion]').waitFor();
-  await frame.locator('[data-portal-accion="ir-repetir"]').first().click();
+  await click(frame.locator('[data-portal-accion="ir-repetir"]').first());
   await close('T5');
-  await frame.locator('#portal-tabs [data-portal-tab="ayuda"]').click();
+  await click(frame.locator('#portal-tabs [data-portal-tab="ayuda"]'));
   await frame.locator('#mp-form-ayuda select').selectOption({ index: 1 });
   await frame.locator('#mp-form-ayuda textarea').fill('La máquina de prueba necesita ayuda.');
   await close('T6', '#mp-panel-ayuda [data-cierra-tarea="T6"]');
@@ -341,7 +348,119 @@ async function crmGate(context, role, folder) {
     await menu.locator('[data-c2-go="' + routes[role] + '"]').click();
     await blocked(page, folder, '05-menu-crm-' + role + '.png');
     await saveEvaluation(page);
-    assert.equal(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).taskIndex, sessionKey), role === 'ventas' ? 2 : 1);
+    assert.equal(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).taskIndex, sessionKey), { ventas:1, marketing:3, jefatura:1 }[role]);
+  } finally { await page.close(); }
+}
+
+async function internalJourney(context, role, folder) {
+  const page = await context.newPage();
+  try {
+    await page.addInitScript(key => { if (location.pathname.endsWith('/prueba.html')) localStorage.removeItem(key); }, sessionKey);
+    const frame = await begin(page, role);
+    const choose = frame.locator('[data-c2="choose-role"][data-role="' + role + '"]');
+    const menu = frame.locator('.crm2-nav');
+    await choose.or(menu).first().waitFor();
+    if (await choose.isVisible()) await choose.click();
+    const menuHoy = { ventas:'R01', marketing:'R11', jefatura:'R05' }[role];
+    const section = title => frame.locator('.crm2-block').filter({has:frame.getByRole('heading', {name:title})}).first();
+    const opening = name => frame.locator('[data-crm-agente-tarea="' + name + '"]').first();
+    const draft = tipo => frame.locator('[data-crm-agente-borrador][data-tipo="' + tipo + '"]').last();
+    let clicks = 0;
+    let start = Date.now();
+    const click = async target => { clicks++; await target.first().click(); };
+    const check = async target => { clicks++; await target.first().check(); };
+    const select = async (target, index) => { clicks++; await target.selectOption({ index }); };
+    const send = tipo => draft(tipo).locator('[data-crm-agente-accion="enviar"]');
+    const hide = async () => {
+      const control = frame.getByRole('button',{name:'Ocultar la conversación'});
+      if (await control.isVisible()) await control.click();
+    };
+    const hoy = async () => {
+      await hide();
+      await menu.locator('[data-c2-go="' + menuHoy + '"]').click();
+      clicks = 0;
+      start = Date.now();
+    };
+    const close = async (task, button, beforeSave) => {
+      assert.equal(await button.first().getAttribute('data-cierra-tarea'), task);
+      await click(button);
+      const elapsed = Date.now() - start;
+      assert.ok(clicks <= 4, task + ' tomó ' + clicks + ' clics');
+      assert.ok(elapsed < 120000, task + ' tardó más de dos minutos');
+      await blocked(page, folder, /1$/.test(task) && folder.includes('chrome-') ? task + '.jpg' : null);
+      const current = await page.evaluate(key => {
+        const s = JSON.parse(localStorage.getItem(key));
+        return { task:s.tareas[s.taskIndex].etapa, origen:s.evaluando_origen };
+      }, sessionKey);
+      assert.deepEqual(current, { task, origen:'cta' });
+      await beforeSave?.();
+      await saveEvaluation(page);
+      console.log('Camino', role, task, clicks + ' clics', Math.round(elapsed / 1000) + ' s');
+      clicks = 0;
+      start = Date.now();
+    };
+    const enviado = tipo => frame.locator('[data-crm-agente-borrador][data-tipo="' + tipo + '"][data-estado="enviado"]').last().waitFor();
+    if (role === 'ventas') {
+      await click(section('Traspasos nuevos').locator('[data-crm-agente-tarea="contactar"]'));
+      await close('C-V1', send('contactar'));
+      await enviado('contactar');
+      assert.match(await section('Traspasos nuevos').innerText(), /Contactado hoy/);
+      await hoy();
+      await click(section('Propuestas por cerrar').getByRole('button', {name:'Preparar propuesta'}));
+      await select(frame.locator('[data-quote-excepcion]'), 1);
+      await close('C-V2', frame.getByRole('button', {name:'Enviar a aprobación'}));
+      await frame.getByRole('status').filter({hasText:'Enviado a Jefatura'}).first().waitFor();
+      await hoy();
+      await click(section('Cuentas por reponer').locator('[data-crm-agente-tarea="recordatorio"]'));
+      await close('C-V3', send('recordatorio'));
+      await enviado('recordatorio');
+      assert.match(await section('Cuentas por reponer').innerText(), /Recordatorio enviado/);
+      await hoy();
+      await click(section('Visitas por coordinar').locator('.crm2-row'));
+      await click(opening('visita'));
+      await draft('visita').waitFor();
+      assert.equal(await draft('visita').locator('[data-crm-agente-horario]').count(), 2);
+      await check(draft('visita').locator('[data-crm-agente-horario]'));
+      await close('C-V4', send('visita'));
+    } else if (role === 'marketing') {
+      await click(section(/Leads por calificar/).getByRole('button', {name:'Revisar lead'}));
+      await click(frame.locator('.crm2-actionbar [data-crm-agente-tarea="traspaso"]'));
+      await close('C-M1', send('traspaso'));
+      await enviado('traspaso');
+      await hoy();
+      await click(section(/Detractores por resolver/).locator('[data-crm-agente-tarea="detractor"]'));
+      await close('C-M2', send('detractor'));
+      await enviado('detractor');
+      assert.match(await section(/Detractores por resolver/).innerText(), /Respondido/);
+      await hoy();
+      await click(menu.locator('[data-c2-go="R19"]'));
+      await click(section('Promotores').locator('[data-crm-agente-tarea="resena"]'));
+      await close('C-M3', send('resena'));
+      await enviado('resena');
+      assert.match(await section('Promotores').innerText(), /Reseña pedida/);
+      await hoy();
+      await click(section('Campañas y contenido').getByRole('button',{name:'Ver medios'}));
+      const medio = frame.locator('.crm2-medio').first();
+      assert.match(await medio.innerText(), /Dónde:[\s\S]*Objetivo:[\s\S]*KPI:/);
+      await close('C-M4', medio.getByRole('button', {name:'Registrar indicador revisado'}));
+    } else {
+      await click(section('Metas y NPS').getByText('Ver qué significa el NPS', {exact:true}));
+      await click(opening('plan-marketing'));
+      await close('C-J1', send('plan-marketing'));
+      await enviado('plan-marketing');
+      await hoy();
+      await click(section('Espera tu aprobación').locator('[data-c2="review-approval"]').filter({hasText:'Propuestas'}));
+      await click(frame.locator('[data-approval]').filter({hasText:/condición especial|propuesta especial/i}).getByRole('button',{name:'Aprobar',exact:true}));
+      await close('C-J2', frame.locator('[data-crm-agente-accion="confirmar-aprobacion"][data-cierra-tarea="C-J2"]'));
+      await frame.getByText('Aprobación registrada', {exact:true}).last().waitFor();
+      await hoy();
+      await click(section('Espera tu aprobación').locator('[data-c2="review-approval"]').filter({hasText:'Referidos'}));
+      const ref = frame.locator('[data-approval]').filter({hasText:/Beneficio por referido/});
+      await click(ref.getByRole('button',{name:'Revisar datos del referido'}));
+      await click(frame.getByRole('button',{name:'Confirmar permiso, vínculo y beneficio'}));
+      await close('C-J3', frame.locator('[data-crm-agente-accion="confirmar-aprobacion"][data-cierra-tarea="C-J3"]'));
+    }
+    await page.locator('#question-next').waitFor();
   } finally { await page.close(); }
 }
 
@@ -371,6 +490,9 @@ async function main() {
       if (channel === 'chrome' && role === 'ventas') await moderated(await context.newPage(), folder);
       if (channel === 'chrome' && role === 'marketing') await acquisition(await context.newPage());
       await crmGate(context, role, folder);
+      const interno = await browser.newContext({ viewport, reducedMotion:'reduce', isMobile:viewport.width < 768, hasTouch:viewport.width < 768 });
+      try { await internalJourney(interno, role, folder); }
+      finally { await interno.close(); }
       const client = await browser.newContext({ viewport, reducedMotion: 'reduce', isMobile: viewport.width < 768, hasTouch: viewport.width < 768 });
       try { await journeyGate(client, folder); }
       finally { await client.close(); }
