@@ -694,7 +694,7 @@
       const quote = (crm.quotes || []).findLast(q => q.leadId === it.leadId && q.status === 'Esperando aprobación');
       if (!referido && quote) quote.status = 'Aprobada por Jefatura';
       if (referido) {
-        const ref = s.postventa?.referidos?.find(r => String(r.cuentaId) === String(it.cuenta));
+        const ref = s.postventa?.referidos?.find(r => it.referidoId ? r.id === it.referidoId : String(r.cuentaId) === String(it.cuenta));
         if (ref) ref.estado = 'aprobado';
       }
     });
@@ -1926,6 +1926,7 @@
     version: VERSION,
     procesar,
     sincronizar,
+    notificarDecision: (rol, texto, leadId) => mutarAgente(st => avisar(st, rol, texto, { tipo:'aprobacion', leadId })),
     rol: () => S.rol,
     panel: {
       abrirTarea: (tipo, id) => conEspera(() => abrirTarea(tipo, id)),

@@ -898,19 +898,12 @@
     const npsInfo = npsSummary();
     const digital = digitalReorderMetrics();
     const approvals = pendingApprovals();
-    const followups = managerFollowups();
     const quickReview = [
       ['Propuestas', approvals.find(item => item.tipo !== 'referido')],
       ['Referidos', approvals.find(item => item.tipo === 'referido')],
-      ['Recuperación', followups.find(item => item.status === 'Requiere aprobación')],
-      ['Permisos', followups.find(item => item.status === 'Bloqueado')],
     ].map(([label, item]) => {
       if (!item) return `<p class="crm2-queue-empty"><strong>${label}</strong> · Sin pendientes</p>`;
-      const fila = row(label, item.titulo || item.name, '', `data-c2="review-approval" data-id="${esc(item.id)}"`, badgeConEstado(item.id, item.status === 'Bloqueado' ? 'Falta permiso' : ''));
-      // La persona detrás de la solicitud: el agente arma el aviso o el correo con sus datos.
-      const persona = item.lead || item.account || leadById(item.leadId) || accountById(item.leadId) || accountById(item.cuenta);
-      if (!persona) return fila;
-      return filaCola(fila, persona, Boolean(item.account || accountById(item.cuenta)), 'jefatura', permission(persona));
+      return row(label, item.titulo || item.name, 'Revisar solicitud', `data-c2="review-approval" data-id="${esc(item.id)}"`, badgeConEstado(item.id, 'Por revisar'), item.tipo === 'referido' ? 'referido' : '');
     }).join('');
     const salesNote = goal > 0 ? `${Math.round(sales / goal * 100)} % de la meta ingresada (${money(goal)}); datos de prueba` : 'Meta comercial sin registrar · muestra financiera de prueba';
     const metricGrid = `<div class="crm2-metrics">${metric('Ventas netas · 90 días', money(sales), salesNote, true)}${metric('Leads calificados', String(qualified), `${sql} SQL aceptados · meta del informe: +25 % vs base; base sin registrar`)}${metric('Reposición digital', digital.value, digital.note)}${npsMetric(npsInfo)}</div>`;
@@ -965,7 +958,7 @@
       const b2bVerified = referralChecklist.b2b === true;
       const benefitVerified = referralChecklist.benefit === true && Boolean(item.benefit || item.beneficio);
       const canApprove = !isReferralApproval || (permissionVerified && b2bVerified && benefitVerified);
-      const decisionStatus = item.estado === 'pidio_info' ? 'Información solicitada a Ventas' : 'Pendiente de decisión';
+      const decisionStatus = item.estado === 'pidio_info' ? `Información solicitada a ${isReferralApproval ? 'Marketing' : 'Ventas'}` : 'Pendiente de decisión';
       const checks = isReferralApproval ? `<ul class="crm2-checklist"><li>${statusPill(`Permiso del referido · ${permissionVerified ? 'registrado' : 'por confirmar'}`,permissionVerified ? 'good' : 'wait')}</li><li>${statusPill(`Negocio B2B · ${b2bVerified ? 'registrado' : 'por confirmar'}`,b2bVerified ? 'good' : 'wait')}</li><li>${statusPill(`Beneficio · ${benefitVerified ? 'registrado' : 'por confirmar'}`,benefitVerified ? 'good' : 'wait')}</li></ul>${!canApprove ? '<p class="crm2-small-note">Aprobar queda bloqueado hasta registrar los tres datos. No se asigna un monto al beneficio.</p>' : ''}` : `<ul class="crm2-checklist"><li>${statusPill('Excepción y motivo · revisar','wait')}</li><li>${statusPill('Monto del catálogo · referencial','wait')}</li></ul>`;
       return `<article class="crm2-approval" data-approval="${esc(item.id)}"><div class="crm2-approval-head"><div><p class="crm2-eyebrow">${item.dataTest ? 'DATO DE PRUEBA' : 'SOLICITUD'} · ${esc(item.tipo || 'excepción')}</p><h3>${esc(item.titulo || 'Solicitud pendiente')}</h3><p>${esc(item.detalle || item.motivo || 'Motivo sin registro')}</p></div>${amount}</div>${statusPill(decisionStatus,item.estado === 'pidio_info' ? 'wait' : '')}${checks}<label class="crm2-note-field">Nota para Ventas<input type="text" data-approval-note="${esc(item.id)}" value="${esc(item.nota || '')}" placeholder="Escribe qué falta confirmar"></label><div class="crm2-row-actions">${primary('Aprobar','decide-approval',`data-id="${esc(item.id)}" data-decision="aprobada" ${canApprove ? '' : 'disabled title="Faltan datos verificables del referido"'}`)}${secondary('Pedir cambios','decide-approval',`data-id="${esc(item.id)}" data-decision="pidio_info"`)}${!canApprove && isReferralApproval ? secondary('Revisar datos del referido','review-referral-data',`data-id="${esc(item.id)}"`) : ''}${secondary('Rechazar','decide-approval',`data-id="${esc(item.id)}" data-decision="descartada"`)}</div></article>`;
     }).join('') : empty('No hay solicitudes pendientes','Las decisiones registradas quedan vinculadas a su propuesta o referido.');
@@ -1087,7 +1080,7 @@
     return tareas;
   }
   function agenteBotones(item, isAccount, role, perm) {
-    return agenteTareas(item, isAccount, role, perm).map(tarea => `<button type="button" class="crm2-btn crm2-btn--secondary" data-crm-agente-tarea="${tarea}" data-cuenta-id="${esc(item.id)}" data-crm-tipo="${isAccount ? 'cuenta' : 'lead'}">${esc(AGENTE_TXT[tarea])}</button>`).join('');
+    return agenteTareas(item, isAccount, role, perm).filter(tarea => !(tarea === 'visita' && isAccount && role === 'ventas')).map(tarea => `<button type="button" class="crm2-btn crm2-btn--secondary" data-crm-agente-tarea="${tarea}" data-cuenta-id="${esc(item.id)}" data-crm-tipo="${isAccount ? 'cuenta' : 'lead'}">${esc(AGENTE_TXT[tarea])}</button>`).join('');
   }
   // Acciones rápidas del agente en una fila de la cola: van fuera del botón de la fila (nada de botones anidados).
   function agenteAccionesFila(item, isAccount, role, perm, etiqueta) {
@@ -1132,7 +1125,7 @@
     // Solo aparece lo que el rol puede usar: «Preparar propuesta» y «Preparar reposición» son de Ventas (sus botones van en la barra).
     const actions = isAccount
       ? (role === 'ventas' ? '' : `<div class="crm2-detail-actions">${secondary('Agendar contacto', 'start-followup', `data-id="${esc(item.id)}"`)}</div>`) + agente
-      : (role === 'marketing' ? `<div class="crm2-detail-actions">${isMql(item) ? statusPill('MQL registrado','good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="mark-mql" data-id="${esc(item.id)}">Marcar como calificado (MQL)</button>`}${progressFor(item).estado ? statusPill(statusOfLead(item),progressFor(item).estado==='devuelto'?'blocked':'good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="pass-sales" data-id="${esc(item.id)}">Pasar a Ventas</button>`}</div>` : '') + agente;
+      : (role === 'marketing' ? `<div class="crm2-detail-actions">${isMql(item) ? statusPill('MQL registrado','good') : `<button class="crm2-btn crm2-btn--secondary" type="button" data-c2="mark-mql" data-id="${esc(item.id)}">Marcar como calificado (MQL)</button>`}${progressFor(item).estado ? statusPill(statusOfLead(item),progressFor(item).estado==='devuelto'?'blocked':'good') : ''}</div>` : '') + agente;
     const referralDataAction = !isAccount && isReferral(item) && role === 'ventas' ? `<div class="crm2-detail-actions">${secondary('Pedir datos a Marketing','request-referral-data',`data-id="${esc(item.id)}"`)}</div>` : '';
     const permissionControls = !isAccount && role === 'marketing' ? `<p class="crm2-small-note">Registra una preferencia solo después de verificar la elección explícita del contacto.</p>${secondary('Confirmar permiso promocional','permission-yes',`data-id="${esc(item.id)}"`)} ${secondary('Registrar sin permiso','permission-no',`data-id="${esc(item.id)}"`)}` : '';
     const canSchedule = role !== 'marketing' || perm.key === 'yes';
@@ -1153,11 +1146,11 @@
     if (!isAccount && role === 'ventas') {
       const reasonSelect = `<select class="crm2-action-select" data-return-reason="${esc(item.id)}" aria-label="Motivo de devolución"><option value="">Motivo para devolver</option><option>Falta volumen</option><option>No contesta</option><option>Cotiza a futuro</option><option>Falta presupuesto</option></select>`;
       const exceptionSelect = `<select class="crm2-action-select" data-approval-kind="${esc(item.id)}" aria-label="Tipo de excepción"><option value="">Tipo de excepción</option><option>Descuento fuera de lista</option><option>Comodato bajo volumen mínimo</option><option>Plazo o condición especial</option></select>`;
-      const more = `<details class="crm2-action-more"><summary>Más</summary><div class="crm2-action-more-menu"><label>Motivo para devolver${reasonSelect}</label>${secondary('Devolver a Marketing','return-lead',`data-id="${esc(item.id)}"`)}<label>Tipo de excepción${exceptionSelect}</label>${secondary('Enviar a aprobación','send-approval',`data-id="${esc(item.id)}"`)}</div></details>`;
+      const more = `<details class="crm2-action-more"><summary>Devolver o escalar</summary><div class="crm2-action-more-menu"><label>Motivo para devolver${reasonSelect}</label>${secondary('Devolver a Marketing','return-lead',`data-id="${esc(item.id)}"`)}<label>Tipo de excepción${exceptionSelect}</label>${secondary('Enviar a aprobación','send-approval',`data-id="${esc(item.id)}"`)}</div></details>`;
       actionbar = actionBar(`${primary('Preparar propuesta','quote',`data-id="${esc(item.id)}"`)}${secondary('Aceptar como SQL','accept-sql',`data-id="${esc(item.id)}" ${isMql(item) ? '' : 'disabled title="Marketing debe validar el MQL primero"'}`)}${more}`, true);
     } else if (isAccount && role === 'ventas') {
       const id = `data-id="${esc(item.id)}"`;
-      const more = `<details class="crm2-action-more"><summary>Más</summary><div class="crm2-action-more-menu">${secondary('Agendar contacto','start-followup',id)}${item.referral ? secondary('Revisar referido','open-referral',id) : ''}</div></details>`;
+      const more = `<details class="crm2-action-more"><summary>${item.referral ? 'Opciones de seguimiento y referido' : 'Opciones de seguimiento'}</summary><div class="crm2-action-more-menu">${secondary('Agendar contacto','start-followup',id)}${item.referral ? secondary('Revisar referido','open-referral',id) : ''}</div></details>`;
       // Recomendar es del programa de Marketing: Ventas prepara la reposición y cierra la cuenta.
       actionbar = actionBar(`${tareaBtn('visita',item.id,'Agendar visita')}${primary('Preparar reposición','open-reorder',id)}${more}`, true);
     } else if (!isAccount && role === 'marketing' && isMql(item) && !progressFor(item).estado) {
@@ -1421,14 +1414,15 @@
     // Pedir información y rechazar siguen directos; el aviso y la fila cambian igual.
     if (decision === 'aprobada' && window.MarleyCRMAgente?.panel?.aprobar) { window.MarleyCRMAgente.panel.aprobar(id); return; }
     const currentApproval = pendingApprovals().find(item => item.id === id);
+    if (!currentApproval) return;
+    const audience = currentApproval.tipo === 'referido' ? 'Marketing' : 'Ventas';
     if (decision === 'aprobada' && currentApproval?.tipo === 'referido') {
-      const referralAccount = accountById(currentApproval.cuenta);
       const checklist = currentApproval.checklist || {};
-      const verified = checklist.permission === true && permission(referralAccount).key === 'yes' && checklist.b2b === true && Boolean(referralAccount?.business) && checklist.benefit === true && Boolean(currentApproval.benefit || currentApproval.beneficio);
+      const verified = checklist.permission === true && checklist.b2b === true && checklist.benefit === true && Boolean(currentApproval.benefit || currentApproval.beneficio);
       if (!verified) { toast('Aprobación bloqueada','Confirma y registra permiso, vínculo B2B y beneficio antes de aprobar.'); return; }
     }
     const note = root()?.querySelector(`[data-approval-note="${CSS.escape(id)}"]`)?.value?.trim() || '';
-    if (decision === 'pidio_info' && !note) { toast('Falta una nota','Indica qué dato debe confirmar Ventas.'); root()?.querySelector(`[data-approval-note="${CSS.escape(id)}"]`)?.focus(); return; }
+    if (decision === 'pidio_info' && !note) { toast('Falta una nota',`Indica qué dato debe confirmar ${audience}.`); root()?.querySelector(`[data-approval-note="${CSS.escape(id)}"]`)?.focus(); return; }
     save((crm, st) => {
       st.jefeAprob = Array.isArray(st.jefeAprob) ? st.jefeAprob : [];
       let item = st.jefeAprob.find(entry => entry.id === id);
@@ -1452,31 +1446,15 @@
       crm.counters = crm.counters || {};
       crm.counters.aprobaciones = Number(crm.counters.aprobaciones || 0) + 1;
     });
-    toast(decision === 'aprobada' ? 'Aprobación registrada' : decision === 'pidio_info' ? 'Información solicitada' : 'Propuesta rechazada', 'La decisión queda en la ficha de Ventas.');
+    const title = decision === 'aprobada' ? 'Aprobación registrada' : decision === 'pidio_info' ? 'Información solicitada' : 'Solicitud rechazada';
+    window.MarleyCRMAgente?.notificarDecision?.(audience.toLowerCase(), `${title} · ${currentApproval.titulo}${note ? ` · ${note}` : ''}`, currentApproval.leadId || currentApproval.cuenta);
+    toast(title, `La decisión queda en la ficha y se avisa a ${audience}.`);
     render();
   }
   function withLead(id, callback) {
     const lead = leadById(id);
     if (!lead) { toast('Contacto no encontrado','Vuelve a la lista y selecciona un registro.'); return; }
     callback(lead);
-  }
-  function passToSales(id) {
-    withLead(id, lead => {
-      if (!isMql(lead)) { toast('Aún no se puede pasar','Revisa contacto, tipo de negocio, permiso y puntaje de interés.'); return; }
-      save((crm, st) => {
-        st.marketingPasos = st.marketingPasos || {};
-        const old = st.marketingPasos[id] || {};
-        st.marketingPasos[id] = Object.assign({}, old, { estado:'esperando', motivo:'MQL calificado', por:userFor('marketing'), at:now() });
-        crm.handoffs = crm.handoffs || {};
-        crm.handoffs[id] = { status:'esperando', reason:'MQL calificado', at:now() };
-        crm.rowState = crm.rowState || {};
-        crm.rowState[String(id)] = { tipo:'traspaso', texto:`Pasado a Ventas hoy ${horaCorta(now())}`, kind:'ok', at:now(), by:userFor(currentState().role) };
-        crm.counters = crm.counters || {};
-        crm.counters.traspasos = Number(crm.counters.traspasos || 0) + 1;
-      });
-      toast('Lead pasado a Ventas', 'Aparece en “Hoy” y en Contactos de Ventas.');
-      render();
-    });
   }
   function acceptSql(id) {
     withLead(id, lead => {
@@ -1685,7 +1663,6 @@
     if (action === 'open-account') { detailOpen(id,'account'); return; }
     if (action === 'toggle-referrals') { save(crm=>{crm.filters=crm.filters||{};crm.filters.referred=!crm.filters.referred;}); render(); return; }
     if (action === 'quote') { openQuoteDialog(id); return; }
-    if (action === 'pass-sales') { passToSales(id); return; }
     if (action === 'mark-mql') {
       withLead(id, lead => {
         if (!isMql(lead)) { toast('Falta información','Verifica el permiso, el negocio y el interés antes de marcar MQL.'); return; }

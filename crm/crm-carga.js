@@ -9,8 +9,8 @@
   window.__crmCarga = true;
   var RUTA_CRM = /^#R(?:0\d|1[0-9])(?:\?|$)/;
   var ARCHIVOS = [
-    ['css', 'crm/crm-agente.css'],
-    ['js', 'crm/crm-agente.js'],
+    ['css', 'crm/crm-agente.css?v=20261126ultima'],
+    ['js', 'crm/crm-agente.js?v=20261126ultima'],
     ['css', 'crm/crm-dashboard.css'],
     ['js', 'crm/crm-dashboard.js']
   ];

@@ -1012,9 +1012,16 @@
       c.referralContacto = v.contacto.slice(0, 120);
       c.referralPersonaAcepta = true;
       c.referralSentAt = window.M4.now();
-      escribirPostventa(s, 'referidos', c.orders?.at(-1)?.id || null, {
-        negocio: c.referralBusiness, contacto: c.referralContacto, permiso: true, estado: 'enviado'
+      var pedidoId = c.orders?.at(-1)?.id || null;
+      var referidoId = 'REF-' + c.accountId + '-' + c.referralSentAt;
+      escribirPostventa(s, 'referidos', pedidoId, {
+        id: referidoId, negocio: c.referralBusiness, contacto: c.referralContacto, permiso: true, estado: 'enviado'
       });
+      var beneficio = window.M4D.LM.LM7.gives;
+      (s.jefeAprob ||= []).push({ id: referidoId, referidoId, cuenta: c.accountId,
+        titulo: 'Beneficio por referido · ' + c.referralBusiness, tipo: 'referido', estado: 'pendiente',
+        motivo: 'Recomendación desde el portal', detalle: beneficio, beneficio,
+        checklist: { permission: true, b2b: true, benefit: true }, at: c.referralSentAt });
       evento(s, 'referral_sent', 'Recomendación enviada a revisión de Jefatura', { referred_business: c.referralBusiness, permission: true });
     });
     st.formularios.recomendar = {};

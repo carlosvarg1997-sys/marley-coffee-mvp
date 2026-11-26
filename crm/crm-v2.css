@@ -483,6 +483,8 @@ body.crm-v2-active .m7o-bar { display: none !important; }
 #crm-v2-root .crm2-main .a1crm-btn { min-height: 44px; }
 #crm-v2-root .crm2-fold a[data-c2-go] { display: inline-flex; align-items: center; }
 @media (max-width: 767px) {
+  #crm-v2-root .crm2-actionbar > .crm2-action-more { max-width: 37vw; }
+  #crm-v2-root .crm2-actionbar > .crm2-btn { min-width: 44px; }
   .crm2-actionbar [data-c2='recommend-account'] { flex: 0 1 auto; }
 }
 /* 17-nov (Claude): colores por flujo intactos; el tinte de Ventas y el amarillo suave se aclaran para que no se lean como crema (pedido de Carlitos) */
@@ -845,6 +847,9 @@ body:is([data-current^="R"]) #crm-v2-root :is(.crm2-metric > b,.crm2-team-grid a
   #crm-v2-root .crm2-content--hoy > section + section { margin-top: 0 !important; }
 }
 @media (max-width: 767px) {
+  #crm-v2-root .crm2-content--hoy > #crm-agente-barra { order: -1; }
+  #crm-v2-root .crm2-content--hoy > #crm-agente-chat { order: -3; }
+  #crm-v2-root .crm2-content--hoy > section + section { margin-top: 0 !important; }
   #crm-v2-root .crm2-qitem { grid-template-columns: minmax(0,1fr); padding: 8px 0; }
   #crm-v2-root .crm2-row { grid-template-columns: minmax(0,1fr); gap: 8px; }
   #crm-v2-root .crm2-row-side { justify-content: flex-start; }
