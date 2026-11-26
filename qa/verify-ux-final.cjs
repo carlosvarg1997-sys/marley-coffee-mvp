@@ -296,9 +296,12 @@ const leerCtas = (p) => p.evaluate(() => {
   return Object.entries(grupos).map(([id, els]) => {
     const ultimo = els[els.length - 1];
     const abajoUltimo = ultimo.getBoundingClientRect().bottom + scrollY;
-    const panel = ultimo.closest('.mp-panel')?.getBoundingClientRect();
-    const posicionUltimo = panel
-      ? (ultimo.getBoundingClientRect().top - panel.top) / panel.height
+    const panel = ultimo.closest('.mp-panel');
+    const rectPanel = panel?.getBoundingClientRect();
+    const cierre = ultimo.closest('.mp-cierre');
+    const cierreAlFinal = panel && cierre && [...panel.children].filter(F.vis).at(-1) === cierre;
+    const posicionUltimo = cierreAlFinal ? 1 : rectPanel
+      ? (ultimo.getBoundingClientRect().top - rectPanel.top) / rectPanel.height
       : (ultimo.getBoundingClientRect().top + scrollY) / docH;
     return {
       id,
@@ -714,6 +717,7 @@ async function p6Agente(s) {
   salida.push(sigue.respuesta ? ok('6.c', { respuesta: sigue.respuesta.slice(0, 120) }) : falla('6.c', 'mientras llega la persona el agente deja de responder'));
 
   salida.push(...await p6Crm(s));
+  await p.evaluate(() => window.M4.setRole(null));
   await irRuta(s, 'C09');
   await clic(p, '#portal-tabs [data-portal-tab="ayuda"]').catch(() => false);
   if (await p.locator('#mp-agente:not([open]) > summary').isVisible()) await p.locator('#mp-agente > summary').click();
@@ -731,7 +735,10 @@ async function p6Crm(s) {
   const p = s.page;
   if (!(await entrarCRM(s, 'ventas'))) return [pend('6.e', 'D', 'no aparece el ingreso de Ventas en R00')];
   await irRuta(s, 'R01');
-  await clic(p, '#crm-agente-chat .crm-agente-lanzador[aria-expanded="false"]').catch(() => false);
+  const entrada = p.locator('#crm-agente-barra #crm-agente-entrada');
+  await entrada.waitFor({ state: 'visible', timeout: 8000 });
+  await entrada.fill('¿Hay conversaciones en espera?');
+  await entrada.press('Enter');
   const espera = await esperarVisible(p, '[data-crm-espera]', null, 6000);
   if (!espera.length) return [pend('6.e', 'D', 'en Ventas no aparece la conversación en espera ([data-crm-espera])')];
   const resumen = await p.evaluate(() => window.__F.norm(document.querySelector('[data-crm-espera]')?.innerText || ''));
@@ -1105,14 +1112,14 @@ async function recorrer(s, tipo, { hasta = 'portal', hooks = {} } = {}) {
     await paso('maquinas');
     s.maquinaId = await p.evaluate((i) => document.querySelectorAll('[data-maquina-id]')[i]?.dataset.maquinaId || '', tarjetas[0].i);
     await clic(p, '[data-maquina-id]').catch(() => false);
-    await paso('maquina');
-    if (hasta === 'maquina') return res;
     const pack = await esperarVisible(p, '#pack-resumen', null, 10000);
     if (!pack.length) {
       const cuestionario = await esperarVisible(p, 'fieldset, [data-solucion-pregunta], [data-motor-pregunta]', null, 500);
       if (cuestionario.length) return parar('B1', 'al elegir la máquina sigue el cuestionario en vez de ir al pack', '3.b', 'falla');
       return parar('B1', 'al elegir la máquina no aparece el pack (#pack-resumen)', '4.a');
     }
+    await paso('maquina');
+    if (hasta === 'maquina') return res;
     await paso('pack');
     if (hasta === 'pack') return res;
     if (!(await clic(p, '[data-pack-accion="aceptar"]').catch(() => false))) return parar('B1', 'falta «Aceptar mi pack» ([data-pack-accion="aceptar"])', '4.c');
@@ -1606,7 +1613,8 @@ async function main() {
   }
   const combos = [];
   for (const nav of navegadores) {
-    for (const [w, h] of (TAMANOS[nav] || [])) {
+    const tamanos = [...(TAMANOS[nav] || [])].sort(([a], [b]) => Number(a >= 768) - Number(b >= 768));
+    for (const [w, h] of tamanos) {
       if (tamanosFiltro && !tamanosFiltro.split(',').includes(`${w}x${h}`)) continue;
       combos.push({ navegador: nav, w, h });
     }

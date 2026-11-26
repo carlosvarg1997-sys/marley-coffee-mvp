@@ -6,8 +6,7 @@ async function completeDiagnostic(page, { business = 'Restaurante', commune = 'L
     if (await page.evaluate(() => document.body.dataset.current !== 'C04')) return;
     await form.waitFor({ state: 'visible' });
     const step = await form.locator('.r5-q-progress > span').first().innerText();
-    const next = form.locator('[data-r4-next]:visible');
-    const action = await next.innerText();
+    const action = await form.locator('[data-r4-next]').innerText();
     const options = form.locator('[data-a="answer"]');
     const key = await options.first().getAttribute('data-k', { timeout: 500 }).catch(() => null);
     if (key && key === stopAt) return;
@@ -27,6 +26,13 @@ async function completeDiagnostic(page, { business = 'Restaurante', commune = 'L
       if (!await email.inputValue()) await email.fill('camila.rojas@example.com');
       await form.locator('[name="consent"]').check();
     }
+    if (await page.evaluate(() => document.body.dataset.current !== 'C04')) return;
+    // En celular se usa la acción dentro de la vista. En escritorio queda la del formulario.
+    const dock = page.locator('.r5-mobile-final-action:not(.is-inline-visible) [data-r4-next]:visible');
+    const next = await dock.evaluateAll(elements => elements.some(element => {
+      const r = element.getBoundingClientRect();
+      return r.top >= 0 && r.bottom <= innerHeight;
+    })) ? dock : form.locator('[data-r4-next]:visible');
     await next.click();
     if (!key && !isCommune) {
       await page.waitForFunction(() => document.body.dataset.current !== 'C04');

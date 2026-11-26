@@ -215,8 +215,9 @@ body[data-current] #app :is(.mc-price-value,.mp-prod-precio,.mp-fila-precio,.mp-
 }
 #app :is(.mp-chip,.m5-buyer-group .m5-tab)[aria-pressed="true"] {
   border-color: var(--mc-ink);
-  background: #fff4d1;
+  background: rgb(247 190 0 / 68%);
   color: var(--mc-ink);
+  box-shadow: inset 0 0 0 1px var(--mc-ink);
 }
 #app :is(.mp-chip,.m5-buyer-group .m5-tab)[aria-pressed="true"]::before { content: "✓"; }
 #app :is(.mp-etapa,.mp-prod,.mp-linea,.mp-agente-resumen,.mp-maquina) {
@@ -341,10 +342,11 @@ body[data-current] #app .r3-step-guide li.is-current { box-shadow: inset 0 -3px 
 body[data-current] #app .r3-step-guide li > span {
   display: grid;
   place-items: center;
-  flex: 0 0 20px;
-  width: 20px !important;
-  height: 20px !important;
-  padding: 0 !important;
+  box-sizing: border-box;
+  flex: 0 0 28px;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 8px !important;
 }
 @media (max-width: 767px) {
   #app #negocios .m5-buyer-groups button { min-height: 44px !important; }
@@ -470,7 +472,7 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
   font-size: var(--mc-copy-size);
   line-height: var(--mc-copy-leading);
 }
-#app :is(.mc-btn,.mp-btn,[data-cta-principal="cuentanos"],[data-r4-next],[data-cta-principal="packs"]) {
+#app :is(.mc-btn,.mp-btn,[data-r4-next],[data-cta-principal="cuentanos"],[data-cta-principal="packs"],[data-cta-principal="guardar-avance"],[data-cta-principal="caso-comercial"]) {
   min-height: var(--mc-action-height) !important;
   padding: 8px 20px;
   border-radius: var(--mc-action-radius) !important;
@@ -497,6 +499,14 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
 }
 #app :is(.mp-etapa,.mp-linea) { min-height: 48px; }
 #app .mp-tab { font-size: 16px; line-height: 1.375; }
+#app .m8-email-domains button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  font-size: 14px;
+  white-space: nowrap;
+}
 #app .r4-diag .cmp-salida {
   align-items: center;
   gap: 4px 12px;
@@ -508,6 +518,7 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
   min-height: 44px !important;
   padding: 4px 0;
   border: 0 !important;
+  background: transparent !important;
   text-align: left;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -530,11 +541,15 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
   body[data-current="C02"] #app #m4-main { padding-block-end: 24px !important; }
   #app :is(.cmp-cierre,.mp-cierre) { min-height: 136px; padding: 24px 40px; }
   #app .cmp-confirm > .cmp-wrap { padding: 40px; }
-  #app #mp-panel-repetir :is(.mp-sugerencias,.mp-tarjeta) { margin-top: 24px; padding-block: 12px; }
+  #app #mp-panel-repetir:has(#mp-form-repetir) :is(.mp-sugerencias,.mp-tarjeta) { margin-top: 24px; padding-block: 12px; }
   #app #mp-panel-repetir .mp-cierre { margin-bottom: 16px; }
 }
 @media (max-width: 767px) {
   #app :is(.cmp-wrap,.mp-portal):not(.cmp-confirm > .cmp-wrap) { padding-inline: 4px; }
+  #app [data-cta-principal="caso-comercial"] { width: 100%; justify-content: center; }
+  body[data-current="C10"] #app .r5-barra { gap: 8px; padding: 8px !important; }
+  body[data-current="C10"] #app .r5-barra-res { flex-basis: 100%; padding-block: 4px; }
+  body[data-current="C10"] #app .r5-barra #m9-continue { min-height: var(--mc-action-height); }
   #app #mp-panel-repetir :is(.mp-sugerencias,.mp-tarjeta) { padding-block: 12px; }
   #app #mp-panel-repetir .mp-cierre { margin-bottom: 16px; }
   #app #mp-form-repetir .mp-linea { grid-template-columns: 40px minmax(0,1fr) 64px; column-gap: 8px; }
@@ -567,5 +582,5 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
   body[data-current="C04"] #app :is(button, input, select, textarea, a) { scroll-margin-bottom: 76px; }
 }
 @media (max-width: 374px) {
-  body[data-current="C02"] #app #negocios { margin-top: 32px !important; }
+  body[data-current="C02"] #app .m5-foot { padding-block: 12px !important; }
 }

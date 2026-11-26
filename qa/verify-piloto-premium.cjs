@@ -164,9 +164,14 @@ async function crm(page) {
     await go(page, 'R05');
   }
   await go(page, 'R11');
+  const campaignFold = 'details:has([data-crm2-draft-segment]) > summary';
+  if (await page.locator(campaignFold).count()) {
+    await click(page, 'R11', campaignFold, () => open(page, '[data-crm2-draft-segment]'));
+  }
+  await go(page, 'R13');
   await page.locator('[data-crm2-draft-segment]').selectOption('OCS');
-  await click(page, 'R11', '[data-c2="generate-marketing-draft"]', () => text(page, '[data-crm2-draft-preview]', /Borrador creado[\s\S]*puntos de café[\s\S]*para oficinas/i));
-  await click(page, 'R11', '[data-c2="confirm-marketing-draft"]', () => text(page, '[data-crm2-draft-preview]', /Borrador confirmado/));
+  await click(page, 'R13', '[data-c2="generate-marketing-draft"]', () => text(page, '[data-crm2-draft-preview]', /Borrador creado[\s\S]*puntos de café[\s\S]*para oficinas/i));
+  await click(page, 'R13', '[data-c2="confirm-marketing-draft"]', () => text(page, '[data-crm2-draft-preview]', /Borrador confirmado/));
   for (const [route, selector] of Object.entries(firstCrmAction)) {
     if (route === 'R04') continue;
     await go(page, route);

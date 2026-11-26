@@ -277,6 +277,10 @@ body.autoguiada-body {
   .ag-eval-body,.ag-eval-foot { padding-inline: var(--mc-gutter); }
   .ag-eval-foot .ag-btn { width: 100%; }
 }
+@media (min-width: 360px) and (max-width: 599px) {
+  .ag-result-options { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .ag-result-options label { padding-inline: 8px; font-size: 14px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .ag-btn,.ag-progress span { transition: none; }
 }
