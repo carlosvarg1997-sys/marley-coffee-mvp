@@ -69,15 +69,17 @@ async function buyer(page) {
   await page.keyboard.press('Escape');
   if (!await page.locator('.b2c-business-link:visible').count()) await click(page, 'C01', '.b2c-menu-details > summary', () => open(page, '.b2c-business-link:visible'));
   await click(page, 'C01', '.b2c-business-link:visible', () => screen(page, 'C02'));
-  // El camino a «Cuéntanos de tu negocio» es el CTA T1 de la sección «Así funciona» (ya no está en el hero de C02).
+  // El CTA T1 se ofrece antes y después de la comparación de máquinas.
   await click(page, 'C02', '[data-cierra-tarea="T1"]', () => screen(page, 'C04'));
   await click(page, 'C04', '#r4Datos [data-r4-next]:visible', () => text(page, '#r4Datos .r4-msg', /Elige el tipo de negocio/));
   await click(page, 'C04', '#r4Datos [data-v="Hotel"]', () => page.locator('#r4Datos [data-v="Hotel"][aria-pressed="true"]').waitFor());
   await completeDiagnostic(page, { business: 'Hotel' });
   await screen(page, 'C05');
-  await text(page, '.premium-quote-total', /Total neto referencial\s*\$\s*[\d.]+\s*\+ IVA/);
+  await text(page, '.premium-quote-total', /Total neto referencial\s*\$\s*[\d.]+\s*\+ IVA/i);
   await text(page, '.cmp-maquina .cmp-motivo', /\S/);
-  await click(page, 'C05', '[data-m7-open="ayuda"]', () => open(page, '#m7-title, #agente-panel:not([hidden])'));
+  await page.locator('.cmp-cambios > details > summary').click();
+  await page.locator('.cmp-cambios-lista > details > summary').click();
+  await click(page, 'C05', '.cmp-cambios [data-m7-open="ayuda"]', () => open(page, '#m7-title, #agente-panel:not([hidden])'));
   await page.keyboard.press('Escape');
   await click(page, 'C05', '[data-pack-accion="ver-productos"]', () => open(page, '#pack-productos .cmp-deck'));
   assert.equal(await page.locator('#pack-resumen [data-pack-total]').getAttribute('data-pack-total'),

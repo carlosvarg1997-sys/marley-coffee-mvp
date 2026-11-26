@@ -488,6 +488,9 @@ async function elegirRol(page, rol, log) {
   const ingreso = await esperarControl(page, `[data-c2="choose-role"][data-role="${rol}"]`, 8000, `el ingreso de ${rol} en R00`);
   await ingreso.locator.click({ timeout: 5000 });
   await page.waitForFunction((h) => location.hash === h, `#${HOME[rol]}`, { timeout: 8000 });
+  await page.locator('#crm-agente-barra').first().waitFor({ state: 'attached', timeout: 8000 });
+  const control = page.locator('#crm-agente-controles:not([open]) > summary');
+  if (await control.isVisible()) await control.click();
   await page.locator('#crm-agente-barra').first().waitFor({ state: 'visible', timeout: 8000 });
   await sinDesborde(page, `CRM · ${rol}`);
   paso(log, `Entra como ${rol} y ve la barra «Pídele al agente» en su Hoy`);
@@ -753,6 +756,9 @@ async function flujoVentas(page, size, log) {
   const ver = (await controlVisible(page, `${SEL_AVISO} [data-crm-agente-accion="ver-aviso"]`)) || aviso;
   await clicConRespuesta(page, ver.locator, 'Ver aviso de Ventas', log);
   await irA(page, 'R01');
+  await page.locator('#crm-agente-barra').first().waitFor({ state: 'attached', timeout: 8000 });
+  const control = page.locator('#crm-agente-controles:not([open]) > summary');
+  if (await control.isVisible()) await control.click();
   await page.locator('#crm-agente-barra').first().waitFor({ state: 'visible', timeout: 8000 });
   await preguntarCrm(page, 'Resume la cuenta', [/resum|cuenta/i, new RegExp(`${log.lead ? log.lead.nombre : 'Fernanda Rojas'}|Hotel`, 'i')], 'resumen de la cuenta');
   paso(log, 'Ventas pide «resume la cuenta»');

@@ -133,9 +133,9 @@ async function checkRouteViews(browser) {
         assert.ok(metrics.rootVisible, `${routeKey} ${size.name}: CRM no visible`);
         assert.equal(metrics.horizontalOverflow, false, `${routeKey} ${size.name}: overflow horizontal (${metrics.scrollWidth}/${metrics.width})`);
         assert.ok(metrics.majorGroups <= 3, `${routeKey} ${size.name}: ${metrics.majorGroups} grupos visibles`);
-        assert.match(metrics.bodyFont, /Pressura/i, `${routeKey} ${size.name}: texto sin Pressura`);
+        assert.match(metrics.bodyFont, /Fabriga.*sans-serif/i, `${routeKey} ${size.name}: falta la familia proporcional de lectura`);
         assert.match(metrics.titleFont, /Festivo/i, `${routeKey} ${size.name}: título sin Festivo (${metrics.titleFont || 'sin font-family'})`);
-        assert.equal(metrics.yellow.toLowerCase(), '#f3c900', `${routeKey}: token amarillo distinto`);
+        assert.equal(metrics.yellow.toLowerCase(), '#f7be00', `${routeKey}: token amarillo distinto`);
         assert.equal(metrics.fontLoaded.festivo, true, `${routeKey} ${size.name}: Festivo no cargó`);
         assert.equal(metrics.fontLoaded.pressura, true, `${routeKey} ${size.name}: Pressura no cargó`);
         assert.equal(metrics.actionbarOverlap, false, `${routeKey} ${size.name}: la barra fija invade el menú lateral`);
