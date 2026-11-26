@@ -144,6 +144,7 @@ body[data-current] #app :is(.mc-price-value,.mp-prod-precio,.mp-fila-precio,.mp-
   height: auto;
   aspect-ratio: 1;
 }
+#app .cmp-minis img[data-zoom] { width: 44px; padding: 1px; }
 #app .cmp-wrap { gap: 24px; }
 #app #pack-resumen { gap: 16px; }
 #app .cmp-wrap .cmp-eyebrow { color: var(--mc-muted); font-size: 12px; }
@@ -346,6 +347,7 @@ body[data-current] #app .r3-step-guide li > span {
   padding: 0 !important;
 }
 @media (max-width: 767px) {
+  #app #negocios .m5-buyer-groups button { min-height: 44px !important; }
   body[data-current] #app .r3-step-guide li { flex-direction: column; gap: 3px; }
 }
 
@@ -445,6 +447,7 @@ html body[data-current="C02"] #app .ux-hero-copy h1 {
 }
 body[data-current="C02"] #app .ux-hero-copy > p { font-size: 16px; line-height: var(--mc-copy-leading); }
 #app :is(.cmp-wrap,.mp-portal) {
+  box-sizing: border-box;
   width: min(calc(100% - var(--mc-gutter) * 2),var(--mc-wrap));
   max-width: var(--mc-wrap);
   margin-inline: auto;
@@ -509,7 +512,7 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-#app .r4-diag .cmp-salida + .r5-single-question { margin-top: 16px; }
+#app .r4-diag .cmp-salida + .r5-single-question { margin-top: 24px; }
 #app .cmp-confirm > .cmp-wrap {
   padding: 24px;
   border-radius: var(--mc-panel-radius);
@@ -531,6 +534,11 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
   #app #mp-panel-repetir .mp-cierre { margin-bottom: 16px; }
 }
 @media (max-width: 767px) {
+  #app :is(.cmp-wrap,.mp-portal):not(.cmp-confirm > .cmp-wrap) { padding-inline: 4px; }
+  #app #mp-panel-repetir :is(.mp-sugerencias,.mp-tarjeta) { padding-block: 12px; }
+  #app #mp-panel-repetir .mp-cierre { margin-bottom: 16px; }
+  #app #mp-form-repetir .mp-linea { grid-template-columns: 40px minmax(0,1fr) 64px; column-gap: 8px; }
+  #app #mp-form-repetir .mp-cant input { width: 100%; }
   body[data-current="C04"] #app .r4-diag .r5-single-question .m5-opts {
     grid-template-columns: minmax(0,1fr) !important;
     gap: 8px !important;
@@ -556,4 +564,8 @@ body[data-current="C04"] #app .r5-single-question .m5-qfield-h :is(h2,h3) {
     background: white;
   }
   body[data-current="C04"] #app { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  body[data-current="C04"] #app :is(button, input, select, textarea, a) { scroll-margin-bottom: 76px; }
+}
+@media (max-width: 374px) {
+  body[data-current="C02"] #app #negocios { margin-top: 32px !important; }
 }

@@ -1620,14 +1620,41 @@ async function main() {
   const tablaTipos = [];
   const aireTodos = [];
   const erroresGlobales = [];
+  const terminadas = [];
+  const incompletas = [];
   const inicio = Date.now();
+  fs.mkdirSync(EVIDENCIA, { recursive: true });
+  const archivo = path.join(EVIDENCIA, 'informe-ux-final.json');
+  const cuenta = (estado) => resultados.filter((r) => r.estado === estado).length;
+  const guardar = (fin) => {
+    const informe = {
+      encargo: 'Mejoras finales del prototipo Marley Coffee Empresas (26-nov-2026)',
+      base,
+      fecha: new Date().toISOString(),
+      segundos: Math.round((Date.now() - inicio) / 1000),
+      estricto,
+      fin,
+      combos: combos.map((c) => `${c.navegador} ${c.w}x${c.h}`),
+      terminadas,
+      incompletas,
+      resumen: { PASS: cuenta('PASS'), FALLA: cuenta('FALLA'), PENDIENTE: cuenta('PENDIENTE') },
+      resultados,
+      tablaTipos,
+      aire: aireTodos,
+      errores: erroresGlobales,
+    };
+    fs.writeFileSync(archivo, JSON.stringify(informe, null, 2) + '\n');
+    return informe;
+  };
 
   const clearEnCodigo = escanearClear();
   if (clearEnCodigo.length) erroresGlobales.push({ tipo: 'localStorage.clear en el código', detalle: clearEnCodigo.join(', ') });
 
   await correrPool(combos, 1, async (combo) => {
-    const browser = await lanzar(combo);
+    const etiqueta = `${combo.navegador} ${combo.w}x${combo.h}`;
+    let browser;
     try {
+      browser = await lanzar(combo);
       const r = await corrida({ ...combo, browser, base }, selecciona);
       const porId = consolidar(r.partes);
       for (const x of porId) {
@@ -1644,31 +1671,19 @@ async function main() {
       }
       if (r.tabla) tablaTipos.push({ navegador: combo.navegador, tamano: `${combo.w}x${combo.h}`, filas: r.tabla });
       for (const e of r.erroresTodos) erroresGlobales.push({ navegador: combo.navegador, tamano: `${combo.w}x${combo.h}`, ...e });
+      terminadas.push(etiqueta);
+    } catch (error) {
+      incompletas.push({ combo: etiqueta, detalle: String(error.message).split('\n')[0] });
     } finally {
-      await browser.close().catch(() => {});
+      if (browser) await browser.close().catch(() => {});
     }
-    process.stderr.write(`  listo ${combo.navegador} ${combo.w}x${combo.h}\n`);
+    guardar(false);
+    process.stderr.write(`  ${terminadas.includes(etiqueta) ? 'listo' : 'incompleto'} ${etiqueta}\n`);
   });
 
   if (servidor) servidor.close();
 
-  const cuenta = (estado) => resultados.filter((r) => r.estado === estado).length;
-  const informe = {
-    encargo: 'Mejoras finales del prototipo Marley Coffee Empresas (25-nov-2026) · subagente F, pruebas automáticas',
-    base,
-    fecha: new Date().toISOString(),
-    segundos: Math.round((Date.now() - inicio) / 1000),
-    estricto,
-    combos: combos.map((c) => `${c.navegador} ${c.w}x${c.h}`),
-    resumen: { PASS: cuenta('PASS'), FALLA: cuenta('FALLA'), PENDIENTE: cuenta('PENDIENTE') },
-    resultados,
-    tablaTipos,
-    aire: aireTodos,
-    errores: erroresGlobales,
-  };
-  fs.mkdirSync(EVIDENCIA, { recursive: true });
-  const archivo = path.join(EVIDENCIA, 'informe-ux-final.json');
-  fs.writeFileSync(archivo, JSON.stringify(informe, null, 2) + '\n');
+  const informe = guardar(true);
 
   // Resumen en pantalla: por comprobación, con los tamaños donde falla o queda pendiente.
   const ids = [...new Set(resultados.map((r) => r.id))].sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
@@ -1685,7 +1700,7 @@ async function main() {
   if (erroresGlobales.length) process.stdout.write(`Errores de consola, red, llamadas externas o localStorage.clear: ${erroresGlobales.length}\n`);
   process.stdout.write(`Resumen: PASS ${informe.resumen.PASS} · FALLA ${informe.resumen.FALLA} · PENDIENTE ${informe.resumen.PENDIENTE} (${informe.segundos} s)\n`);
   process.stdout.write(`Informe: ${archivo}\n`);
-  const fallos = informe.resumen.FALLA + (estricto ? informe.resumen.PENDIENTE : 0);
+  const fallos = incompletas.length + informe.resumen.FALLA + (estricto ? informe.resumen.PENDIENTE : 0);
   process.exitCode = fallos > 0 ? 1 : 0;
 }
 

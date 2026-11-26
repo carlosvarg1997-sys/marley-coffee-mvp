@@ -25103,6 +25103,7 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
     toastEl.hidden = false;
     clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, 5000);
   }
+  window.addEventListener('hashchange', hideToast);
   window.MCToast = { show: toast, hide: hideToast };
   window.MCMail = { card: card, open: openMail, close: closeMail, find: findMail };
   document.addEventListener("click", function (e) {
@@ -25121,7 +25122,7 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
   }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && overlayEl && !overlayEl.hidden) closeMail(); });
 })();
-</script><link rel="stylesheet" href="recursos/marca/piloto-premium.css?v=20261123"><link rel="stylesheet" href="recursos/marca/componentes.css?v=20261126b">
+</script><link rel="stylesheet" href="recursos/marca/piloto-premium.css?v=20261123"><link rel="stylesheet" href="recursos/marca/componentes.css?v=20261126c">
 <script id="marley-crm-v2-loader">
 (() => {
   let requested = false;

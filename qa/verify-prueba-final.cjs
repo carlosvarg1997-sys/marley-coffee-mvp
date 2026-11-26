@@ -312,6 +312,26 @@ async function journeyGate(context, folder) {
     await saveEvaluation(alt);
     assert.equal(await alt.evaluate(key => JSON.parse(localStorage.getItem(key)).taskIndex, sessionKey), 5);
   } finally { await altContext.close(); }
+
+  const historyContext = await context.browser().newContext({
+    viewport, reducedMotion: 'reduce', isMobile: viewport.width < 768, hasTouch: viewport.width < 768
+  });
+  try {
+    const page = await historyContext.newPage();
+    const frame = await begin(page);
+    await openClientAtC02(frame, 'domcontentloaded');
+    // Una página posterior puede quedar en el historial de una sesión reanudada.
+    await frame.evaluate(() => {
+      history.pushState(null, '', '#C09');
+      history.pushState(null, '', '#C02');
+      history.back();
+    });
+    await frame.waitForURL(/#C09$/);
+    await blocked(page, folder, '05-volver-en-historial.jpg');
+    await saveEvaluation(page);
+    const step = await page.evaluate(key => JSON.parse(localStorage.getItem(key)).taskIndex, sessionKey);
+    assert.ok(step > 0, 'Volver por el historial a una etapa posterior requiere la evaluación');
+  } finally { await historyContext.close(); }
 }
 
 async function crmGate(context, role, folder) {

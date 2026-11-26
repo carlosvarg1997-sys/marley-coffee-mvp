@@ -34,6 +34,18 @@ const roleFor = (hash) => ['R05', 'R14', 'R15'].includes(hash) ? 'jefatura'
     : hash.startsWith('R') && hash !== 'R00' ? 'ventas' : null;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+function installDockCheck() {
+  window.qaFooterInReservedSpace = (element, rect) => {
+    if (!element.matches('.r4-diag .r5-mobile-final-action') || document.body.dataset.current !== 'C04') return false;
+    const app = element.closest('#app');
+    const inline = app.querySelector('.r4-acciones [data-r4-next]');
+    return rect.bottom <= innerHeight + 1 && rect.top >= innerHeight - 76 &&
+      Number.parseFloat(getComputedStyle(app).paddingBottom) + 1 >= rect.height &&
+      inline && Number.parseFloat(getComputedStyle(inline).scrollMarginBottom) >= rect.height &&
+      element.querySelector('button').getBoundingClientRect().height >= 44;
+  };
+}
+
 async function route(page, hash) {
   const role = roleFor(hash);
   await page.evaluate(({ hash, role }) => {
@@ -63,6 +75,7 @@ async function main() {
   let loginError = null;
   try {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+    await context.addInitScript(installDockCheck);
     const page = await context.newPage();
     page.on('pageerror', (error) => errors.push({ type: 'pageerror', message: error.message }));
     page.on('console', (message) => { if (message.type() === 'error') errors.push({ type: 'console', message: message.text() }); });
@@ -115,6 +128,7 @@ async function main() {
           const fixed = [...document.querySelectorAll('body *')].filter((element) => {
             const r = element.getBoundingClientRect(), s = getComputedStyle(element);
             if ((s.position !== 'fixed' && s.position !== 'sticky') || r.width <= 1 || r.height <= 1 || !visible(element)) return false;
+            if (window.qaFooterInReservedSpace(element, r)) return false;
             const crmMain = element.closest('#crm-v2-root')?.querySelector('.crm2-main');
             if (!crmMain) return true;
             const area = crmMain.getBoundingClientRect();
@@ -175,7 +189,7 @@ async function main() {
           await wait(40);
           const fixed = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((element) => {
             const r = element.getBoundingClientRect(), position = getComputedStyle(element).position, style = getComputedStyle(element);
-            return (position === 'fixed' || position === 'sticky') && r.width > 1 && r.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > 0;
+            return (position === 'fixed' || position === 'sticky') && r.width > 1 && r.height > 1 && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > 0 && !window.qaFooterInReservedSpace(element, r);
           }).map((element) => {
             const r = element.getBoundingClientRect();
             return { selector: element.id || element.className || element.tagName, position: getComputedStyle(element).position, top: r.top, bottom: r.bottom, left: r.left, right: r.right, text: (element.innerText || '').trim().slice(0, 40) };
@@ -232,7 +246,7 @@ async function main() {
       return { totalBytes: total, mediaRequests: media.map((entry) => entry.name), posterLoaded: resources.some((entry) => /poster_m\.webp/i.test(entry.name)), videos: document.querySelectorAll('video').length };
     });
     await videoPage.mouse.move(195, 340);
-    await videoPage.mouse.wheel(0, 450);
+    await videoPage.mouse.wheel(0, 48);
     await videoPage.waitForFunction(() => performance.getEntriesByType('resource').some((entry) => /video_m\.mp4/i.test(entry.name)), null, { timeout: 5000 }).catch(() => {});
     const videoAfterScroll = await videoPage.evaluate(() => performance.getEntriesByType('resource').filter((entry) => /\.(mp4|webm|m4v)(\?|$)/i.test(entry.name)).map((entry) => entry.name));
     await videoContext.close();

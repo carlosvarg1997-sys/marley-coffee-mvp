@@ -26,6 +26,9 @@ class Servidor(http.server.ThreadingHTTPServer):
 
 
 class Silencioso(http.server.SimpleHTTPRequestHandler):
+    # Reutiliza conexiones en las matrices para evitar agotar los sockets de Windows.
+    protocol_version = "HTTP/1.1"
+
     def log_message(self, formato, *args):
         pass
 
