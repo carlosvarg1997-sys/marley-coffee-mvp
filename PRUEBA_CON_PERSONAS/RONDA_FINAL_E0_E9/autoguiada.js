@@ -35,7 +35,7 @@
     { id:'T2', origen:['E2','E3','E4'], titulo:'Revisa tu propuesta', consigna:'Revisa tu propuesta y explica qué máquina, qué productos y cuánto pagas.' },
     { id:'T3', origen:['E6'], titulo:'Confirma y cuenta qué pasa después', consigna:'Confirma si quieres avanzar y cuenta qué pasa después.' },
     { id:'T4', origen:['E5'], titulo:'Retoma tu decisión', consigna:'Retoma tu decisión desde donde quedaste.' },
-    { id:'T5', origen:['E7'], titulo:'Repite tu pedido', consigna:'Repite tu pedido desde el historial.' },
+    { id:'T5', origen:['E7'], titulo:'Repite tu pedido', consigna:'Revisa tu entrega y repite el pedido desde el portal.' },
     { id:'T6', origen:['E8','E9'], titulo:'Pide ayuda o recomienda a otro negocio', consigna:'Pide ayuda por un problema y, si quieres, recomienda a otro negocio.' }
   ];
   // Etapas del recorrido (12-nov): las preguntas van por lo que se está haciendo, no por pantalla.
@@ -1200,6 +1200,8 @@
     const payload={dias:days,sesion_id:state.session.id,at:Date.now(),nonce:randomNonce()};
     try { localStorage.setItem(JUMP_KEY,JSON.stringify(payload)); }
     catch (_) { const status=app.querySelector('#ag-salto [role="status"]');if(status)status.textContent='No se pudo guardar el avance del tiempo en este navegador.';return; }
+    try { iframeRef?.contentWindow?.M4Journey?.applyTestJump?.(payload); }
+    catch (_) { /* Si el marco aún está cargando, recibe el salto mediante storage. */ }
     const stage=days===3?'E5':'E7';
     const row={
       sesion_id:state.session.id,sesion_origen:'',participante:state.session.id,

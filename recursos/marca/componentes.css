@@ -726,3 +726,54 @@ body[data-current="C02"] #app .ux-hero-scroll .ux-hero-copy { z-index: 6; }
   body[data-current="C02"] #app .cmp-opciones { margin-top: 40px !important; }
   body[data-current="C02"] #app .r3-c02-end-actions { margin-top: 24px !important; padding-top: 8px !important; }
 }
+.mc-ayuda-movil { display: none; }
+.mc-compare-media { display: grid; gap: 12px; }
+#app .mc-compare-media .mc-machine-scene,
+#app .mc-pack-scene { min-width: 0; margin: 0; }
+#app .mc-compare-media .mc-machine-scene .m5-film {
+  height: clamp(96px,13vw,160px);
+  background: #171717;
+}
+#app .mc-buyer-scene { overflow: hidden; }
+#app .mc-buyer-scene .m5-film { height: 100%; min-height: inherit; }
+#app .mc-pack-scene { display: grid; gap: 8px; margin-top: 16px; }
+#app .mc-pack-scene .m5-film { height: clamp(146px,20vw,220px); overflow: hidden; border-radius: 12px; }
+#app :is(.mc-pack-scene,.mc-buyer-scene) .m5-film-poster { width: 100%; height: 100%; object-fit: cover; }
+.mc-caso-ficha { display: grid; gap: 8px; margin: 12px 0 0; }
+.mc-caso-ficha dd { margin: 0; }
+.mc-caso-ficha dt { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+.mc-caso-recursos { display: grid; gap: 16px; margin-block: 40px; }
+.mc-caso-recursos :is(a,summary) { min-height: 44px; color: #161616; text-underline-offset: 3px; }
+.mc-caso-recursos > a { display: flex; align-items: center; }
+.mc-caso-recursos summary { cursor: pointer; padding: 10px 0; }
+@media (min-width: 768px) {
+  .mc-compare-media { grid-template-columns: minmax(0,3.6fr) minmax(0,1fr); align-items: center; }
+  .mc-compare-media .mc-machine-scene { grid-column: 2; grid-row: 1; }
+  .mc-compare-media .cmp-home-maquinas { grid-column: 1; grid-row: 1; min-width: 0; }
+  #app .mc-compare-media .cmp-home-maquina img { height: 112px; }
+}
+@media (max-width: 374px) {
+  #app #condiciones .mc-condiciones-finales { display: none; }
+}
+@media (max-width: 767px) {
+  #app .mc-ayuda-movil {
+    display: flex;
+    justify-content: flex-end;
+    padding-inline: 16px;
+    background: #161616;
+    color: white;
+  }
+  #app .mc-ayuda-movil button {
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 14px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  body[data-current^="C"] #m7-launcher { display: none !important; }
+}

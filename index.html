@@ -5844,20 +5844,26 @@ window.M5UI = (() => {
     return `<img class="${cls}" src="${D.fondo(k)}" srcset="${D.fondo(k, true)} 960w, ${D.fondo(k)} 1920w" sizes="100vw" alt="${esc(alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"${pos ? ` style="object-position:${pos}"` : ''}>`;
   }
   // mode: 'scroll' (avanza con el scroll del contenedor data-driver) | 'loop' (video sin sonido) | 'still' (plano final)
-  function film(key, { mode = 'scroll', label = '', cls = '', eager = false, still = 'poster' } = {}) {
+  const deferredPoster = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+  function scenePoster(src, mobile, label, deferred, eager) {
+    const source = mobile ? `<source media="(max-width:767px)" ${deferred ? 'data-scene-srcset' : 'srcset'}="${mobile}">` : '';
+    return `<picture>${source}<img class="m5-film-poster" src="${deferred ? deferredPoster : src}" ${deferred ? `data-scene-poster="${src}"` : ''} alt="${esc(label)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></picture>`;
+  }
+  function film(key, { mode = 'scroll', label = '', cls = '', eager = false, still = 'poster', deferred = false } = {}) {
     const s = D.SCENES[key];
     if (WF()) return `<div class="m5-film ${cls}"><div class="m5-ph"><b>VIDEO</b><span>${esc(label || s.alt)}</span><span>Toma continua · ${mode === 'scroll' ? 'avanza al bajar y retrocede al subir' : mode === 'loop' ? 'loop sin sonido; se pausa fuera de pantalla' : 'plano final fijo'}</span></div></div>`;
     const isStill = mode === 'still' || M.STATIC || Boolean(s.stillOnly) || reduce();
     const src = isStill && still === 'fin' ? s.fin : s.poster; const srcM = isStill && still === 'fin' ? s.fin : s.posterM;
-    return `<div class="m5-film ${cls}" ${isStill ? '' : `data-film="${key}" data-mode="${mode}"`}><picture><source media="(max-width:767px)" srcset="${srcM}"><img class="m5-film-poster" src="${src}" alt="${esc(s.alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></picture>${isStill ? '' : '<span class="m5-film-load" aria-hidden="true">Cargando escena…</span>'}</div>`;
+    return `<div class="m5-film ${cls}" ${deferred ? 'data-escena-vista' : ''} ${isStill ? '' : `data-film="${key}" data-mode="${mode}"`}>${scenePoster(src, srcM, s.alt, deferred, eager)}${isStill ? '' : '<span class="m5-film-load" aria-hidden="true">Cargando escena…</span>'}</div>`;
   }
   // Cámara sobre imagen en alta (carrusel de máquinas, 13-10): un lienzo dibuja en cada cuadro el recorte de la foto
   // original (2752 px) y las capas de luz de cada lámpara. Sin video que buscar: va fluido y la ficha cambia con la cámara.
-  function cam(key, { label = '' } = {}) {
+  function cam(key, { label = '', deferred = false } = {}) {
     const s = D.SCENES[key];
     if (WF()) return `<div class="m5-film"><div class="m5-ph"><b>ANIMACIÓN</b><span>${esc(label || s.alt)}</span><span>Cámara sobre la foto en alta · avanza al bajar y retrocede al subir; cada lámpara se enciende al llegar</span></div></div>`;
-    if (M.STATIC || reduce()) return `<div class="m5-film"><img class="m5-film-poster" src="${s.fin}" alt="${esc(label || s.alt)}" loading="lazy" decoding="async"></div>`;
-    return `<div class="m5-film m5-cam" data-cam="${key}"><picture><source media="(max-width:767px)" srcset="${s.posterM}"><img class="m5-film-poster" src="${s.poster}" alt="${esc(label || s.alt)}" loading="lazy" decoding="async"></picture><canvas class="m5-cam-cv" aria-hidden="true"></canvas></div>`;
+    const lazy = deferred ? 'data-escena-vista' : '';
+    if (M.STATIC || reduce()) return `<div class="m5-film" ${lazy}>${scenePoster(s.fin, null, label || s.alt, deferred, false)}</div>`;
+    return `<div class="m5-film m5-cam" data-cam="${key}" ${lazy}>${scenePoster(s.poster, s.posterM, label || s.alt, deferred, false)}<canvas class="m5-cam-cv" aria-hidden="true"></canvas></div>`;
   }
   const machineImg = (mk, cls = '') => { const m = D.MACHINES[mk]; return WF() ? `<div class="m5-ph m5-ph--inline ${cls}" role="img" aria-label="Máquina ${esc(m.name)}"><b>FOTO</b><span>Máquina ${esc(m.name)} (foto oficial sin fondo)</span></div>` : `<img class="${cls}" src="${m.img}" alt="Máquina ${esc(m.name)} de Marley Coffee" loading="lazy" decoding="async">`; };
   const lm = (id, { title, text, list, light = false, mini = false } = {}) => { const x = D.LM[id]; return `<div class="m5-lm ${light ? 'm5-lm--light' : ''} ${mini ? 'm5-lm--mini' : ''}" data-lm="${id} · ${esc(x.name)}">${icon('gift', 20)}<div><b>${esc(title || x.promise)}</b></div>${text ? `<p>${text}</p>` : ''}${list ? `<ul>${list.map((li) => `<li>${icon('check', 16)}<span>${esc(li)}</span></li>`).join('')}</ul>` : ''}</div>`; };
@@ -5934,6 +5940,11 @@ window.M5UI = (() => {
       v.addEventListener('seeked', schedule);
       vids[id] = v;
     } else if (v.readyState >= 2) { v.classList.add('is-on'); p.el.classList.remove('is-loading'); p.el.classList.add('is-ready'); }
+    const route = document.body.dataset.current;
+    if (p.mode === 'once' && v.__escenaRuta !== route) {
+      if (v.currentTime) v.currentTime = 0;
+      v.__escenaRuta = route;
+    }
     if (v.parentElement !== p.el) p.el.appendChild(v);
     p.video = v; schedule();
   }
@@ -5987,6 +5998,7 @@ window.M5UI = (() => {
     const d = el.closest('[data-driver]') || el; const r = d.getBoundingClientRect();
     const compact = d.matches('.r3-c02-machine, .mc-machine-scene');
     if (!r.height || (document.body.dataset.current === 'C02' && !window.scrollY)) return false;
+    if (el.hasAttribute('data-escena-vista') && (r.bottom <= 0 || r.top >= vh)) return false;
     if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) return false;
     const key = el.dataset.cam; const c = D.SCENES[key].cam; const set = camLoad(key);
     camWarm(el);
@@ -6028,13 +6040,21 @@ window.M5UI = (() => {
   function frame() {
     raf = 0; let moving = false;
     const vh = innerHeight;
+    document.querySelectorAll('img[data-scene-poster]').forEach(img => {
+      const r = img.closest('.m5-film').getBoundingClientRect();
+      if (!r.height || r.bottom <= 0 || r.top >= vh) return;
+      const source = img.parentElement.querySelector('source[data-scene-srcset]');
+      if (source) source.srcset = source.dataset.sceneSrcset;
+      img.src = img.dataset.scenePoster;
+      img.removeAttribute('data-scene-poster');
+    });
     const drivers = new Set();
     players = players.filter((p) => p.el.isConnected);
     for (const p of players) {
       const r = p.driver.getBoundingClientRect();
       const near = r.bottom > -vh * 0.5 && r.top < vh * 1.8;
-      if (near) startLoading(p);
       const visible = r.bottom > 0 && r.top < vh;
+      if (p.el.hasAttribute('data-escena-vista') ? visible && r.height > 0 : near) startLoading(p);
       if (p.mode === 'scroll' && near && scrub(p, progressOf(p.driver))) moving = true;
       if (p.mode !== 'scroll' && p.video) {
         if (visible && !document.hidden && !reduce() && !p.video.ended) {
@@ -6109,7 +6129,7 @@ window.M5UI = (() => {
     root.querySelectorAll('[data-film]').forEach((el) => {
       if (el.__m5) return; el.__m5 = true; const p = makePlayer(el); players.push(p);
       // Si el video ya está cargado (otra visita a la pantalla), se muestra al tiro sin esperar.
-      if (vids[p.src + '|' + p.mode]) startLoading(p);
+      if (!el.hasAttribute('data-escena-vista') && vids[p.src + '|' + p.mode]) startLoading(p);
     });
     // Las capas del carrusel se piden cuando la sección se acerca (camFrame), no al cargar la página.
     reveal(root);
@@ -6356,13 +6376,14 @@ window.M4C = (() => {
     const portal = s.lead && (s.lead.channel || (s.proposal && s.proposal.status === 'aceptada')) ? `<a href="#C06" data-go="C06" class="m5-top-link">${icon('chat', 18)}<span>Mi propuesta</span></a>` : '';
     // v6: «Máquinas» va primero (los productos antes que la solución).
     const navJourney = M.get().catalogJourney || {};
-    const nav = [['C02', 'Inicio'], ['C10', 'Productos'], ['C11', 'Máquinas'], ['negocios', 'Soluciones'], ['servicios', 'Servicios'], ['C08', 'Casos'], ['faq', 'Preguntas']].map(([k, l]) => { const current = k === route || (k === 'negocios' && ['C04'].includes(route)) || (k === 'C10' && ['C05','C06'].includes(route) && navJourney.productsAt) || (k === 'negocios' && ['C05','C06'].includes(route) && !navJourney.productsAt); const active = current ? ' aria-current="page" class="is-current"' : ''; return k[0] === 'C' ? `<a href="#${k}" data-go="${k}" ${k==='C10'?'data-m9-open':''}${active}>${l}</a>` : `<a href="#C02" data-a="anchor" data-v="${k}"${active}>${l}</a>`; }).join('');
+    const nav = [['C02', 'Inicio'], ['C10', 'Productos'], ['C11', 'Máquinas'], ['negocios', 'Soluciones'], ['servicios', 'Servicios'], ['C08', 'Casos y guías']].map(([k, l]) => { const current = k === route || (k === 'negocios' && ['C04'].includes(route)) || (k === 'C10' && ['C05','C06'].includes(route) && navJourney.productsAt) || (k === 'negocios' && ['C05','C06'].includes(route) && !navJourney.productsAt); const active = current ? ' aria-current="page" class="is-current"' : ''; return k[0] === 'C' ? `<a href="#${k}" data-go="${k}" ${k==='C10'?'data-m9-open':''}${active}>${l}</a>` : `<a href="#C02" data-a="anchor" data-v="${k}"${active}>${l}</a>`; }).join('');
     // En Empresas, «Ver mi solución» del encabezado aparece después de ver las máquinas (25-ui5.js, frame).
     const late = false;
     return `<div class="m4 m5 m4-client ${cls}">
 <header class="m5-top"><div class="m5-top-in"><a class="m5-brand" href="#C02" data-go="C02" aria-label="Marley Coffee Empresas, inicio">${U.logo()}<span>Empresas</span></a>
-${focus ? '' : `<nav class="m5-nav" aria-label="Secciones">${nav}</nav><details class="ux-mobile-nav"><summary>Menú</summary><nav aria-label="Secciones en móvil">${nav}<a href="#C09" data-go="C09" ${route === 'C09' ? 'aria-current="page" class="is-current"' : ''}>Ya soy cliente</a><a href="#C01" data-go="C01">Tienda</a></nav></details>`}
-<div class="m5-top-actions">${focus ? idChip : `${window.M9Catalog.headerHTML()}${idChip}${portal}<a href="#C09" data-go="C09" class="m5-top-link">${icon('users', 18)}<span>Ya soy cliente</span></a><a href="#C01" data-go="C01" class="m5-top-link">${icon('back', 16)}<span>Tienda</span></a>${route === 'C02' || route === 'C08' ? `<button type="button" class="m5-btn m5-btn--hide-m ${late ? 'm5-btn--late' : ''}" data-a="quote" ${late ? 'inert' : ''}>${qTxt(false)}</button>` : ''}`}</div></div></header>
+${focus ? '' : `<nav class="m5-nav" aria-label="Secciones">${nav}</nav><details class="ux-mobile-nav"><summary aria-label="Abrir menú de secciones">Menú</summary><nav aria-label="Secciones en móvil">${nav}<a href="#C09" data-go="C09" ${route === 'C09' ? 'aria-current="page" class="is-current"' : ''}>Ya soy cliente</a><a href="#C01" data-go="C01">Tienda</a></nav></details>`}
+<div class="m5-top-actions">${focus ? idChip : `${window.M9Catalog.headerHTML()}${idChip}${portal}<a href="#C09" data-go="C09" class="m5-top-link">${icon('users', 18)}<span>Ya soy cliente</span></a><a href="#C01" data-go="C01" class="m5-top-link">${icon('back', 16)}<span>Tienda</span></a>${route === 'C02' || route === 'C08' ? `<button type="button" class="m5-btn m5-btn--hide-m ${late ? 'm5-btn--late' : ''}" data-a="quote" ${late ? 'inert' : ''}>${qTxt(false)}</button>` : ''}`}</div></div>
+${route.slice(0,3) !== 'C09' ? `<div class="mc-ayuda-movil"><button type="button" ${/^C0[1-8]/.test(route) ? 'data-m7-open="ayuda"' : 'data-mc-ayuda-ruta'}>¿Necesitas ayuda?</button></div>` : ''}</header>
 <main id="m4-main">${inner}</main>
 <footer class="m5-foot"><div class="m5-wrap m5-foot-in"><span>Marley Coffee Empresas · ${M.MODE === 'prototype' ? 'prototipo académico con datos de prueba' : M.MODE === 'mockups' ? 'mockup con datos de prueba' : 'wireframe'}</span><span>Precios profesionales, disponibilidad y condiciones se confirman con el equipo. Prueba sin envíos ni cobros reales.</span><a class="m5-foot-guide" href="guia-servicio-cafe.html">Guía práctica para planificar el café de tu negocio</a></div></footer>
 ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" inert><button type="button" class="m5-btn" data-a="quote" data-cta-principal="armar" data-evt="cta-armar">${showResume() ? 'Continuar mi solución' : 'Armar mi solución'}</button><button type="button" class="m5-btn m5-btn--ghost" data-a="quote" aria-label="Cotizar máquina">${icon('box', 18)}</button></div>` : ''}</div>`;
@@ -6412,22 +6433,19 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
   <div class="cmp-condiciones">
     <div class="ux-strip-item"><div><h3>Máquina en comodato</h3><p class="cmp-clave">La máquina queda en préstamo mientras compras café.</p></div></div>
     <div class="ux-strip-item"><div><h3>Carga base</h3><p class="cmp-clave"><b data-vida="cuenta" data-valor="1491220">$1.491.220</b> netos referenciales, con kit y filtro.</p></div></div>
-    <div class="ux-strip-item"><div><h3>Condiciones finales</h3><p class="cmp-clave">El equipo confirma modelo, mínimo mensual y plazo.</p></div></div>
+    <div class="ux-strip-item mc-condiciones-finales"><div><h3>Condiciones finales</h3><p class="cmp-clave">El equipo confirma modelo, mínimo mensual y plazo.</p></div></div>
   </div>
-  <details class="cmp-detalle-c"><summary>Ver condiciones de la carga base</summary><p>La referencia corresponde a negocios de flujo bajo o medio. Se paga antes de instalar y no corresponde a una mensualidad.</p></details>
-  <div class="mc-compare-head">
-    <h3 class="cmp-compara-titulo">Cuatro máquinas para distintas formas de servir</h3>
-    <details class="mc-machine-clip">
-      <summary data-evt="ver-escena-maquinas">Ver escena</summary>
-      <figure class="mc-machine-scene" data-driver aria-label="Escena de las cuatro máquinas">${V.cam('barras', { label:'Las cuatro máquinas Marley Coffee' })}</figure>
-    </details>
+  <details class="cmp-detalle-c"><summary>Ver condiciones de la carga base</summary><p>La referencia corresponde a negocios de flujo bajo o medio. Se paga antes de instalar y no corresponde a una mensualidad. El equipo confirma modelo, mínimo mensual y plazo.</p></details>
+  <div class="mc-compare-head"><h3 class="cmp-compara-titulo">Cuatro máquinas para distintas formas de servir</h3></div>
+  <div class="mc-compare-media">
+    <figure class="mc-machine-scene" data-driver aria-label="Escena de las cuatro máquinas">${V.cam('barras', { label:'Las cuatro máquinas Marley Coffee en sus barras', deferred:true })}</figure>
+    <div class="cmp-home-maquinas" role="region" aria-label="Compara las cuatro máquinas" tabindex="0"><!-- maquinas-comodato --></div>
   </div>
-  <div class="cmp-home-maquinas" role="region" aria-label="Compara las cuatro máquinas" tabindex="0"><!-- maquinas-comodato --></div>
   <div class="cmp-inicio-cta"><button type="button" class="m5-btn r3-main" data-m10-unknown data-cierra-tarea="T1" data-cta-principal="cuentanos" data-evt="cta-cuentanos">Cuéntanos de tu negocio ${icon('arrow',18)}</button><button type="button" class="mc-btn mc-btn--sec" data-a="machine-shortcut" data-evt="ya-se-maquina">Ya sé qué máquina quiero</button></div>
 </section>
 <section class="ux-section" id="insumos"><div class="ux-wrap"><div class="ux-cafe-card"><div><span class="ux-eyebrow">Café e insumos</span><h2>¿Qué café e insumos puedo pedir?</h2><p class="r5-brandline">Elige café e insumos para tu negocio.</p><p>Elige una selección sugerida y ajústala, o selecciona tus productos uno por uno.</p></div><button type="button" class="m5-btn" data-m9-open>Ver packs y productos ${icon('arrow',18)}</button></div></div></section>
 <section class="ux-section" id="negocios" aria-labelledby="h-negocios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Para cada forma de servir</span><h2 id="h-negocios">¿Qué necesita tu tipo de negocio?</h2></div></div><div class="m5-buyer-groups" aria-label="Categorías de negocio">${tabs}</div>
-<div class="ux-buyer-panel" id="panel-biz" aria-live="polite">${V.WF()?'<div class="m5-ph ux-buyer-photo" role="img" aria-label="Servicio de café">Imagen del negocio</div>':`<img class="ux-buyer-photo" width="640" height="275" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-zoom data-zoom-grupo="inicio" data-comodato-foto="${biz==='Hotel'?'recursos/legado/hotel-automatica-portada.webp':D.SCENES[B.scene].fin}" alt="Servicio de café para ${esc(article(biz))}" loading="lazy" decoding="async" fetchpriority="low">`}<div class="ux-buyer-copy"><span class="ux-eyebrow" style="color:#F3C900">${esc(biz === 'OCS' ? 'Oficinas' : biz)}</span><h3><span class="r5-business-h3-line">Café para ${{Hotel: 'hoteles', Restaurante: 'restaurantes', Cafetería: 'cafeterías', 'Eventos o catering': 'eventos', Oficinas: 'oficinas', Conveniencia: 'tiendas de conveniencia', Panadería: 'panaderías'}[biz] || 'negocios'}</span>${esc(B.h)}</h3><p>${esc(B.p)}</p><button type="button" class="m5-btn" data-a="quote-biz" data-v="${esc(biz)}">Elegir productos ${icon('arrow',18)}</button></div></div></div></section>
+<div class="ux-buyer-panel" id="panel-biz" aria-live="polite"><div class="ux-buyer-photo mc-buyer-scene">${V.film(B.scene, { mode:'once', deferred:true, label:'Cómo se vería el café para ' + article(biz) })}</div><div class="ux-buyer-copy"><span class="ux-eyebrow" style="color:#F3C900">${esc(biz === 'OCS' ? 'Oficinas' : biz)}</span><h3><span class="r5-business-h3-line">Café para ${{Hotel: 'hoteles', Restaurante: 'restaurantes', Cafetería: 'cafeterías', 'Eventos o catering': 'eventos', Oficinas: 'oficinas', Conveniencia: 'tiendas de conveniencia', Panadería: 'panaderías'}[biz] || 'negocios'}</span>${esc(B.h)}</h3><p>${esc(B.p)}</p><button type="button" class="m5-btn" data-a="quote-biz" data-v="${esc(biz)}">Elegir productos ${icon('arrow',18)}</button></div></div></div></section>
 <section class="ux-section ux-machine-scroll" id="maquinas" data-driver><div class="ux-wrap ux-machine-scroll-stage"><div class="ux-machine-visual">${V.cam('barras',{label:'Animación de las máquinas Marley Coffee'})}</div><div class="ux-cafe-card"><div><span class="ux-eyebrow">Máquina en comodato</span><span class="ux-machine-caption" data-machine-caption role="status" aria-live="polite" aria-atomic="true">Máquina Bar</span><h2>¿Qué máquina de café me prestan en comodato?</h2><h3 class="r5-machine-answer">${esc(D.MACHINES[B.machine].name)}: ${esc(D.MACHINES[B.machine].kind)}</h3><p class="r5-brandline">Una máquina para tu forma de servir.</p><p>${esc(D.MACHINES[B.machine].line)}</p><p>Prestamos la máquina; compras insumos cada mes y te orientamos según tu operación.</p></div><button type="button" class="m5-btn" data-a="quote">Armar mi solución ${icon('arrow',18)}</button></div></div></section>
 <section class="ux-section" id="servicios"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Más para tu negocio</span><h2>Servicios y experiencias.</h2></div><p>Agrega lo que te interese a tu propuesta.</p></div><details class="m5-more"><summary>Explorar servicios disponibles</summary>${bento}</details><p class="m5-cta-note">Servicios y condiciones sujetos a confirmación.</p><details class="m5-more"><summary>¿Creas contenido sobre café o gastronomía?</summary><p>Conversemos sobre una posible colaboración.</p><button type="button" class="m5-btn m5-btn--ghost" data-a="creator-interest">Conversar sobre una alianza</button></details></div></section>
 <section class="ux-section ux-faq" id="faq"><div class="ux-wrap"><div class="ux-head"><div><span class="ux-eyebrow">Estamos para ayudarte</span><h2>Preguntas frecuentes.</h2></div></div><div>${faq}</div></div></section>
@@ -6694,15 +6712,14 @@ ${accepted ? done : ''}
 <div class="m5-qstep"><h2>1 · Tu máquina <span>${sugg ? 'según tu negocio' : 'elige por cómo sirves'}</span></h2>${machines}</div>
 <div class="m5-qstep"><h2>2 · Comodato y carga inicial</h2><div class="m5-modes">${modeButtons(q, m)}</div></div>
 <div class="m5-qstep"><h2>3 · Tu consumo de café</h2><label class="m5-field"><span>Tazas al día: <b data-q-out="cups">${q.cups == null ? 'Por confirmar' : q.cups}</b></span><input class="m5-range" id="m5Cups" type="range" min="20" max="600" step="10" value="${q.cups ?? 100}" data-q="cups" aria-label="Tazas al día"><small class="m5-fine">Si aún no tienes una estimación, deja el dato por confirmar. Mover el control lo agrega a tu solicitud.</small></label><div class="m5-seg" role="group" aria-label="Días de servicio al mes">${[22, 26, 30].map((d) => `<button type="button" data-a="q-days" data-v="${d}" aria-pressed="${q.days === d}">${d} días al mes</button>`).join('')}</div></div>
-<details class="m5-qstep m5-extra-details" data-lm="LM4 · Ampliación"><summary><span>4 · Complementos</span><small>${esc(extraSummary)}</small></summary><div class="m5-extra-details-body">${extrasHTML(s, q, { all: true })}</div></details>
+<details class="m5-qstep m5-extra-details" data-lm="LM4 · Ampliación"><summary><span>Ver complementos de la propuesta</span><small>${esc(extraSummary)}</small></summary><div class="m5-extra-details-body">${extrasHTML(s, q, { all: true })}</div></details>
 </div><aside class="m5-sum" id="m5-sum" aria-live="polite">${summaryHTML(s)}</aside></div>`);
   }
   // ---------- C08 · Casos (experiencia inmersiva con scroll) ----------
   const CHAPTERS = [
-    { k: 'hotel', biz: 'Hotel', t: 'Hotel', h: 'Café en cada momento', p: 'Desayuno, habitaciones y una barra de marca en el lobby.', kit: ['Máquina Bar', 'Pods en habitaciones', 'Tazas mug Marley Coffee', 'Coffee Experience en eventos'] },
-    { k: 'restaurante', biz: 'Restaurante', t: 'Restaurante', h: 'Espresso para cerrar la mesa', p: 'Pods para servir café y una taza de marca en la mesa.', kit: ['Máquina Pods', 'Café molido Roots Rock', 'Soul Rebel Chai en la carta', 'Material POP'] },
-    { k: 'cafeteria', biz: 'Cafetería', t: 'Cafetería', h: 'Café: tu especialidad', p: 'Bar con molinillo y grano Marley Coffee.', kit: ['Máquina Bar con molinillo', 'Café en grano Keep On Moving', 'Capacitación de barista', 'Exhibidor de bolsas'] },
-    { k: 'evento', biz: 'Eventos o catering', t: 'Eventos', h: 'Café para tu evento', p: 'Barra Marley Coffee con barista y material de marca.', kit: ['Coffee Experience', 'Café al paso para volumen', 'Catering con branding', 'Punto de activación'] }
+    { k: 'hotel', biz: 'Hotel', t: 'Hotel', h: 'Café en cada momento', problema: 'Servir café en el desayuno y tener una barra para el lobby.', solucion: 'Organizar el servicio por espacio y preparar espresso en la barra.', maquina: 'Bar', resultado: 'El equipo tendría una forma de servir café en el desayuno y en el lobby.' },
+    { k: 'restaurante', biz: 'Restaurante', t: 'Restaurante', h: 'Espresso para cerrar la mesa', problema: 'Servir café después de comer sin tener un barista dedicado.', solucion: 'Preparar espresso en dosis individuales para el servicio a la mesa.', maquina: 'Pods', resultado: 'El equipo podría ofrecer espresso como parte del cierre de la comida.' },
+    { k: 'cafeteria', biz: 'Cafetería', t: 'Cafetería', h: 'Café: tu especialidad', problema: 'Preparar espresso y bebidas con leche en una misma barra.', solucion: 'Usar una máquina con molinillo y revisar la capacitación con el equipo.', maquina: 'Bar', resultado: 'La barra podría servir espresso, cappuccino y latte.' }
   ];
   function c08() {
     const s = M.get(); const pref = bizOf(s);
@@ -6712,24 +6729,27 @@ ${accepted ? done : ''}
     const priorOtherBusiness = Boolean(s.proposal && s.answers?.negocio && s.answers.negocio !== cur.biz);
     const tabs = order.map((c) => `<button type="button" class="m5-tab" data-a="exp-tab" data-v="${c.k}" aria-pressed="${c.k === cur.k}">${esc(c.t)}</button>`).join('');
     const ctaCaso = `<button type="button" class="m5-btn" data-a="${priorOtherBusiness ? 'case-resume' : 'quote-biz'}" data-v="${esc(cur.biz)}" data-cta-principal="caso-comercial" data-evt="cta-caso-comercial">${esc(priorOtherBusiness ? 'Retomar mi propuesta' : D.BUSINESS[cur.biz].cta)} ${icon('arrow', 18)}</button>`;
-    return shell(`<section class="m5-exp-intro"><div class="m5-wrap"><div class="m5-exp-title"><span class="m5-kick m5-kick--light m5-seo-line">Casos Marley Coffee</span><h1>Café para tu negocio</h1></div><div class="m5-exp-side"><p class="m5-lead">Elige un rubro y explora un caso ilustrativo.</p><div class="m5-actions">${ctaCaso}</div></div></div></section>
+    return shell(`<section class="m5-exp-intro"><div class="m5-wrap"><div class="m5-exp-title"><h1>Casos y guías</h1></div><div class="m5-exp-side"><p class="m5-lead">Elige un rubro para ver cómo se podría servir café en tu negocio.</p><div class="m5-actions">${ctaCaso}</div></div></div></section>
 <section class="m5-stage" id="m5-exp" aria-labelledby="h-exp">
   <div class="m5-stage-pin">
     <div class="m5-stage-copy">
       <div class="m5-tabs m5-stage-tabs" role="group" aria-label="Elige el negocio que quieres revisar">${tabs}</div>
       <div class="m5-stage-beats" aria-live="polite">
         <div class="m5-stage-beat m5-cap">
-          <h2 id="h-exp"><span class="m5-tag m5-tag--sm m5-seo-line">${esc(cur.t)}</span>${esc(cur.h)}</h2>
-          <p class="m5-lead">${esc(cur.p)}</p>
+          <h2 id="h-exp"><span class="m5-tag m5-tag--sm m5-seo-line">Caso ilustrativo · ${esc(cur.t)}</span>${esc(cur.h)}</h2>
+          <dl class="mc-caso-ficha">${[['Problema',cur.problema],['Solución',cur.solucion],['Máquina',cur.maquina],['Resultado esperado',cur.resultado]].map(([k,v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
           ${priorOtherBusiness ? `<p class="m5-fine">Ya tienes una propuesta para ${esc(article(s.answers.negocio))}. Puedes retomarla con sus datos guardados.</p>` : ''}
-          <details class="m5-case-includes"><summary>${esc(cur.t)} · lo que incluye la idea</summary><ul class="m5-exp-kit">${cur.kit.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></details>
         </div>
       </div>
     </div>
     <div class="m5-stage-media">${V.film(cur.k, { mode: 'once', label: 'Escena ' + cur.t.toLowerCase() + ' con Marley Coffee', still: 'fin' })}</div>
   </div>
 </section>
-<section class="m5-band" aria-labelledby="h-band8">${V.fondo('activacion')}<div class="m5-wrap"><span class="m5-kick m5-kick--light">Referencia real · 2025</span><h2 id="h-band8">Hard Rock Café Santiago</h2><p class="m5-lead">Mesa de marca, cócteles de café y kits. Sin resultados comerciales publicados.</p><details class="m5-case-source"><summary>Ver alcance publicado</summary><p>Las bases públicas de Marley Coffee describen esta experiencia.</p></details><div class="m5-actions">${ctaCaso}</div></div></section>`, { mbar: false });
+<section class="m5-wrap mc-caso-recursos" aria-labelledby="h-band8"><h2 id="h-band8">Guías y preguntas frecuentes</h2>
+  <a href="recursos/portal/guia-elegir-maquina.html">Ver la guía para elegir máquina</a>
+  <a href="recursos/portal/guia-cuidado-maquina.html">Ver la guía de cuidado de la máquina</a>
+  <details><summary>Ver preguntas frecuentes sobre comodato y servicio</summary>${D.FAQ.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${a}</p></details>`).join('')}</details>
+  <div class="m5-actions">${ctaCaso}</div></section>`, { mbar: false });
   }
   // ---------- C09 · Mi cuenta (cliente activo) ----------
   // Deleite (D14): idea visual para el tipo de negocio del cliente activo. Es una recreación, no su local (06-nov).
@@ -7784,7 +7804,10 @@ window.MarleyApp = (() => {
     if (id === 'C05') M.viewProposal();
     const keep = routeChanged ? { scroll: {}, videos: {} } : capture(root);
     const html = (isCRM(id) ? R.SCREENS[id] : C.SCREENS[id])();
-    const tpl = document.createElement('template'); tpl.innerHTML = strip(id) + html + floating(id);
+    const ayuda = /^C(?:0[1-8]|1[0-5])$/.test(id) && !html.includes('mc-ayuda-movil')
+      ? '<div class="mc-ayuda-movil"><button type="button" ' + (id.startsWith('C0') ? 'data-m7-open="ayuda"' : 'data-mc-ayuda-ruta') + '>¿Necesitas ayuda?</button></div>'
+      : '';
+    const tpl = document.createElement('template'); tpl.innerHTML = strip(id) + ayuda + html + floating(id);
     // Al cambiar de pantalla se dibuja todo; si solo cambió el estado, se reemplaza únicamente lo distinto
     // (sin esto la pantalla completa parpadeaba con cada mensaje, «escribiendo…» o cambio de estado).
     if (routeChanged || !prevTpl || M.STATIC) root.replaceChildren(tpl.content.cloneNode(true));
@@ -10226,7 +10249,7 @@ const assetURL=(value)=>MARLEY_ASSETS[value]||value;
   const businessLink = '<a class="b2c-business-link" href="#C02" data-go="C02" data-entry="home-business">EMPRESAS</a>';
   const mobileLinks = businessLink + categoryLinks;
   const homeReturn = '<button type="button" data-go="C01">Marley Coffee · inicio</button>';
-  if (id === 'C01') return '<header class="b2c-header"><div class="b2c-promo-strip"><span>MARLEY COFFEE · CHILE</span></div><div class="b2c-header-main"><button type="button" class="b2c-mobile-search" data-b2c-demo="Búsqueda" aria-label="Buscar">⌕</button><a class="b2c-logo-link" href="https://www.marleycoffee.cl/" target="_blank" rel="noopener" aria-label="Marley Coffee Chile, sitio oficial">' + logo + '</a><form class="b2c-search" id="b2cSearchForm" role="search"><label class="b2c-sr-only" for="b2cSearch">Buscar productos Marley Coffee</label><input id="b2cSearch" name="query" placeholder="¿Qué estás buscando?" autocomplete="off"><button type="submit" aria-label="Buscar">⌕</button></form><div class="b2c-utility-actions"><a href="https://www.marleycoffee.cl/tiendas" target="_blank" rel="noopener">ENCUENTRA TU MARLEY</a><a href="https://www.marleycoffee.cl/seguir-pedido" target="_blank" rel="noopener">ESTADO DE TU PEDIDO</a><button type="button" data-b2c-demo="Entrar">ENTRAR</button><button type="button" data-b2c-demo="Favoritos" aria-label="Favoritos">♡</button><button type="button" data-b2c-demo="Carrito" aria-label="Carrito">0</button></div><details class="site-menu b2c-menu-details"><summary aria-label="Abrir menú de Marley Coffee" aria-controls="b2cMenuPanel" aria-expanded="false"><span class="b2c-hamburger" aria-hidden="true">☰</span><span class="b2c-sr-only">Menú</span></summary><button type="button" class="b2c-menu-backdrop" data-action="close-menu" tabindex="-1" aria-label="Cerrar menú al tocar fuera"></button><div class="b2c-menu-panel" id="b2cMenuPanel" role="dialog" aria-modal="true" aria-label="Menú principal de Marley Coffee"><div class="b2c-menu-top"><span>Menú</span><button type="button" data-action="close-menu" aria-label="Cerrar menú">×</button></div><nav aria-label="Categorías Marley Coffee">' + mobileLinks + '</nav><div class="b2c-country">SELECCIONA TU PAÍS</div></div></details></div><nav class="b2c-category-nav" aria-label="Navegación principal Marley Coffee">' + categoryLinks + businessLink + '</nav></header>';
+  if (id === 'C01') return '<header class="b2c-header"><div class="b2c-promo-strip"><span>MARLEY COFFEE · CHILE</span></div><div class="b2c-header-main"><button type="button" class="b2c-mobile-search" data-b2c-demo="Búsqueda" aria-label="Buscar">⌕</button><a class="b2c-logo-link" href="https://www.marleycoffee.cl/" target="_blank" rel="noopener" aria-label="Marley Coffee Chile, sitio oficial">' + logo + '</a><form class="b2c-search" id="b2cSearchForm" role="search"><label class="b2c-sr-only" for="b2cSearch">Buscar productos Marley Coffee</label><input id="b2cSearch" name="query" placeholder="¿Qué estás buscando?" autocomplete="off"><button type="submit" aria-label="Buscar">⌕</button></form><div class="b2c-utility-actions"><a href="https://www.marleycoffee.cl/tiendas" target="_blank" rel="noopener">ENCUENTRA TU MARLEY</a><a href="https://www.marleycoffee.cl/seguir-pedido" target="_blank" rel="noopener">ESTADO DE TU PEDIDO</a><button type="button" data-b2c-demo="Entrar">ENTRAR</button><button type="button" data-b2c-demo="Favoritos" aria-label="Favoritos">♡</button><button type="button" data-b2c-demo="Carrito" aria-label="Carrito">0</button></div><details class="site-menu b2c-menu-details"><summary aria-label="Abrir menú de Marley Coffee" aria-controls="b2cMenuPanel" aria-expanded="false"><span class="b2c-hamburger" aria-hidden="true">☰</span><span class="b2c-sr-only">Menú</span></summary><button type="button" class="b2c-menu-backdrop" data-action="close-menu" tabindex="-1" aria-label="Cerrar menú al tocar fuera"></button><div class="b2c-menu-panel" id="b2cMenuPanel" role="dialog" aria-modal="true" aria-label="Menú principal de Marley Coffee"><div class="b2c-menu-top"><span>Menú</span><button type="button" data-action="close-menu" aria-label="Cerrar menú">×</button></div><nav aria-label="Categorías Marley Coffee">' + mobileLinks + '</nav><div class="b2c-country">SELECCIONA TU PAÍS</div></div></details></div><nav class="b2c-category-nav" aria-label="Navegación principal Marley Coffee">' + categoryLinks + businessLink + '</nav><div class="mc-ayuda-movil"><button type="button" data-m7-open="ayuda">¿Necesitas ayuda?</button></div></header>' ;
   if (id === 'C03') return '<nav class="site-nav campaign-nav horeca-nav" aria-label="Encabezado de campaña"><div class="wordmark">' + (ARTIFACT_MODE === 'wireframes' ? 'MARLEY COFFEE EMPRESAS' : logo) + '</div><span class="campaign-label">SOLUCIONES PARA NEGOCIOS</span></nav>';
   return '<nav class="site-nav horeca-nav" aria-label="Navegación Marley Coffee Empresas"><div class="wordmark">' + (ARTIFACT_MODE === 'wireframes' ? 'MARLEY COFFEE EMPRESAS' : logo) + '</div><div class="nav-items"><a href="#C02" data-go="C02">Soluciones</a></div><details class="site-menu"><summary>Menú</summary><div class="site-menu-panel">' + homeReturn + '</div></details></nav>';
 }
@@ -11067,11 +11090,12 @@ window.M4Journey = (() => {
     try { const e = (M.get().emails || []).slice().reverse().find(predicate); if (e && window.MCToast) window.MCToast.show(e); } catch (_) { /* el aviso es opcional */ }
   }
   function flushMailToast() { const id = lastPushedMail; lastPushedMail = null; if (id) toastMail((e) => e.id === id); }
-  function placeOrder(items, { sourceOrderId = null } = {}) {
-    if (!items || !items.length) return null;
-    let placed = null;
-    M.update((s) => {
+  function createOrder(s, items, sourceOrderId = null) {
+      if (!items?.length) return null;
       const c = cycle(s); if (!c || !c.contractSignedAt || !c.replenishmentNotice) return;
+      c.orders ||= [];
+      if (!sourceOrderId && c.orders.length) return c.orders[0].id;
+      if (sourceOrderId && c.orders.at(-1)?.id !== sourceOrderId) return null;
       c.orderComplementChoices ||= [];
       const merged = new Map((items || []).filter((item) => item.k && Number(item.qty) > 0).map((item) => [item.k, Number(item.qty)]));
       const priceLines = window.R3C2?.data?.().prices?.lines || [];
@@ -11085,14 +11109,18 @@ window.M4Journey = (() => {
       if (!finalItems.length) return;
       const first = !c.orders.length; const id = `PED-${s.lead.id}-${String(c.orders.length + 1).padStart(2, '0')}`;
       const eventName = first ? 'order_confirmed' : 'repeat_order_confirmed'; const total = itemsTotal(finalItems);
-      const order = { id, eventName, at: M.now(), items: finalItems, total, sourceOrderId: sourceOrderId || null, complementItems: appliedComplements, waitPassed: false, receivedAt: null, status: 'Pedido confirmado' };
-      c.orders.push(order); placed = id;
+      const order = { id, eventName, at: M.now(), simulatedDay: Number(c.simulatedDays) || 0, items: finalItems, total, sourceOrderId: sourceOrderId || null, complementItems: appliedComplements, waitPassed: false, receivedAt: null, status: 'Pedido confirmado' };
+      c.orders.push(order);
       record(s, eventName, first ? 'Pedido simulado confirmado' : 'Pedido simulado repetido', { key: `cycle:${s.lead.id}:${eventName}:${id}`, order_id: id, source_order_id: order.sourceOrderId, order_items: finalItems.map((item) => ({ ...item })), account_id: c.accountId, buyer: c.buyer, channel: 'portal', items_count: finalItems.length, total_neto: total });
       addOrderMail(s, order);
       c.orderComplementChoices = [];
       c.npsScore = null; c.npsComment = null; c.referralConsent = null; c.referralBusiness = null; c.referralLink = null; c.referralSentAt = null;
       npsSelected = null;
-    });
+      return id;
+  }
+  function placeOrder(items, { sourceOrderId = null } = {}) {
+    let placed = null;
+    M.update(s => { placed = createOrder(s, items, sourceOrderId) || null; });
     repeatOpen = null;
     if (placed) toastMail((e) => e.orderId === placed);
     return placed;
@@ -11145,13 +11173,26 @@ window.M4Journey = (() => {
     M.update((s) => {
       const order = cycle(s)?.orders?.find((item) => item.id === orderId);
       if (!order || !order.waitPassed || order.receivedAt) return;
-      order.receivedAt = M.now(); order.status = 'Recepción confirmada';
-      pushMail(s, 'RECEP', 'Recepción confirmada · ' + order.id, 'Registramos que recibiste el pedido de prueba. Cuando pase el tiempo de reposición, tu portal mostrará la siguiente reposición.', { forOrder: order.id });
-      record(s, 'order_received', 'Cliente confirmó recepción en la prueba', { key: `cycle:${s.lead.id}:order_received:${order.id}`, order_id: order.id });
+      deliverOrder(s, cycle(s), order, M.now());
       changed = true;
     });
     flushMailToast();
     return changed;
+  }
+  function deliverOrder(s, c, order, at) {
+    if (order.receivedAt) return;
+    order.waitPassed = true;
+    order.waitPassedAt ||= at;
+    order.receivedAt = at;
+    if (c.orders[0].id === order.id) order.installedAt = at;
+    order.status = order.installedAt ? 'Entregado e instalado' : 'Entregado';
+    s.postventa ||= {};
+    s.postventa.resenas ||= [];
+    if (!s.postventa.resenas.some(r => r.pedidoId === order.id && r.canal === 'google')) {
+      s.postventa.resenas.push({ cuentaId: c.accountId, pedidoId: order.id, canal: 'google', estado: 'invitada', ts: at });
+    }
+    pushMail(s, 'RECEP', 'Entrega registrada · ' + order.id, 'Registramos la entrega en la simulación. Ahora puedes contarnos cómo te fue.', { forOrder: order.id });
+    record(s, 'order_received', order.status + ' (simulación)', { key: `cycle:${s.lead.id}:order_received:${order.id}`, order_id: order.id });
   }
   function requestStockAlert(productId, status) {
     let changed = false;
@@ -11192,47 +11233,56 @@ window.M4Journey = (() => {
       if (!enabled(s) || !s.lead) return;
       s.customerCycle ||= newCycle(s);
       const c = cycle(s), key = String(amount); c.timeJumps ||= {};
-      const pendingOrder = c.orders && c.orders[c.orders.length - 1];
-      // Post-compra (17-nov): con un pedido recibido, el tiempo que pasa deja la reposición lista («Toca reponer»). Se puede repetir.
-      if (pendingOrder && pendingOrder.receivedAt && !pendingOrder.replenishDue) {
-        pendingOrder.replenishDue = true; pendingOrder.replenishDueAt = M.now(); c.simulatedDays += amount;
-        c.timeJumps[`reposicion:${pendingOrder.id}:${key}`] = M.now();
-        record(s, 'replenishment_due', 'Reposición lista en el portal tras el paso del tiempo', { key: `cycle:${s.lead.id}:replenishment_due:${pendingOrder.id}`, order_id: pendingOrder.id, simulated_days: amount });
-        applied = true; return;
+      const at = M.now(), day = Number(c.simulatedDays) || 0;
+      if (!c.contractSignedAt) {
+        if (c.timeJumps[key]) return;
+        if (amount === 3 && s.proposal) addMail(s, 'E03');
+      } else {
+        c.orders ||= [];
+        let order = c.orders.at(-1);
+        if (!order) {
+          c.replenishmentNotice = true;
+          if (!createOrder(s, baseItems(s))) return;
+          order = c.orders.at(-1);
+        }
+        const orderJump = `pedido:${order.id}:${day}:${key}`;
+        c.timeJumps[orderJump] = at;
+        order.simulatedDay ??= day;
+        deliverOrder(s, c, order, at);
+        if (!order.replenishDue && day + amount - order.simulatedDay >= 30) {
+          order.replenishDue = true;
+          order.replenishDueAt = at;
+          record(s, 'replenishment_due', 'Reposición lista en el portal tras el paso del tiempo', { key: `cycle:${s.lead.id}:replenishment_due:${order.id}`, order_id: order.id, simulated_days: amount });
+        }
+        addMail(s, amount === 30 ? 'E08' : 'E07');
       }
-      // Con un pedido en camino, el paso del tiempo avanza la espera (sin límite de una vez).
-      if (pendingOrder && !pendingOrder.receivedAt && !pendingOrder.waitPassed) {
-        pendingOrder.waitPassed = true; pendingOrder.waitPassedAt = M.now(); pendingOrder.status = 'Listo para confirmar recepción';
-        c.timeJumps[`pedido:${pendingOrder.id}`] = M.now(); c.simulatedDays += amount;
-        record(s, 'order_wait_simulated', 'Avance de espera simulado en el portal', { key: `cycle:${s.lead.id}:order_wait_simulated:${pendingOrder.id}`, order_id: pendingOrder.id });
-        applied = true; return;
-      }
-      if (c.timeJumps[key]) return;
-      c.timeJumps[key] = M.now(); c.simulatedDays += amount; applied = true;
-      if (amount === 3 && s.proposal && !c.contractSignedAt) addMail(s, 'E03');
-      if (amount === 3 && c.contractSignedAt) addMail(s, 'E07');
-      if (amount === 30 && c.contractSignedAt) { c.replenishmentNotice = true; addMail(s, 'E08'); }
+      c.timeJumps[key] ||= at;
+      c.simulatedDays = day + amount;
+      applied = true;
     });
     return applied;
   }
-  window.addEventListener('storage', (event) => {
-    if (event.key !== KIT_JUMP_KEY || !event.newValue) return;
-    let jump;
-    try { jump = JSON.parse(event.newValue); } catch (_) { return; }
+  function applyTestJump(jump) {
     const session = activeKitSession();
     const nonce = String(jump?.nonce || '').trim();
     const days = Number(jump?.dias);
-    if (!session || !nonce || jump?.sesion_id !== session.id || ![3,30].includes(days)) return;
-    if (!enabled()) return;
+    if (!session || !nonce || jump?.sesion_id !== session.id || ![3,30].includes(days)) return false;
+    if (!enabled()) return false;
     sync();
     const current = M.get();
     const applied = current.customerCycle?.moderatorJumpNonces || {};
-    if (applied[nonce] || !jumpDays(days)) return;
+    if (applied[nonce]) return true;
+    if (!jumpDays(days)) return false;
     M.update((s) => {
       if (!s.customerCycle) return;
       s.customerCycle.moderatorJumpNonces ||= {};
       if (!s.customerCycle.moderatorJumpNonces[nonce]) s.customerCycle.moderatorJumpNonces[nonce] = { dias: days, at: Number(jump.at) || M.now() };
     });
+    return true;
+  }
+  window.addEventListener('storage', (event) => {
+    if (event.key !== KIT_JUMP_KEY || !event.newValue) return;
+    try { applyTestJump(JSON.parse(event.newValue)); } catch (_) { /* Datos ajenos a la prueba. */ }
     window.MarleyApp?.render?.();
   });
   function action(name, el) {
@@ -11287,7 +11337,7 @@ window.M4Journey = (() => {
     }
     window.MarleyApp?.render?.();
   }, true);
-  return { enabled, inboxHTML, contractPanelHTML, accountHTML, jumpDays, sync, markMql, addMail: (s, code) => addMail(s, code), baseItems, placeOrder, advanceOrderWait, advanceReplenishment, confirmOrderReceived, proposalAccepted, signContract, requestStockAlert, chooseOrderComplement, npsHTML };
+  return { enabled, inboxHTML, contractPanelHTML, accountHTML, jumpDays, applyTestJump, sync, markMql, addMail: (s, code) => addMail(s, code), baseItems, placeOrder, advanceOrderWait, advanceReplenishment, confirmOrderReceived, proposalAccepted, signContract, requestStockAlert, chooseOrderComplement, npsHTML, referralUrl };
 })();
 // Al recargar en una pantalla del cliente, la app se dibuja antes de que exista M4Journey y muestra el portal estándar.
 // Se vuelve a dibujar una vez, ya con el módulo listo (12-nov: antes lo ocultaba un redibujo accidental).
@@ -13025,7 +13075,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const otherMachines = machineKeys.filter(function (key) { return key !== primaryKey; }).map(machineCard).join("");
     const machineOptions = otherMachines ? '<details class="r3-machine-alternatives"><summary>Comparar otras m\u00e1quinas (' + (machineKeys.length - 1) + ')</summary><div class="r3-machine-grid">' + otherMachines + '</div></details>' : "";
     const conditions = offer
-      ? '<details class="r3-conditions"><summary><span><b>Pack de partida</b><small>Productos, kit y filtro · ' + money(startingTotal) + '</small></span></summary><div class="r3-conditions-body"><span class="r3-kicker">Tu pack de partida</span><ul class="r3-pack-lines r3-condition-lines">' + offerLines.map(function (line) { return '<li>' + lineImage(line) + '<span><b>' + esc(line.t) + '</b><small>' + esc(fmtFor(line)) + '</small></span><strong>' + money(line.precio) + '</strong></li>'; }).join("") + '</ul><dl class="r3-pack-total"><div><dt>Productos del pack</dt><dd>' + money(productsTotal) + '</dd></div><div><dt>Kit de instalaci\u00f3n y filtro</dt><dd>' + money(fixedTotal) + '</dd></div><div class="r3-total"><dt>Total del pack de partida</dt><dd>' + money(startingTotal) + '</dd></div></dl>' + quotationReferenceHTML() + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p></div></details>'
+      ? '<details class="r3-conditions"><summary><span><b>Ver el pack de partida</b><small>Productos, kit y filtro · ' + money(startingTotal) + '</small></span></summary><div class="r3-conditions-body"><span class="r3-kicker">Tu pack de partida</span><ul class="r3-pack-lines r3-condition-lines">' + offerLines.map(function (line) { return '<li>' + lineImage(line) + '<span><b>' + esc(line.t) + '</b><small>' + esc(fmtFor(line)) + '</small></span><strong>' + money(line.precio) + '</strong></li>'; }).join("") + '</ul><dl class="r3-pack-total"><div><dt>Productos del pack</dt><dd>' + money(productsTotal) + '</dd></div><div><dt>Kit de instalaci\u00f3n y filtro</dt><dd>' + money(fixedTotal) + '</dd></div><div class="r3-total"><dt>Total del pack de partida</dt><dd>' + money(startingTotal) + '</dd></div></dl>' + quotationReferenceHTML() + '<p class="r3-price-note">' + esc(DATA.prices.nota_cliente) + '</p></div></details>'
       : '<section class="r3-conditions"><h2>¿Qué incluye el pack de partida?</h2>' + quotationReferenceHTML() + '<a class="m5-link" href="#C02" data-go="C02">Elegir un negocio</a></section>';
     const cardLabel = chosen ? (chosen === recommendedKey ? "Máquina recomendada" : "Máquina elegida") : "Máquina recomendada";
     return '<section class="r3-machines m5-wrap" aria-labelledby="r3-machines-title">' + stepGuide(1) + '<header class="r3-catalog-heading"><span class="r3-kicker">Máquina en comodato</span><h1 id="r3-machines-title">Revisa la máquina para tu negocio</h1><p>Compara las opciones antes de elegir.</p></header><section class="r3-machine-primary" aria-label="' + esc(cardLabel) + '"><span class="r3-kicker">' + esc(cardLabel) + '</span>' + primaryMachine + '</section>' + machineOptions + conditions + '<div class="r3-next-machine"><button type="button" class="m5-btn r3-main" data-m10-finish data-cta-principal="packs" data-evt="cta-packs">Continuar a packs y productos</button></div></section>';
@@ -13090,7 +13140,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const serviceHead = serviceInside.slice(0, serviceFoldAt);
     const serviceRest = serviceInside.slice(serviceFoldAt);
     const description = (serviceHead.match(/<p>([\s\S]*?)<\/p>/) || [null, 'Agrega lo que te interese a tu propuesta.'])[1];
-    services = services.slice(0, serviceInsideStart) + '<details class="r3-services-fold"><summary><h2>Servicios y experiencias</h2></summary><div class="r3-services-fold-body"><p>' + description + '</p>' + serviceRest + '</div></details>' + services.slice(serviceEnd);
+    services = services.slice(0, serviceInsideStart) + '<details class="r3-services-fold"><summary><h2>Ver servicios y experiencias</h2></summary><div class="r3-services-fold-body"><p>' + description + '</p>' + serviceRest + '</div></details>' + services.slice(serviceEnd);
     const faqWrap = '<div class="ux-wrap">', faqInsideStart = faq.indexOf(faqWrap) + faqWrap.length, faqEndInside = faq.lastIndexOf('</div></section>');
     const firstQuestion = faq.indexOf('<details>', faqInsideStart);
     const questions = faq.slice(firstQuestion, faqEndInside).replace(/<\/div>\s*$/, "");
@@ -25142,7 +25192,18 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
   }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && overlayEl && !overlayEl.hidden) closeMail(); });
 })();
-</script><link rel="stylesheet" href="recursos/marca/piloto-premium.css?v=20261123"><link rel="stylesheet" href="recursos/marca/componentes.css?v=20261126e">
+</script><link rel="stylesheet" href="recursos/marca/piloto-premium.css?v=20261123"><link rel="stylesheet" href="recursos/marca/componentes.css?v=20261126nps">
+<script>
+(() => {
+  const app = document.getElementById('app');
+  window.addEventListener('click', event => {
+    if (!event.target.closest?.('[data-mc-ayuda-ruta]')) return;
+    event.preventDefault();
+    window.MarleyApp?.go('C02');
+    requestAnimationFrame(() => app.querySelector('.mc-ayuda-movil [data-m7-open]')?.click());
+  });
+})();
+</script>
 <script id="marley-crm-v2-loader">
 (() => {
   let requested = false;
@@ -25232,7 +25293,7 @@ body[data-current="C09"] #m4-main{padding-bottom:24px!important}
 })();
 </script>
 <script src="crm/crm-carga.js"></script>
-<script>(function(){var P=/^#C0[456]$|^#C09$/,L=0,T={C01:['Empresas →','empresas'],C08:['Armar mi solución','armar'],C10:['Continuar con mis datos →','datos'],C11:['Continuar a packs y productos','packs']};function ld(){if(L)return;L=1;var l=document.createElement('link');l.rel='stylesheet';l.href='recursos/compra/compra.css?v=20261126d';document.head.appendChild(l);var j=document.createElement('script');j.src='recursos/compra/compra.js?v=20261126d';j.onload=function(){window.MarleyApp&&MarleyApp.render&&MarleyApp.render()};document.body.appendChild(j)}function pend(r){var x=document.querySelector('.cta-pendiente'),st=window.M4&&M4.get(),on=r==='C02'&&st&&st.compra&&st.compra.pendiente&&st.proposal&&st.proposal.status!=='aceptada';if(!on){if(x)x.remove();return}if(x)return;var m=document.querySelector('#app main');if(!m)return;var d=document.createElement('div');d.className='cta-pendiente';d.style.cssText='margin:24px auto 0;padding:16px clamp(20px,3vw,32px);max-width:820px;display:grid;gap:10px;border:2px solid #161616';d.innerHTML='<p style="margin:0;font-weight:700">Tienes una propuesta pendiente: tu pack de inicio te espera.</p><a class="m5-btn r3-main" href="#C05" data-go="C05" data-cierra-tarea="T4" data-evt="retomar-propuesta" style="justify-self:start">Retomar mi propuesta</a>';m.insertBefore(d,m.firstChild)}function pl(){if(!/^(#C02)?$/.test(location.hash||''))return;var p=document.querySelector('.r3-c02-product-pair');if(!p)return;[['insumos','¿Qué café e insumos puedo pedir?'],['maquinas','¿Qué máquina me prestan en comodato?']].forEach(function(x){var e=p.querySelector('#'+x[0]);if(!e||e.parentNode.tagName==='DETAILS')return;var d=document.createElement('details');d.className='r7-fold r7-c02-fold';d.setAttribute('data-r7-fold',x[0]);var h=document.createElement('summary');h.innerHTML='<span class="r7-summary-heading" role="heading" aria-level="2">'+x[1]+'</span>';e.parentNode.insertBefore(d,e);d.appendChild(h);d.appendChild(e)})}function cta(){pl();var r=(location.hash||'#C01').slice(1).split('?')[0],ex=document.querySelector('.cta-cierre');pend(r);if(!T[r]){if(ex)ex.remove();return}if(ex&&ex.getAttribute('data-r')===r)return;if(ex)ex.remove();var m=document.querySelector('#app main');if(!m)return;var b=[].slice.call(document.querySelectorAll('#app a,#app button')).find(function(e){return e.textContent.indexOf(T[r][0])>=0&&e.getClientRects().length>0});if(!b)return;b.setAttribute('data-cta-principal',T[r][1]);var w=document.createElement('div');w.className='cta-cierre';w.setAttribute('data-r',r);w.style.cssText='margin:40px auto;padding:0 clamp(20px,3vw,32px);max-width:820px';var c=b.cloneNode(true);c.removeAttribute('id');w.appendChild(c);m.appendChild(w)}function ck(){if(P.test(location.hash))ld();cta()}addEventListener('hashchange',ck);document.addEventListener('r3:listo',pl);addEventListener('load',pl);new MutationObserver(cta).observe(document.body,{childList:true,subtree:true});ck()})();</script>
+<script>(function(){var P=/^#C0[456]$|^#C09$/,L=0,T={C01:['Empresas →','empresas'],C08:['Armar mi solución','armar'],C10:['Continuar con mis datos →','datos'],C11:['Continuar a packs y productos','packs']};function ld(){if(L)return;L=1;var l=document.createElement('link');l.rel='stylesheet';l.href='recursos/compra/compra.css?v=20261126nps';document.head.appendChild(l);var j=document.createElement('script');j.src='recursos/compra/compra.js?v=20261126nps';j.onload=function(){window.MarleyApp&&MarleyApp.render&&MarleyApp.render()};document.body.appendChild(j)}function pend(r){var x=document.querySelector('.cta-pendiente'),st=window.M4&&M4.get(),on=r==='C02'&&st&&st.compra&&st.compra.pendiente&&st.proposal&&st.proposal.status!=='aceptada';if(!on){if(x)x.remove();return}if(x)return;var m=document.querySelector('#app main');if(!m)return;var d=document.createElement('div');d.className='cta-pendiente';d.style.cssText='margin:24px auto 0;padding:16px clamp(20px,3vw,32px);max-width:820px;display:grid;gap:10px;border:2px solid #161616';d.innerHTML='<p style="margin:0;font-weight:700">Tienes una propuesta pendiente: tu pack de inicio te espera.</p><a class="m5-btn r3-main" href="#C05" data-go="C05" data-cierra-tarea="T4" data-evt="retomar-propuesta" style="justify-self:start">Retomar mi propuesta</a>';m.insertBefore(d,m.firstChild)}function pl(){if(!/^(#C02)?$/.test(location.hash||''))return;var p=document.querySelector('.r3-c02-product-pair');if(!p)return;[['insumos','¿Qué café e insumos puedo pedir?'],['maquinas','¿Qué máquina me prestan en comodato?']].forEach(function(x){var e=p.querySelector('#'+x[0]);if(!e||e.parentNode.tagName==='DETAILS')return;var d=document.createElement('details');d.className='r7-fold r7-c02-fold';d.setAttribute('data-r7-fold',x[0]);var h=document.createElement('summary');h.innerHTML='<span class="r7-summary-heading" role="heading" aria-level="2">'+x[1]+'</span>';e.parentNode.insertBefore(d,e);d.appendChild(h);d.appendChild(e)})}function cta(){pl();var r=(location.hash||'#C01').slice(1).split('?')[0],ex=document.querySelector('.cta-cierre');pend(r);if(!T[r]){if(ex)ex.remove();return}if(ex&&ex.getAttribute('data-r')===r)return;if(ex)ex.remove();var m=document.querySelector('#app main');if(!m)return;var b=[].slice.call(document.querySelectorAll('#app a,#app button')).find(function(e){return e.textContent.indexOf(T[r][0])>=0&&e.getClientRects().length>0});if(!b)return;b.setAttribute('data-cta-principal',T[r][1]);var w=document.createElement('div');w.className='cta-cierre';w.setAttribute('data-r',r);w.style.cssText='margin:40px auto;padding:0 clamp(20px,3vw,32px);max-width:820px';var c=b.cloneNode(true);c.removeAttribute('id');w.appendChild(c);m.appendChild(w)}function ck(){if(P.test(location.hash))ld();cta()}addEventListener('hashchange',ck);document.addEventListener('r3:listo',pl);addEventListener('load',pl);new MutationObserver(cta).observe(document.body,{childList:true,subtree:true});ck()})();</script>
 <style id="ds5-c04-reserva">@media (max-width:767px){body[data-current="C04"] #app{padding-bottom:calc(76px + env(safe-area-inset-bottom))!important}body[data-current="C04"] #app :is(button,input,select,textarea,a){scroll-margin-bottom:84px}}</style>
 <script src="recursos/vida/cargar-vida.js?v=20261126b" defer></script>
 </body></html>

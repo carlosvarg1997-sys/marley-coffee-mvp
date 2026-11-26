@@ -15,17 +15,6 @@
   var OFERTA = 'recursos/datos/oferta_por_buyer.json';
   var GUIA = 'recursos/portal/guia-elegir-maquina.html';
   var RESPALDO = 'recursos/productos/catalog/consumibles.webp';
-  // Foto de ejemplo por tipo de comprador (archivos que ya existen en el repositorio)
-  var FOTO = {
-    hotel: 'recursos/legado/hotel-automatica-portada.webp',
-    restaurante: 'recursos/legado/restaurant-brand-experience-concept.webp',
-    cafeteria: 'recursos/legado/horeca-bar-concept.webp',
-    oficina: 'recursos/legado/office-concept.webp',
-    eventos: 'recursos/fondos/catering.webp',
-    panaderia: 'recursos/escenas/panaderia-barra-concept.webp',
-    conveniencia: 'recursos/escenas/conveniencia-autoatencion-concept.webp'
-  };
-
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function clp(n) { return n == null ? 'precio con tu ejecutivo' : (D.fmtCLP ? D.fmtCLP(n) : '$ ' + Math.round(n).toLocaleString('es-CL')); }
   function ruta() { return (location.hash || '#C01').slice(1).split('?')[0]; }
@@ -159,7 +148,10 @@
     if (s.compra && s.compra.paso === 'cruce') return '<section class="cmp-sec"><div class="cmp-wrap">' + cruceHTML() + '</div></section>';
     var maquina = maquinaDe(s), mq = maquina.m, com = p.comprador, etiq = com && com.etiqueta ? com.etiqueta.toLowerCase() : '';
     var titulo = com ? 'Tu pack de inicio para ' + etiq : 'Tu pack de inicio';
-    var ejemplo = com && FOTO[com.id] ? '<details class="cmp-ejemplo"><summary>Ver ejemplo para ' + esc(etiq) + '</summary><img src="' + FOTO[com.id] + '" alt="Ejemplo de café para ' + esc(etiq) + '" width="640" height="400" loading="lazy" data-zoom data-zoom-grupo="ejemplo-pack"></details>' : '';
+    var scene = window.M4D.BUSINESS[s.answers?.negocio || com?.negocio]?.scene || 'hotel';
+    var ejemplo = '<figure class="mc-pack-scene"><figcaption>Así se vería el café en tu ' +
+      esc(({Hotel:'hotel',Restaurante:'restaurante','Cafetería':'cafetería',Oficinas:'oficina',OCS:'oficina'})[s.answers?.negocio] || 'negocio') +
+      '</figcaption>' + window.M5UI.film(scene, { mode: 'once', deferred: true }) + '</figure>';
     var saludo = com && com.mensaje ? '<p class="cmp-saludo">' + esc(com.mensaje) + '</p>' : '';
     var motivo = s.catalogJourney?.machineSource === 'cliente' ? 'Elegiste esta máquina directamente.' : window.R5?.porque?.(s, maquina.key) || mq.kind;
     var extra = s.compra && s.compra.extra ? '<p class="cmp-ok">Sumaste la taza de la marca a tu pack: su precio lo confirma tu ejecutivo.</p>' : '';
@@ -171,7 +163,7 @@
       '<div class="cmp-pack">' +
       '<div class="cmp-pack-main">' +
       '<div class="cmp-maquina"><img src="' + esc(mq.photo) + '" alt="' + esc(mq.name) + '" width="160" height="140" loading="lazy" data-zoom data-zoom-grupo="maquina"><div><b>' + esc(mq.name) + '</b><span>' + esc(mq.cupsTxt) + '</span><small>' + esc(mq.staff) + '</small><p class="cmp-motivo">' + esc(motivo) + '</p></div></div>' +
-      extra +
+      ejemplo + extra +
       '</div>' +
       '<aside id="pack-resumen" class="cmp-pack-card" aria-label="Resumen de tu pack">' +
       '<div class="cmp-total premium-quote-total mc-price"><span class="mc-price-label">Total neto referencial</span><strong class="mc-price-value" data-pack-total="' + p.total + '" data-vida="cuenta" data-valor="' + p.total + '">' + clp(p.total) + '</strong><small>+ IVA · referencial</small></div>' +
@@ -179,8 +171,8 @@
       '<div class="cmp-linea"><div class="cmp-minis">' + miniaturas(p) + '</div><p>' + p.enPack.length + ' productos, más el kit de instalación y el filtro.' + (com ? ' Elegidos para ' + esc(etiq) + '.' : '') + '</p></div>' +
       '<p class="cmp-nota">Precios netos referenciales, de la cotización del 19-oct-2026. Modelo, mínimo mensual y plazo de entrega: los confirma el equipo.</p>' +
       '</aside>' +
-      '</div>' + (ui.verProductos ? detalle(p) : '<div id="pack-productos" hidden></div>') + (ui.contacto ? contactoHTML(s) : '') + ejemplo +
-      '<section class="cmp-cambios mc-card" aria-label="Cambios a tu pack"><details><summary>¿Necesitas cambiar algo?</summary><div class="cmp-cambios-lista"><button type="button" class="cmp-link" data-pack-accion="cambiar-maquina" data-evt="pack-cambiar-maquina">Cambiar máquina</button><button type="button" class="cmp-link" data-pack-accion="cambiar-respuestas" data-evt="pack-cambiar-respuestas">Cambiar respuestas</button><button type="button" class="cmp-link" data-pack-accion="guardar-despues" data-evt="guardar-propuesta">Guardar y seguir después</button><details><summary>Guías y ayuda</summary><a class="cmp-link" href="' + esc(guiaHref(s)) + '" data-evt="lead-magnet-guia-maquina">Guía para elegir máquina</a><button type="button" class="cmp-link" data-m7-open="ayuda" data-evt="pack-abrir-ayuda">Te ayudamos a decidir</button></details></div></details></section>' +
+      '</div>' + (ui.verProductos ? detalle(p) : '<div id="pack-productos" hidden></div>') + (ui.contacto ? contactoHTML(s) : '') +
+      '<section class="cmp-cambios mc-card" aria-label="Cambios a tu pack"><details><summary>Ver opciones para cambiar tu pack</summary><div class="cmp-cambios-lista"><button type="button" class="cmp-link" data-pack-accion="cambiar-maquina" data-evt="pack-cambiar-maquina">Cambiar máquina</button><button type="button" class="cmp-link" data-pack-accion="cambiar-respuestas" data-evt="pack-cambiar-respuestas">Cambiar respuestas</button><button type="button" class="cmp-link" data-pack-accion="guardar-despues" data-evt="guardar-propuesta">Guardar y seguir después</button><details><summary>Ver la guía y hablar con el asistente</summary><a class="cmp-link" href="' + esc(guiaHref(s)) + '" data-evt="lead-magnet-guia-maquina">Guía para elegir máquina</a><button type="button" class="cmp-link" data-m7-open="ayuda" data-evt="pack-abrir-ayuda">Te ayudamos a decidir</button></details></div></details></section>' +
       '<div class="cmp-cierre"><div class="cmp-acciones">' + botonAceptar() + '</div></div>' +
       '</div></section>';
   }
@@ -259,10 +251,10 @@
   function montarPortal() {
     var host = document.getElementById('portal-host');
     if (!host || host.getAttribute('data-montado')) return;
-    cargarCss('recursos/portal/portal.css?v=20261126b');
+    cargarCss('recursos/portal/portal.css?v=20261126nps');
     if (window.MarleyPortal) { renderPortal(host); return; }
     if (!portalCarga) portalCarga = new Promise(function (resolve, reject) {
-      var sc = document.createElement('script'); sc.src = 'recursos/portal/portal.js?v=20261126b';
+      var sc = document.createElement('script'); sc.src = 'recursos/portal/portal.js?v=20261126nps';
       sc.onload = resolve; sc.onerror = reject; document.body.appendChild(sc);
     }).catch(function () { portalCarga = null; });
     portalCarga.then(function () { renderPortal(host); });

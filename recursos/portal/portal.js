@@ -20,17 +20,17 @@
     { id: 'firmado', t: 'Contrato firmado', d: 'Firmaste el contrato de comodato (simulación): la máquina queda en préstamo mientras compras café.' },
     { id: 'preparacion', t: 'En preparación', d: 'Preparamos tu máquina y tus insumos. La fecha y el plazo de entrega se confirman con tu ejecutivo.' },
     { id: 'camino', t: 'En camino', d: 'Tu pedido va en camino (simulación). Cuando llegue, confírmalo en esta pantalla.' },
-    { id: 'instalado', t: 'Instalado', d: 'Confirmaste que llegó el pedido. La instalación de la máquina se coordina con tu ejecutivo.' }
+    { id: 'instalado', t: 'Instalado', d: 'Tu pedido llegó y la instalación quedó registrada en la simulación.' }
   ];
   var PASOS = {
     'sin-propuesta': { titulo: 'Tu pedido', lead: 'Tu pedido todavía no está confirmado. Cuando tu propuesta esté aceptada, aquí verás tu contrato y tu avance.' },
     firma: { titulo: 'Firma tu contrato', lead: 'Tu propuesta está aceptada. Revisa el contrato y fírmalo para avanzar.' },
-    aviso: { titulo: 'Contrato firmado', lead: 'Cuando llegue el aviso de reposición, confirma tu pedido.' },
+    aviso: { titulo: 'Contrato firmado', lead: 'Simula el paso del tiempo para ver cómo llega tu pedido.' },
     confirmar: { titulo: 'Confirma tu pedido', lead: 'El aviso de reposición está listo. Confirma tu pedido para que comience la preparación.' },
     preparacion: { titulo: 'Tu pedido está en preparación', lead: 'Tu pedido está confirmado. Puedes seguir su avance en la línea de abajo.' },
     camino: { titulo: 'Tu pedido va en camino', lead: 'Tu pedido va <mark data-vida="clave">en camino</mark>. Cuando llegue, confírmalo aquí.' },
     recibido: { titulo: 'Pedido recibido', lead: 'Recibiste tu pedido. Cuando toque reponer, lo repites en un toque.' },
-    reponer: { titulo: 'Toca reponer', lead: 'Repite tu pedido con los mismos productos o ajústalo a tu consumo.' }
+    reponer: { titulo: '¿Quieres repetir tu pedido?', lead: 'Repite tu pedido con los mismos productos o ajústalo a tu consumo.' }
   };
   var MOTIVOS = ['La máquina no funciona', 'Me faltan insumos o el pedido no llegó', 'El café no sale como antes', 'Facturación o pago', 'Otro'];
   var RAPIDAS = [
@@ -43,6 +43,9 @@
   ];
   var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   var ESTIMADO = 'estimado de la simulación';
+  var CARITAS = { contento: ['🙂', 'Contento'], regular: ['😐', 'Más o menos'], 'no-contento': ['🙁', 'No contento'] };
+  var CANALES = { google: 'Google', whatsapp: 'WhatsApp', linkedin: 'LinkedIn', instagram: 'Instagram', referido: 'Recomendar a otro negocio' };
+  var ICONOS_CANALES = { google:'★', whatsapp:'↗', linkedin:'▤', instagram:'▧', referido:'✉' };
 
   var st = {
     tab: 'pedido',
@@ -60,7 +63,10 @@
     rapida: null,
     textoRapida: null,
     toast: null,
-    toastTimer: null
+    toastTimer: null,
+    encuesta: null,
+    vistaCanal: null,
+    resumenAyuda: null
   };
 
   /* ---------- utilidades ---------- */
@@ -112,8 +118,9 @@
     return window.M4D && window.M4D.MACHINES && window.M4D.MACHINES[maquina] ? window.M4D.MACHINES[maquina] : {};
   }
   function maquinaDe(x) {
-    var f = ficha(x.comp.maquina || '');
-    var m = maquinaM4(x.comp.maquina || '');
+    var clave = x.s.proposal?.machine || x.s.quote?.machine || x.comp.maquina || '';
+    var f = ficha(clave);
+    var m = maquinaM4(clave);
     return {
       nombre: f.nombre || m.name || 'Tu máquina',
       tipo: f.tipo || m.kind || '',
@@ -158,6 +165,107 @@
     };
     Object.keys(extra || {}).forEach(function (k) { ev[k] = extra[k]; });
     s.events.push(ev);
+  }
+  function postventa(s, lista, escribir) {
+    if (escribir) {
+      s.postventa ||= {};
+      return s.postventa[lista] ||= [];
+    }
+    return s.postventa?.[lista] || [];
+  }
+  function fichaPostventa(s, lista, pedidoId) {
+    return postventa(s, lista).find(v => v.cuentaId === s.customerCycle?.accountId && v.pedidoId === pedidoId);
+  }
+  function escribirPostventa(s, lista, pedidoId, datos) {
+    var fila = fichaPostventa(s, lista, pedidoId);
+    if (fila) { Object.assign(fila, datos); return; }
+    postventa(s, lista, true).push(Object.assign({ cuentaId: s.customerCycle.accountId, pedidoId, ts: window.M4.now() }, datos));
+  }
+
+  function pedidoParaEncuesta(x) {
+    var pendientes = (x.c.orders || []).filter(p => {
+      if (!p.receivedAt) return false;
+      var r = fichaPostventa(x.s, 'respuestas', p.id);
+      return !r || r.nps === null && !(r.carita === 'no-contento' && fichaPostventa(x.s, 'ayudas', p.id));
+    });
+    return pendientes.at(-1) || (x.p?.receivedAt ? x.p : null);
+  }
+  function momento(x, pedidoId) { return x.c.orders?.[0]?.id === pedidoId ? 'primera' : 'recompra'; }
+  function tarjetasCanales(conChecks, elegidos = []) {
+    return '<div class="mp-canales">' + Object.entries(CANALES).map(([id, canal]) => {
+      var etiqueta = '<span aria-hidden="true">' + ICONOS_CANALES[id] + '</span> ' + esc(canal);
+      if (!conChecks) return '<button type="button" class="mp-btn mp-btn--sec" data-mp-postaccion="canal" data-canal="' + id + '">' + etiqueta + '</button>';
+      return '<label><input type="checkbox" name="canales" value="' + id + '"' +
+        (elegidos.includes(id) ? ' checked' : '') + '> ' + etiqueta + '</label>';
+    }).join('') + '</div>';
+  }
+  function vistaCanal(x, id, abierta) {
+    var info = st.formularios.recomendar || {};
+    var negocio = x.c.company || 'tu negocio';
+    var m = maquinaDe(x);
+    var imagen = m.foto ? '<img class="mp-canal-foto" src="' + esc(m.foto) + '" width="160" height="120" loading="lazy" alt="' + esc(m.nombre) + '">' : '';
+    var reseña = '<label class="mp-campo">Borrador de tu reseña<textarea rows="2" maxlength="600" placeholder="Cuenta tu experiencia con el servicio.">' +
+      esc(abierta || '') + '</textarea></label>';
+    var cuerpos = {
+      google: '<div class="mp-canal-muestra"><b>Marley Coffee Empresas</b><small>Perfil de Empresa en Google</small><span aria-label="Escala de una a cinco estrellas">☆ ☆ ☆ ☆ ☆</span>' + reseña + '</div><p>Las reseñas aparecen en Google Maps y en la búsqueda local. Ayudan a que otros negocios encuentren la ficha y evalúen el servicio.</p>',
+      whatsapp: '<div class="mp-canal-muestra"><b>Mensaje para WhatsApp</b><p>Hola, te comparto Marley Coffee Empresas por si estás buscando café para tu negocio.</p><div class="mp-canal-enlace"><b>Marley Coffee Empresas</b><small>' + esc(journey()?.referralUrl?.(x.c) || '') + '</small></div></div>',
+      linkedin: '<div class="mp-canal-muestra"><b>' + esc(negocio) + ' · Publicación de LinkedIn</b><p>Así servimos café en nuestro negocio con Marley Coffee Empresas.</p>' + imagen + '</div>',
+      instagram: '<div class="mp-canal-muestra"><b>' + esc(negocio) + ' · Historia de Instagram</b>' + imagen + '<span>@marleycoffee.chile</span></div>',
+      referido: '<div class="mp-canal-muestra"><b>Correo para ' + esc(info.negocio || 'otro negocio') + '</b><p>De parte de ' + esc(negocio) + ': te comparto una guía para elegir máquina y atender el café de tu equipo o de tus clientes.</p><a class="mp-link" href="' + esc(buyerGuia(x.comp, 'guia-elegir-maquina.html')) + '">Ver la guía para elegir máquina</a></div>' +
+        (st.tab === 'recomendar' ? '' : boton('mp-btn--sec', 'data-portal-tab="recomendar"', 'Abrir Recomendar'))
+    };
+    return '<div class="mp-canal-vista" data-canal-vista="' + id + '"><h3>Así se vería en ' + esc(id === 'referido' ? 'un correo' : CANALES[id]) +
+      '</h3><p class="mp-fino">Vista previa simulada: no se publica ni se envía nada.</p>' + cuerpos[id] + '</div>';
+  }
+  function invitacion(x, p) {
+    if (!p) return '';
+    var r = fichaPostventa(x.s, 'respuestas', p.id);
+    var ayuda = fichaPostventa(x.s, 'ayudas', p.id);
+    var caras = Object.entries(CARITAS).map(([id, datos]) =>
+      '<button type="button" class="mp-carita" data-mp-postaccion="cara" data-cara="' + id +
+      '" data-pedido="' + esc(p.id) + '" aria-pressed="' + String(r?.carita === id) + '"><span aria-hidden="true">' +
+      datos[0] + '</span>' + datos[1] + '</button>').join('');
+    var resuelta = ayuda?.estado === 'resuelta' && !r?.seguimientoAt;
+    var contenido = resuelta
+      ? '<p>Tu solicitud quedó resuelta. Cuéntanos cómo te fue y deja tu reseña cuando quieras.</p>' +
+        boton('mp-btn--sec', 'data-mp-postaccion="seguimiento" data-pedido="' + esc(p.id) + '"', 'Contar cómo me fue')
+      : ayuda ? '<p role="status">Tu solicitud está ' + (ayuda.estado === 'tomada' ? 'en manos de Soporte.' : 'en espera de Soporte.') + '</p>'
+      : r?.nps != null ? '<p role="status">Gracias por contarnos cómo te fue.</p>'
+      : '<div class="mp-caritas">' + caras + '</div>';
+    return '<div class="mp-satisfaccion mp-bloque" data-mp-satisfaccion="' + esc(p.id) + '">' +
+      '<h3>¿Cómo te fue con tu pedido?</h3>' + contenido +
+      '<button type="button" class="mp-link" data-mp-postaccion="canal" data-canal="google" data-pedido="' + esc(p.id) +
+      '">' + (r?.carita === 'no-contento' ? 'O deja tu reseña en Google' : 'Ver cómo dejar una reseña en Google') + '</button></div>';
+  }
+  function encuestaHTML(x) {
+    var e = st.encuesta;
+    if (!e) return '';
+    var contenido;
+    if (e.modo === 'preview') {
+      contenido = vistaCanal(x, e.canal, fichaPostventa(x.s, 'respuestas', e.pedido)?.abierta);
+    } else if (e.modo === 'ayuda') {
+      contenido = '<h3>Te ayudamos ahora</h3><form class="mp-form" data-mp-form="incidencia">' +
+        '<label class="mp-campo">¿Qué pasó?<select name="motivo" required><option value="">Elige un motivo</option>' +
+        MOTIVOS.map(m => '<option' + (e.motivo === m ? ' selected' : '') + '>' + esc(m) + '</option>').join('') + '</select></label>' +
+        '<label class="mp-campo">Cuéntanos qué pasó<textarea name="detalle" required maxlength="600">' + esc(e.detalle || '') + '</textarea></label>' +
+        '<label class="mp-campo" data-mp-foto' + (e.motivo === MOTIVOS[0] ? '' : ' hidden') + '>Foto de la falla (opcional)<input type="file" accept="image/*" name="foto"><small>En esta prueba solo se registra el nombre de la foto.</small></label>' +
+        '<label class="mp-campo">¿Cuándo te acomoda que te contactemos?<input type="text" name="horario" required maxlength="100" value="' +
+        esc(e.horario || '') + '"></label><button class="mp-btn mp-btn--primario" type="submit">Pedir ayuda</button></form>' +
+        boton('mp-link', 'data-mp-postaccion="canal" data-canal="google" data-pedido="' + esc(e.pedido) + '"', 'O deja tu reseña en Google');
+    } else {
+      contenido = '<h3>Cuéntanos cómo te fue</h3><form class="mp-form" data-mp-form="satisfaccion">' +
+        '<fieldset class="mp-campo"><legend>¿Qué tan probable es que nos recomiendes?</legend><div class="mp-nps">' +
+        Array.from({length:11}, (_, i) => '<label><input type="radio" name="nps" value="' + i + '" required' +
+          (String(e.nps) === String(i) ? ' checked' : '') + '><span>' + i + '</span></label>').join('') +
+        '</div><small>0 = nada probable · 10 = muy probable</small></fieldset>' +
+        '<label class="mp-campo">¿Qué te gustó o qué mejorarías?<textarea name="abierta" maxlength="600">' + esc(e.abierta || '') + '</textarea></label>' +
+        '<fieldset class="mp-campo"><legend>¿Por dónde nos recomendarías?</legend>' + tarjetasCanales(true, e.canales) + '</fieldset>' +
+        '<div data-mp-vista-inline aria-live="polite">' + (e.canal ? vistaCanal(x, e.canal, e.abierta) : '') + '</div>' +
+        '<button class="mp-btn mp-btn--primario" type="submit">Guardar respuesta</button></form>';
+    }
+    return '<dialog class="mp-encuesta" data-mp-encuesta aria-label="' + (e.modo === 'preview' ? 'Vista previa de recomendación' : 'Satisfacción con tu pedido') +
+      '"><div class="mp-encuesta-interior">' + boton('mp-btn--sec mp-encuesta-cerrar', 'data-mp-postaccion="cerrar"', 'Cerrar') +
+      contenido + '</div></dialog>';
   }
 
   /* ---------- estado de la cuenta ---------- */
@@ -236,6 +344,7 @@
       '<h1 class="mp-titulo" data-vida="titulo">Hola, ' + esc(nombre) + '</h1>' +
       '<p class="mp-saludo">' + esc(x.comp.mensaje || 'Tu café para el día a día, con reposición antes de que se acabe.') + '</p>' +
       '<p class="mp-folio">Folio <b>' + esc(folioDe(x.s) || 'por asignar') + '</b></p>' +
+      '<button type="button" class="mp-ayuda-movil" data-portal-tab="ayuda">¿Necesitas ayuda?</button>' +
       '</header>';
   }
   function pestanas(x) {
@@ -277,11 +386,9 @@
       case 'aviso':
       case 'preparacion':
       case 'recibido':
-        return boton('mp-btn--primario', 'data-portal-accion="avanzar-tiempo" ' + evt + ' data-evt="pedido_avance_tiempo"', 'Simular avance de tiempo');
       case 'confirmar':
-        return boton('mp-btn--primario', 'data-portal-accion="confirmar-pedido" ' + evt + ' data-evt="pedido_confirmar"', 'Confirmar pedido');
       case 'camino':
-        return boton('mp-btn--primario', 'data-portal-accion="confirmar-recepcion" ' + evt + ' data-evt="pedido_confirmar_llegada"', 'Confirmar que llegó');
+        return boton('mp-btn--primario', 'data-portal-accion="avanzar-tiempo" ' + evt + ' data-evt="pedido_avance_tiempo"', 'Simular avance de tiempo');
       case 'reponer':
         return boton('mp-btn--primario', 'data-portal-accion="ir-repetir" ' + evt + ' data-evt="pedido_ir_repetir"', 'Repetir mi pedido');
       default:
@@ -297,14 +404,17 @@
         ? (av.fechas[e.id] ? 'Hecho el ' + diaMes(av.fechas[e.id]) : 'Hecho')
         : (actual ? 'Fecha: ' + ESTIMADO : 'Pendiente');
       var clase = hecha ? ' is-hecha' : (actual ? ' is-actual' : '');
+      var nombreEtapa = e.id === 'instalado' && x.numero > 1 ? 'Entregado' : e.t;
       return '<li class="mp-etapa' + clase + '">' +
         '<button type="button" class="mp-etapa-btn" data-etapa="' + e.id + '" aria-pressed="' + (etapaVista.id === e.id ? 'true' : 'false') + '"' + (actual ? ' aria-current="step"' : '') + '>' +
         '<span class="mp-etapa-n" aria-hidden="true">' + (i + 1) + '</span>' +
-        '<span class="mp-etapa-txt"><b>' + esc(e.t) + '</b>' + (actual ? '<em>Ahora</em>' : '') + '<small>' + esc(texto) + '</small></span>' +
+        '<span class="mp-etapa-txt"><b>' + esc(nombreEtapa) + '</b>' + (actual ? '<em>Ahora</em>' : '') + '<small>' + esc(texto) + '</small></span>' +
         '</button></li>';
     }).join('');
     /* La explicación aparece al tocar una etapa (en la carga solo se marca la etapa actual). */
-    var detalle = st.etapa ? '<b>' + esc(etapaVista.t) + '.</b> ' + esc(etapaVista.d) : '';
+    var detalle = st.etapa ? (etapaVista.id === 'instalado' && x.numero > 1
+      ? '<b>Entregado.</b> Tu recompra llegó en la simulación.'
+      : '<b>' + esc(etapaVista.t) + '.</b> ' + esc(etapaVista.d)) : '';
     return '<ol id="portal-franja" class="mp-franja" aria-label="Avance de tu pedido">' + items + '</ol>' +
       (av.hecho.instalado ? '' : '<p class="mp-fino">Fecha estimada de llegada por confirmar. Las etapas muestran el avance simulado.</p>') +
       '<p id="portal-franja-detalle" class="mp-franja-detalle" aria-live="polite">' + detalle + '</p>';
@@ -331,20 +441,39 @@
       '<b data-vida="cuenta" data-valor="' + Math.round(x.total) + '">' + fmt(x.total) + '</b></p>' +
       (x.p ? '' : '<small>Incluye kit de instalación (' + fmt(x.kit) + ') y filtro (' + fmt(x.filtro) + ').</small>') +
       '<small>+ IVA · referencial</small></div>';
+    var productos = x.items.length ? '<ul class="mp-lista" aria-label="Productos">' + lista + '</ul>' : '<p class="mp-fino">Los productos se confirman con tu ejecutivo.</p>';
+    if (x.p?.receivedAt) productos = '<details class="mp-productos-entregados"><summary>Ver los productos entregados</summary>' + productos + '</details>';
     return '<div class="mp-bloque" aria-labelledby="mp-h-pediste">' +
       '<h2 id="mp-h-pediste" class="mp-h3">Lo que pediste</h2>' +
       '<p class="mp-folio-linea">Folio <b>' + esc(folioDe(x.s) || 'por asignar') + '</b> · ' + (x.p ? 'Pedido ' + x.numero : 'Pack de partida, por confirmar') + '</p>' +
       maquinaHTML +
-      (x.items.length ? '<ul class="mp-lista" aria-label="Productos">' + lista + '</ul>' : '<p class="mp-fino">Los productos se confirman con tu ejecutivo.</p>') +
+      productos +
       '<p class="mp-fino mp-modalidad">Modalidad: comodato. La máquina queda en préstamo mientras compras café.</p>' +
       total +
       '</div>';
+  }
+  function explicacionesPedido(x) {
+    var a = x.s.answers || {};
+    var b = a.negocio || x.c.business || 'negocio';
+    var especial = { OCS: 'oficina', Oficinas: 'oficina', Conveniencia: 'tienda de conveniencia', 'Eventos o catering': 'negocio de eventos o catering' };
+    var nombre = especial[b] || b.toLowerCase();
+    var m = maquinaDe(x);
+    var directo = x.s.catalogJourney?.machineSource === 'cliente';
+    var respuestas = [['Tazas que indicaste', a.volumen], ['Forma de servir', a.operacion], ['Preferencias', a.preferencias]]
+      .filter(([, v]) => v?.length).map(([k, v]) => '<li><b>' + esc(k) + ':</b> ' + esc(Array.isArray(v) ? v.join(', ') : v) + '</li>').join('');
+    return '<div class="mp-explicaciones"><details><summary>Ver por qué elegimos esta solución para tu ' + esc(nombre) + '</summary>' +
+      '<p>' + esc(directo ? 'Elegiste la máquina ' + m.nombre + ' directamente.' : 'La máquina ' + m.nombre + ' se seleccionó según tu tipo de negocio y la forma de servir café.') + '</p>' +
+      '<ul>' + (directo ? '' : respuestas) + '<li><b>Capacidad:</b> ' + esc(m.tazas || 'A confirmar con el equipo') +
+      '</li><li><b>Atención:</b> ' + esc(m.atencion || 'A confirmar con el equipo') + '</li></ul></details>' +
+      '<details><summary>Ver qué incluye el comodato</summary><p>La máquina queda en préstamo mientras compras café.</p>' +
+      '<p>La carga base incluye café e insumos, kit de instalación y filtro. La referencia corresponde a negocios de flujo bajo o medio. Se paga antes de instalar y no corresponde a una mensualidad.</p>' +
+      '<p>El equipo confirma modelo, mínimo mensual y plazo.</p></details></div>';
   }
   function panelPedido(x) {
     var P = PASOS[x.paso] || PASOS['sin-propuesta'];
     var av = avance(x);
     var cta = '<div class="mp-accion">' + ctaPedido(x) + '</div>';
-    var tecnico = '<details class="mp-tecnico"><summary>Datos técnicos</summary><ul class="mp-tecnico-lista">' +
+    var tecnico = '<details class="mp-tecnico"><summary>Ver datos técnicos del pedido</summary><ul class="mp-tecnico-lista">' +
       '<li>Cuenta de prueba: ' + esc(x.c.accountId || '—') + '</li>' +
       '<li>Contrato simulado: ' + esc(x.c.contractId || 'sin firmar') + '</li>' +
       '<li>Días simulados: ' + esc(String(x.c.simulatedDays || 0)) + '</li>' +
@@ -355,7 +484,9 @@
       '<h2 class="mp-h2" data-vida="titulo">' + esc(P.titulo) + '</h2>' +
       '<p class="mp-lead">' + P.lead + '</p></header>' +
       avisosYErrores('pedido') +
+      invitacion(x, pedidoParaEncuesta(x)) +
       cta +
+      (x.aceptada ? explicacionesPedido(x) : '') +
       resumenPedido(x) +
       '<div class="mp-bloque" aria-labelledby="mp-h-avance"><h2 id="mp-h-avance" class="mp-h3">Cómo va tu pedido</h2>' +
       franja(x, av) +
@@ -529,11 +660,11 @@
       '<label class="mp-campo"><span>Cuéntanos qué pasa</span><textarea name="detail" rows="3" minlength="3" maxlength="600" required>' + esc(f.detail || '') + '</textarea></label>' +
       '</form>' +
       estadoCaso +
-      '<details class="mp-bloque mp-consultas" data-rapidas' + (respuesta ? ' open' : '') + '><summary>Preguntas rápidas</summary><div class="mp-chips">' + rapidas + '</div>' +
+      '<details class="mp-bloque mp-consultas" data-rapidas' + (respuesta ? ' open' : '') + '><summary>Ver preguntas rápidas para el asistente</summary><div class="mp-chips">' + rapidas + '</div>' +
       (respuesta ? '<p id="portal-rapida-respuesta" class="mp-respuesta" role="status">' + esc(respuesta) + '</p>' : '') + '</details>' +
       (formatoEscritorio.matches ? '' : agenteHTML(x)) +
       // DS5: la guía es contenido secundario de la pestaña; se pliega para no pasar el alto máximo en celular.
-      '<details class="mp-tarjeta mp-guia"><summary class="mp-guia-resumen"><span class="mp-kicker">Guía</span><span class="mp-guia-t">Guía de cuidado de tu máquina</span></summary>' +
+      '<details class="mp-tarjeta mp-guia"><summary class="mp-guia-resumen"><span class="mp-guia-t">Ver la guía de cuidado de tu máquina</span></summary>' +
       '<div class="mp-guia-cuerpo"><p class="mp-fino">Qué revisar, cómo pedir ayuda y los datos de tu máquina.</p>' +
       '<a class="mp-btn mp-btn--sec" href="' + esc(guia) + '" data-lead-magnet="guia-cuidado" data-evt="ayuda_guia_cuidado">Abrir la guía de cuidado</a></div></details>' +
       '<div class="mp-espaciador" aria-hidden="true"></div><div class="mp-cierre"><button type="submit" form="mp-form-ayuda" class="mp-btn mp-btn--primario" data-cta-principal="ayuda-enviar" data-cierra-tarea="T6" data-evt="ayuda_enviar">Enviar</button></div>' +
@@ -555,6 +686,9 @@
     var avisoGuia = st.guia ? '<div class="mp-aviso" role="status"><p><b>Guía enviada (simulación) a ' + esc(st.guia.persona) + '</b></p>' +
       '<p>Le llega de parte de ' + esc(c.company || 'tu negocio') + '. No se envió ningún correo real.</p>' +
       '<a class="mp-link" href="' + esc(guia) + '" data-evt="recomendar_ver_guia">Ver la guía que recibe</a></div>' : '';
+    var canales = '<details class="mp-tarjeta mp-canales-detalle"' + (st.vistaCanal ? ' open' : '') + '><summary>Ver cómo recomendar por cada canal</summary>' +
+      tarjetasCanales(false) + '<div data-mp-vista-inline aria-live="polite">' +
+      (st.vistaCanal ? vistaCanal(x, st.vistaCanal) : '') + '</div></details>';
     if (enviada) {
       return '<section id="mp-panel-recomendar" class="mp-panel" role="tabpanel" aria-labelledby="mp-tab-recomendar" data-portal-panel="recomendar">' +
         cab + '<p class="mp-lead">Gracias por recomendarnos.</p></header>' +
@@ -562,6 +696,7 @@
         '<div class="mp-aviso" role="status"><p><b>Recomendación enviada a ' + esc(c.referralBusiness) + '.</b></p>' +
         '<p>Jefatura la revisa antes de contactar a esa persona.</p></div>' +
         '<div class="mp-accion"><button type="button" class="mp-btn mp-btn--primario" data-portal-tab="pedido" data-cta-principal="recomendar-ver-pedido" data-evt="recomendar_ver_pedido">Ver mi pedido</button></div>' +
+        canales +
         '<div class="mp-espaciador" aria-hidden="true"></div><div class="mp-cierre"><button type="button" class="mp-btn mp-btn--primario" data-portal-tab="pedido" data-cta-principal="recomendar-ver-pedido" data-evt="recomendar_ver_pedido">Ver mi pedido</button></div>' +
         '</section>';
     }
@@ -579,6 +714,7 @@
       '<label><input type="radio" name="permiso" value="no"' + (f.permiso === 'no' ? ' checked' : '') + '> Todavía no</label>' +
       '</fieldset>' +
       '</form>' +
+      canales +
       '<section class="mp-tarjeta mp-guia" aria-labelledby="mp-h-guia-elegir"><p class="mp-kicker">Guía</p><h3 id="mp-h-guia-elegir" class="mp-h3">Compártele la guía para elegir máquina</h3>' +
       '<p class="mp-fino">Muestra las cuatro máquinas y cómo elegir la tuya. Solo se envía si esa persona aceptó que la contactemos.</p>' +
       '<button type="submit" form="mp-form-recomendar" name="accion" value="guia" class="mp-btn mp-btn--sec" data-lead-magnet="guia-elegir-maquina" data-evt="recomendar_compartir_guia">Compártele la guía para elegir máquina</button>' +
@@ -674,6 +810,7 @@
       host.addEventListener('change', onInput);
       host.addEventListener('keydown', onKey);
       host.addEventListener('toggle', onToggle, true);
+      host.addEventListener('cancel', ev => { if (ev.target.matches('[data-mp-encuesta]')) { ev.preventDefault(); volverEncuesta(); } }, true);
       host.__mpBound = true;
     }
     var s = estado();
@@ -683,6 +820,11 @@
       return;
     }
     var x = contexto(s);
+    if (st.cuenta !== x.c.accountId) {
+      st.cuenta = x.c.accountId;
+      st.encuesta = null;
+      st.vistaCanal = null;
+    }
     if (st.dialogo && (x.c.contractSignedAt || !x.aceptada)) { st.dialogo = false; }
     var desplazamiento = host.querySelector('#portal-tabs')?.scrollLeft || 0;
     host.innerHTML = '<div class="mp-portal" data-mp-portal data-vista="' + esc(st.tab) + '" data-comprador="' + esc(x.comp.id || '') + '">' +
@@ -695,7 +837,10 @@
       '</div>' +
       nota() +
       dialogoHTML(x) +
+      encuestaHTML(x) +
       '</div>';
+    var encuesta = host.querySelector('[data-mp-encuesta]');
+    if (encuesta && !encuesta.open) encuesta.showModal();
     var tabs = host.querySelector('#portal-tabs');
     var tabActiva = tabs.querySelector('[aria-selected="true"]');
     if (tabActiva) {
@@ -722,6 +867,7 @@
     st.tab = id;
     st.errores = {};
     st.dialogo = false;
+    st.encuesta = null;
     st.textoRapida = null;
     if (st.aviso && st.aviso.tab !== id) { st.aviso = null; }
     st.foco = '#mp-tab-' + id;
@@ -735,14 +881,11 @@
     var x = contexto(estado());
     var p = x.p;
     if (!J) { return; }
-    if (!p) {
-      if (x.c.contractSignedAt && !x.c.replenishmentNotice) { simularAviso(); }
-    } else if (!p.waitPassed) {
-      J.advanceOrderWait(p.id);
-    } else if (p.receivedAt && !p.replenishDue) {
-      J.advanceReplenishment(p.id);
-    }
+    if (!J.jumpDays(p?.receivedAt ? 30 : 3)) return;
+    st.etapa = null;
     refresh();
+    var encuesta = st.host?.querySelector('[data-mp-satisfaccion]');
+    encuesta?.scrollIntoView({ block: 'nearest' });
   }
   function confirmarRecepcion() {
     var J = journey();
@@ -797,7 +940,8 @@
     }
     st.cantidades = null;
     st.errores = {};
-    st.aviso = { tab: 'repetir', texto: 'Repetición confirmada: pedido ' + (x.numero + 1) + '. Te enviamos la confirmación a tu correo de prueba (simulación).' };
+    setTab('pedido');
+    st.aviso = { tab: 'pedido', texto: 'Repetición confirmada: pedido ' + (x.numero + 1) + '. Aquí puedes seguir su avance.' };
     refresh();
   }
   function enviarAyuda(form) {
@@ -857,6 +1001,9 @@
       c.referralContacto = v.contacto.slice(0, 120);
       c.referralPersonaAcepta = true;
       c.referralSentAt = window.M4.now();
+      escribirPostventa(s, 'referidos', c.orders?.at(-1)?.id || null, {
+        negocio: c.referralBusiness, contacto: c.referralContacto, permiso: true, estado: 'enviado'
+      });
       evento(s, 'referral_sent', 'Recomendación enviada a revisión de Jefatura', { referred_business: c.referralBusiness, permission: true });
     });
     st.formularios.recomendar = {};
@@ -921,9 +1068,120 @@
     st.foco = '[data-portal-accion="firmar-contrato"]';
     renderLocal();
   }
+  function volverEncuesta() {
+    var previa = st.encuesta;
+    st.encuesta = previa?.volver || null;
+    if (!st.encuesta && previa?.pedido) st.foco = '[data-mp-satisfaccion] button';
+    renderLocal();
+  }
+  function registrarResena(pedido) {
+    var anterior = st.encuesta;
+    var abrir = function (s) {
+      if (!s.customerCycle?.accountId) return;
+      escribirPostventa(s, 'resenas', pedido || null, { canal: 'google', estado: 'vista-previa' });
+    };
+    if (estado().customerCycle?.accountId) mutar(abrir);
+    // M4 puede repintar el portal durante la mutación.
+    if (anterior && st.encuesta !== anterior) st.encuesta = anterior;
+  }
+  function abrirCanal(canal, pedido) {
+    if (!CANALES[canal]) return;
+    if (!pedido && st.tab === 'recomendar') {
+      st.vistaCanal = canal;
+      if (canal === 'google') registrarResena(contexto(estado()).p?.id);
+      renderLocal();
+      return;
+    }
+    var volver = st.encuesta;
+    st.encuesta = { modo: 'preview', pedido, canal, volver };
+    if (canal === 'google') registrarResena(pedido);
+    renderLocal();
+  }
+  function elegirCarita(el) {
+    var pedido = el.dataset.pedido, cara = el.dataset.cara;
+    var x = contexto(estado());
+    if (!x.c.orders?.some(p => p.id === pedido && p.receivedAt)) return;
+    var r = fichaPostventa(x.s, 'respuestas', pedido);
+    var modo = cara === 'no-contento' ? 'ayuda' : 'nps';
+    if (el.dataset.mpPostaccion === 'seguimiento') {
+      st.encuesta = { modo: 'nps', pedido, seguimiento: true, canales: [] };
+      renderLocal();
+      return;
+    }
+    if (!CARITAS[cara] || r?.nps != null) return;
+    st.encuesta = { modo, pedido, nps: r?.nps, abierta: r?.abierta, canales: r?.canales || [] };
+    mutar(s => escribirPostventa(s, 'respuestas', pedido, { momento: momento(x, pedido), carita: cara, nps: null, abierta: '', canales: [] }));
+    renderLocal();
+  }
+  function guardarSatisfaccion(form) {
+    var e = st.encuesta;
+    if (!e || !form.checkValidity()) return;
+    var marcada = form.querySelector('[name="nps"]:checked');
+    var nps = Number(marcada?.value);
+    if (!Number.isInteger(nps) || nps < 0 || nps > 10) return;
+    var abierta = form.elements.abierta.value.trim();
+    var canales = [...form.querySelectorAll('[name="canales"]:checked')].map(n => n.value);
+    st.encuesta = null;
+    mutar(s => {
+      var r = fichaPostventa(s, 'respuestas', e.pedido);
+      var pedido = s.customerCycle?.orders.find(p => p.id === e.pedido);
+      if (!r || !pedido?.receivedAt || r.nps != null) return;
+      Object.assign(r, { nps, abierta, canales });
+      if (e.seguimiento) r.seguimientoAt = window.M4.now();
+      Object.assign(pedido, { npsScore: nps, npsComment: abierta, npsAt: window.M4.now() });
+      s.customerCycle.npsScore = nps;
+      s.customerCycle.npsComment = abierta;
+      evento(s, 'nps_submitted', 'Satisfacción registrada', { order_id: e.pedido, nps_score: nps });
+      if (nps <= 6 && /falla|no funciona|avería/i.test(abierta)) {
+        escribirPostventa(s, 'ayudas', e.pedido, { motivo: MOTIVOS[0], resumen: abierta, estado: 'abierta' });
+      }
+    });
+    if (canales.includes('referido')) setTab('recomendar');
+    else renderLocal();
+  }
+  function pedirAyudaPedido(form) {
+    var e = st.encuesta;
+    if (!e || !form.checkValidity()) return;
+    var motivo = form.elements.motivo.value;
+    var detalle = form.elements.detalle.value.trim();
+    var horario = form.elements.horario.value.trim();
+    var foto = motivo === MOTIVOS[0] ? form.elements.foto.files[0]?.name : '';
+    if (!detalle || !horario) return;
+    var resumen = motivo + '. ' + detalle + ' · Horario: ' + horario + (foto ? ' · Foto: ' + foto.slice(0, 120) : '');
+    st.encuesta = null;
+    mutar(s => {
+      if (fichaPostventa(s, 'ayudas', e.pedido)) return;
+      escribirPostventa(s, 'ayudas', e.pedido, { motivo, resumen, estado: 'abierta' });
+      evento(s, 'support_case_opened', 'Solicitud de postventa abierta', { order_id: e.pedido, case_type: motivo });
+    });
+    setTab('ayuda');
+    var det = st.host.querySelector('#mp-agente');
+    if (det) det.open = true;
+    var host = st.host.querySelector('#agente-portal');
+    host?.scrollIntoView({ block: 'nearest' });
+    var intentos = 0;
+    var entregar = function () {
+      var destino = st.host?.querySelector('#agente-portal');
+      if (st.tab !== 'ayuda' || !destino) return;
+      if (!window.MarleyAgenteClienteNucleo && intentos++ < 40) { setTimeout(entregar, 150); return; }
+      if (window.MarleyAgenteClienteNucleo) {
+        var texto = 'Necesito hablar con una persona de Soporte. ' + resumen;
+        destino.dispatchEvent(new CustomEvent('marley:portal-pregunta', { bubbles: true, detail: { texto } }));
+      }
+    };
+    entregar();
+  }
   function onClick(ev) {
     var t = ev.target;
     if (!t || !t.closest) { return; }
+    var post = t.closest('[data-mp-postaccion]');
+    if (post) {
+      ev.preventDefault();
+      if (post.dataset.mpPostaccion === 'cerrar') volverEncuesta();
+      else if (post.dataset.mpPostaccion === 'canal') abrirCanal(post.dataset.canal, post.dataset.pedido);
+      else elegirCarita(post);
+      return;
+    }
     if (t.hasAttribute && t.hasAttribute('data-mp-fondo') && t === ev.target) { cerrarDialogo(); return; }
     var el = t.closest('[data-portal-tab],[data-etapa],[data-portal-rapida],[data-portal-sugerencia],[data-mp-cerrar],[data-portal-accion]');
     if (!el || el.type === 'submit') { return; }
@@ -960,6 +1218,8 @@
     ev.preventDefault();
     var accion = ev.submitter && ev.submitter.getAttribute('name') === 'accion' ? ev.submitter.value : 'enviar';
     if (tipo === 'repetir') { confirmarRepeticion(form); }
+    else if (tipo === 'satisfaccion') { guardarSatisfaccion(form); }
+    else if (tipo === 'incidencia') { pedirAyudaPedido(form); }
     else if (tipo === 'ayuda') { enviarAyuda(form); }
     else if (tipo === 'recomendar') { if (accion === 'guia') { compartirGuia(form); } else { enviarRecomendacion(form); } }
   }
@@ -968,6 +1228,22 @@
     var form = t && t.form;
     var tipo = form && form.getAttribute ? form.getAttribute('data-mp-form') : null;
     if (!tipo) { return; }
+    if ((tipo === 'satisfaccion' || tipo === 'incidencia') && st.encuesta) {
+      var e = st.encuesta;
+      if (t.name === 'canales' && ev.type === 'change') {
+        e.canales = [...form.querySelectorAll('[name="canales"]:checked')].map(n => n.value);
+        e.canal = t.checked ? t.value : e.canales.at(-1);
+        if (t.checked && t.value === 'google') registrarResena(e.pedido);
+        var vista = st.host.querySelector('[data-mp-encuesta] [data-mp-vista-inline]');
+        if (vista) vista.innerHTML = e.canal ? vistaCanal(contexto(estado()), e.canal, e.abierta) : '';
+      } else if (t.name === 'motivo' && ev.type === 'change') {
+        e.motivo = t.value;
+        form.querySelector('[data-mp-foto]').hidden = t.value !== MOTIVOS[0];
+      } else if (['nps','abierta','detalle','horario'].includes(t.name)) {
+        e[t.name] = t.value;
+      }
+      return;
+    }
     if (tipo === 'repetir') {
       if (t.name && t.name.indexOf('q-') === 0 && st.cantidades) {
         st.cantidades.q[t.name.slice(2)] = cantidad(t.value);
@@ -1008,15 +1284,6 @@
   function firmarContrato() {
     st.dialogo = false;
     if (!journey()?.signContract?.()) renderLocal();
-  }
-  function simularAviso() {
-    mutar(function (m) {
-      var c = m.customerCycle;
-      if (!c || !c.contractSignedAt || c.replenishmentNotice) { return; }
-      c.replenishmentNotice = true;
-      c.simulatedDays = (Number(c.simulatedDays) || 0) + 30;
-      if (window.M4Journey && window.M4Journey.addMail) { window.M4Journey.addMail(m, 'E08'); }
-    });
   }
   function confirmarPedido() {
     var J = journey();
