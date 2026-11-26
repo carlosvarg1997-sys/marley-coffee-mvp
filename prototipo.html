@@ -5847,7 +5847,7 @@ window.M5UI = (() => {
   function film(key, { mode = 'scroll', label = '', cls = '', eager = false, still = 'poster' } = {}) {
     const s = D.SCENES[key];
     if (WF()) return `<div class="m5-film ${cls}"><div class="m5-ph"><b>VIDEO</b><span>${esc(label || s.alt)}</span><span>Toma continua · ${mode === 'scroll' ? 'avanza al bajar y retrocede al subir' : mode === 'loop' ? 'loop sin sonido; se pausa fuera de pantalla' : 'plano final fijo'}</span></div></div>`;
-    const isStill = mode === 'still' || M.STATIC || Boolean(s.stillOnly) || prefersReduced();
+    const isStill = mode === 'still' || M.STATIC || Boolean(s.stillOnly) || reduce();
     const src = isStill && still === 'fin' ? s.fin : s.poster; const srcM = isStill && still === 'fin' ? s.fin : s.posterM;
     return `<div class="m5-film ${cls}" ${isStill ? '' : `data-film="${key}" data-mode="${mode}"`}><picture><source media="(max-width:767px)" srcset="${srcM}"><img class="m5-film-poster" src="${src}" alt="${esc(s.alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></picture>${isStill ? '' : '<span class="m5-film-load" aria-hidden="true">Cargando escena…</span>'}</div>`;
   }
@@ -5888,6 +5888,7 @@ window.M5UI = (() => {
     removeEventListener('keydown', onMobileHeroKeydown, true);
     const queued = [...pendingCompactHero]; pendingCompactHero.clear();
     queued.forEach((player) => startLoading(player));
+    schedule();
   }
   function onMobileHeroWheel(event) { if (event.isTrusted) userScrollIntent = true; }
   function onMobileHeroKeydown(event) { if (event.isTrusted && ['ArrowDown', 'PageDown', ' ', 'End'].includes(event.key)) userScrollIntent = true; }
@@ -5900,14 +5901,14 @@ window.M5UI = (() => {
   function makePlayer(el) {
     const key = el.dataset.film; const s = D.SCENES[key]; const mob = isMob(); const mode = el.dataset.mode;
     const driver = el.closest('[data-driver]') || el;
-    const src = mode === 'scroll' ? (mob ? s.vm : s.vd) : s.vs;
+    const src = mode === 'scroll' || key === 'hero' ? (mob ? s.vm : s.vd) : s.vs;
     const p = { el, key, s, mob, driver, mode, src, started: false, video: null, cur: null };
     if (prefersReduced()) { const img = el.querySelector('img'); if (img) img.src = s.fin; el.querySelectorAll('source').forEach((x) => x.remove()); p.reduced = true; }
     return p;
   }
   function startLoading(p) {
-    if (p.started || p.reduced) return;
-    if (p.key === 'hero' && p.mode === 'scroll' && innerWidth <= 1024) {
+    if (p.started || p.reduced || !p.el.isConnected) return;
+    if (p.key === 'hero' && p.mode === 'once') {
       if (!compactHeroUnlocked) { pendingCompactHero.add(p); return; }
       p.started = true;
       p.el.classList.add('is-loading');
@@ -5922,14 +5923,14 @@ window.M5UI = (() => {
     const id = p.src + '|' + p.mode; let v = vids[id];
     if (!v) {
       v = document.createElement('video');
-      v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.setAttribute('aria-hidden', 'true');
+      v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = p.mode === 'once' ? 'none' : 'auto'; v.setAttribute('aria-hidden', 'true');
       v.loop = p.mode === 'loop'; v.className = 'm5-film-vid';
       // Para avanzar con el scroll hay que poder saltar a cualquier instante: con servidor se carga el video completo en memoria
       // (así funciona aunque el servidor no entregue el archivo por partes); abierto como archivo local se usa directo.
       v.src = p.src;
       v.addEventListener('error', () => { const host = v.parentElement; if (host) host.classList.remove('is-loading'); }, { once: true });
       const ready = () => { v.classList.add('is-on'); const host = v.parentElement; if (host) { host.classList.remove('is-loading'); host.classList.add('is-ready'); } schedule(); };
-      v.addEventListener(p.mode === 'loop' ? 'playing' : 'loadeddata', ready);
+      v.addEventListener(p.mode === 'scroll' ? 'loadeddata' : 'playing', ready);
       v.addEventListener('seeked', schedule);
       vids[id] = v;
     } else if (v.readyState >= 2) { v.classList.add('is-on'); p.el.classList.remove('is-loading'); p.el.classList.add('is-ready'); }
@@ -5984,7 +5985,7 @@ window.M5UI = (() => {
   }
   function camFrame(el, vh) {
     const d = el.closest('[data-driver]') || el; const r = d.getBoundingClientRect();
-    const compact = d.classList.contains('r3-c02-machine');
+    const compact = d.matches('.r3-c02-machine, .mc-machine-scene');
     if (!r.height || (document.body.dataset.current === 'C02' && !window.scrollY)) return false;
     if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) return false;
     const key = el.dataset.cam; const c = D.SCENES[key].cam; const set = camLoad(key);
@@ -6035,7 +6036,11 @@ window.M5UI = (() => {
       if (near) startLoading(p);
       const visible = r.bottom > 0 && r.top < vh;
       if (p.mode === 'scroll' && near && scrub(p, progressOf(p.driver))) moving = true;
-      if (p.mode === 'loop' && p.video) { if (visible && !document.hidden) { if (p.video.paused) { const pr = p.video.play(); pr && pr.catch(() => {}); } } else if (!p.video.paused) p.video.pause(); }
+      if (p.mode !== 'scroll' && p.video) {
+        if (visible && !document.hidden && !reduce() && !p.video.ended) {
+          if (p.video.paused) p.video.play()?.catch(() => {});
+        } else if (!p.video.paused) p.video.pause();
+      }
       drivers.add(p.driver);
     }
     document.querySelectorAll('[data-cam]').forEach((el) => { if (camFrame(el, vh)) moving = true; });
@@ -6069,9 +6074,10 @@ window.M5UI = (() => {
   addEventListener('scroll', schedule, { passive: true });
   addEventListener('resize', schedule);
   document.addEventListener('toggle', event => {
-    if (event.target.matches('details[data-r7-fold="maquinas"]') && event.target.open) schedule();
+    if (event.target.matches('details[data-r7-fold="maquinas"], .mc-machine-clip')) schedule();
   }, true);
   document.addEventListener('visibilitychange', schedule);
+  matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', schedule);
   // ---------- Apariciones ----------
   let io = null;
   // Escalonado automático en listas y grillas (solo al entrar a la pantalla).
@@ -6399,7 +6405,7 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
     return shell(`
 <section class="ux-hero ux-hero-scroll" data-driver aria-labelledby="ux-hero-title"><div class="ux-wrap ux-hero-grid ux-hero-stage">
   <div class="ux-hero-copy"><span class="ux-eyebrow">Marley Coffee Empresas</span><h1 id="ux-hero-title" data-vida="titulo">Café para empresas con máquina en comodato</h1><p class="cmp-aclara">En comodato: la máquina queda en préstamo mientras compras café.</p><p class="r5-brandline">Café para empresas que mueve tu negocio.</p><p>No necesitas saber qué máquina elegir. Cuéntanos cómo sirves el café y te orientamos; si ya tienes una en mente, puedes partir por ahí.</p><div class="ux-hero-actions"><a class="m5-btn" href="#condiciones" data-evt="guia-como-funciona">Ver cómo funciona ${icon('arrow',18)}</a><button type="button" class="m5-link" data-go="C11">Ya sé cuál me interesa</button></div><p class="m5-hero-products">¿Prefieres empezar por el café? <button type="button" class="m5-link" data-m9-open>Ver packs y productos</button></p></div>
-  <div class="ux-hero-media">${V.film('hero',{eager:true,label:'Café Marley Coffee para empresas'})}</div>
+  <div class="ux-hero-media">${V.film('hero',{mode:'once',eager:true,label:'Café Marley Coffee para empresas'})}</div>
 </div></section>
 <section class="ux-strip" id="condiciones" aria-label="Así funciona Marley Coffee Empresas">
   <h2 class="r5-strip-title" data-vida="titulo">Así funciona Marley Coffee Empresas</h2>
@@ -6409,7 +6415,13 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
     <div class="ux-strip-item"><div><h3>Condiciones finales</h3><p class="cmp-clave">El equipo confirma modelo, mínimo mensual y plazo.</p></div></div>
   </div>
   <details class="cmp-detalle-c"><summary>Ver condiciones de la carga base</summary><p>La referencia corresponde a negocios de flujo bajo o medio. Se paga antes de instalar y no corresponde a una mensualidad.</p></details>
-  <h3 class="cmp-compara-titulo">Cuatro máquinas para distintas formas de servir</h3>
+  <div class="mc-compare-head">
+    <h3 class="cmp-compara-titulo">Cuatro máquinas para distintas formas de servir</h3>
+    <details class="mc-machine-clip">
+      <summary data-evt="ver-escena-maquinas">Ver escena</summary>
+      <figure class="mc-machine-scene" data-driver aria-label="Escena de las cuatro máquinas">${V.cam('barras', { label:'Las cuatro máquinas Marley Coffee' })}</figure>
+    </details>
+  </div>
   <div class="cmp-home-maquinas" role="region" aria-label="Compara las cuatro máquinas" tabindex="0"><!-- maquinas-comodato --></div>
   <div class="cmp-inicio-cta"><button type="button" class="m5-btn r3-main" data-m10-unknown data-cierra-tarea="T1" data-cta-principal="cuentanos" data-evt="cta-cuentanos">Cuéntanos de tu negocio ${icon('arrow',18)}</button><button type="button" class="mc-btn mc-btn--sec" data-a="machine-shortcut" data-evt="ya-se-maquina">Ya sé qué máquina quiero</button></div>
 </section>
@@ -6445,7 +6457,7 @@ ${mbar ? `<div class="m5-mbar" role="region" aria-label="Acción principal" iner
       : directMachine
       ? V.machineImg(directMachineKey, 'm10-contact-machine-image')
       : inicio
-      ? V.film(sceneOf(s), { mode: 'loop', label: 'Marley Coffee para ' + (biz ? article(biz) : 'empresas') })
+      ? V.film(sceneOf(s), { mode: 'once', label: 'Marley Coffee para ' + (biz ? article(biz) : 'empresas') })
       : proposalMini(s);
     const h1 = creator ? 'Conversemos sobre una alianza' : inicio ? 'Guarda tu avance' : seguimiento ? 'Solicita seguimiento' : hablar ? 'Tu consulta, por correo' : 'Confirma tu propuesta';
     const cta = creator ? 'Guardar interés (demo)' : inicio ? 'Continuar' : seguimiento ? 'Solicitar seguimiento por correo' : hablar ? 'Enviar consulta por correo' : 'Confirmar propuesta';
@@ -6714,7 +6726,7 @@ ${accepted ? done : ''}
         </div>
       </div>
     </div>
-    <div class="m5-stage-media">${V.film(cur.k, { mode: 'loop', label: 'Escena ' + cur.t.toLowerCase() + ' con Marley Coffee', still: 'fin' })}</div>
+    <div class="m5-stage-media">${V.film(cur.k, { mode: 'once', label: 'Escena ' + cur.t.toLowerCase() + ' con Marley Coffee', still: 'fin' })}</div>
   </div>
 </section>
 <section class="m5-band" aria-labelledby="h-band8">${V.fondo('activacion')}<div class="m5-wrap"><span class="m5-kick m5-kick--light">Referencia real · 2025</span><h2 id="h-band8">Hard Rock Café Santiago</h2><p class="m5-lead">Mesa de marca, cócteles de café y kits. Sin resultados comerciales publicados.</p><details class="m5-case-source"><summary>Ver alcance publicado</summary><p>Las bases públicas de Marley Coffee describen esta experiencia.</p></details><div class="m5-actions">${ctaCaso}</div></div></section>`, { mbar: false });
@@ -23130,7 +23142,7 @@ body[data-current="C10"] #m4-main .r7-copy-sentence+.r7-copy-sentence{margin:0}
   }
   function prepareVideos() {
     if (!document.body || !document.body.matches('[data-current^="C"]')) return;
-    document.querySelectorAll('video').forEach((video) => {
+    document.querySelectorAll('video:not(.m5-film-vid)').forEach((video) => {
       const poster = posterFor(video);
       if (poster && !video.hasAttribute('poster')) video.setAttribute('poster', poster);
       if (reduced.matches) {
@@ -24802,7 +24814,7 @@ body[data-current="C08"] .m4.m5 .m5-exp-kit{display:grid;grid-template-columns:r
 body[data-current="C08"] .m4.m5 .m5-exp-kit li{min-height:40px;padding:9px 10px;border:1px solid rgba(255,255,255,.3);border-radius:6px;background:rgba(0,0,0,.28);font:500 13px/1.35 var(--font)}
 body[data-current="C08"] .m4.m5 .m5-stage-beat .m5-actions{margin-top:20px}
 body[data-current="C08"] .m4.m5 .m5-stage-prog{display:none}
-body[data-current="C08"] .m4.m5 .m5-stage-media .m5-film-load{display:none!important}
+
 body[data-current="C08"] .m4.m5 .m5-band .m5-actions .m5-btn::after{display:none!important}
 body[data-current="C07"] .m4.m5 .m5-quote{padding-bottom:40px!important}
 body[data-current="C07"] .m4.m5 .m5-extra-details{border-bottom:1px solid #d5d5d5}

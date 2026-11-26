@@ -51,11 +51,7 @@
     if (vistos[clave]) return;
     vistos[clave] = 1;
     if (!animar) return;
-    if (tipo === 'cuenta') {
-      var tok = token(el.__fin, parseFloat(el.getAttribute('data-valor')) || 0);
-      if (!tok) return;
-      el.textContent = el.__fin.replace(tok, '0');
-    } else {
+    if (tipo !== 'cuenta') {
       el.classList.add('vida-oculto');
     }
     io.observe(el);
