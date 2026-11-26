@@ -7,7 +7,7 @@
   'use strict';
   if (window.__crmCarga) return;
   window.__crmCarga = true;
-  var RUTA_CRM = /^#R(?:0\d|1[0-7])(?:\?|$)/;
+  var RUTA_CRM = /^#R(?:0\d|1[0-9])(?:\?|$)/;
   var ARCHIVOS = [
     ['css', 'crm/crm-agente.css'],
     ['js', 'crm/crm-agente.js'],

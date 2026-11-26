@@ -1349,10 +1349,12 @@
     ventas: ['resumen', 'canasta', 'propuesta', 'visita', 'cotizo', 'puntaje', 'dudas', 'origen', 'conversacion', 'ayuda'],
     jefatura: ['aprobaciones', 'aprobar_ref', 'resumen', 'cotizo', 'puntaje', 'mql', 'ayuda'],
   };
+  // Opciones por rol (26-nov): las mismas que muestra la tarjeta del CRM. El agente del CRM interpreta
+  // estos textos con sus propias respuestas; aquí solo se ofrecen para que ninguna opción quede sin salida.
   const SUGERENCIAS_CRM = {
-    marketing: [['cotizo', '¿Qué cotizó este lead?'], ['mql', '¿Cumple para MQL?'], ['dudas', '¿Qué dudas tuvo?'], ['pasar', 'Pásalo a Ventas']],
-    ventas: [['resumen', 'Resume la cuenta'], ['canasta', 'Propón la canasta'], ['propuesta', 'Prepara la propuesta'], ['visita', 'Agenda la visita']],
-    jefatura: [['aprobaciones', '¿Qué espera mi aprobación?'], ['ayuda', 'Ver lo que puedo hacer']],
+    marketing: [['detractores', '¿Qué detractores tengo?'], ['resena', 'Pide reseña a los promotores'], ['referidos', '¿Qué referidos llegaron?'], ['cotizo', '¿Qué cotizó este lead?']],
+    ventas: [['dia', 'Resume mi día'], ['reponer', '¿Qué cuentas toca reponer?'], ['propuesta', 'Prepara la propuesta'], ['visita', 'Agenda la visita']],
+    jefatura: [['aprobaciones', '¿Qué espera mi aprobación?'], ['metas', '¿Cómo vamos con las metas?']],
   };
   const quienHace = { pasar: 'Marketing', aprobar_envio: 'Marketing', aprobar_ref: 'Jefatura', aprobaciones: 'Jefatura', resumen: 'Ventas', canasta: 'Ventas', propuesta: 'Ventas', visita: 'Ventas' };
 

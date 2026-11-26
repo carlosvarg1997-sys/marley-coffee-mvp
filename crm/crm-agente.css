@@ -241,6 +241,61 @@
 }
 @media (prefers-reduced-motion: reduce) { .crm-agente-escribe::after { animation: none; } }
 
+/* 26-nov (DS6) · El agente se abre A LA VISTA: panel lateral en escritorio y hoja inferior en celular.
+   Antes la tarjeta quedaba en y=582 a 1280×551 y el borrador nacía fuera de la pantalla; por eso «no pasaba nada».
+   Cerrado en el Hoy, el panel no ocupa espacio (la tarjeta del asistente es la que invita); al abrir, es fijo. */
+#crm-v2-root .crm2-content > #crm-agente-chat { margin: 0; }
+#crm-v2-root .crm2-content > #crm-agente-chat.crm-agente-chat--en-hoy:not(.is-abierto) { display: none; }
+#crm-v2-root .crm2-content > #crm-agente-chat.is-abierto {
+  position: fixed;
+  z-index: 80;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  width: min(460px, calc(100vw - 32px));
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--ag-line);
+  border-left: 4px solid var(--ag-accent);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(23, 23, 23, 0.24);
+}
+#crm-v2-root .crm2-content > #crm-agente-chat.is-abierto .crm-agente-lanzador { display: none; }
+#crm-v2-root .crm2-content > #crm-agente-chat.is-abierto .crm-agente-chat-cab {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  margin: 0;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--ag-line);
+  background: #fff;
+}
+#crm-v2-root .crm2-content > #crm-agente-chat.is-abierto .crm-agente-cerrar { min-height: 44px; }
+#crm-v2-root .crm2-content > #crm-agente-chat.is-abierto .crm-agente-hilo-chat { max-height: none; }
+@media (max-width: 900px) {
+  #crm-v2-root .crm2-content > #crm-agente-chat.is-abierto {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 92dvh;
+    border-right: 0;
+    border-bottom: 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -18px 48px rgba(23, 23, 23, 0.28);
+  }
+  #crm-v2-root .crm2-content > #crm-agente-chat.is-abierto .crm-agente-cuerpo { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+}
+
 /* 26-nov (DS2): la tarjeta del asistente en el Hoy. Ícono, nombre, opciones del rol a la vista y campo para escribir.
    En escritorio las opciones y el campo comparten una línea; en celular se apilan. */
 .crm-agente-tarjeta-asistente { padding: 14px 16px; border-radius: 16px; }

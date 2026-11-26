@@ -7,20 +7,22 @@
 
   const ROOT_ID = 'crm-v2-root';
   const DATA_KEY = 'crm2';
+  // Un flujo, una pestaña (contrato 26-nov, punto 2). Ventas cierra y repone; Marketing capta,
+  // hace postventa y mueve evangelizadores; Jefatura aprueba y mira metas. Ningún rol ve el trabajo del otro.
   const NAV = {
     ventas: [
       ['R01', 'Hoy', 'home'], ['R02', 'Traspasos y leads', 'people'],
-      ['R03', 'Cuentas', 'building'], ['R10', 'Volver a pedir', 'clock'],
-      ['R08', 'Propuestas', 'file']
+      ['R08', 'Propuestas', 'file'], ['R10', 'Volver a pedir', 'clock'],
+      ['R03', 'Cuentas', 'building']
     ],
     marketing: [
       ['R11', 'Hoy', 'home'], ['R12', 'Leads', 'people'],
-      ['R16', 'Recuperar', 'clock'], ['R13', 'Campañas', 'campaign']
+      ['R18', 'Postventa', 'check'], ['R19', 'Recomendados', 'campaign'],
+      ['R13', 'Campañas y contenido', 'campaign']
     ],
     jefatura: [
       ['R05', 'Hoy', 'home'], ['R07', 'Por aprobar', 'check'],
-      ['R06', 'Metas y canales', 'chart'], ['R14', 'Equipo', 'people'],
-      ['R15', 'Operación', 'building']
+      ['R06', 'Metas y KPIs', 'chart'], ['R14', 'Equipo', 'people']
     ]
   };
   const ROUTE = {
@@ -29,8 +31,8 @@
     R02: { role: 'ventas', page: 'salesContacts', menu: 'R02', title: 'Traspasos y leads' },
     R03: { role: 'ventas', page: 'salesClients', menu: 'R03', title: 'Cuentas' },
     R04: { role: null, page: 'detail', menu: null, title: 'Ficha del cliente' },
-    R05: { role: 'jefatura', page: 'managerSummary', menu: 'R05', title: 'Resumen' },
-    R06: { role: 'jefatura', page: 'managerGoals', menu: 'R06', title: 'Metas y canales' },
+    R05: { role: 'jefatura', page: 'managerSummary', menu: 'R05', title: 'Hoy' },
+    R06: { role: 'jefatura', page: 'managerGoals', menu: 'R06', title: 'Metas y KPIs' },
     R07: { role: 'jefatura', page: 'managerApprovals', menu: 'R07', title: 'Por aprobar' },
     R08: { role: 'ventas', page: 'salesQuotes', menu: 'R08', title: 'Propuestas' },
     R09: { role: 'jefatura', page: 'managerGoals', menu: 'R06', title: 'Puntaje y metas' },
@@ -39,9 +41,11 @@
     R12: { role: 'marketing', page: 'marketingLeads', menu: 'R12', title: 'Leads' },
     R13: { role: 'marketing', page: 'marketingCampaigns', menu: 'R13', title: 'Campañas' },
     R14: { role: 'jefatura', page: 'managerTeam', menu: 'R14', title: 'Equipo' },
-    R15: { role: 'jefatura', page: 'managerOperations', menu: 'R15', title: 'Operación' },
-    R16: { role: 'marketing', page: 'marketingRecover', menu: 'R16', title: 'Recuperar' },
-    R17: { role: null, page: 'buyerCRM', menu: 'R14', title: 'CRM por comprador' }
+    R15: { role: 'jefatura', page: 'managerOperations', menu: 'R14', title: 'Operación' },
+    R16: { role: 'marketing', page: 'marketingRecover', menu: 'R12', title: 'Recuperar' },
+    R17: { role: null, page: 'buyerCRM', menu: 'R14', title: 'CRM por comprador' },
+    R18: { role: 'marketing', page: 'marketingPostventa', menu: 'R18', title: 'Postventa' },
+    R19: { role: 'marketing', page: 'marketingReferrals', menu: 'R19', title: 'Recomendados' }
   };
   const ICON = {
     home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
@@ -65,13 +69,14 @@
   const icon = name => `<svg class="crm2-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON[name] || ICON.file}</svg>`;
   const money = n => n == null || n === '' || !Number.isFinite(Number(n)) ? 'Sin monto registrado' : (D.fmtCLP ? D.fmtCLP(Number(n)) : '$' + new Intl.NumberFormat('es-CL').format(Number(n)));
   const fmtDate = value => value ? new Date(value).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Sin fecha registrada';
+  const horaCorta = value => { try { return new Date(Number(value)).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }); } catch (_) { return ''; } };
   const now = () => M.now ? M.now() : Date.now();
   const save = mutator => M.update(st => {
     if (!st[DATA_KEY] || typeof st[DATA_KEY] !== 'object') st[DATA_KEY] = {};
     mutator(st[DATA_KEY], st);
   });
   const localRoute = () => (location.hash || '#R00').slice(1).split('?')[0];
-  const active = () => /^R(?:0\d|1[0-7])$/.test(localRoute()) || /(?:^|\/)crm\.html$/i.test(location.pathname);
+  const active = () => /^R(?:0\d|1[0-9])$/.test(localRoute()) || /(?:^|\/)crm\.html$/i.test(location.pathname);
   const routeRole = (route, role) => route === 'R06' && role === 'marketing' ? 'marketing' : ROUTE[route]?.role || null;
   const homeFor = role => ({ ventas: 'R01', marketing: 'R11', jefatura: 'R05' }[role] || 'R00');
   const userFor = role => D.ROLE_MENUS?.[role]?.user || ({ ventas: 'Ventas', marketing: 'Marketing', jefatura: 'Jefatura' }[role] || 'Equipo Marley');
@@ -146,19 +151,119 @@
     const order = (c.orders || []).at(-1) || {};
     return [{ id: `REF-${c.accountId}`, name: 'Contacto por confirmar', company: business, business, comuna: 'Por confirmar', source: `Referido · ${c.company || 'cuenta del portal'}`, referralLead: true, referralPending: true, referrerAccountId: c.accountId, referralCode: c.accountCode, stage: 'Lead', at: Number(c.referralSentAt || order.npsAt || order.receivedAt || 0), live: false, dataTest: true }];
   }
+  // ---------- Postventa del portal (contrato 26-nov, punto 4): lectura tolerante ----------
+  // Codex escribe `M4.get().postventa` desde el portal; aquí solo se lee. Si la clave no existe o viene
+  // incompleta, se usa una lista vacía y, para que las pestañas de Marketing no queden vacías, 3 o 4
+  // ejemplos ficticios rotulados «ejemplo». Nunca se inventan respuestas reales ni se mezclan con las del portal.
+  const postventaRaw = () => { const p = currentState().postventa; return p && typeof p === 'object' ? p : {}; };
+  const postventaLista = key => Array.isArray(postventaRaw()[key]) ? postventaRaw()[key].filter(item => item && typeof item === 'object') : [];
+  const PV_DIA = Number(D.DAY || 86400000);
+  const pvEjTs = days => Number(D.REF || now()) - days * PV_DIA;
+  const POSTVENTA_EJEMPLO = {
+    respuestas: [
+      { cuentaId: 'AC-101', momento: 'primera', carita: 'contento', nps: 10, abierta: 'La instalación quedó impecable y el equipo explicó todo antes de irse.', canales: ['google', 'whatsapp'], ts: pvEjTs(3), ejemplo: true },
+      { cuentaId: 'AC-113', momento: 'recompra', carita: 'contento', nps: 9, abierta: 'El café se mantiene igual de bien y la reposición llegó antes de lo previsto.', canales: [], ts: pvEjTs(6), ejemplo: true },
+      { cuentaId: 'AC-110', momento: 'primera', carita: 'regular', nps: 7, abierta: 'El café gustó; la entrega demoró un día más de lo acordado.', canales: [], ts: pvEjTs(9), ejemplo: true },
+      { cuentaId: 'AC-104', momento: 'primera', carita: 'no-contento', nps: 4, abierta: 'La máquina llegó con un golpe en la carcasa y la instalación se atrasó.', canales: [], ts: pvEjTs(1), ejemplo: true }
+    ],
+    ayudas: [
+      { cuentaId: 'AC-104', motivo: 'Falla o daño en la máquina', resumen: 'Carcasa golpeada al recibir; pide revisión y reposición del equipo.', estado: 'abierta', ts: pvEjTs(1), ejemplo: true }
+    ],
+    resenas: [
+      { cuentaId: 'AC-113', canal: 'google', estado: 'invitada', ts: pvEjTs(5), ejemplo: true }
+    ],
+    referidos: [
+      { cuentaId: 'AC-101', negocio: 'Panadería La Espiga', contacto: 'Por confirmar', permiso: true, estado: 'enviado', ts: pvEjTs(4), ejemplo: true },
+      { cuentaId: 'AC-117', negocio: 'Café Aeropuerto Norte', contacto: 'Por confirmar', permiso: true, estado: 'aprobado', ts: pvEjTs(8), ejemplo: true }
+    ]
+  };
+  const postventaDe = key => postventaLista(key).length ? postventaLista(key) : (POSTVENTA_EJEMPLO[key] || []);
+  const postventaEsEjemplo = key => postventaLista(key).length === 0;
+  const notaEjemplo = key => postventaEsEjemplo(key) ? '<p class="crm2-small-note" data-crm2-ejemplo>Datos de ejemplo: el portal todavía no registra esta información. En cuanto el comprador responda, la vista usa sus datos.</p>' : '';
+  const cuentaNombre = id => accountById(id)?.name || leadById(id)?.company || leadById(id)?.name || `Cuenta ${id}`;
+  const cuentaRubro = id => accountById(id)?.business || leadById(id)?.business || 'Negocio sin dato';
+  const fechaCorta = value => Number(value) ? new Date(Number(value)).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' }) : 'Sin fecha';
+  const momentoTexto = value => value === 'recompra' ? 'Recompra' : 'Primera compra';
+  const caritaTexto = value => value === 'contento' ? 'Contento' : value === 'no-contento' ? 'No contento' : 'Más o menos';
+  const caritaGlifo = value => value === 'contento' ? '☺' : value === 'no-contento' ? '☹' : '·';
+  const canalTexto = value => ({ google: 'Reseña en Google', whatsapp: 'WhatsApp', linkedin: 'LinkedIn', instagram: 'Instagram', referido: 'Recomendar a otro negocio' }[value] || value || 'Canal sin registro');
+  const ultimaRespuestaPorCuenta = () => {
+    const porCuenta = new Map();
+    postventaDe('respuestas').forEach(respuesta => {
+      const key = String(respuesta.cuentaId || '');
+      if (!key) return;
+      const previa = porCuenta.get(key);
+      if (!previa || Number(respuesta.ts || 0) >= Number(previa.ts || 0)) porCuenta.set(key, respuesta);
+    });
+    return [...porCuenta.values()].sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0));
+  };
+  const gestionPostventa = () => appState().postventaGestion || {};
+  const ayudaGestionada = id => (gestionPostventa().ayudas || {})[String(id)] || null;
+  const resenaGestionada = id => (gestionPostventa().resenas || {})[String(id)] || null;
+  const referidoGestionado = id => (gestionPostventa().referidos || {})[String(id)] || null;
+  function ayudasDe(id) {
+    const real = postventaDe('ayudas').filter(item => String(item.cuentaId) === String(id));
+    const gestion = ayudaGestionada(id);
+    return gestion && !real.some(item => item.gestionada) ? real.concat([Object.assign({ gestionada: true, ejemplo: false }, gestion)]) : real;
+  }
+  // Detractores por resolver: NPS de 0 a 6 o carita «no contento», con su ayuda abierta si existe.
+  function detractoresPostventa() {
+    const vistos = new Set();
+    const out = ultimaRespuestaPorCuenta()
+      .filter(item => (Number(item.nps) <= 6 && item.nps !== null && item.nps !== undefined) || item.carita === 'no-contento')
+      .map(item => {
+        vistos.add(String(item.cuentaId));
+        const ayuda = ayudasDe(item.cuentaId)[0] || null;
+        const gestion = ayudaGestionada(item.cuentaId);
+        return { cuentaId: item.cuentaId, nombre: cuentaNombre(item.cuentaId), rubro: cuentaRubro(item.cuentaId), nps: item.nps === null || item.nps === undefined ? null : Number(item.nps), carita: item.carita, abierta: item.abierta || '', momento: item.momento, ts: item.ts, ayuda, ejemplo: Boolean(item.ejemplo), resuelto: Boolean(gestion && /respond|resuelt|tomad/i.test(String(gestion.estado || ''))) || ayuda?.estado === 'resuelta' };
+      });
+    accounts().filter(account => isDetractor(account) && !vistos.has(String(account.id))).forEach(account => {
+      out.push({ cuentaId: account.id, nombre: account.name || 'Cuenta', rubro: account.business || 'Negocio sin dato', nps: lastNps(account), carita: null, abierta: '', momento: null, ts: 0, ayuda: ayudasDe(account.id)[0] || null, ejemplo: false, resuelto: false });
+    });
+    return out.sort((a, b) => Number(a.nps ?? 99) - Number(b.nps ?? 99) || Number(b.ts || 0) - Number(a.ts || 0));
+  }
+  // Promotores (9-10) a los que todavía no se les pidió reseña ni referido.
+  function promotoresPostventa() {
+    const resenas = postventaDe('resenas').map(item => String(item.cuentaId));
+    const referidos = postventaDe('referidos').map(item => String(item.cuentaId));
+    const vistos = new Set();
+    const out = ultimaRespuestaPorCuenta().filter(item => Number(item.nps) >= 9).map(item => {
+      vistos.add(String(item.cuentaId));
+      return { cuentaId: item.cuentaId, nombre: cuentaNombre(item.cuentaId), rubro: cuentaRubro(item.cuentaId), nps: Number(item.nps), abierta: item.abierta || '', ts: item.ts, ejemplo: Boolean(item.ejemplo), resena: resenas.includes(String(item.cuentaId)) || Boolean(resenaGestionada(item.cuentaId)), referido: referidos.includes(String(item.cuentaId)) || Boolean(referidoGestionado(item.cuentaId)) };
+    });
+    accounts().filter(account => isPromoter(account) && !vistos.has(String(account.id))).forEach(account => {
+      out.push({ cuentaId: account.id, nombre: account.name || 'Cuenta', rubro: account.business || 'Negocio sin dato', nps: lastNps(account), abierta: '', ts: 0, ejemplo: false, resena: resenas.includes(String(account.id)) || Boolean(resenaGestionada(account.id)), referido: referidos.includes(String(account.id)) || Boolean(referidoGestionado(account.id)) });
+    });
+    return out.sort((a, b) => Number(b.nps || 0) - Number(a.nps || 0));
+  }
+  function referidosPostventa() {
+    return postventaDe('referidos').map(item => ({ cuentaId: item.cuentaId, nombre: cuentaNombre(item.cuentaId), negocio: item.negocio || 'Negocio por confirmar', contacto: item.contacto || 'Por confirmar', permiso: item.permiso !== false, estado: item.estado || 'enviado', ts: item.ts, ejemplo: Boolean(item.ejemplo) })).sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0));
+  }
+  function resenasPostventa() {
+    const reales = postventaDe('resenas').map(item => ({ cuentaId: item.cuentaId, nombre: cuentaNombre(item.cuentaId), canal: item.canal || 'google', estado: item.estado || 'invitada', ts: item.ts, ejemplo: Boolean(item.ejemplo) }));
+    const gestionadas = Object.entries(gestionPostventa().resenas || {}).filter(([id]) => !reales.some(item => String(item.cuentaId) === String(id))).map(([id, item]) => ({ cuentaId: id, nombre: cuentaNombre(id), canal: item.canal || 'google', estado: item.estado || 'pedida', ts: item.at, ejemplo: false }));
+    return [...gestionadas, ...reales].sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0));
+  }
+
   function npsEntries(account) {
     const rows = (account?.orders || []).filter(order => order.npsScore !== null && order.npsScore !== undefined && Number.isFinite(Number(order.npsScore))).map(order => ({ score: Number(order.npsScore), at: Number(order.npsAt || order.receivedAt || order.at || 0), orderId: order.id }));
     if (!rows.length && account?.nps != null && Number.isFinite(Number(account.nps))) rows.push({ score: Number(account.nps), at: 0, orderId: null });
     return rows;
   }
   function lastNps(account) {
+    // El portal manda: su última respuesta con nota reemplaza al NPS del pedido. Los ejemplos no cuentan aquí.
+    const portal = postventaLista('respuestas').filter(item => String(item.cuentaId) === String(account?.id) && item.nps !== null && item.nps !== undefined && Number.isFinite(Number(item.nps))).sort((a, b) => Number(b.ts || 0) - Number(a.ts || 0))[0];
+    if (portal) return Number(portal.nps);
     const rows = npsEntries(account).sort((a, b) => b.at - a.at);
     return rows.length ? rows[0].score : null;
   }
   function isDetractor(account) { const score = lastNps(account); return score != null && score <= 6; }
   function isPromoter(account) { const score = lastNps(account); return score != null && score >= 9; }
   function npsSummary() {
-    const responses = accounts().flatMap(account => npsEntries(account));
+    // Cada cuenta cuenta una vez: si el portal ya respondió, su respuesta reemplaza al NPS del pedido.
+    const portal = postventaLista('respuestas').filter(item => item.nps !== null && item.nps !== undefined && Number.isFinite(Number(item.nps)));
+    const portalIds = new Set(portal.map(item => String(item.cuentaId)));
+    const responses = accounts().filter(account => !portalIds.has(String(account.id))).flatMap(account => npsEntries(account)).concat(portal.map(item => ({ score: Number(item.nps), at: Number(item.ts || 0), portal: true })));
     const n = responses.length;
     const promoters = responses.filter(item => item.score >= 9).length;
     const passives = responses.filter(item => item.score >= 7 && item.score <= 8).length;
@@ -213,6 +318,7 @@
     return `<div class="crm2-list">${rows}</div>`;
   }
   function staticRow(title, subtitle, meta, badge = '') {
+    const estado = /riesgo/i.test(badge) ? 'riesgo' : /list[oa]|confirmad[oa]|enviad|aprobad/i.test(badge) ? 'listo' : 'revisar';
     return `<div class="crm2-row crm2-row--static"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge" data-estado="${estado}">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small></span></div>`;
   }
   function referralStatus(lead) {
@@ -363,7 +469,14 @@
     if (route === 'R09') return 'R06';
     if (route === 'R10') return 'R03';
     if (route === 'R15' || route === 'R17') return 'R14';
+    if (route === 'R16') return 'R12';
     return ROUTE[route]?.menu || NAV[role]?.[0]?.[0];
+  }
+  // El alias R06 de Marketing conserva el menú de cuatro entradas con el que se verificó el contrato R6;
+  // las pestañas nuevas (Postventa y Recomendados) son del CRM por rol, no de ese alias heredado.
+  function navFor(route, role) {
+    if (route === 'R06' && role === 'marketing') return [['R11', 'Hoy', 'home'], ['R12', 'Leads', 'people'], ['R16', 'Recuperar', 'clock'], ['R13', 'Campañas', 'campaign']];
+    return NAV[role] || [];
   }
 
   function labelValue(label, value) { return `<div class="crm2-kv"><span>${esc(label)}</span><b>${esc(value || 'Sin dato registrado')}</b></div>`; }
@@ -374,7 +487,7 @@
     return `<section class="crm2-block ${extra}"><header class="crm2-block-head"><div class="crm2-block-title"><h2>${esc(title)}</h2>${short ? `<p>${esc(copy)}</p>` : ''}</div>${more}</header>${body}</section>`;
   }
   function row(title, subtitle, meta, action, badge = '') {
-    const estado = /riesgo/i.test(badge) ? 'riesgo' : /list[oa]|cliente activo|confirmad[oa]/i.test(badge) ? 'listo' : 'revisar';
+    const estado = /riesgo/i.test(badge) ? 'riesgo' : /list[oa]|cliente activo|confirmad[oa]|contactad|visita agendada|resea|reseña|respondid|pedida|enviad|aprobad|pasado a ventas/i.test(badge) ? 'listo' : 'revisar';
     return `<button class="crm2-row" type="button" ${action} aria-label="${esc(title)}. ${esc(subtitle)}"><span class="crm2-row-main"><b>${esc(title)}</b><span>${esc(subtitle)}</span></span><span class="crm2-row-side">${badge ? `<span class="crm2-row-badge" data-estado="${estado}">${esc(badge)}</span>` : ''}<small>${esc(meta || '')}</small>${icon('arrow')}</span></button>`;
   }
   function empty(title, detail) { return `<div class="crm2-empty"><b>${esc(title)}</b><p>${esc(detail)}</p></div>`; }
@@ -415,10 +528,12 @@
       marketingChannels: ['Ventas y origen', ''],
       marketingLeads: ['Leads', ''],
       marketingRecover: ['Recuperar', ''],
-      marketingCampaigns: ['Campañas', ''],
+      marketingCampaigns: ['Campañas y contenido', ''],
+      marketingPostventa: ['Postventa', ''],
+      marketingReferrals: ['Recomendados', ''],
       managerSummary: ['Hoy', ''],
       managerApprovals: ['Por aprobar', ''],
-      managerGoals: ['Metas y canales', ''],
+      managerGoals: ['Metas y KPIs', ''],
       managerTeam: ['Equipo', ''],
       managerOperations: ['Operación', ''],
       buyerCRM: ['CRM por comprador', ''],
@@ -434,7 +549,7 @@
   }
   function shell(route, role, title, subtitle, content, actionbar = '', cta = '') {
     const activeRoute = menuRouteFor(route, role);
-    const menu = NAV[role] || [];
+    const menu = navFor(route, role);
     const nav = menu.map(([id, label, glyph]) => `<a class="crm2-nav-link ${activeRoute === id ? 'is-active' : ''}" href="#${id}" data-c2-go="${id}" ${activeRoute === id ? 'aria-current="page"' : ''}>${icon(glyph)}<span>${esc(label)}</span></a>`).join('');
     const userName = userFor(role);
     const visual = role === 'marketing'
@@ -451,7 +566,7 @@
       </aside>
       <div class="crm2-workspace">
         <header class="crm2-topbar"><div class="crm2-mobile-brand"><span class="crm2-brand-mark">M</span><b>${esc(roleTitle(role))}</b></div><div class="crm2-search-wrap">${icon('search')}<input type="search" data-c2-search placeholder="Buscar" aria-label="Buscar contacto o cuenta" autocomplete="off"><div class="crm2-search-results" data-c2-search-results hidden></div></div><button class="crm2-alerts" type="button" data-c2-go="${role === 'jefatura' ? 'R07' : role === 'marketing' ? 'R16' : 'R01'}" aria-label="Ver avisos">${icon('bell')}<span>Avisos</span><b>${alertCount(role)}</b></button></header>
-        <main class="crm2-main"><header class="crm2-page-head${ES_HOY(route) ? ' crm2-page-head--hoy' : ''}"><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}${cta ? `<div class="crm2-page-cta">${cta}</div>` : ''}</header><div class="crm2-content${ES_HOY(route) ? ' crm2-content--hoy' : ''}">${content}${cta ? `<div class="crm2-cierre" data-crm2-cierre>${cta}</div>` : ''}</div></main>
+        <main class="crm2-main${ES_HOY(route) ? ' crm2-main--hoy' : ''}"><header class="crm2-page-head${ES_HOY(route) ? ' crm2-page-head--hoy' : ''}"><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}${cta ? `<div class="crm2-page-cta">${cta}</div>` : ''}</header><div class="crm2-content${ES_HOY(route) ? ' crm2-content--hoy' : ''}">${content}${cta ? `<div class="crm2-cierre" data-crm2-cierre>${cta}</div>` : ''}</div></main>
       </div>
       ${actionbar}
       <div class="crm2-toast-host" data-crm2-toast aria-live="polite" aria-atomic="true"></div>
@@ -470,38 +585,48 @@
   function primary(label, action, extra = '') { return `<button type="button" class="crm2-btn crm2-btn--primary" data-c2="${action}" ${extra}>${esc(label)}</button>`; }
   function secondary(label, action, extra = '') { return `<button type="button" class="crm2-btn crm2-btn--secondary" data-c2="${action}" ${extra}>${esc(label)}</button>`; }
 
+  // Propuestas que siguen abiertas (las del CRM y las del prototipo anterior).
+  function quotesPorCerrar() {
+    const abierta = status => !/cerrad|aceptad|rechaz|anulad/i.test(String(status || ''));
+    const generadas = crmQuotes().slice().reverse().filter(quote => abierta(quote.status)).map(quote => ({ id: quote.leadId || quote.id, folio: quote.folio || quote.id, company: quote.company || 'Contacto', machine: quote.machine || 'Máquina por confirmar', amount: quote.amount, status: quote.status || 'Borrador', channel: quote.channel || 'Canal sin registro', leadId: quote.leadId || null, at: quote.at }));
+    const legadas = legacyQuotes().filter(quote => abierta(quote.status)).map(quote => ({ id: quote.id, folio: quote.id, company: quote.company || quote.name || 'Contacto', machine: quote.machine || 'Propuesta registrada', amount: quote.amount, status: quote.status || 'En revisión', channel: 'Canal sin registro', leadId: null, at: quote.at }));
+    return [...generadas, ...legadas].sort((a, b) => Number(b.at || 0) - Number(a.at || 0));
+  }
   function salesToday() {
     const passed = sortedNewest(passedLeads());
     const qualified = sortedNewest(leads().filter(lead => lead.stage === 'MQL' && isMql(lead) && !progressFor(lead).estado));
     const due = accounts().filter(accountNeedsReorder).sort((a,b) => accountDue(a) - accountDue(b));
-    const risk = accounts().filter(accountAtRisk).sort((a,b) => Number(isDetractor(b)) - Number(isDetractor(a)) || Number(accountStats(b).lastAgo || 0) - Number(accountStats(a).lastAgo || 0));
-    const referrals = leads().filter(isReferral);
-    const referralAccounts = accounts().filter(account => account.referral);
-    const waiting = currentState().crm2?.followups || [];
     const dueIds = new Set(due.map(account => String(account.id)));
-    const candidates = [
-      ...(passed.length ? passed.slice(0,1).map(lead => ({ kind:'lead', item:lead, label:'Traspaso de Marketing' })) : qualified.slice(0,1).map(lead => ({ kind:'lead', item:lead, label:'Revisar MQL' }))),
-      ...due.slice(0,1).map(account => ({ kind:'account', item:account, label:'Revisar reposición' })),
-      ...risk.filter(account => !dueIds.has(String(account.id))).slice(0,1).map(account => ({ kind:'account', item:account, label:'Revisar postventa' })),
-      ...referralAccounts.slice(0,1).map(account => ({ kind:'referral-account', item:account, label:'Confirmar permiso' })),
-      ...referrals.slice(0,1).map(lead => ({ kind:'lead', item:lead, label:'Revisar referido' }))
-    ];
-    const unique = new Set();
-    const queue = candidates.filter(entry => { const kind = entry.kind === 'referral-account' ? 'account' : entry.kind; const key = `${kind}-${entry.item.id}`; if (unique.has(key)) return false; unique.add(key); return true; });
+    // La cuenta que llegó por un referido y todavía no cierra es trabajo comercial de Ventas: se confirma
+    // el permiso y se cierra la venta. Pedir reseñas o referidos es del programa de Marketing y no se ve aquí.
+    const referred = accounts().filter(account => account.referral && !dueIds.has(String(account.id)));
+    const entryLead = passed[0] || qualified[0] || null;
+    const queue = [
+      entryLead ? { kind:'lead', item:entryLead, label: passed.length ? 'Traspaso nuevo de Marketing' : 'Lead listo para aceptar', badge: passed.length ? 'Nuevo' : 'Por aceptar' } : null,
+      due[0] ? { kind:'account', item:due[0], label:'Reposición pendiente', badge:'Reposición' } : null,
+      referred[0] ? { kind:'account', item:referred[0], label:'Llegó por referido', badge:'Referido' } : null
+    ].filter(Boolean);
     const queueBody = queue.length ? limitedList(queue, entry => {
       const item = entry.item;
       const isLead = entry.kind === 'lead';
-      const isReferralAccount = entry.kind === 'referral-account';
-      // Tarea C-V6 (referido): abrir la recomendación es el cierre de esa tarea.
-      const tarea = entry.kind === 'referral-account' || entry.label === 'Revisar referido' ? ' data-cierra-tarea="C-V6"' : '';
+      // Tarea C-V6 (contrato anterior): abrir la cuenta que llegó por referido es el cierre de esa tarea.
+      const tarea = !isLead && item.referral ? ' data-cierra-tarea="C-V6"' : '';
       const action = (isLead ? `data-c2="open-lead" data-id="${esc(item.id)}"` : `data-c2="open-account" data-id="${esc(item.id)}"`) + tarea;
-      const meta = isLead ? sourceOf(item) : isReferralAccount ? item.referral : riskReason(item);
-      const badge = isLead ? priorityLabel(item) : isReferralAccount ? 'Referido' : (accountNeedsReorder(item) ? 'Reposición' : 'En riesgo');
-      const company = isLead ? companyName(item) : item.business || 'Cuenta';
-      return filaCola(row(isLead ? contactName(item) : item.name, isLead ? `${entry.label} · ${company}` : entry.label, meta, action, badge), item, !isLead, 'ventas', permission(item));
-    }, 'Ver todas las prioridades') : empty('Nada urgente por ahora', 'Aquí aparecen traspasos, reposiciones y casos de postventa.');
-    const responseBody = waiting.length ? limitedList(waiting, item => row(item.name || item.accountName || 'Contacto', `${item.channel || 'Canal por confirmar'} · ${item.date ? fmtDate(item.date) : 'Seguimiento registrado'}`, item.status || 'Esperando respuesta', `data-c2="open-lead" data-id="${esc(item.leadId || item.id)}"`, 'Esperan respuesta')) : `<div class="crm2-inline-note">Las conversaciones y propuestas viven en la ficha del contacto.</div>`;
-    return block('A atender hoy', '', queueBody) + `<details class="crm2-fold"><summary>Referidos nuevos</summary>${referralNewBody()}</details><details class="crm2-fold"><summary>Esperan respuesta</summary>${responseBody}</details>`;
+      const meta = isLead ? `${entry.label} · ${sourceOf(item)}` : `${entry.label} · ${item.business || 'Negocio sin dato'}`;
+      const badge = badgeConEstado(item.id, entry.badge);
+      return filaCola(row(isLead ? contactName(item) : item.name, isLead ? `${companyName(item)} · ${priorityLabel(item)}` : `${item.business || 'Negocio sin dato'} · ${item.comuna || 'Comuna sin dato'}`, meta, action, badge), item, !isLead, 'ventas', permission(item));
+    }, 'Ver toda la cola') : empty('Nada urgente por ahora', 'Aquí aparecen los traspasos de Marketing, las reposiciones y las cuentas que llegaron por referido.');
+    const quotes = quotesPorCerrar();
+    const quotesBody = quotes.length ? limitedList(quotes, quote => {
+      const id = quote.leadId || quote.id;
+      const abrir = quote.leadId ? `data-c2="open-lead" data-id="${esc(quote.leadId)}"` : `data-c2-go="R08"`;
+      const persona = quote.leadId ? leadById(quote.leadId) : null;
+      return `<div class="crm2-qitem">${row(quote.company, `${quote.machine} · ${canalTexto(quote.channel)}`, quote.amount ? `${money(quote.amount)} · ${quote.status}` : quote.status, abrir, badgeConEstado(id, 'Por cerrar'))}${persona ? agenteAccionesFila(persona, false, 'ventas', permission(persona)) : ''}</div>`;
+    }, 'Ver todas las propuestas') : empty('Sin propuestas abiertas', 'Cuando prepares una propuesta aparece aquí hasta que la cuenta la acepte.');
+    const dueBody = due.length ? limitedList(due, account => filaCola(row(account.name || 'Cuenta', `${account.business || 'Negocio sin dato'} · ${account.comuna || 'Comuna sin dato'}`, `Última compra hace ${accountStats(account).lastAgo ?? 'sin dato'} días · ciclo ${accountStats(account).freqDays ?? 'por calcular'} días`, `data-c2="open-account" data-id="${esc(account.id)}"`, badgeConEstado(account.id, 'Reposición por revisar')), account, true, 'ventas', permission(account)), 'Ver todas las reposiciones', 2) : empty('Sin reposiciones pendientes', 'Las cuentas aparecen cuando su ciclo de compra vence.');
+    return block('A atender hoy', '', queueBody, 'crm2-block--cola')
+      + block(`Propuestas por cerrar${quotes.length ? ` · ${quotes.length}` : ''}`, '', quotesBody)
+      + block(`Cuentas por reponer${due.length ? ` · ${due.length}` : ''}`, '', dueBody);
   }
   function buyerCrmLink() {
     return '<p class="crm2-route-helper"><a href="#R17" data-c2-go="R17">Abrir CRM por comprador</a></p>';
@@ -517,13 +642,14 @@
     return block('Traspasos de Marketing', 'Leads que Marketing pasó a Ventas y aún no aceptas.', traspasos) +
       block('Contactos y origen', 'Encuentra el primer contacto, la campaña y la prioridad sin abrir varias pantallas.', filters + `<div class="crm2-list">${contacts}</div>`) + buyerCrmLink();
   }
-  // Cuentas: solo el estado de cada cuenta (en riesgo o no). Volver a pedir tiene su propia pestaña (salesReorder).
+  // Cuentas: el estado comercial de cada cuenta (ciclo vencido o al día). La postventa vive en Marketing.
   function salesClients() {
     const all = accounts();
-    const risk = all.filter(accountAtRisk).sort((a,b) => Number(isDetractor(b))-Number(isDetractor(a)) || Number(accountStats(b).lastAgo||0)-Number(accountStats(a).lastAgo||0));
+    const cycleOverdue = account => { const stats = accountStats(account); return stats.lastAgo != null && stats.freqDays != null && Number(stats.lastAgo) > Number(stats.freqDays); };
+    const risk = all.filter(cycleOverdue).sort((a,b) => Number(accountStats(b).lastAgo||0)-Number(accountStats(a).lastAgo||0));
     const riskIds = new Set(risk.map(account => String(account.id)));
     const other = all.filter(account => !riskIds.has(String(account.id)));
-    return block('En riesgo', 'Si hay una incidencia abierta, la postventa va antes de la venta.', `<div class="crm2-list">${limitedList(risk,account => accountRow(account,'risk'),'Ver todas las cuentas en riesgo')}</div>`) +
+    return block('En riesgo', 'Ciclo de compra vencido: hay que recuperar la cuenta.', `<div class="crm2-list">${limitedList(risk,account => accountRow(account,'risk'),'Ver todas las cuentas en riesgo')}</div>`) +
       `<details class="crm2-fold"><summary>Todas las cuentas (${other.length})</summary><div class="crm2-list">${other.map(account => accountRow(account,'client')).join('') || empty('Sin cuentas adicionales','')}</div></details>`;
   }
   function salesReorder() {
@@ -538,21 +664,61 @@
       `<details class="crm2-fold"><summary>Datos que se confirman antes de compartir</summary><div class="crm2-fold-body"><p>Contacto, volumen, compatibilidad y disponibilidad se confirman con la cuenta. El prototipo no consulta stock ni envía mensajes reales.</p></div></details>`;
   }
 
+  // Botones del agente para una fila de postventa o de recomendados (los atiende crm-agente.js por delegación).
+  const tareaBtn = (tipo, id, etiqueta, isCuenta = true) => `<button type="button" class="crm2-qtool" data-crm-agente-tarea="${tipo}" data-cuenta-id="${esc(id)}" data-crm-tipo="${isCuenta ? 'cuenta' : 'lead'}" aria-label="${esc(etiqueta)} · ${esc(id)}">${icon(tipo === 'resena' ? 'campaign' : tipo === 'referido' ? 'people' : 'file')}<span>${esc(etiqueta)}</span></button>`;
   function marketingToday() {
+    const detractors = detractoresPostventa().filter(item => !item.resuelto);
     const ready = leadsReady();
-    const returned = returnedLeads();
-    const referralRequests = (appState().referralRequests || []).filter(item => item.status === 'Por confirmar');
-    const sales = salesInPeriod();
-    const sql = leads().filter(lead => statusOfLead(lead).startsWith('SQL')).length;
-    const mql = leads().filter(isMql).length;
-    const leadBody = ready.length ? limitedList(ready, lead => filaCola(row(contactName(lead), companyName(lead), `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, permissionShort(lead)), lead, false, 'marketing', permission(lead)), 'Ver todos los leads') : empty('No hay un lead listo para pasar', 'La calificación requiere contacto identificado, negocio B2B, permiso y 40 puntos de interés.');
-    const returnedBody = returned.length ? limitedList(returned, lead => row(contactName(lead), `${companyName(lead)} · ${sourceOf(lead)}`, `Motivo: ${progressFor(lead).motivoDevolucion || progressFor(lead).motivo || 'revisar ficha'}`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, 'Devuelto por Ventas')) : `<div class="crm2-inline-note">Sin devoluciones pendientes.</div>`;
-    const referralBody = referralRequests.length ? `<div class="crm2-list">${limitedList(referralRequests, item => { const lead = leadById(item.leadId) || {}; return row(contactName(lead), `${companyName(lead)} · ${item.reason}`, item.status, `data-c2="open-lead" data-id="${esc(item.leadId)}"`, 'Referido'); }, 'Ver todos los referidos')}</div>` : '';
-    // El borrador de campaña es trabajo de otra pestaña: en el Hoy queda plegado para que la cola mande.
-    const draft = marketingDraftBlock();
-    const draftFold = draft ? `<details class="crm2-fold crm2-fold--trabajo"><summary>Borrador de campaña por negocio</summary><div class="crm2-fold-body">${draft}</div></details>` : '';
-    return block('Para pasar a Ventas', '', leadBody) + `<details class="crm2-fold"><summary>Traspaso y ventas</summary><div class="crm2-fold-body"><p>${mql} MQL · ${sql} SQL aceptados</p><p>Ventas del período de prueba <b>${money(sales)}</b></p>${returnedBody}${referralBody}</div></details>` + draftFold;
+    const promoters = promotoresPostventa().filter(item => !item.resena && !item.referido);
+    const nps = npsSummary();
+    const detractorBody = detractors.length ? limitedList(detractors, item => {
+      const estado = badgeConEstado(item.cuentaId, item.ejemplo ? 'Detractor · ejemplo' : 'Detractor');
+      return `<div class="crm2-qitem">${row(item.nombre, `${item.rubro} · ${item.momento ? momentoTexto(item.momento) : 'Respuesta del portal'} · NPS ${item.nps ?? 'sin nota'}/10`, item.abierta || (item.ayuda ? item.ayuda.resumen : 'Revisar la ayuda abierta antes de responder'), `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, estado)}<div class="crm2-qtools" role="group" aria-label="Responder al detractor">${tareaBtn('detractor', item.cuentaId, 'Responder')}</div></div>`;
+    }, 'Ver todos los detractores', 3) : empty('Sin detractores pendientes', 'Un NPS de 0 a 6 o una carita «no contento» aparece aquí con su ayuda abierta.');
+    const leadBody = ready.length ? limitedList(ready, lead => `<div class="crm2-qitem">${row(contactName(lead), `${companyName(lead)} · ${permissionShort(lead)}`, `Interés ${interestLabel(lead)} · Valor ${scoreValue(lead)?.puntaje ?? 0}/100`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, badgeConEstado(lead.id, statusOfLead(lead)))}<div class="crm2-qtools" role="group" aria-label="Pasar a Ventas"><button type="button" class="crm2-qtool crm2-qtool--principal" data-crm-agente-tarea="traspaso" data-cuenta-id="${esc(lead.id)}" data-crm-tipo="lead">${icon('arrow')}<span>Pasar a Ventas</span></button></div></div>`, 'Ver todos los leads', 3) : empty('No hay un lead listo para pasar', 'La calificación requiere contacto identificado, negocio B2B, permiso y 40 puntos de interés.');
+    const promoterBody = promoters.length ? limitedList(promoters, item => {
+      const estado = badgeConEstado(item.cuentaId, item.ejemplo ? 'Promotor · ejemplo' : 'Promotor');
+      return `<div class="crm2-qitem">${row(item.nombre, `${item.rubro} · NPS ${item.nps}/10 · ${item.resena ? 'Reseña pedida' : 'Sin reseña pedida'}`, item.abierta || 'Todavía no recomienda por escrito', `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, estado)}<div class="crm2-qtools" role="group" aria-label="Pedir reseña o referido">${tareaBtn('resena', item.cuentaId, 'Reseña')}${tareaBtn('referido', item.cuentaId, 'Referido')}</div></div>`;
+    }, 'Ver todos los promotores', 3) : empty('Sin promotores por invitar', 'Cuando una cuenta responda 9 o 10 y no haya recomendado todavía, aparece aquí.');
+    return block(`Detractores por resolver${detractors.length ? ` · ${detractors.length}` : ''}`, '', detractorBody, 'crm2-block--cola')
+      + block(`Leads por calificar${ready.length ? ` · ${ready.length}` : ''}`, '', leadBody)
+      + block(`Promotores a los que pedir reseña o referido${promoters.length ? ` · ${promoters.length}` : ''}`, '', promoterBody)
+      + `<details class="crm2-fold"><summary>Resumen de satisfacción y NPS</summary><div class="crm2-fold-body"><p><b>${nps.n ? `NPS ${nps.nps > 0 ? '+' : ''}${nps.nps}` : 'NPS pendiente'}</b> · meta 52 · ${nps.promoters} promotor(es), ${nps.passives} pasivo(s), ${nps.detractors} detractor(es) de ${nps.n} respuesta(s).</p><p><a href="#R18" data-c2-go="R18">Abrir Postventa</a> · <a href="#R19" data-c2-go="R19">Abrir Recomendados</a></p><p class="crm2-small-note">El NPS se calcula con las respuestas del portal; los ejemplos no suman al indicador.</p></div></details>`;
   }
+  // Postventa (Marketing): satisfacción, NPS, detractores con su ayuda y seguimiento. Un flujo, una pestaña.
+  function marketingPostventa() {
+    const respuestas = ultimaRespuestaPorCuenta();
+    const detractores = detractoresPostventa();
+    const pendientes = detractores.filter(item => !item.resuelto);
+    const nps = npsSummary();
+    const detractorBody = detractores.length ? limitedList(detractores, item => {
+      const estado = item.resuelto ? 'Respondido' : `NPS ${item.nps ?? 's/n'} · ${caritaTexto(item.carita)}`;
+      const ayuda = item.ayuda ? `<span class="crm2-satisfaccion-ayuda">Ayuda ${esc(item.ayuda.estado || 'abierta')}: ${esc(recortaTexto(item.ayuda.resumen || item.ayuda.motivo || '', 90))}</span>` : '<span class="crm2-satisfaccion-ayuda">Sin ayuda abierta</span>';
+      return `<div class="crm2-qitem"><div class="crm2-satisfaccion"><button type="button" class="crm2-satisfaccion-main" data-c2="open-account" data-id="${esc(item.cuentaId)}"><span class="crm2-carita" data-carita="${esc(item.carita || 'no-contento')}" aria-hidden="true">${caritaGlifo(item.carita || 'no-contento')}</span><span><b>${esc(item.nombre)}</b><span>${esc(item.rubro)}${item.momento ? ` · ${momentoTexto(item.momento)}` : ''}${item.ejemplo ? ' · ejemplo' : ''}</span><small>${esc(item.abierta || 'Sin comentario registrado')}</small>${ayuda}</span>${statusPill(estado, item.resuelto ? 'good' : 'blocked')}</button><div class="crm2-qtools" role="group" aria-label="Responder al detractor">${item.resuelto ? '' : tareaBtn('detractor', item.cuentaId, 'Responder')}</div></div></div>`;
+    }, 'Ver todos los detractores') : empty('Sin detractores registrados', 'Cuando una respuesta traiga NPS de 0 a 6 o carita «no contento», aparece aquí.');
+    const respuestasBody = respuestas.length ? `<div class="crm2-lista-satisfaccion">${respuestas.slice(0, 6).map(item => `<article class="crm2-respuesta"><span class="crm2-carita" data-carita="${esc(item.carita || 'regular')}" aria-hidden="true">${caritaGlifo(item.carita)}</span><div><b>${esc(cuentaNombre(item.cuentaId))}</b><span>${momentoTexto(item.momento)} · NPS ${item.nps ?? 'sin nota'}/10 · ${fechaCorta(item.ts)}${item.ejemplo ? ' · ejemplo' : ''}</span><p>${esc(item.abierta || 'Sin comentario abierto.')}</p>${(item.canales || []).length ? `<small>Recomendaría por: ${esc((item.canales || []).map(canalTexto).join(' · '))}</small>` : ''}</div></article>`).join('')}</div>${notaEjemplo('respuestas')}` : empty('Sin respuestas todavía', 'Las respuestas del portal aparecen cuando el comprador contesta la encuesta de su entrega.');
+    const ayudas = postventaDe('ayudas');
+    const ayudasBody = ayudas.length ? `<div class="crm2-list">${ayudas.map(item => row(cuentaNombre(item.cuentaId), `${item.motivo || 'Ayuda abierta'} · ${recortaTexto(item.resumen || '', 70)}`, `Estado · ${item.estado || 'abierta'}${item.ejemplo ? ' · ejemplo' : ''}`, `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, item.estado === 'resuelta' ? 'Resuelta' : item.estado === 'tomada' ? 'Tomada' : 'Abierta'))}</div>${notaEjemplo('ayudas')}` : empty('Sin ayudas abiertas', 'Cuando alguien no esté contento, su caso aparece aquí con el resumen para responder.');
+    const npsDetalle = `<details class="crm2-fold"><summary>Qué significa el NPS</summary><div class="crm2-fold-body"><p><b>Promotores menos detractores.</b> Se cuentan las respuestas de 0 a 10: promotor 9-10, pasivo 7-8, detractor 0-6. El NPS es el porcentaje de promotores menos el de detractores.</p><p>Meta 52. Hoy: <b>${nps.n ? `${nps.nps > 0 ? '+' : ''}${nps.nps}` : 'pendiente'}</b> · ${nps.n} respuesta(s) · ${nps.promoters} promotor(es) · ${nps.passives} pasivo(s) · ${nps.detractors} detractor(es).</p><p>Primero se resuelve la fricción y después se invita a la reseña. La reseña pública nunca se bloquea y no se ofrece ningún incentivo.</p></div></details>`;
+    return block(`Detractores por resolver${pendientes.length ? ` · ${pendientes.length}` : ''}`, '', detractorBody, 'crm2-block--cola')
+      + block('Satisfacción y NPS', 'Respuestas del portal, en cada entrega', respuestasBody + npsDetalle)
+      + block('Seguimiento de ayudas', '', ayudasBody);
+  }
+  // Recomendados (Marketing): referidos con su estado, reseñas invitadas y promotores que aún no recomiendan.
+  function marketingReferrals() {
+    const referidos = referidosPostventa();
+    const resenas = resenasPostventa();
+    const promotores = promotoresPostventa().filter(item => !item.resena || !item.referido);
+    const refBody = referidos.length ? `<div class="crm2-list">${referidos.map(item => `<div class="crm2-qitem">${row(item.negocio, `${item.nombre} lo recomendó · contacto ${item.contacto}`, `Permiso ${item.permiso ? 'registrado' : 'por confirmar'} · ${fechaCorta(item.ts)}${item.ejemplo ? ' · ejemplo' : ''}`, `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, item.estado === 'aprobado' ? 'Aprobado' : item.estado === 'contactado' ? 'Contactado' : 'Enviado')}<div class="crm2-qtools" role="group" aria-label="Seguimiento del referido">${tareaBtn('avisar', item.cuentaId, 'Avisar')}</div></div>`).join('')}</div>${notaEjemplo('referidos')}` : empty('Sin referidos registrados', 'Cuando una cuenta recomiende a otro negocio, aparece aquí con su estado y su permiso.');
+    const resenasBody = resenas.length ? `<div class="crm2-list">${resenas.map(item => { const etiqueta = item.estado === 'vista-previa' ? 'Vista previa' : item.estado === 'pedida' ? 'Reseña pedida' : 'Invitada'; return `<div class="crm2-qitem">${row(cuentaNombre(item.cuentaId), `${canalTexto(item.canal)} · invitación ${item.estado === 'vista-previa' ? 'vista previa' : item.estado}`, fechaCorta(item.ts) + (item.ejemplo ? ' · ejemplo' : ''), `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, etiqueta)}<div class="crm2-qtools" role="group" aria-label="Pedir reseña">${tareaBtn('resena', item.cuentaId, 'Reseña')}</div></div>`; }).join('')}</div>${notaEjemplo('resenas')}` : empty('Sin reseñas invitadas', 'Las invitaciones a reseña aparecen cuando se piden desde el portal o desde aquí.');
+    const promotorBody = promotores.length ? limitedList(promotores, item => `<div class="crm2-qitem">${row(item.nombre, `${item.rubro} · NPS ${item.nps}/10`, item.resena ? 'Reseña pedida; falta el referido' : item.referido ? 'Referido pedido; falta la reseña' : 'Todavía no recomienda', `data-c2="open-account" data-id="${esc(item.cuentaId)}"`, badgeConEstado(item.cuentaId, item.ejemplo ? 'Promotor · ejemplo' : 'Promotor'))}<div class="crm2-qtools" role="group" aria-label="Pedir reseña o referido">${item.resena ? '' : tareaBtn('resena', item.cuentaId, 'Reseña')}${item.referido ? '' : tareaBtn('referido', item.cuentaId, 'Referido')}</div></div>`, 'Ver todos los promotores') : empty('Sin promotores pendientes', 'Todos los promotores registrados ya tienen su invitación.');
+    return block(`Referidos${referidos.length ? ` · ${referidos.length}` : ''}`, '', refBody, 'crm2-block--cola')
+      + block(`Reseñas invitadas${resenas.length ? ` · ${resenas.length}` : ''}`, '', resenasBody)
+      + block(`Promotores que aún no recomiendan${promotores.length ? ` · ${promotores.length}` : ''}`, '', promotorBody)
+      + `<details class="crm2-fold"><summary>Cómo se pide una reseña</summary><div class="crm2-fold-body"><p>La invitación se ofrece a todos, nunca solo a los contentos. No se bloquea la reseña ni se ofrece un incentivo: las políticas de Google prohíben pedir reseñas positivas de forma selectiva.</p><p>Primero se resuelve la fricción; la invitación va después, en el momento justo.</p></div></details>`;
+  }
+  function recortaTexto(texto, max = 120) { const value = String(texto ?? '').replace(/\s+/g, ' ').trim(); return value.length > max ? value.slice(0, max - 1) + '…' : value; }
+
   function marketingDraftBlock() {
     const segments = Object.keys(D.SEGMENT_CONTENT || {});
     if (!segments.length) return '';
@@ -663,6 +829,38 @@
     });
     return [...grouped.entries()].filter(([name]) => name && name !== 'Sin campaña asociada').map(([name, people]) => ({ name, people }));
   }
+  // Vista «Medios» (contrato 26-nov, punto 6): los mismos medios en todo el recorrido, con un ejemplo
+  // real de cómo se ve cada pieza y dónde aparece, su objetivo y su KPI. Sin cifras inventadas.
+  const MEDIOS = [
+    { grupo: 'Captación', nombre: 'Google · anuncios', donde: 'Resultados de búsqueda y Display', pieza: 'captacion/anuncios/evidencia/export/display-300x600.png', alt: 'Pieza de Google Display de Marley Coffee Empresas', objetivo: 'Captar la demanda que ya busca servicio de café para empresas.', kpi: 'CTR y CPL' },
+    { grupo: 'Captación', nombre: 'LinkedIn · anuncios', donde: 'Feed de LinkedIn, por cargo y comuna', pieza: 'captacion/anuncios/evidencia/export/linkedin-imagen-1200x1200.webp', alt: 'Pieza de LinkedIn de Marley Coffee Empresas', objetivo: 'Alcanzar a quien decide el servicio de café en la empresa.', kpi: 'CTR y CPL' },
+    { grupo: 'Captación', nombre: 'Meta · Instagram y Facebook', donde: 'Feed e historias', pieza: 'captacion/anuncios/evidencia/export/meta-carrusel-01-1080x1350.webp', alt: 'Carrusel de Meta de Marley Coffee Empresas', objetivo: 'Dar a conocer el servicio y el pack de inicio.', kpi: 'CTR y CPL' },
+    { grupo: 'Captación', nombre: 'YouTube · video', donde: 'Anuncios de video y canal', pieza: 'captacion/anuncios/evidencia/export/youtube-video-1280x720.png', alt: 'Miniatura del video de YouTube de Marley Coffee Empresas', objetivo: 'Mostrar cómo se vería la máquina en un espacio real.', kpi: 'CTR y CPL' },
+    { grupo: 'Conversación', nombre: 'WhatsApp', donde: 'Chat del cliente con una persona del equipo', mock: 'whatsapp', objetivo: 'Responder la consulta y llegar al primer diagnóstico.', kpi: 'Respuesta y paso a MQL' },
+    { grupo: 'Conversación', nombre: 'Correo', donde: 'Bandeja del contacto, con permiso registrado', mock: 'correo', pieza: 'captacion/correos/E01.html', enlace: true, alt: 'Correo E01 de Marley Coffee Empresas', objetivo: 'Sostener la conversación y entregar la guía de servicio.', kpi: 'Respuesta y paso a MQL' },
+    { grupo: 'Evangelización', nombre: 'Google · perfil de empresa', donde: 'Google Maps y la búsqueda local', mock: 'google', objetivo: 'Ganar confianza con reseñas reales de clientes.', kpi: 'Reseñas y NPS' },
+    { grupo: 'Evangelización', nombre: 'Referidos', donde: 'Correo y WhatsApp con el enlace del cliente', mock: 'referido', objetivo: 'Que un cliente contento recomiende a otro negocio.', kpi: 'Referidos y NPS' },
+    { grupo: 'Evangelización', nombre: 'Contenido de clientes', donde: 'Instagram y LinkedIn, con permiso del cliente', pieza: 'captacion/organico/evidencia/export/p02-1080x1920.png', alt: 'Historia de Instagram con contenido de cliente', objetivo: 'Mostrar casos reales con el permiso del cliente.', kpi: 'Reseñas y NPS' }
+  ];
+  function medioMock(tipo, nombre) {
+    if (tipo === 'whatsapp') return `<div class="crm2-medio-mock crm2-medio-mock--wa"><span class="crm2-medio-mock-t">WhatsApp</span><p class="crm2-medio-burbuja">Hola, soy Paula de Marley Coffee. ¿Te acomoda que revisemos tu propuesta de máquina para ${esc(nombre || 'tu negocio')}?</p><p class="crm2-medio-burbuja crm2-medio-burbuja--ok">Sí, mañana a las 10</p></div>`;
+    if (tipo === 'google') return `<div class="crm2-medio-mock crm2-medio-mock--google"><span class="crm2-medio-mock-t">Perfil de empresa</span><b>Marley Coffee Empresas</b><span class="crm2-medio-estrellas" aria-label="5 estrellas">★★★★★</span><p>«La instalación quedó impecable y el café se acabó en dos días.»</p><small>Reseña de un cliente · Google Maps</small></div>`;
+    if (tipo === 'correo') return `<div class="crm2-medio-mock crm2-medio-mock--correo"><span class="crm2-medio-mock-t">Correo</span><b>Tu guía para planificar el servicio de café</b><p>Hola: revisamos tu diagnóstico y preparamos la guía con productos, consumo y reposición.</p><small>De: Marley Coffee Empresas · con permiso registrado</small></div>`;
+    return `<div class="crm2-medio-mock crm2-medio-mock--ref"><span class="crm2-medio-mock-t">Enlace de referido</span><b>Recomienda a otro negocio</b><p>«Te comparto el enlace de Marley Coffee Empresas: te ayudan a elegir la máquina.»</p><small>El negocio referido decide si quiere cotizar.</small></div>`;
+  }
+  function mediosView() {
+    const grupos = ['Captación', 'Conversación', 'Evangelización'];
+    const bloques = grupos.map(grupo => {
+      const piezas = MEDIOS.filter(medio => medio.grupo === grupo);
+      const cards = piezas.map(medio => `<article class="crm2-medio">
+        <div class="crm2-medio-vista">${medio.mock ? medioMock(medio.mock, 'tu negocio') : `<img src="${esc(medio.pieza)}" alt="${esc(medio.alt || medio.nombre)}" loading="lazy">`}</div>
+        <div class="crm2-medio-txt"><h3>${esc(medio.nombre)}</h3><p class="crm2-medio-donde"><b>Dónde:</b> ${esc(medio.donde)}</p><p><b>Objetivo:</b> ${esc(medio.objetivo)}</p><p class="crm2-medio-kpi"><b>KPI:</b> ${esc(medio.kpi)}</p>${medio.enlace ? `<a class="crm2-text-link" href="${esc(medio.pieza)}" target="_blank" rel="noopener">Abrir la pieza</a>` : ''}</div>
+      </article>`).join('');
+      return `<section class="crm2-medios-grupo" aria-labelledby="crm2-medios-${esc(normKey(grupo))}"><h3 id="crm2-medios-${esc(normKey(grupo))}">${esc(grupo)}</h3><div class="crm2-medios-grid">${cards}</div></section>`;
+    }).join('');
+    return `<div class="crm2-medios">${bloques}<p class="crm2-small-note">Los KPI son los que ya siguen el tablero y el informe; aquí no se agregan cifras. Las piezas son las que existen en el prototipo; los ejemplos de WhatsApp, Google y referidos son vistas simuladas.</p></div>`;
+  }
+  const normKey = texto => String(texto || '').toLocaleLowerCase('es-CL').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-');
   function marketingCampaigns() {
     const campaigns = campaignRows();
     const body = campaigns.length ? campaigns.slice(0,4).map(campaign => {
@@ -670,7 +868,10 @@
       return `<article class="crm2-campaign"><div><p class="crm2-eyebrow">CAMPAÑA · DATO DE PRUEBA</p><h3>${esc(campaign.name)}</h3><p>${campaign.people.length} contacto${campaign.people.length === 1 ? '' : 's'} con ese origen registrado.</p></div><details><summary>Ver piezas y contactos</summary><div class="crm2-campaign-details"><p><b>Origen:</b> ${esc(campaign.name)}</p><p><b>Pieza:</b> ${esc(pieceOf(campaign.people[0]))}</p><p><b>Contenido del rubro:</b> ${esc(D.SEGMENT_CONTENT?.[campaign.people[0]?.business]?.explora || 'Sin pieza asociada en el registro.')}</p>${leadsHtml}</div></details></article>`;
     }).join('') : empty('Sin campañas registradas','El origen del contacto se conserva aunque no haya una campaña asociada.');
     const tactics = Object.entries(D.FLY_TACTICS || {}).map(([stage, items]) => `<details><summary>${esc(stage)} · ${items.length} tácticas</summary><div class="crm2-tactic-list">${items.slice(0,3).map(item => `<p><b>${esc(item.t)}</b><span>${esc(item.m || item.d)}</span></p>`).join('')}</div></details>`).join('');
-    return marketingDraftBlock() + block('Campañas y origen', '', body) + `<details class="crm2-fold"><summary>Contenido del flywheel</summary><div class="crm2-fold-body">${tactics || 'Sin tácticas registradas.'}</div></details>`;
+    const medios = Boolean(appState().vistaMedios);
+    const selector = `<div class="crm2-vista-switch" role="group" aria-label="Vista de Campañas y contenido"><button type="button" class="crm2-chip-button ${medios ? '' : 'is-selected'}" data-c2="vista-campanas" aria-pressed="${medios ? 'false' : 'true'}">Campañas</button><button type="button" class="crm2-chip-button ${medios ? 'is-selected' : ''}" data-c2="vista-medios" aria-pressed="${medios ? 'true' : 'false'}">Medios</button></div>`;
+    if (medios) return selector + block('Medios · cómo se ve cada pieza y dónde', '', mediosView());
+    return selector + marketingDraftBlock() + block('Campañas y origen', '', body) + `<details class="crm2-fold"><summary>Contenido del flywheel</summary><div class="crm2-fold-body">${tactics || 'Sin tácticas registradas.'}</div></details>`;
   }
 
   function salesInPeriod() {
@@ -702,7 +903,7 @@
       ['Permisos', followups.find(item => item.status === 'Bloqueado')],
     ].map(([label, item]) => {
       if (!item) return `<p class="crm2-queue-empty"><strong>${label}</strong> · Sin pendientes</p>`;
-      const fila = row(label, item.titulo || item.name, '', `data-c2="review-approval" data-id="${esc(item.id)}"`, item.status === 'Bloqueado' ? 'Falta permiso' : '');
+      const fila = row(label, item.titulo || item.name, '', `data-c2="review-approval" data-id="${esc(item.id)}"`, badgeConEstado(item.id, item.status === 'Bloqueado' ? 'Falta permiso' : ''));
       // La persona detrás de la solicitud: el agente arma el aviso o el correo con sus datos.
       const persona = item.lead || item.account || leadById(item.leadId) || accountById(item.leadId) || accountById(item.cuenta);
       if (!persona) return fila;
@@ -710,11 +911,15 @@
     }).join('');
     const salesNote = goal > 0 ? `${Math.round(sales / goal * 100)} % de la meta ingresada (${money(goal)}); datos de prueba` : 'Meta comercial sin registrar · muestra financiera de prueba';
     const metricGrid = `<div class="crm2-metrics">${metric('Ventas netas · 90 días', money(sales), salesNote, true)}${metric('Leads calificados', String(qualified), `${sql} SQL aceptados · meta del informe: +25 % vs base; base sin registrar`)}${metric('Reposición digital', digital.value, digital.note)}${npsMetric(npsInfo)}</div>`;
+    // Los KPI clave, a la vista y en el mismo bloque de decisiones: cuatro cifras, sin duplicar las tarjetas del informe.
+    const npsTxt = npsInfo.n ? `${npsInfo.nps > 0 ? '+' : ''}${npsInfo.nps}` : 'Pendiente';
+    const npsNota = npsInfo.n ? `Meta 52 · ${npsInfo.promoters} promotor(es) y ${npsInfo.detractors} detractor(es) de ${npsInfo.n} respuesta(s)` : 'Se obtiene con la encuesta del portal · meta 52';
+    const kpiStrip = `<div class="crm2-kpi-strip" role="list">${[['Ventas netas · 90 días', money(sales), goal > 0 ? `${Math.round(sales / goal * 100)} % de la meta` : 'Meta sin registrar'], ['NPS', npsTxt, npsNota], ['Por aprobar', String(approvals.length), approvals.length ? 'Esperan tu decisión' : 'Nada pendiente'], ['Acciones de hoy', String(accionesDeHoy()), 'Contactos, visitas, reseñas y respuestas registradas']].map(([label, value, nota]) => `<article class="crm2-kpi" role="listitem"><span>${esc(label)}</span><b>${esc(value)}</b><small>${esc(nota)}</small></article>`).join('')}</div>`;
     const details = `<details class="crm2-fold"><summary>Todos los indicadores</summary><div class="crm2-fold-body crm2-kpi-details">${labelValue('Retención','Meta 90 % · base 86 %')}${labelValue('Quiebres OCS','Meta: −30 %')}${labelValue('OTIF','Meta: 96 %')}${labelValue('Ticket neto','Meta: +10 % en cuentas activadas')}${labelValue('Cuentas activadas','Meta: 100 en doce meses')}${labelValue('CAC','Escenario del piloto · revisar en Metas y canales')}</div></details>`;
     // En el Hoy manda la cola de decisiones; las cuatro cifras van en el tablero compacto y el resto
     // (ventas netas, leads, reposición y NPS) queda a un toque en «Resultados del programa».
     const programa = `<details class="crm2-fold"><summary>Resultados del programa</summary><div class="crm2-fold-body">${metricGrid}${details}</div></details>`;
-    return block('Por aprobar', '', quickReview, 'crm2-approval-queue') + programa;
+    return block('Por aprobar', '', quickReview, 'crm2-approval-queue crm2-block--cola') + block('KPIs clave', '', kpiStrip) + programa;
   }
   function approvalSampleItems() {
     const s = currentState();
@@ -785,7 +990,13 @@
   }
   function managerGoals() {
     const rows = sortedNewest(leads()).slice(0,4).map(lead => row(contactName(lead), `${companyName(lead)} · ${sourceOf(lead)}`, `${interestLabel(lead)} interés · ${scoreValue(lead)?.puntaje ?? 0}/100 valor`, `data-c2="open-lead" data-id="${esc(lead.id)}"`, 'Dos ejes')).join('');
-    return block('Meta editable', 'El valor monetario queda vacío hasta que Jefatura registre el objetivo aprobado.', saveMetaForm()) + block('Canales y oportunidades', 'Origen y actividad del contacto ayudan a distribuir la atención.', `<div class="crm2-list">${rows || empty('Sin contactos','')}</div>`);
+    const nps = npsSummary();
+    const npsValor = nps.n ? `${nps.nps > 0 ? '+' : ''}${nps.nps}` : 'Pendiente';
+    const npsBody = `<div class="crm2-kpi-strip crm2-kpi-strip--uno" role="list"><article class="crm2-kpi" role="listitem"><span>NPS · recomendación</span><b>${esc(npsValor)}</b><small>${nps.n ? `Meta 52 · ${nps.promoters} promotor(es), ${nps.passives} pasivo(s) y ${nps.detractors} detractor(es) de ${nps.n} respuesta(s)` : 'Se obtiene con la encuesta del portal · meta 52'}</small></article></div>
+      <details class="crm2-fold"><summary>¿Qué significa el NPS?</summary><div class="crm2-fold-body"><p>Es el porcentaje de promotores (9-10) menos el porcentaje de detractores (0-6) sobre las respuestas válidas. Los pasivos (7-8) no suman ni restan.</p><p>Se mide en dos momentos: después de la primera entrega y después de cada recompra. Las respuestas y las ayudas se gestionan en <a href="#R18" data-c2-go="R18">Postventa</a> de Marketing.</p><p class="crm2-small-note">Los ejemplos rotulados no suman al indicador; solo cuentan las respuestas del portal.</p></div></details>`;
+    return block('NPS · promotores menos detractores', '', npsBody)
+      + block('Meta editable', 'El valor monetario queda vacío hasta que Jefatura registre el objetivo aprobado.', saveMetaForm())
+      + block('Canales y oportunidades', 'Origen y actividad del contacto ayudan a distribuir la atención.', `<div class="crm2-list">${rows || empty('Sin contactos','')}</div>`);
   }
   function managerTeam() {
     const countByRole = (role) => role === 'ventas' ? leads().length : role === 'marketing' ? leadsReady().length : pendingApprovals().length;
@@ -829,6 +1040,24 @@
     return value?.valor?.puntaje ?? value?.puntaje ?? account?.st?.fin ?? 'Sin puntaje';
   }
   function npsChip(score) { return statusPill(`NPS ${score}/10 · ${score >= 9 ? 'promotor' : score >= 7 ? 'pasivo' : 'detractor'}`, score <= 6 ? 'blocked' : score >= 9 ? 'good' : ''); }
+  // Estado visible de una fila después de una acción (contrato 26-nov, punto 3). Lo escribe el agente o la
+  // propia acción del CRM en `crm2.rowState`; sobrevive al re-render porque vive en el estado de M4.
+  const rowStates = () => appState().rowState || {};
+  const rowStateOf = id => rowStates()[String(id)] || null;
+  const estadoFila = id => { const item = rowStateOf(id); return item && item.texto ? String(item.texto) : ''; };
+  const contadores = () => appState().counters || {};
+  const accionesDeHoy = () => Object.values(contadores()).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  function marcarFila(id, tipo, texto, kind = 'ok') {
+    if (!id) return;
+    save(crm => {
+      crm.rowState = crm.rowState || {};
+      crm.rowState[String(id)] = { tipo, texto, kind, at: now(), by: userFor(currentState().role) };
+      crm.counters = crm.counters || {};
+      const clave = tipo === 'contacto' ? 'contactos' : tipo === 'visita' ? 'visitas' : tipo === 'resena' ? 'resenas' : tipo === 'detractor' ? 'respuestas' : tipo === 'aprobacion' ? 'aprobaciones' : tipo === 'traspaso' ? 'traspasos' : tipo === 'propuesta' ? 'propuestas' : 'acciones';
+      crm.counters[clave] = Number(crm.counters[clave] || 0) + 1;
+    });
+  }
+  const badgeConEstado = (id, fallback) => estadoFila(id) || fallback || '';
   function landingContext(lead) {
     if (!lead?.landing) return '';
     const touch = item => [item?.source || item?.params?.utm_source, item?.campaign || item?.params?.utm_campaign].filter(Boolean).join(' · ');
@@ -925,7 +1154,8 @@
     } else if (isAccount && role === 'ventas') {
       const id = `data-id="${esc(item.id)}"`;
       const more = `<details class="crm2-action-more"><summary>Más</summary><div class="crm2-action-more-menu">${secondary('Agendar contacto','start-followup',id)}${item.referral ? secondary('Revisar referido','open-referral',id) : ''}</div></details>`;
-      actionbar = actionBar(`${primary('Preparar reposición','open-reorder',id)}${secondary('Recomendar','recommend-account',id)}${more}`, true);
+      // Recomendar es del programa de Marketing: Ventas prepara la reposición y cierra la cuenta.
+      actionbar = actionBar(`${primary('Preparar reposición','open-reorder',id)}${more}`, true);
     }
     else actionbar = actionBar('', true);
     return { content: (permissionFirst ? folded : '') + group1 + group2 + group3, actionbar };
@@ -979,6 +1209,10 @@
       crm.quotes.push(saved);
       crm.conversations[lead.id] = Array.isArray(crm.conversations[lead.id]) ? crm.conversations[lead.id] : [];
       crm.conversations[lead.id].push({ from:'Ventas', text:`Propuesta ${folio} registrada por ${quoteWizard.channel} · solo simulación.`, at:now(), simulated:true });
+      crm.rowState = crm.rowState || {};
+      crm.rowState[String(lead.id)] = { tipo:'propuesta', texto:`Propuesta ${folio} enviada hoy ${horaCorta(now())}`, kind:'ok', at:now(), by:userFor(currentState().role) };
+      crm.counters = crm.counters || {};
+      crm.counters.propuestas = Number(crm.counters.propuestas || 0) + 1;
       st.marketingPasos = st.marketingPasos || {};
     });
     const dialog = root()?.querySelector('[data-quote-dialog]');
@@ -1004,6 +1238,8 @@
     marketingChannels: ['Revisar leads por origen', 'go:R12'],
     marketingRecover: ['Abrir la primera ficha', 'open-first'],
     marketingCampaigns: ['Generar borrador', 'draft'],
+    marketingPostventa: ['Responder al primer detractor', 'open-first'],
+    marketingReferrals: ['Revisar el primer referido', 'open-first'],
     managerSummary: ['Revisar la primera aprobación', 'open-first'],
     managerApprovals: ['Revisar la primera solicitud', 'focus-first'],
     managerGoals: ['Ver aprobaciones pendientes', 'go:R07'],
@@ -1035,6 +1271,7 @@
       const pageFn = {
         salesToday, salesContacts, salesClients, salesReorder, salesQuotes,
         marketingToday, marketingChannels, marketingLeads, marketingRecover, marketingCampaigns,
+        marketingPostventa, marketingReferrals,
         managerSummary, managerApprovals, managerGoals, managerTeam, managerOperations, buyerCRM
       }[pageName];
       content = pageFn ? pageFn() : empty('Vista no disponible','Selecciona una opción del menú.');
@@ -1133,7 +1370,21 @@
       });
     }
   }
-  window.MarleyCRM2 = { render };
+  // API mínima para que el agente del CRM responda con los mismos datos y ejemplos que ve cada pestaña.
+  window.MarleyCRM2 = {
+    render,
+    toast,
+    postventa: {
+      detractores: detractoresPostventa,
+      promotores: promotoresPostventa,
+      referidos: referidosPostventa,
+      resenas: resenasPostventa,
+      respuestas: ultimaRespuestaPorCuenta,
+      resumen: npsSummary
+    },
+    metas: () => ({ goal: Number(appState().goalSales || 0), ventas: salesInPeriod(), nps: npsSummary(), acciones: accionesDeHoy(), aprobaciones: pendingApprovals().length, contadores: contadores() }),
+    reponer: () => accounts().filter(accountNeedsReorder).sort((a, b) => accountDue(a) - accountDue(b)).map(account => ({ id: account.id, nombre: account.name || 'Cuenta', rubro: account.business || 'Negocio sin dato', comuna: account.comuna || 'Comuna sin dato', dias: accountDue(account), ultima: accountStats(account).lastAgo }))
+  };
   let searchValue = '';
   function bindQuoteDialog() {
     const dialog = root()?.querySelector('[data-quote-dialog]');
@@ -1153,6 +1404,9 @@
   }
 
   function approvalDecision(id, decision) {
+    // Aprobar pasa por el agente (contrato 26-nov, punto 3): abre el panel con la confirmación a la vista.
+    // Pedir información y rechazar siguen directos; el aviso y la fila cambian igual.
+    if (decision === 'aprobada' && window.MarleyCRMAgente?.panel?.aprobar) { window.MarleyCRMAgente.panel.aprobar(id); return; }
     const currentApproval = pendingApprovals().find(item => item.id === id);
     if (decision === 'aprobada' && currentApproval?.tipo === 'referido') {
       const referralAccount = accountById(currentApproval.cuenta);
@@ -1179,6 +1433,11 @@
       if (item.leadId && st.marketingPasos?.[item.leadId]) st.marketingPasos[item.leadId].aprobacion = decision;
       crm.approvalHistory = Array.isArray(crm.approvalHistory) ? crm.approvalHistory : [];
       crm.approvalHistory.push({ id, decision, note, at:now() });
+      // El efecto visible en el mismo momento: la fila cambia de estado y el contador de Jefatura suma.
+      crm.rowState = crm.rowState || {};
+      crm.rowState[String(id)] = { tipo:'aprobacion', texto: decision === 'aprobada' ? `Aprobada hoy ${horaCorta(now())}` : decision === 'pidio_info' ? `Información pedida hoy ${horaCorta(now())}` : `Rechazada hoy ${horaCorta(now())}`, kind: decision === 'aprobada' ? 'ok' : 'wait', at:now(), by:userFor(currentState().role) };
+      crm.counters = crm.counters || {};
+      crm.counters.aprobaciones = Number(crm.counters.aprobaciones || 0) + 1;
     });
     toast(decision === 'aprobada' ? 'Aprobación registrada' : decision === 'pidio_info' ? 'Información solicitada' : 'Propuesta rechazada', 'La decisión queda en la ficha de Ventas.');
     render();
@@ -1197,6 +1456,10 @@
         st.marketingPasos[id] = Object.assign({}, old, { estado:'esperando', motivo:'MQL calificado', por:userFor('marketing'), at:now() });
         crm.handoffs = crm.handoffs || {};
         crm.handoffs[id] = { status:'esperando', reason:'MQL calificado', at:now() };
+        crm.rowState = crm.rowState || {};
+        crm.rowState[String(id)] = { tipo:'traspaso', texto:`Pasado a Ventas hoy ${horaCorta(now())}`, kind:'ok', at:now(), by:userFor(currentState().role) };
+        crm.counters = crm.counters || {};
+        crm.counters.traspasos = Number(crm.counters.traspasos || 0) + 1;
       });
       toast('Lead pasado a Ventas', 'Aparece en “Hoy” y en Contactos de Ventas.');
       render();
@@ -1311,6 +1574,10 @@
     save(crm => {
       crm.replenishments = crm.replenishments || {};
       crm.replenishments[id] = { status:'Reposición lista', accountId:id, lastOrder:account.orders?.at(-1)?.id || null, items, note, inventory:'Por confirmar', shipping:'Por confirmar', at:now(), dataTest:true };
+      crm.rowState = crm.rowState || {};
+      crm.rowState[String(id)] = { tipo:'reposicion', texto:`Reposición lista hoy ${horaCorta(now())}`, kind:'ok', at:now(), by:userFor(currentState().role) };
+      crm.counters = crm.counters || {};
+      crm.counters.reposiciones = Number(crm.counters.reposiciones || 0) + 1;
     });
     toast('Reposición lista','La cuenta quedó preparada; cantidades y despacho siguen por confirmar.');
     render();
@@ -1443,6 +1710,8 @@
     if (action === 'save-account-recommendation') { recommendAccount(id, true); return; }
     if (action === 'generate-marketing-draft') { generateMarketingDraft(false); return; }
     if (action === 'confirm-marketing-draft') { generateMarketingDraft(true); return; }
+    if (action === 'vista-medios') { save(crm => { crm.vistaMedios = true; }); render(); return; }
+    if (action === 'vista-campanas') { save(crm => { crm.vistaMedios = false; }); render(); return; }
     if (action === 'save-goal') { saveGoal(); return; }
     if (action === 'save-cac') { saveCac(); return; }
     if (action === 'close-dialog') { root()?.querySelector('[data-quote-dialog]')?.close(); quoteWizard=null; return; }

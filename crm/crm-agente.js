@@ -308,14 +308,15 @@
     const cuenta = cuentasDe().find(a => String(a.id) === String(it.cuenta)) || null;
     return { permiso: cl.permission === true || permisoDe(cuenta || {}) === 'yes', b2b: cl.b2b === true || Boolean(cuenta?.business), beneficio: cl.benefit === true && Boolean(reg.beneficio || it.beneficio) };
   }
-  // Tres o cuatro opciones por rol, a la vista en la tarjeta del asistente (26-nov, pedido de Carlitos).
+  // Opciones por rol (contrato 26-nov, punto 4): solo el trabajo de cada rol y todas con resultado.
+  // Ventas cierra y repone; Marketing capta, hace postventa y mueve evangelizadores; Jefatura aprueba y mira metas.
   function sugerenciaTexto(rol) {
     const l = leadFoco(rol) || leadPrioritario();
     const nombre = l ? empresaDe(l) : 'este lead';
-    if (rol === 'marketing') return [`¿Qué cotizó ${nombre}?`, '¿Cumple para MQL?', 'Pásalo a Ventas'];
-    if (rol === 'ventas') return ['Resume mi día', `Mándale un correo a ${nombre}`, `Agenda una visita a ${nombre}`];
+    if (rol === 'marketing') return ['¿Qué detractores tengo?', 'Pide reseña a los promotores', '¿Qué referidos llegaron?', `¿Qué cotizó ${nombre}?`];
+    if (rol === 'ventas') return ['Resume mi día', '¿Qué cuentas toca reponer?', `Prepara la propuesta de ${nombre}`, `Agenda una visita con ${nombre}`];
     const pend = aprobacionesPendientes()[0];
-    return ['¿Qué espera mi aprobación?', pend ? `Aprueba ${esReferido(pend) ? 'el referido' : 'la propuesta'} de ${nombreItem(pend)}` : 'Aprueba la propuesta especial', 'Resume mi día'];
+    return ['¿Qué espera mi aprobación?', '¿Cómo vamos con las metas?', pend ? `Aprueba ${esReferido(pend) ? 'el referido' : 'la propuesta'} de ${nombreItem(pend)}` : 'Aprueba la propuesta especial'];
   }
   const leadFoco = rol => (S.foco[rol] ? leadPorId(S.foco[rol]) : null);
   function leadPrioritario() {
@@ -687,6 +688,7 @@
       const tr = st.traspasos.find(x => x.id === it.id) || null;
       if (tr) { tr.estado = 'aprobado'; tr.aprobadoPor = userDe('jefatura'); tr.aprobadoTs = ahora(); }
     });
+    marcarEstadoFila(it.leadId || it.cuenta || id, 'aprobacion', `Aprobada hoy ${horaTexto(ahora())}`);
     pushAgente(S.rol, tarjeta('Aprobación registrada', `${filas([['Solicitud', it.titulo], ['Estado', 'Aprobada'], ['Aviso', 'Marketing recibe el aviso']])}`, 'crm-agente-ok') +
       niveles({ regla: esReferido(it) ? 'Permiso, B2B y beneficio confirmados antes de aprobar.' : 'Excepción registrada con su detalle.', ia: 'Aviso a Marketing redactado.', persona: `Aprobó ${userDe('jefatura')}.`, registro: 'aprobación confirmada' }));
   }
@@ -703,10 +705,63 @@
       niveles({ regla: 'Solo apruebo solicitudes que existen en Por aprobar.', ia: 'Te muestro lo pendiente.', persona: 'Tú eliges cuál revisar.', registro: '' });
   }
 
+  // ---------- Respuestas de postventa, recomendados, reposición y metas (contrato 26-nov) ----------
+  // El agente lee los mismos datos y ejemplos que la pestaña del rol; si no hay datos, lo dice y ofrece la acción útil.
+  const pvApi = () => window.MarleyCRM2?.postventa || null;
+  const crmApi = () => window.MarleyCRM2 || null;
+  function htmlDetractores() {
+    const lista = (pvApi()?.detractores?.() || []).filter(item => !item.resuelto);
+    if (!lista.length) return tarjeta('Sin detractores pendientes', '<p>No hay respuestas con NPS de 0 a 6 ni caritas «no contento» esperando respuesta.</p>') + chips(['¿Qué referidos llegaron?', 'Pide reseña a los promotores']) + niveles({ regla: 'Detractor: NPS de 0 a 6 o carita «no contento».', ia: 'Sin casos abiertos en este momento.', persona: 'Marketing revisa la pestaña Postventa.', registro: 'consulta de detractores' });
+    const items = lista.slice(0, 4).map(item => `<li><b>${esc(item.nombre)}</b> <small>NPS ${item.nps ?? 's/n'}/10 · ${esc(item.rubro)}${item.ejemplo ? ' · ejemplo' : ''}</small><p>${esc(recorta(item.abierta || item.ayuda?.resumen || 'Sin comentario registrado.', 120))}</p><button type="button" class="crm-agente-btn crm-agente-btn--mini" data-crm-agente-accion="abrir-tarea" data-tipo="detractor" data-id="${esc(item.cuentaId)}">Responder al detractor</button></li>`).join('');
+    return tarjeta(`Detractores por resolver (${lista.length})`, `<ul class="crm-agente-lista crm-agente-pendientes">${items}</ul>`) +
+      niveles({ regla: 'Primero se resuelve la fricción; la reseña se invita después y nunca se bloquea.', ia: `Sugiero responder primero a ${lista[0].nombre} (NPS ${lista[0].nps ?? 's/n'}).`, persona: 'Marketing edita y envía la respuesta.', registro: 'consulta de detractores' });
+  }
+  function htmlPromotores() {
+    const lista = (pvApi()?.promotores?.() || []).filter(item => !item.resena || !item.referido);
+    if (!lista.length) return tarjeta('Sin promotores por invitar', '<p>Todos los promotores registrados ya tienen su invitación a reseña o referido.</p>') + chips(['¿Qué detractores tengo?', '¿Qué referidos llegaron?']) + niveles({ regla: 'Promotor: NPS de 9 o 10.', ia: 'No queda ninguno sin invitar.', persona: 'Marketing revisa Recomendados.', registro: 'consulta de promotores' });
+    const primero = lista[0];
+    abrirTarea('resena', primero.cuentaId);
+    const otros = lista.slice(1, 4).map(item => `<li><b>${esc(item.nombre)}</b> <small>NPS ${item.nps}/10 · ${esc(item.rubro)}</small></li>`).join('');
+    return tarjeta('Reseña pedida al primer promotor', `<p>Armé la invitación para <b>${esc(primero.nombre)}</b> (NPS ${primero.nps}/10). Edítala y envíala cuando quieras.</p>${otros ? `<p>Quedan ${lista.length - 1} promotor(es) por invitar:</p><ul class="crm-agente-lista">${otros}</ul>` : ''}`) +
+      niveles({ regla: 'Sin incentivos por reseñas y sin bloquear la reseña pública.', ia: 'Elegí al promotor con mayor NPS.', persona: 'Marketing aprueba y envía la invitación.', registro: 'invitación a reseña' });
+  }
+  function htmlReferidos() {
+    const lista = pvApi()?.referidos?.() || [];
+    if (!lista.length) return tarjeta('Sin referidos todavía', '<p>Ninguna cuenta recomendó a otro negocio en el registro.</p>') + chips(['¿Qué detractores tengo?', 'Pide reseña a los promotores']) + niveles({ regla: 'El negocio referido decide si quiere cotizar.', ia: 'Sin referidos registrados.', persona: 'Marketing invita a los promotores.', registro: 'consulta de referidos' });
+    const items = lista.slice(0, 5).map(item => `<li><b>${esc(item.negocio)}</b> <small>${esc(item.nombre)} lo recomendó · ${esc(item.estado)}${item.ejemplo ? ' · ejemplo' : ''}</small><p>Contacto ${esc(item.contacto)} · permiso ${item.permiso ? 'registrado' : 'por confirmar'}.</p></li>`).join('');
+    return tarjeta(`Referidos que llegaron (${lista.length})`, `<ul class="crm-agente-lista">${items}</ul>`) +
+      niveles({ regla: 'Solo se contacta al negocio referido con su permiso.', ia: `${lista.filter(item => item.estado === 'enviado').length} esperan revisión.`, persona: 'Marketing confirma el permiso y pasa el lead a Ventas.', registro: 'consulta de referidos' });
+  }
+  function htmlMetas(rol) {
+    const metas = crmApi()?.metas?.();
+    if (!metas) return tarjeta('Metas y KPIs', '<p>No pude leer el tablero de metas en este momento.</p>') + chips(['¿Qué espera mi aprobación?']);
+    const ventas = money(metas.ventas);
+    const avance = metas.goal > 0 ? `${Math.round(metas.ventas / metas.goal * 100)} % de la meta` : 'Meta comercial sin registrar';
+    const nps = metas.nps || {};
+    const npsTxt = nps.n ? `${nps.nps > 0 ? '+' : ''}${nps.nps}` : 'Pendiente';
+    const npsNota = nps.n ? `Meta 52 · ${nps.promoters} promotor(es), ${nps.passives} pasivo(s), ${nps.detractors} detractor(es) de ${nps.n} respuesta(s)` : 'Se obtiene con la encuesta del portal · meta 52';
+    return tarjeta('Cómo vamos con las metas', filas([['Ventas netas · 90 días', `${ventas} · ${avance}`], ['NPS', `${npsTxt} · ${npsNota}`], ['Aprobaciones pendientes', String(metas.aprobaciones)], ['Acciones registradas hoy', String(metas.acciones)]]) +
+      `<p class="crm-agente-nota">El NPS es promotores menos detractores: 9-10 suma, 7-8 no cuenta y 0-6 resta. Los ejemplos rotulados no suman al indicador.</p>`) +
+      niveles({ regla: 'Cifras del tablero y del registro; no se estiman.', ia: nps.n ? 'El NPS ya tiene respuestas del portal.' : 'Falta la primera respuesta del portal para calcular el NPS.', persona: 'Jefatura decide dónde poner el foco.', registro: 'consulta de metas' }) + chips(['¿Qué espera mi aprobación?', 'Resume mi día']);
+  }
+  function htmlReponer(rol) {
+    const lista = crmApi()?.reponer?.() || [];
+    if (!lista.length) return tarjeta('Sin cuentas por reponer', '<p>Ninguna cuenta tiene el ciclo vencido en el registro.</p>') + chips(['Resume mi día', '¿Qué cuentas toca reponer?']) + niveles({ regla: 'Reponer = ciclo de compra vencido.', ia: 'Sin cuentas vencidas.', persona: 'Ventas revisa el historial.', registro: 'consulta de reposición' });
+    const items = lista.slice(0, 4).map(item => `<li><b>${esc(item.nombre)}</b> <small>${esc(item.rubro)} · ${esc(item.comuna)}</small><p>Última compra hace ${esc(item.ultima ?? 'sin dato')} días · ciclo vencido hace ${Math.abs(Number(item.dias) || 0)} días.</p><button type="button" class="crm-agente-btn crm-agente-btn--mini" data-crm-agente-accion="abrir-ficha" data-id="${esc(item.id)}">Abrir la cuenta</button></li>`).join('');
+    return tarjeta(`Cuentas que toca reponer (${lista.length})`, `<ul class="crm-agente-lista crm-agente-pendientes">${items}</ul>`) +
+      niveles({ regla: 'La reposición sigue el historial; cantidades y despacho se confirman con la cuenta.', ia: `Sugiero empezar por ${lista[0].nombre}.`, persona: 'Ventas prepara la reposición.', registro: 'consulta de reposición' });
+  }
+
   // ---------- Respuestas por intención ----------
   function interpretar(t) {
     if (!t) return { tipo: 'ayuda' };
     if (/\b(ayuda|opciones|que puedes|que haces|que sabes)\b/.test(t)) return { tipo: 'ayuda' };
+    // Opciones nuevas del contrato 26-nov: primero las consultas propias de cada rol.
+    if (/\b(detractor|detractores|postventa|satisfaccion|nps|caritas?)\b/.test(t)) return { tipo: 'detractores' };
+    if (/\b(resena|resenas|promotor|promotores)\b/.test(t)) return { tipo: 'resena' };
+    if (/\b(referido|referidos|recomendados?|recomendacion)\b/.test(t)) return { tipo: 'referidos' };
+    if (/\b(metas?|kpis?|como vamos|objetivos?)\b/.test(t)) return { tipo: 'metas' };
+    if (/\b(reponer|reposicion|reponer|volver a pedir|toca reponer)\b/.test(t)) return { tipo: 'reponer' };
     if (/\b(aprueba|aprueb[ae]r?|apruebe|aprobar)\b/.test(t)) return { tipo: 'aprobar' };
     if (/(aprobacion|pendient|por aprobar|espera mi|mis aprob)/.test(t)) return { tipo: 'pendientes' };
     if (/(pasal|pasa|pasar|traspas|deriv|mand|envi).*(venta|ejecutiv)|a ventas/.test(t)) return { tipo: 'pasar' };
@@ -724,9 +779,9 @@
     return { tipo: null };
   }
   const AYUDA = {
-    marketing: 'Puedo mostrar lo que cotizó un lead, sus puntajes y su origen, revisar si cumple para MQL, leer sus dudas y pasarlo a Ventas con un mensaje que tú apruebas.',
-    ventas: 'Puedo resumir la cuenta, proponer la canasta de inicio, preparar la propuesta (las condiciones especiales van a Jefatura) y agendar la visita.',
-    jefatura: 'Puedo listar lo que espera tu aprobación y registrar tu decisión después de que la confirmes.'
+    marketing: 'Puedo mostrar los detractores con su ayuda abierta, pedir reseña a los promotores, listar los referidos que llegaron y decirte qué cotizó un lead, con sus puntajes y su origen.',
+    ventas: 'Puedo resumir tu día, listar las cuentas que toca reponer, preparar la propuesta de una cuenta y agendar la visita.',
+    jefatura: 'Puedo listar lo que espera tu aprobación y mostrarte cómo vamos con las metas, incluido el NPS.'
   };
   function leadDe(texto) {
     const l = buscarLead(texto);
@@ -747,6 +802,16 @@
     switch (intent.tipo) {
       case 'ayuda': return tarjeta('Qué puedo hacer', `<p>${esc(AYUDA[rol] || '')}</p>`) + chips(sugerenciaTexto(rol));
       case 'saludo': return tarjeta('Hola', `<p>${esc(AYUDA[rol] || '')} Todo queda en el registro y nada sale sin aprobación de una persona.</p>`);
+      case 'detractores':
+        return rol === 'marketing' ? htmlDetractores() : tarjeta('Eso lo ve Marketing', '<p>La postventa, las caritas y el NPS son trabajo de Marketing.</p>') + chips(['Resume mi día']);
+      case 'resena':
+        return rol === 'marketing' ? htmlPromotores() : tarjeta('Eso lo hace Marketing', '<p>Pedir reseñas o referidos es del programa de Marketing.</p>') + chips(['Resume mi día']);
+      case 'referidos':
+        return rol === 'marketing' ? htmlReferidos() : tarjeta('Eso lo ve Marketing', '<p>Los referidos y las reseñas se mueven desde Marketing.</p>') + chips(['Resume mi día']);
+      case 'metas':
+        return rol === 'jefatura' ? htmlMetas('jefatura') : tarjeta('Las metas las sigue Jefatura', '<p>El tablero de metas y el NPS están en la vista de Jefatura.</p>') + chips(rol === 'ventas' ? ['Resume mi día'] : ['¿Qué detractores tengo?']);
+      case 'reponer':
+        return rol === 'ventas' ? htmlReponer('ventas') : tarjeta('Eso lo hace Ventas', '<p>La reposición de cuentas es trabajo de Ventas.</p>') + chips(rol === 'marketing' ? ['¿Qué detractores tengo?'] : ['¿Qué espera mi aprobación?']);
       case 'aprobar': {
         if (rol === 'marketing') {
           const pend = Object.values(S.borradores).filter(b => b.estado === 'pendiente').pop();
@@ -932,6 +997,9 @@
     if (accion === 'cancelar') return notaRol('Sin cambios: no aprobé nada.');
     if (accion === 'ver-aviso') return verAviso(idv);
     if (accion === 'ver-lead') { const l = leadPorId(idv); if (l) { S.foco[S.rol] = l.id; return pushAgente(S.rol, htmlCotizacion(S.rol, l), { tl: l.id }); } return; }
+    if (accion === 'abrir-tarea') return abrirTarea(btn.dataset.tipo, idv);
+    if (accion === 'abrir-ficha') { escribirCrm(crm => { crm.selectedAccount = idv; crm.selectedLead = null; crm.returnRoute = (location.hash || '#R01').slice(1).split('?')[0]; }); location.hash = 'R04'; return; }
+    if (accion === 'abrir-ruta') { location.hash = idv; return; }
   }
   function refrescarHilo() { renderHilo(); renderAvisos(); renderRegistro(); }
   function verAviso(nid) {
@@ -1041,10 +1109,7 @@
   function abrirConversacion(texto) {
     if (!panelEl || !panelEl.isConnected) sincronizarPanel();
     procesarPanel(texto);
-    if (panelEl && panelEl.isConnected) {
-      try { panelEl.scrollIntoView({ block: 'nearest' }); } catch (_) { /* vista opcional */ }
-      if (pnInputEl) { try { pnInputEl.focus({ preventScroll: true }); } catch (_) { /* foco opcional */ } }
-    }
+    if (pnInputEl) { try { pnInputEl.focus({ preventScroll: true }); } catch (_) { /* foco opcional */ } }
   }
   function onClick(ev) {
     const sug = ev.target.closest('[data-crm-agente-sugerencia]');
@@ -1127,9 +1192,9 @@
   // ---------- Panel del agente en todas las pestañas del CRM (botón y panel que no tapan los CTA) ----------
   // Tareas (correo, contactar, visita, avisar) con borrador editable, ajustes, envío en segundo plano,
   // conversaciones en espera y su toma. Solo este módulo y la barra escriben acciones del CRM; el motor interpreta.
-  const PN = { hilo: [], borradores: {}, avisos: [], abierto: false, escribiendo: 0, rol: null };
+  const PN = { hilo: [], borradores: {}, avisos: [], abierto: false, escribiendo: 0, rol: null, focoPrevio: null, ruta: null };
   let panelEl = null, pnCuerpoEl = null, pnLanzEl = null, pnContEl = null, pnHiloEl = null, pnEsperaEl = null, pnAvisoEl = null, pnSugEl = null, pnFormEl = null, pnInputEl = null, pnRegEl = null;
-  const ETIQ_TAREA = { correo: 'Correo', contactar: 'WhatsApp', visita: 'Visita (nota interna)', avisar: 'Aviso al equipo' };
+  const ETIQ_TAREA = { correo: 'Correo', contactar: 'WhatsApp', visita: 'Visita (nota interna)', avisar: 'Aviso al equipo', resena: 'Invitación a reseña o referido', referido: 'Invitación a recomendar', detractor: 'Respuesta al detractor', traspaso: 'Traspaso a Ventas' };
   const MOTIVO_ESP = { falla: 'Falla o reclamo de la máquina', precio: 'Precio especial o crédito', persona: 'Pide hablar con una persona' };
   const pnRolActual = () => { const r = rolM4(); return ROLES.includes(r) ? r : null; };
   const pnUsuario = rol => (rol === 'ventas' ? (d4().ROLE_MENUS?.ventas?.user || 'Paula Díaz') : userDe(rol));
@@ -1170,6 +1235,14 @@
     if (b.tipo === 'correo') return `${saludo}te escribo de Marley Coffee Empresas. Revisamos tu propuesta de ${b.maquina} para ${i.empresa}. ${primerNombreCRM(ex.name) || 'Una persona de tu zona'} puede resolver tus dudas y ajustar lo que necesites, sin compromiso. Si no quieres recibir más mensajes, responde BAJA.\n${firma}`;
     if (b.tipo === 'contactar') return `${saludo}soy ${primerNombreCRM(ex.name) || 'del equipo'} de Marley Coffee. ¿Te acomoda que revisemos tu propuesta de ${b.maquina} para ${i.empresa}? Respondo por este mismo chat.\n${firma}`;
     if (b.tipo === 'visita') return `Visita a ${i.empresa}: proponer ${b.horario}. Ejecutiva a cargo: ${ex.name || 'por confirmar'}, ${zonaDe(ex)}.`;
+    if (b.tipo === 'traspaso') return `Resumen para Ventas · ${i.empresa}: ${resumenDe(i.x)} Próximo paso sugerido: contactar y preparar la propuesta.`;
+    if (b.tipo === 'resena') return `${saludo}gracias por tu respuesta sobre el café de ${i.empresa}. Si te sirvió, ¿nos dejarías una reseña en Google? También puedes recomendar a otro negocio que necesite café, con este mismo mensaje. Es sin incentivos y sin compromiso.\n${firma}`;
+    if (b.tipo === 'referido') return `${saludo}¿conoces otro negocio al que le sirva el servicio de café de Marley? Te comparto el enlace para recomendarlo: el negocio decide si quiere cotizar, sin compromiso.\n${firma}`;
+    if (b.tipo === 'detractor') {
+      const caso = (window.MarleyCRM2?.postventa?.detractores?.() || []).find(item => String(item.cuentaId) === String(i.key));
+      const motivo = caso?.ayuda?.motivo || caso?.abierta || 'lo que pasó con tu pedido';
+      return `${saludo}soy ${primerNombreCRM(ex.name) || 'del equipo'} de Marley Coffee. Vi tu respuesta${caso && caso.nps != null ? ` (NPS ${caso.nps}/10)` : ''} y quiero ayudarte: ${recorta(motivo, 120)}. Cuéntame qué necesitas y te contactamos hoy para resolverlo.\n${firma}`;
+    }
     return `${b.destinoNombre}: ${b.usuario} te pide que ${b.recado}. Cuenta: ${i.empresa}${i.contacto && i.contacto !== i.empresa ? ' (' + i.contacto + ')' : ''}.`;
   }
   const dividirFirma = t => { const ls = String(t || '').split('\n'); const i = ls.findIndex(l => /^— /.test(l)); return i >= 0 ? { cuerpo: ls.slice(0, i).join(' ').trim(), firma: ls.slice(i).join('\n') } : { cuerpo: String(t || '').trim(), firma: '' }; };
@@ -1267,7 +1340,23 @@
   }
   const borradorAbierto = () => Object.values(PN.borradores).filter(b => b.estado === 'editando').pop() || null;
   const esperasAbiertas = () => leerAgente().traspasos.filter(t => t.espera && t.estado === 'esperando').sort((a, b) => (Number(b.ts) || 0) - (Number(a.ts) || 0));
-  function abrirPanel() { if (!PN.abierto) { PN.abierto = true; renderLanzador(); } }
+  function abrirPanel() {
+    if (!PN.abierto) {
+      // El panel se abre a la vista (lateral en escritorio, hoja inferior en celular): se guarda el foco
+      // para devolverlo al cerrar y se enfoca el campo del borrador o la conversación.
+      try { PN.focoPrevio = document.activeElement; } catch (_) { PN.focoPrevio = null; }
+      PN.abierto = true;
+      renderLanzador();
+    }
+  }
+  function cerrarPanel() {
+    if (!PN.abierto) return;
+    PN.abierto = false;
+    renderLanzador();
+    const previo = PN.focoPrevio;
+    PN.focoPrevio = null;
+    if (previo && typeof previo.focus === 'function' && previo.isConnected) { try { previo.focus({ preventScroll: true }); } catch (_) { /* foco opcional */ } }
+  }
   function avisoPanel(texto) { PN.avisos.push(texto); if (PN.avisos.length > 6) PN.avisos.splice(0, PN.avisos.length - 6); }
   // Escribe en la conversación del cliente lo que el equipo toma o envía (lo ve el portal y la línea de tiempo).
   function avisarCliente(cuentaId) { try { window.MarleyAgente?.eventos?.emitir?.('mensaje', { cuentaId: String(cuentaId) }); } catch (_) { /* opcional */ } }
@@ -1280,16 +1369,23 @@
     abrirPanel();
     const b = { id: uid('BR'), tipo, info, estado: 'editando', maquina: info.maquina, horario: '', destino: 'ventas', destinoNombre: '', usuario: pnUsuario(rol), recado: '', rol };
     if (tipo === 'visita') { const sl = slotsVisita()[0]; b.horario = sl ? sl.etiqueta : 'la próxima semana'; }
-    if (tipo === 'avisar') { b.destino = destinoRol(texto || ''); b.destinoNombre = nombreDestino(b.destino); b.recado = recadoDe(texto || ''); }
+    if (tipo === 'avisar') {
+      // Avisar a un compañero no se manda al mismo rol: Ventas avisa a Marketing y viceversa.
+      const pedido = norm(texto || '');
+      b.destino = /marketing|jefatura/.test(pedido) ? destinoRol(texto) : (rol === 'ventas' ? 'marketing' : 'ventas');
+      b.destinoNombre = nombreDestino(b.destino);
+      b.recado = recadoDe(texto || '');
+    }
     b.texto = textoInicial(b);
     PN.borradores[b.id] = b;
     PN.hilo.push({ tipo: 'agente', html: `<p>Armé el borrador de <b>${esc(ETIQ_TAREA[tipo])}</b> con los datos de ${esc(info.empresa)}. Edítalo aquí mismo o pide ajustes: «más corto», «más formal», «más cercano» o «agrega …». «Envíalo» lo manda en segundo plano.</p>` });
     PN.hilo.push({ tipo: 'agente', borradorId: b.id });
     mutarAgente(st => anotar(st, rol, 'tarea:' + tipo, `cuenta ${info.empresa}`, 'Borrador armado con los datos de la cuenta', 'ia', 'Agente'));
     renderPanel(); renderLanzador();
-    if (panelEl && panelEl.isConnected) { try { panelEl.scrollIntoView({ block: 'nearest' }); } catch (_) { /* vista opcional */ } }
+    // El panel ya está a la vista (fijo); el foco va al borrador listo, sin arrastrar la página.
     const ta = pnHiloEl && pnHiloEl.querySelector(`[data-crm-agente-texto="${b.id}"]`);
     if (ta) { try { ta.focus({ preventScroll: true }); } catch (_) { /* foco opcional */ } }
+    else if (pnInputEl) { try { pnInputEl.focus({ preventScroll: true }); } catch (_) { /* foco opcional */ } }
   }
   function ajustarBorrador(b, aj) {
     const ta = pnHiloEl ? pnHiloEl.querySelector(`[data-crm-agente-texto="${b.id}"]`) : null;
@@ -1323,18 +1419,39 @@
     if (b.tipo === 'correo' || b.tipo === 'contactar') {
       const canal = b.tipo === 'correo' ? 'correo' : 'whatsapp';
       if (!permisoPara(b.info, canal)) {
-        b.estado = 'bloqueado';
-        mutarAgente(st => anotar(st, rol, 'regla:sin-permiso-' + canal, `Sin permiso de ${canal === 'correo' ? 'correo' : 'WhatsApp'} registrado`, 'No se envía: primero se pide el permiso', 'regla', 'Regla del CRM'));
-        avisoPanel(`No se envió: ${b.info.contacto} no tiene permiso de ${canal === 'correo' ? 'correo' : 'WhatsApp'} registrado.`);
-        PN.hilo.push({ tipo: 'agente', html: tarjeta('Sin permiso del cliente', `<p>Con clientes solo se envía por los canales con permiso. ${esc(b.info.contacto)} no lo tiene para ${canal === 'correo' ? 'correo' : 'WhatsApp'}.</p>`, 'crm-agente-alerta') });
-        renderPanel(); renderAviso(); renderRegistroPanel();
-        return;
+        // Contactar tiene respaldo en el chat del portal, que es donde el cliente ya está hablando.
+        // Correo y WhatsApp sin consentimiento no salen: primero se pide el permiso.
+        if (b.tipo === 'contactar') {
+          b.canalRespaldo = 'web';
+          mutarAgente(st => anotar(st, rol, 'regla:sin-permiso-whatsapp', 'Sin permiso de WhatsApp registrado', 'Se usa el chat del portal, que el cliente inició', 'regla', 'Regla del CRM'));
+        } else {
+          b.estado = 'bloqueado';
+          mutarAgente(st => anotar(st, rol, 'regla:sin-permiso-' + canal, `Sin permiso de ${canal === 'correo' ? 'correo' : 'WhatsApp'} registrado`, 'No se envía: primero se pide el permiso', 'regla', 'Regla del CRM'));
+          avisoPanel(`No se envió: ${b.info.contacto} no tiene permiso de ${canal === 'correo' ? 'correo' : 'WhatsApp'} registrado.`);
+          PN.hilo.push({ tipo: 'agente', html: tarjeta('Sin permiso del cliente', `<p>Con clientes solo se envía por los canales con permiso. ${esc(b.info.contacto)} no lo tiene para ${canal === 'correo' ? 'correo' : 'WhatsApp'}.</p>`, 'crm-agente-alerta') });
+          renderPanel(); renderAviso(); renderRegistroPanel();
+          return;
+        }
       }
     }
     b.estado = 'enviando';
     avisoPanel('Enviando en segundo plano: puedes seguir trabajando.');
     renderPanel(); renderAviso();
     setTimeout(() => terminarEnvio(id), 600 + Math.round(Math.random() * 300));
+  }
+  const horaTexto = ts => { try { return new Date(Number(ts)).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }); } catch (_) { return ''; } };
+  // Estado visible de la fila + contador (contrato 26-nov, punto 3): se escribe en el estado del CRM,
+  // así crm-v2 vuelve a pintar la fila con «Contactado hoy 11:40» y el KPI suma en el mismo momento.
+  function marcarEstadoFila(id, tipo, texto, extra) {
+    try { window.MarleyCRM2?.toast?.(texto, 'La fila y el contador ya cambiaron.'); } catch (_) { /* aviso opcional */ }
+    escribirCrm((crm, st) => {
+      crm.rowState = crm.rowState || {};
+      crm.rowState[String(id)] = { tipo, texto, kind: 'ok', at: ahora(), by: pnUsuario(pnRolActual() || 'ventas') };
+      crm.counters = crm.counters || {};
+      const clave = { contactar: 'contactos', correo: 'correos', visita: 'visitas', avisar: 'avisos', resena: 'resenas', referido: 'referidos', detractor: 'respuestas', traspaso: 'traspasos', aprobacion: 'aprobaciones' }[tipo] || 'acciones';
+      crm.counters[clave] = Number(crm.counters[clave] || 0) + 1;
+      if (extra) extra(crm, st);
+    });
   }
   function terminarEnvio(id) {
     const b = PN.borradores[id];
@@ -1344,18 +1461,20 @@
     const info = b.info;
     let aviso = '';
     if (b.tipo === 'correo' || b.tipo === 'contactar') {
-      const canal = b.tipo === 'correo' ? 'correo' : 'whatsapp';
-      const r = enviarSimulado({ canal, cuentaId: info.key, para: canal === 'correo' ? (info.email || info.contacto) : (info.telefono || info.contacto), texto: b.texto, aprobadoPor: quien });
+      const canal = b.tipo === 'correo' ? 'correo' : (b.canalRespaldo === 'web' ? 'web' : 'whatsapp');
+      const para = canal === 'correo' ? (info.email || info.contacto) : canal === 'web' ? 'Chat del portal' : (info.telefono || info.contacto);
+      const r = enviarSimulado({ canal, cuentaId: info.key, para, texto: b.texto, aprobadoPor: quien });
       if (!r || r.ok === false) { b.estado = 'editando'; avisoPanel(`No se envió: ${r && r.motivo ? r.motivo : 'falta el permiso del contacto'}.`); renderPanel(); renderAviso(); return; }
       b.estado = 'enviado';
-      aviso = `${canal === 'correo' ? 'Correo' : 'WhatsApp'} enviado a ${info.contacto} (${info.empresa}).`;
+      aviso = canal === 'web' ? `Contacto enviado por el chat del portal a ${info.empresa} (sin permiso de WhatsApp).` : `${canal === 'correo' ? 'Correo' : 'WhatsApp'} enviado a ${info.contacto} (${info.empresa}).`;
       const otro = rol === 'ventas' ? 'marketing' : 'ventas';
       mutarAgente(st => {
         anotar(st, rol, 'borrador:' + b.tipo, `datos de la cuenta y permiso de ${canal}`, 'Borrador armado por el agente', 'ia', 'Agente');
-        anotar(st, rol, 'regla:permiso-' + canal, 'Consentimiento del contacto registrado', 'Con clientes, solo por canales con permiso', 'regla', 'Regla del CRM');
+        anotar(st, rol, 'regla:permiso-' + canal, canal === 'web' ? 'Chat del portal iniciado por el cliente' : 'Consentimiento del contacto registrado', 'Con clientes, solo por canales con permiso', 'regla', 'Regla del CRM');
         anotar(st, rol, 'envio:' + canal, recorta(b.texto, 90), 'Texto aprobado y enviado por la persona', 'persona', quien);
         avisar(st, otro, `${quien} envió un ${canal === 'correo' ? 'correo' : 'WhatsApp'} a ${info.contacto} (${info.empresa}).`, { leadId: info.key, tipo: 'envio' });
       });
+      marcarEstadoFila(info.key, b.tipo, `${b.tipo === 'correo' ? 'Correo enviado' : canal === 'web' ? 'Contactado por el chat del portal' : 'Contactado'} hoy ${horaTexto(ahora())}`);
     } else if (b.tipo === 'visita') {
       b.estado = 'enviado';
       aviso = `Visita propuesta a ${info.empresa} registrada en la línea de tiempo.`;
@@ -1363,17 +1482,53 @@
         st.conversaciones[info.key] = (st.conversaciones[info.key] || []).concat([{ canal: 'nota', rol, texto: b.texto, ts: ahora(), aprobadoPor: quien }]);
         anotar(st, rol, 'visita:proponer', `horario ${b.horario}`, 'Nota interna para la ejecutiva de la zona', 'persona', quien);
       });
+      marcarEstadoFila(info.key, 'visita', 'Visita agendada');
+    } else if (b.tipo === 'traspaso') {
+      b.estado = 'enviado';
+      const ex = ejecutivoDe(info.x);
+      aviso = `Traspaso enviado: ${info.empresa} aparece en el Hoy de Ventas con la marca «Nuevo».`;
+      mutarAgente(st => {
+        st.traspasos.unshift({ id: uid('TR'), leadId: info.key, de: 'marketing', a: 'ventas', dueno: ex.name, zona: zonaDe(ex), resumen: b.texto, estado: 'pendiente', canal: 'web', ts: ahora() });
+        st.conversaciones[info.key] = (st.conversaciones[info.key] || []).concat([{ canal: 'nota', rol, texto: b.texto, ts: ahora(), aprobadoPor: quien }]);
+        avisar(st, 'ventas', `Marketing pasó a ${info.empresa}. Dueño por zona: ${duenoTexto(info.x, ex)}.`, { leadId: info.key, tipo: 'traspaso' });
+        anotar(st, rol, 'traspaso:enviar', recorta(b.texto, 90), 'Resumen revisado por Marketing', 'persona', quien);
+      });
+      marcarEstadoFila(info.key, 'traspaso', `Pasado a Ventas hoy ${horaTexto(ahora())}`, (crm, st) => {
+        st.marketingPasos = st.marketingPasos || {};
+        const previo = st.marketingPasos[info.key] || {};
+        st.marketingPasos[info.key] = Object.assign({}, previo, { estado: 'esperando', motivo: 'MQL calificado', por: quien, at: ahora() });
+        crm.handoffs = crm.handoffs || {};
+        crm.handoffs[info.key] = { status: 'esperando', reason: 'MQL calificado', at: ahora() };
+      });
+    } else if (b.tipo === 'resena' || b.tipo === 'referido' || b.tipo === 'detractor') {
+      b.estado = 'enviado';
+      const etiqueta = { resena: 'Reseña pedida', referido: 'Referido pedido', detractor: 'Respondido' }[b.tipo];
+      aviso = { resena: `Invitación a reseña enviada a ${info.empresa}. Queda como «Reseña pedida».`, referido: `Invitación a recomendar enviada a ${info.empresa}. Queda como «Referido pedido».`, detractor: `Respuesta enviada a ${info.empresa}. La ayuda queda como respondida.` }[b.tipo];
+      const otro = rol === 'ventas' ? 'marketing' : 'ventas';
+      mutarAgente(st => {
+        const k = String(info.key);
+        st.conversaciones[k] = (st.conversaciones[k] || []).concat([{ canal: 'web', rol, texto: b.texto, ts: ahora(), aprobadoPor: quien, simulado: true }]);
+        anotar(st, rol, `postventa:${b.tipo}`, recorta(b.texto, 90), 'Texto aprobado y enviado por la persona', 'persona', quien);
+        avisar(st, otro, `${quien} envió una ${b.tipo === 'detractor' ? 'respuesta al detractor' : b.tipo === 'resena' ? 'invitación a reseña' : 'invitación a recomendar'} de ${info.empresa}.`, { leadId: info.key, tipo: b.tipo });
+      });
+      marcarEstadoFila(info.key, b.tipo, `${etiqueta} hoy ${horaTexto(ahora())}`, crm => {
+        if (b.tipo === 'detractor') { crm.postventaGestion = crm.postventaGestion || {}; crm.postventaGestion.ayudas = crm.postventaGestion.ayudas || {}; crm.postventaGestion.ayudas[String(info.key)] = { estado: 'respondida', at: ahora(), by: quien }; }
+        if (b.tipo === 'resena') { crm.postventaGestion = crm.postventaGestion || {}; crm.postventaGestion.resenas = crm.postventaGestion.resenas || {}; crm.postventaGestion.resenas[String(info.key)] = { estado: 'pedida', canal: 'google', at: ahora(), by: quien }; }
+        if (b.tipo === 'referido') { crm.postventaGestion = crm.postventaGestion || {}; crm.postventaGestion.referidos = crm.postventaGestion.referidos || {}; crm.postventaGestion.referidos[String(info.key)] = { estado: 'pedido', at: ahora(), by: quien }; }
+      });
     } else {
       b.estado = 'enviado';
       aviso = `Aviso enviado a ${nombreDestino(b.destino)}: aparece en su Hoy.`;
       mutarAgente(st => {
+        st.conversaciones[info.key] = (st.conversaciones[info.key] || []).concat([{ canal: 'nota', rol, texto: b.texto, ts: ahora(), aprobadoPor: quien }]);
         avisar(st, b.destino, b.texto, { leadId: info.key, tipo: 'aviso' });
         anotar(st, rol, 'aviso:' + b.destino, recorta(b.recado, 90), 'Aviso que la persona revisó y envió', 'persona', quien);
       });
+      marcarEstadoFila(info.key, 'avisar', `Aviso enviado a ${nombreDestino(b.destino)}`);
     }
     avisoPanel(aviso);
-    // El envío queda a la vista en la línea de tiempo del lead, sin tener que abrir la ficha.
-    const leadEnvio = leadPorId(info.key);
+    // El envío queda a la vista en la línea de tiempo del lead o de la cuenta, sin abrir la ficha.
+    const leadEnvio = leadPorId(info.key) || refDe(info.key)?.cuenta || null;
     PN.hilo.push({ tipo: 'agente', html: `<p>${esc(aviso)}</p>${leadEnvio ? timelineHtml(leadEnvio, true) : ''}` });
     avisarCliente(info.key);
     renderPanel(); renderAviso(); renderEspera(); renderLanzador(); renderRegistroPanel(); refrescarHilo();
@@ -1473,9 +1628,9 @@
     const info = b.info;
     const editable = b.estado === 'editando';
     const canal = b.tipo === 'correo' ? 'correo' : (b.tipo === 'contactar' ? 'whatsapp' : null);
-    const permiso = canal ? (permisoPara(info, canal) ? 'Permiso de ' + (canal === 'correo' ? 'correo' : 'WhatsApp') + ' registrado' : 'Sin permiso: no se envía') : 'Nota interna: no sale al cliente';
+    const permiso = canal ? (permisoPara(info, canal) ? 'Permiso de ' + (canal === 'correo' ? 'correo' : 'WhatsApp') + ' registrado' : (b.tipo === 'contactar' ? 'Sin permiso de WhatsApp: se envía por el chat del portal' : 'Sin permiso: no se envía')) : 'Nota interna: no sale al cliente';
     const estadoTxt = { enviando: 'Enviando en segundo plano…', enviado: 'Enviado', bloqueado: 'Bloqueado: falta permiso', descartado: 'Descartado' }[b.estado] || '';
-    const para = b.tipo === 'avisar' ? `para ${b.destinoNombre}` : `para ${info.contacto} (${info.empresa})`;
+    const para = b.tipo === 'avisar' ? `para ${b.destinoNombre}` : b.tipo === 'traspaso' ? 'para Ventas (resumen editable)' : b.tipo === 'visita' ? `nota interna para ${info.empresa}` : `para ${info.contacto} (${info.empresa})`;
     return `<div class="crm-agente-burbuja crm-agente-burbuja--agente crm-agente-burbuja--borrador" data-crm-agente-burbuja="agente" data-crm-agente-borrador="${esc(b.id)}" data-tipo="${esc(b.tipo)}" data-estado="${esc(b.estado)}">
       <p class="crm-agente-canal"><b>Borrador · ${esc(ETIQ_TAREA[b.tipo])}</b> · ${esc(para)}</p>
       <label class="crm-agente-sr" for="crm-agente-txt-${esc(b.id)}">Texto del borrador</label>
@@ -1499,6 +1654,11 @@
   }
   function renderPanel() {
     if (!pnHiloEl) return;
+    // Al repintar se conserva el foco y el cursor dentro del borrador: la persona sigue escribiendo donde estaba.
+    const activo = document.activeElement;
+    const idTexto = activo && pnHiloEl.contains(activo) && activo.matches('[data-crm-agente-texto]') ? activo.dataset.crmAgenteTexto : null;
+    const selIni = idTexto ? activo.selectionStart : null;
+    const selFin = idTexto ? activo.selectionEnd : null;
     const partes = PN.hilo.map(it => {
       if (it.borradorId && PN.borradores[it.borradorId]) return burbujaBorrador(PN.borradores[it.borradorId]);
       if (it.borradorId && S.borradores[it.borradorId]) return `<div class="crm-agente-burbuja crm-agente-burbuja--agente" data-crm-agente-burbuja="agente">${borradorHtml(S.borradores[it.borradorId])}</div>`;
@@ -1507,6 +1667,10 @@
     });
     if (PN.escribiendo > 0) partes.push('<p class="crm-agente-escribe" data-crm-agente-escribe role="status">escribiendo…</p>');
     pnHiloEl.innerHTML = partes.join('') || '<p class="crm-agente-vacio">Pídele algo al agente: «mándale un correo a…», «avísale a Ventas que llame mañana a…», o toca una tarea de la lista.</p>';
+    if (idTexto) {
+      const ta = pnHiloEl.querySelector(`[data-crm-agente-texto="${CSS.escape(idTexto)}"]`);
+      if (ta) { try { ta.focus({ preventScroll: true }); ta.setSelectionRange(selIni, selFin); } catch (_) { /* foco opcional */ } }
+    }
     pnHiloEl.scrollTop = pnHiloEl.scrollHeight;
   }
   function renderSugPanel() {
@@ -1628,7 +1792,7 @@
     if (!btn || !panelEl.contains(btn)) return;
     ev.preventDefault();
     const acc = btn.dataset.crmAgenteAccion, id = btn.dataset.id || '';
-    if (acc === 'alternar') { PN.abierto = !PN.abierto; renderLanzador(); return; }
+    if (acc === 'alternar') { if (PN.abierto) cerrarPanel(); else { abrirPanel(); if (pnInputEl) { try { pnInputEl.focus({ preventScroll: true }); } catch (_) { /* foco opcional */ } } } return; }
     if (acc === 'enviar') { enviarBorrador(id); renderPanel(); return; }
     if (acc === 'descartar') { descartarBorrador(id); return; }
     if (acc === 'tomar-conversacion') { conEspera(() => tomarConversacion(id)); return; }
@@ -1642,6 +1806,8 @@
     const contenido = host && !host.hidden ? host.querySelector('.crm2-content') : null;
     const rol = pnRolActual();
     if (!contenido || !rol || !/^R\d{2}$/.test(ruta)) { quitarPanel(); return; }
+    // Cambiar de pestaña cierra la conversación: no queda un panel flotando sobre otra pantalla.
+    if (PN.ruta !== ruta) { PN.ruta = ruta; PN.abierto = false; }
     construirPanel();
     const enHoy = ruta === 'R01' || ruta === 'R11' || ruta === 'R05';
     panelEl.classList.toggle('crm-agente-chat--en-hoy', enHoy);
@@ -1667,7 +1833,32 @@
     const cuenta = b.dataset.cuentaId || '';
     conEspera(() => abrirTarea(tipo, cuenta));
   });
+  // Escape cierra la conversación y devuelve el foco al control que la abrió (contrato 26-nov, punto 3).
+  document.addEventListener('keydown', ev => {
+    if (ev.key !== 'Escape' || !PN.abierto) return;
+    ev.preventDefault();
+    cerrarPanel();
+  });
 
-  window.MarleyCRMAgente = { version: VERSION, procesar, sincronizar, rol: () => S.rol, panel: { abrirTarea: (tipo, id) => conEspera(() => abrirTarea(tipo, id)), tomar: tomarConversacion } };
+  window.MarleyCRMAgente = {
+    version: VERSION,
+    procesar,
+    sincronizar,
+    rol: () => S.rol,
+    panel: {
+      abrirTarea: (tipo, id) => conEspera(() => abrirTarea(tipo, id)),
+      tomar: tomarConversacion,
+      // Aprobar desde Por aprobar abre la confirmación del agente; la persona decide ahí y queda su nombre.
+      aprobar: id => {
+        const it = itemPorId(id);
+        if (!it) return;
+        abrirPanel();
+        PN.hilo.push({ tipo: 'agente', html: htmlAprobacion(it) });
+        renderPanel();
+        const btn = pnHiloEl?.querySelector('[data-crm-agente-accion="confirmar-aprobacion"], [data-crm-agente-accion="confirmar-checklist"]');
+        if (btn) { try { btn.focus({ preventScroll: true }); } catch (_) { /* foco opcional */ } }
+      }
+    }
+  };
   arrancar();
 })();

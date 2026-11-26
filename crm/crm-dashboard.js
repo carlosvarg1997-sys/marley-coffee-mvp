@@ -147,11 +147,17 @@
       ? 100 * repetidos.filter(o => /portal|digital|web/i.test(canalDe(o))).length / repetidos.length
       : null;
 
-    // NPS: promotores (9-10) menos detractores (0-6), usando el último NPS de cada cuenta.
-    const ultimosNps = cuentas.map(c => (c.orders || [])
+    // NPS: promotores (9-10) menos detractores (0-6), con el último NPS de cada cuenta.
+    // Las respuestas del portal (`M4.get().postventa.respuestas`, contrato 26-nov) reemplazan al NPS del pedido;
+    // los ejemplos rotulados no viven en el estado, así que nunca suman al indicador.
+    const portal = st && st.postventa && Array.isArray(st.postventa.respuestas) ? st.postventa.respuestas : [];
+    const portalValidas = portal.filter(r => r && r.cuentaId && r.nps !== null && r.nps !== undefined && Number.isFinite(Number(r.nps)));
+    const portalIds = new Set(portalValidas.map(r => String(r.cuentaId)));
+    const ultimosNps = cuentas.filter(c => !portalIds.has(String(c.id))).map(c => (c.orders || [])
       .filter(o => o.npsScore !== null && o.npsScore !== undefined && Number.isFinite(Number(o.npsScore)))
       .reduce((mejor, o) => (!mejor || Number(o.at) > Number(mejor.at) ? o : mejor), null))
-      .filter(Boolean).map(o => Number(o.npsScore));
+      .filter(Boolean).map(o => Number(o.npsScore))
+      .concat(portalValidas.map(r => Number(r.nps)));
     const nps = ultimosNps.length
       ? 100 * (ultimosNps.filter(s => s >= 9).length - ultimosNps.filter(s => s <= 6).length) / ultimosNps.length
       : null;
@@ -621,12 +627,13 @@
     if (existente && existente.dataset.rol === rol && existente.dataset.ruta === ruta
       && bloque.parentElement === contenido) return;
     if (bloque) bloque.remove();
-    // El trabajo va primero: en el Hoy de Jefatura las cuatro cifras van compactas y a la vista;
-    // en Ventas y Marketing el tablero completo queda a un toque, plegado.
+    // El trabajo va primero. En el Hoy de Jefatura las cuatro cifras ya están a la vista en «KPIs clave»;
+    // el tablero compacto del programa queda a un toque, plegado, para no duplicar el alto del Hoy.
     if (ruta === 'R05') {
+      const plegado = '<details class="crm2-fold crm2-tablero-fold"><summary>Las cuatro cifras del programa</summary>' + construirCompacto() + '</details>';
       const cierreCompacto = contenido.querySelector(':scope > .crm2-cierre');
-      if (cierreCompacto) cierreCompacto.insertAdjacentHTML('beforebegin', construirCompacto());
-      else contenido.insertAdjacentHTML('beforeend', construirCompacto());
+      if (cierreCompacto) cierreCompacto.insertAdjacentHTML('beforebegin', plegado);
+      else contenido.insertAdjacentHTML('beforeend', plegado);
       return;
     }
     const tablero = construir(rol, ruta);

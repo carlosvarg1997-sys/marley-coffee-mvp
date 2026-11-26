@@ -712,3 +712,63 @@ body:is([data-current^="R"]) #crm-v2-root :is(.crm2-metric > b,.crm2-team-grid a
 #crm-v2-root .crm2-qtool { min-height: var(--m-btn-h-desktop); border-radius: var(--m-r-btn); }
 #crm-v2-root .crm2-eyebrow { letter-spacing: .05em; }
 #crm-v2-root .crm2-row-badge { letter-spacing: .02em; }
+
+/* 26-nov (DS6 · CRM por rol) — Orden del Hoy: la cola del rol primero, la tarjeta del agente a su lado
+   (visible a 1280×551), después el resto del trabajo y al final el cierre. */
+#crm-v2-root .crm2-content > .crm2-block--cola { order: -4; }
+#crm-v2-root .crm2-content > #crm-agente-barra { order: -3; }
+#crm-v2-root .crm2-content > .crm2-block:not(.crm2-block--cola) { order: -2; }
+
+/* El Hoy no lleva barra de acciones fija: se reserva solo el aire del cierre y, en celular, la navegación. */
+#crm-v2-root .crm2-main--hoy { padding-bottom: 24px; }
+@media (max-width: 767px) { #crm-v2-root .crm2-main--hoy { padding-bottom: calc(88px + env(safe-area-inset-bottom)); } }
+
+/* KPI clave del Hoy de Jefatura (tarjetas propias: no duplican .crm2-metric del informe). */
+#crm-v2-root .crm2-kpi-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+#crm-v2-root .crm2-kpi-strip--uno { grid-template-columns: minmax(0, 1fr); }
+#crm-v2-root .crm2-kpi { display: grid; align-content: start; gap: 4px; min-width: 0; padding: 12px; border: 1px solid var(--crm2-role-line); border-radius: 8px; background: #fff; }
+#crm-v2-root .crm2-kpi > span { color: var(--crm2-role-strong); font-size: 12px; font-weight: 700; letter-spacing: .03em; }
+#crm-v2-root .crm2-kpi > b { font-size: 22px; line-height: 1.15; }
+#crm-v2-root .crm2-kpi > small { color: #5d5d5d; font-size: 12px; line-height: 1.35; }
+@media (max-width: 900px) { #crm-v2-root .crm2-kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Acción principal dentro de una fila (Pasar a Ventas): mismo tamaño táctil, sin amarillo. */
+#crm-v2-root .crm2-qtool--principal { border-color: var(--crm2-ink); background: #fff; font-weight: 700; }
+
+/* Postventa: caritas, respuestas y ayudas en el mismo sistema de componentes. */
+#crm-v2-root .crm2-satisfaccion { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; min-width: 0; }
+#crm-v2-root .crm2-satisfaccion-main { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: start; gap: 10px; width: 100%; min-height: 52px; padding: 6px 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+#crm-v2-root .crm2-satisfaccion-main > span:nth-child(2) { display: grid; gap: 2px; min-width: 0; }
+#crm-v2-root .crm2-satisfaccion-main b { font-size: 15px; }
+#crm-v2-root .crm2-satisfaccion-main small { color: #5d5d5d; font-size: 13px; line-height: 1.35; }
+#crm-v2-root .crm2-satisfaccion-ayuda { color: var(--crm2-role-strong); font-size: 12px; }
+#crm-v2-root .crm2-carita { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--crm2-role-line); border-radius: 50%; font-size: 20px; line-height: 1; }
+#crm-v2-root .crm2-carita[data-carita="contento"] { border-color: #5e7e29; color: #4c6722; }
+#crm-v2-root .crm2-carita[data-carita="no-contento"] { border-color: #b3261e; color: #b3261e; }
+#crm-v2-root .crm2-lista-satisfaccion { display: grid; gap: 8px; }
+#crm-v2-root .crm2-respuesta { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 10px; padding: 10px 12px; border: 1px solid var(--crm2-role-line); border-radius: 8px; background: #fff; }
+#crm-v2-root .crm2-respuesta > div { display: grid; gap: 2px; min-width: 0; }
+#crm-v2-root .crm2-respuesta p { margin: 2px 0 0; font-size: 14px; }
+#crm-v2-root .crm2-respuesta small { color: #5d5d5d; font-size: 12px; }
+
+/* Campañas y contenido: selector de vista y la vista «Medios» con piezas reales. */
+#crm-v2-root .crm2-vista-switch { display: flex; flex-wrap: wrap; gap: 8px; }
+#crm-v2-root .crm2-chip-button.is-selected { border-color: var(--crm2-ink); background: var(--crm2-role-tint); color: var(--crm2-role-strong); font-weight: 700; }
+#crm-v2-root .crm2-medios { display: grid; gap: 16px; }
+#crm-v2-root .crm2-medios-grupo { display: grid; gap: 8px; }
+#crm-v2-root .crm2-medios-grupo > h3 { margin: 0; font-size: 17px; }
+#crm-v2-root .crm2-medios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+#crm-v2-root .crm2-medio { display: grid; gap: 8px; min-width: 0; padding: 12px; border: 1px solid var(--crm2-role-line); border-radius: 8px; background: #fff; }
+#crm-v2-root .crm2-medio-vista { display: grid; place-items: center; min-height: 130px; overflow: hidden; border: 1px solid var(--crm2-line); border-radius: 6px; background: #f6f6f6; }
+#crm-v2-root .crm2-medio-vista img { display: block; width: 100%; height: 150px; object-fit: cover; }
+#crm-v2-root .crm2-medio-txt { display: grid; gap: 4px; min-width: 0; }
+#crm-v2-root .crm2-medio-txt h3 { margin: 0; font-size: 16px; }
+#crm-v2-root .crm2-medio-txt p { margin: 0; font-size: 13px; line-height: 1.4; }
+#crm-v2-root .crm2-medio-donde { color: #5d5d5d; }
+#crm-v2-root .crm2-medio-kpi { color: var(--crm2-role-strong); }
+#crm-v2-root .crm2-medio-mock { display: grid; gap: 6px; width: 100%; padding: 12px; font-size: 13px; line-height: 1.35; }
+#crm-v2-root .crm2-medio-mock-t { color: var(--crm2-muted, #5d5d5d); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+#crm-v2-root .crm2-medio-burbuja { margin: 0; padding: 8px 10px; border: 1px solid var(--crm2-line); border-radius: 10px 10px 10px 3px; background: #fff; }
+#crm-v2-root .crm2-medio-burbuja--ok { margin-left: 18px; border-radius: 10px 10px 3px 10px; background: var(--crm2-role-tint); }
+#crm-v2-root .crm2-medio-estrellas { color: #8a6d00; font-size: 16px; letter-spacing: 2px; }
+#crm-v2-root .crm2-medio-mock small { color: #5d5d5d; }
