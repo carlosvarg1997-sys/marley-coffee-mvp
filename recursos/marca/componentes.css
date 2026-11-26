@@ -762,6 +762,7 @@ body[data-current="C02"] #app .ux-hero-scroll .ux-hero-copy { z-index: 6; }
   .mc-compare-media .mc-machine-scene { grid-column: 2; grid-row: 1; }
   .mc-compare-media .cmp-home-maquinas { grid-column: 1; grid-row: 1; min-width: 0; }
   #app .mc-compare-media .cmp-home-maquina img { height: 112px; }
+  body[data-current="C02"] #app #m4-main #negocios { margin-top: 42px !important; }
 }
 @media (max-width: 374px) {
   #app #condiciones .mc-condiciones-finales { display: none; }
