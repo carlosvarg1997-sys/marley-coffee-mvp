@@ -264,6 +264,27 @@ async function beginClientAtC02(page, waitUntil = 'domcontentloaded') {
   return frame;
 }
 
+async function customerSearch(context) {
+  const page = await context.newPage();
+  try {
+    const frame = await begin(page);
+    const started = Date.now();
+    let clicks = 0;
+    const click = async locator => { await locator.first().click(); clicks++; };
+    await frame.locator('#query').fill('máquina de café para hotel');
+    await click(frame.locator('#search button'));
+    await click(frame.locator('#organic-title'));
+    await frame.waitForURL(/\/captacion\/soluciones\/hoteles\.html/);
+    await click(frame.getByRole('link', { name:'Arma tu propuesta' }));
+    await blocked(page);
+    const elapsed = Date.now() - started;
+    assert.ok(clicks <= 4 && elapsed < 120000, `T1: ${clicks} clics en ${elapsed} ms`);
+    await saveEvaluation(page);
+    await frame.locator('#m4Contact').waitFor();
+    console.log('Camino cliente T1', clicks + ' clics', Math.round(elapsed / 1000) + ' s');
+  } finally { await page.close(); }
+}
+
 async function journeyGate(context, folder) {
   const early = await context.newPage();
   const viewport = early.viewportSize();
@@ -361,6 +382,7 @@ async function internalJourney(context, role, folder) {
     const menu = frame.locator('.crm2-nav');
     await choose.or(menu).first().waitFor();
     if (await choose.isVisible()) await choose.click();
+    const stateKey = await frame.evaluate(() => M4.KEY);
     const menuHoy = { ventas:'R01', marketing:'R11', jefatura:'R05' }[role];
     const section = title => frame.locator('.crm2-block').filter({has:frame.getByRole('heading', {name:title})}).first();
     const opening = name => frame.locator('[data-crm-agente-tarea="' + name + '"]').first();
@@ -461,6 +483,13 @@ async function internalJourney(context, role, folder) {
       await close('C-J3', frame.locator('[data-crm-agente-accion="confirmar-aprobacion"][data-cierra-tarea="C-J3"]'));
     }
     await page.locator('#question-next').waitFor();
+    const result = await page.evaluate(({ key, role }) => {
+      const s = JSON.parse(localStorage.getItem(key));
+      if (role === 'ventas') return Object.values(s.crm2?.visitas || {}).some(visit => visit.fecha && visit.horario);
+      if (role === 'marketing') return Object.values(s.crm2?.mediosRevisados || {}).some(medio => medio.indicador);
+      return (s.jefeAprob || []).some(item => item.tipo === 'referido' && item.estado === 'aprobada');
+    }, { key: stateKey, role });
+    assert.equal(result, true, `El último paso de ${role} guarda el resultado antes de cerrar el recorrido`);
   } finally { await page.close(); }
 }
 
@@ -496,6 +525,9 @@ async function main() {
       const client = await browser.newContext({ viewport, reducedMotion: 'reduce', isMobile: viewport.width < 768, hasTouch: viewport.width < 768 });
       try { await journeyGate(client, folder); }
       finally { await client.close(); }
+      const search = await browser.newContext({ viewport, reducedMotion: 'reduce', isMobile: viewport.width < 768, hasTouch: viewport.width < 768 });
+      try { await customerSearch(search); }
+      finally { await search.close(); }
       assert.deepEqual(errors, []);
       await context.close();
       console.log('PASS', channel, role, viewport);

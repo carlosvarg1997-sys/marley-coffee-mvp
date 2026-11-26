@@ -144,9 +144,9 @@
     const base = new URL('.', location.href).pathname;
     if (!url.pathname.startsWith(base)) return null;
     const relative = decodeURIComponent(url.pathname.slice(base.length));
-    const isLanding = /^captacion\/landing\/[a-z0-9-]+\.html$/i.test(relative);
+    const isAcquisition = /^captacion\/(?:landing|soluciones|contenidos)\/[a-z0-9-]+\.html$/i.test(relative);
     const isEmail = /^captacion\/correos\/[a-z0-9_-]+\.html$/i.test(relative);
-    if (!ALLOWED_EXACT.has(relative) && !isLanding && !isEmail) return null;
+    if (!ALLOWED_EXACT.has(relative) && !isAcquisition && !isEmail) return null;
     return url;
   }
   function browserSummary() {
