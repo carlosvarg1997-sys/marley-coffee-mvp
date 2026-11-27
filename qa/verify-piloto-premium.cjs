@@ -144,9 +144,16 @@ async function crm(page) {
   // 26-nov: recomendar es de Marketing (decisión de Carlitos). En la ficha de Ventas, la acción es contactar por el agente.
   await click(page, 'R04', firstCrmAction.R04, () => text(page, '#crm-agente-chat', /Asistente de IA del CRM|borrador/i));
   await page.keyboard.press('Escape');
+  // 26-nov: «Recuperación» y «Permisos» salieron de la cola de Jefatura y viven en la ficha de la
+  // cuenta. La cola quedó en dos filas reales (Propuestas y Referidos): se recorren todas y se
+  // conserva la regla del referido y la comprobación de permisos, ahora en R04.
+  assert.ok(await page.locator('#crm-v2-root [data-crm2-permissions]').count() >= 1, 'R04: la ficha muestra «Permisos y preferencias»');
   await go(page, 'R05');
-  for (const label of ['Referidos', 'Recuperación', 'Permisos']) {
+  const colaAprobaciones = await page.locator('.crm2-approval-queue [data-c2="review-approval"]').count();
+  assert.ok(colaAprobaciones >= 2, `R05: la cola de aprobaciones muestra ${colaAprobaciones} fila(s)`);
+  for (const label of ['Referidos', 'Propuestas']) {
     const selector = `.crm2-approval-queue [data-c2="review-approval"]:has-text("${label}")`;
+    assert.equal(await page.locator(selector).count(), 1, `R05: falta la fila «${label}» en la cola de aprobaciones`);
     const id = await page.locator(selector).getAttribute('data-id');
     const row = `[data-approval="${id}"], [data-followup="${id}"]`;
     await click(page, 'R05', selector, async () => {
@@ -162,7 +169,6 @@ async function crm(page) {
       await approval.locator('[data-approval-note]').fill('Verificar permiso y vínculo B2B.');
       await click(page, 'R07', `[data-approval="${id}"] [data-decision="pidio_info"]`, () => text(page, '[data-crm2-toast]', /Información solicitada/));
     }
-    if (label === 'Permisos') await click(page, 'R07', `[data-followup="${id}"] [data-c2="review-followup"]`, () => open(page, '[data-crm2-permissions][open]'));
     await go(page, 'R05');
   }
   await go(page, 'R11');
@@ -210,10 +216,17 @@ async function seo(page) {
     assert.deepEqual(current.metadata, old.metadata, `${file}: metadatos`);
     assert.deepEqual(current.ld, old.ld, `${file}: JSON-LD`);
     const esPrototipo = file === 'index.html' || file === 'prototipo.html';
-    const destinosComprador = file.startsWith('captacion/landing/') && file !== 'captacion/landing/empresas.html'
-      ? pages.filter(name => name.startsWith('captacion/landing/') && name !== 'captacion/landing/empresas.html').map(name => path.basename(name) + '#oferta')
-      : [];
-    const enlacesEsperados = [...new Set([...old.links, ...(esPrototipo ? ['#condiciones'] : []), ...destinosComprador])].sort();
+    // DS7: las landings conservan su <head> (SEO) y su cuerpo es solo el respaldo y el salto al
+    // mismo inicio del MVP. Su único destino es index.html con landing=<slug> (#C02).
+    if (file.startsWith('captacion/landing/')) {
+      const slug = path.basename(file, '.html');
+      const destino = [`../../index.html?landing=${slug}#C02`];
+      assert.deepEqual(current.links, destino, `${file}: destino único al inicio del MVP`);
+      assert.deepEqual(current.images, [], `${file}: la landing ya no carga imágenes propias`);
+      evidence.push(file);
+      continue;
+    }
+    const enlacesEsperados = [...new Set([...old.links, ...(esPrototipo ? ['#condiciones'] : [])])].sort();
     assert.deepEqual(current.links, enlacesEsperados, `${file}: destinos HTML`);
     if (esPrototipo) assert.ok(current.tieneCondiciones, `${file}: ancla de condiciones del HTML inicial`);
     assert.deepEqual(current.images, old.images, `${file}: imágenes y texto alternativo`);

@@ -15,233 +15,26 @@
 <link rel="stylesheet" href="landing.css?v=20261126ultima">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "Café y máquina para tiendas de conveniencia", "description": "Café, máquina y productos para tiendas de conveniencia. Estima el consumo por jornada y comparte cómo opera tu local.", "inLanguage": "es-CL"}</script></head>
 <body class="nm">
-<a class="nm-skip" href="#contenido">Saltar al contenido</a>
-
-<header class="ld-barra">
-  <div class="nm-wrap">
-    <div class="ld-marca"><span class="ld-logo" role="img" aria-label="Marley Coffee"></span><span>Empresas</span></div>
-    <div class="ld-barra__action"><p>Calcula tu consumo y revisa tu alternativa.</p><a class="nm-btn" href="../../index.html?mc_surface=landing-conveniencia-propuesta&amp;mc_landing=conveniencia#C04" data-attribution-handoff data-screen="C04" data-surface="landing-conveniencia-propuesta">Arma tu propuesta</a></div>
+<script>
+/* DS7: la landing conserva su <head> (title, description, canonical, Open Graph y JSON-LD)
+   y lleva a la persona al mismo inicio del MVP (C02). Se conservan todos los parámetros de la
+   URL —utm y los de la prueba autoguiada— y se agrega landing=<slug> para que C02 personalice
+   solo la frase de intención y el negocio marcado. */
+(function () {
+  'use strict';
+  var params = new URLSearchParams(location.search);
+  params.set('landing', "conveniencia");
+  location.replace('../../index.html?' + params.toString() + '#C02');
+})();
+</script>
+<noscript>
+<main id="contenido" class="nm-wrap nm-seccion ld-respaldo">
+  <div style="display:grid;gap:20px;max-width:52em">
+    <h1 class="nm-h1">Café y máquina para tiendas de conveniencia</h1>
+    <p class="nm-lead">Máquina en comodato y café para llevar. Te llevamos al inicio de Marley Coffee Empresas con tu negocio ya marcado.</p>
+    <p><a class="nm-btn" href="../../index.html?landing=conveniencia#C02">Ver la propuesta para tu tienda de conveniencia</a></p>
   </div>
-</header>
-
-<main id="contenido">
-
-<nav class="ld-reading-guide nm-wrap" aria-label="En esta página"><strong>En esta página</strong><a href="#oferta">Oferta</a><a href="#calculo">Consumo</a><a href="#pasos">Pasos</a><a href="#contacto">Propuesta</a></nav>
-
-  <section class="ld-hero" aria-labelledby="ld-h1">
-    <div class="ld-hero__media">
-      <picture>
-        <source media="(max-width: 760px)" srcset="../../recursos/escenas/hero/poster_m.webp">
-        <img src="../../recursos/escenas/hero/poster.webp" alt="Espresso cayendo en una taza negra de Marley Coffee" width="1440" height="804" fetchpriority="high" decoding="async">
-      </picture>
-      <video id="ld-hero-video" data-hero-video data-src-d="../../recursos/escenas/hero/video_d.mp4" data-src-m="../../recursos/escenas/hero/video_m.mp4" poster="../../recursos/escenas/hero/poster.webp" preload="none" autoplay muted loop playsinline aria-hidden="true" tabindex="-1"></video>
-    </div>
-    <div class="nm-wrap ld-hero__contenido">
-      <div class="ld-hero__texto">
-        <h1 class="nm-h1" id="ld-h1">Café para empresas con máquina en comodato</h1><p class="ld-brand-line" id="ld-bajada">Una pausa para tus clientes.</p>
-        <p class="nm-lead" id="ld-lead">Calcula el consumo de café por jornada.</p>
-        <div class="ld-hero__accion" id="ld-hero-accion"><div class="ld-paths"><div class="ld-path"><a class="nm-btn" href="../../index.html?mc_surface=landing-conveniencia-propuesta&amp;mc_landing=conveniencia#C04" data-attribution-handoff data-screen="C04" data-surface="landing-conveniencia-propuesta" data-cta="hero">Arma tu propuesta <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div><div class="ld-path"><a class="nm-btn nm-btn--linea" href="../../index.html?mc_surface=landing-conveniencia-productos&amp;mc_landing=conveniencia#C10" data-attribution-handoff data-screen="C10" data-surface="landing-conveniencia-productos">Ver packs y productos</a></div></div></div>
-        
-      </div>
-      <div class="ld-hero__form" id="ld-hero-form" hidden></div>
-    </div>
-  </section>
-
-<section class="nm-seccion ld-offer" id="oferta" data-offer-block aria-labelledby="oferta-conveniencia">
-  <div class="nm-wrap">
-    <p class="nm-eyebrow">Tu oferta · Tiendas de conveniencia</p>
-    <h2 class="nm-h2 ld-visible-question" id="oferta-conveniencia">¿Qué incluye la propuesta para tu tienda de conveniencia?</h2><h3 class="nm-h3 ld-offer-machine-heading">Máquina en comodato: Café al paso</h3><p class="ld-offer__message">A tu ritmo de paso: café rápido para llevar.</p><h3 class="nm-h3 ld-offer-products-heading">Productos del pack de partida</h3>
-    <div class="ld-offer__grid">
-      <details class="ld-machine-details" data-offer-machine="cafe_al_paso"><summary>Ver características de la máquina en comodato</summary><div class="ld-machine-details__body"><img src="../../recursos/maquinas/cafe_al_paso.webp" width="395" height="532" alt="Máquina de café para Tiendas de conveniencia" loading="lazy" decoding="async"><div><p class="ld-offer__machine-specs"><strong>Automática de autoservicio</strong><br>80 a 300 tazas al día</p><p><strong>En comodato: Marley presta la máquina y tú compras los insumos.</strong> Modelo, mínimo mensual y condiciones a confirmar con tu ejecutivo.</p></div></div></details>
-      <div class="ld-offer__products"><details class="ld-disclosure ld-products-disclosure"><summary class="ld-disclosure__summary">Ver productos y precios del pack</summary><ul><li class="ld-offer-item" data-offer-line="cafe" data-price="447920"><img src="../../recursos/productos/catalog/grano.webp" width="720" height="720" alt="Café en grano orgánico" loading="lazy" decoding="async"><div><strong>Café en grano orgánico</strong><span>8 × 907 g</span><b>$447.920 neto</b></div></li><li class="ld-offer-item" data-offer-line="chocolate" data-price="169900"><img src="../../recursos/productos/catalog/chocolate.webp" width="720" height="720" alt="Chocolate" loading="lazy" decoding="async"><div><strong>Chocolate</strong><span>10 × 1 kg</span><b>$169.900 neto</b></div></li><li class="ld-offer-item" data-offer-line="vaso9" data-price="94000"><img src="../../recursos/productos/catalog/consumibles.webp" width="720" height="720" alt="Vaso 9 + tapa" loading="lazy" decoding="async"><div><strong>Vaso 9 + tapa</strong><span>500 de cada uno</span><b>$94.000 neto</b></div></li><li class="ld-offer-item" data-offer-line="vaso14" data-price="107500"><img src="../../recursos/productos/catalog/consumibles.webp" width="720" height="720" alt="Vaso 14 + tapa" loading="lazy" decoding="async"><div><strong>Vaso 14 + tapa</strong><span>500 de cada uno</span><b>$107.500 neto</b></div></li><li class="ld-offer-item" data-offer-line="azucar" data-price="58000"><img src="../../recursos/productos/catalog/consumibles.webp" width="720" height="720" alt="Azúcar y stevia en sobres" loading="lazy" decoding="async"><div><strong>Azúcar y stevia en sobres</strong><span>Formato a confirmar</span><b>$58.000 neto</b></div></li><li class="ld-offer-item" data-offer-line="revolvedores" data-price="32000"><img src="../../recursos/productos/catalog/consumibles.webp" width="720" height="720" alt="Revolvedores y servilletas" loading="lazy" decoding="async"><div><strong>Revolvedores y servilletas</strong><span>Formato a confirmar</span><b>$32.000 neto</b></div></li></ul></details></div>
-    </div>
-    <div class="ld-offer__total" data-offer-summary>
-      <details class="ld-offer-breakdown"><summary>Ver productos y kit incluidos</summary><div class="ld-offer__metric" data-offer-products-total="909320"><span>Productos del pack</span><strong>$909.320</strong></div>
-      <div class="ld-offer__metric" data-offer-kit-total="100000"><span>Kit de instalación</span><strong>$100.000</strong></div><div class="ld-offer__metric" data-offer-filter-total="60000"><span>Filtro</span><strong>$60.000</strong></div></details>
-      <div class="ld-offer__metric" data-offer-total="1069320"><span>Total del pack de partida</span><strong>$1.069.320</strong></div>
-      
-      <details class="ld-reference-details"><summary>Referencia de cotización completa</summary><p class="ld-offer__reference">Referencia: la cotización completa de Marley del 19-oct-2026, con todas las líneas, suma <strong>$1.491.220 neto con kit y filtro.</strong></p></details>
-    </div>
-    <p class="nm-nota ld-offer__note"><strong>Precios netos referenciales,</strong> de la cotización de Marley del 19-oct-2026. Los confirma tu ejecutivo.</p>
-
-  <details id="buyer-routes" class="ld-buyer-routes__disclosure"><summary>Ver opciones por tipo de negocio</summary><nav class="ld-buyer-routes__grid" aria-label="Elige tu tipo de negocio"><a class="ld-buyer-route" href="oficinas.html#oferta">Oficinas</a><a class="ld-buyer-route" href="eventos-catering.html#oferta">Eventos o catering</a><a class="ld-buyer-route" href="restaurantes.html#oferta">Restaurantes</a><a class="ld-buyer-route" href="cafeterias.html#oferta">Cafeterías</a><a class="ld-buyer-route" href="hoteles.html#oferta">Hoteles</a><a class="ld-buyer-route" href="panaderias.html#oferta">Panaderías</a><a class="ld-buyer-route" href="conveniencia.html#oferta">Tiendas de conveniencia</a></nav></details>
-</div>
-</section>
-
-
-
-  <div class="ld-cierre nm-wrap" aria-label="Siguiente paso"><a class="nm-btn" href="../../index.html?mc_surface=landing-conveniencia-propuesta&amp;mc_landing=conveniencia#C04" data-attribution-handoff data-screen="C04" data-surface="landing-conveniencia-propuesta" data-cta="cierre-oferta">Arma tu propuesta <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="nm-btn nm-btn--linea" href="../../index.html?mc_surface=landing-conveniencia-productos&amp;mc_landing=conveniencia#C10" data-attribution-handoff data-screen="C10" data-surface="landing-conveniencia-productos" data-cta="cierre-packs">Ver packs y productos</a></div>
-  <section class="nm-seccion" id="calculo" aria-labelledby="calc-titulo">
-    <div class="nm-wrap">
-      <h2 class="nm-h2 ld-visible-question" id="calc-titulo">¿Cuántas tazas vendes o sirves al día?</h2><h3 class="nm-h3 ld-visible-answer">Calcula el consumo con tus tazas por jornada, días abiertos y receta.</h3><details class="ld-disclosure"><summary class="ld-disclosure__summary">Ajusta tu cálculo de consumo</summary><div class="ld-calc"><div class="nm-revela"><p class="nm-eyebrow">Parte por aquí</p><p class="nm-sr">¿Cuántas tazas vendes o sirves al día?</p><p class="nm-p">Calcula el consumo con tus tazas por jornada, días abiertos y receta.</p>
-        <div class="ld-control">
-          <div>
-            <div class="ld-control__linea">
-              <label class="nm-etiqueta" for="c-base">Tazas al día</label>
-              <span class="ld-control__valor"><output id="c-base-valor" for="c-base">40</output><small>tazas</small></span>
-            </div>
-            <input class="nm-rango" id="c-base" type="range" min="5" max="500" step="5" value="40">
-          </div>
-          <div class="ld-fila">
-
-            <div role="group" aria-labelledby="dias-etq">
-              <span class="nm-etiqueta" id="dias-etq">Días de atención al mes</span>
-              <div class="ld-opciones">
-                <label><input type="radio" name="dias" value="22"><span>22</span></label>
-                <label><input type="radio" name="dias" value="26"><span>26</span></label>
-                <label><input type="radio" name="dias" value="30" checked><span>30</span></label>
-              </div>
-            </div>
-            <div>
-              <label class="nm-etiqueta" for="c-gramos">Gramos de café por taza</label>
-              <div class="ld-gramos"><input id="c-gramos" type="number" inputmode="decimal" min="5" max="25" step="0.5" value="9"><span>referencial</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="nm-card ld-resultado nm-revela" data-retraso="1" aria-live="polite">
-        <p class="nm-etiqueta">Consumo mensual estimado</p>
-        <p class="nm-cifra ld-resultado__kg"><output id="c-kg">0</output><span>kg de café</span></p>
-        <ul class="ld-resultado__ficha" id="calc-ficha" aria-label="Detalle del cálculo">
-          <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Tazas al día</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-base">40 tazas</output></li>
-          <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Días de atención</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-dias">30 días</output></li>
-          <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Gramos por taza (referencial)</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-gramos">9 g</output></li>
-          <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Tazas al mes</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-tazas">1.200 tazas</output></li>
-          <li class="ld-ficha__fila"><span class="ld-ficha__etiqueta">Café al mes</span><span class="ld-ficha__puntos" aria-hidden="true"></span><output class="ld-ficha__valor" id="c-row-kg">10,8 kg</output></li>
-        </ul>
-        <p class="nm-nota"><strong>Fórmula:</strong> tazas al día × días de atención al mes × gramos por taza ÷ 1.000.</p>
-        <p class="nm-nota"><strong>Supuestos:</strong> Ingresa tazas promedio y días abiertos al mes; los gramos por taza son un valor referencial y editable.</p>
-        <details class="ld-calc-more"><summary>Alcance de este cálculo</summary><p class="nm-nota"><strong>Es un cálculo orientativo.</strong> Los gramos por taza son un supuesto: cámbialos por tu receta. El consumo real se ajusta en tu propuesta.</p></details>
-        <a class="nm-btn nm-btn--ancho" href="../../index.html?mc_surface=landing-conveniencia-propuesta&amp;mc_landing=conveniencia#C04" data-attribution-handoff data-screen="C04" data-surface="landing-conveniencia-propuesta" data-cta="calculo">Arma tu propuesta</a><p class="ld-path-note">Comparte tus tazas y la receta de tu negocio.</p>
-      </div>
-        </div>
-      </details>
-    </div>
-  </section>
-
-  <section class="nm-seccion nm-seccion--carbon ld-pasos" id="pasos" aria-labelledby="pasos-titulo">
-    <div class="nm-wrap">
-      <div class="ld-pasos__cabeza">
-        <div>
-          <p class="nm-eyebrow">Cómo funciona</p>
-          <h2 class="nm-h2" id="pasos-titulo">¿Qué pasa después de compartir tu consumo?</h2><h3 class="nm-h3 ld-visible-answer">Se revisan el servicio, la máquina y los productos.</h3>
-        </div>
-      </div>
-      <div class="ld-steps-headings"><h3 class="nm-h3 ld-step-title-visible">Describe tu servicio y consumo</h3><h3 class="nm-h3 ld-step-title-visible">Compara máquina y productos</h3><h3 class="nm-h3 ld-step-title-visible">Confirma instalación y reposición</h3></div>
-      <details class="ld-steps-disclosure"><summary>Ver los tres pasos</summary><ol class="ld-pasos__grilla">
-        <li class="nm-card ld-paso nm-revela" data-retraso="0"><span class="nm-paso-num">01</span><p class="nm-p">Tazas, horarios y cómo se ofrece café en tu local.</p></li>
-        <li class="nm-card ld-paso nm-revela" data-retraso="1"><span class="nm-paso-num">02</span><p class="nm-p">Máquina y productos según tu servicio. Si ya sabes qué máquina quieres, partimos de ahí.</p></li>
-        <li class="nm-card ld-paso nm-revela" data-retraso="2"><span class="nm-paso-num">03</span><p class="nm-p">Coordinamos la puesta en marcha y la reposición de tus productos.</p></li>
-      </ol></details>
-    </div>
-  </section>
-
-  <section class="nm-seccion ld-secondary" aria-label="Detalles de la propuesta"><div class="nm-wrap ld-secondary__intro"><h2 class="nm-h2">¿Qué condiciones debes revisar antes de firmar?</h2><h3 class="nm-h3">Confirma alcance, responsable y condiciones de cierre.</h3></div><div class="nm-wrap ld-secondary__items"><div class="ld-secondary-disclosure"><div class="ld-secondary-disclosure__body">
-      <details class="ld-disclosure"><summary class="ld-disclosure__summary"><h3 class="nm-h3 ld-condition-question">Ver lo que queda por escrito</h3></summary>
-        <div class="ld-disclosure__body">
-          <div class="nm-hoja nm-revela">
-            <div class="ld-hoja__cabeza">
-              <p class="nm-eyebrow">Cuentas claras</p>
-              <p class="nm-h2" id="hoja-titulo">Lo que queda por escrito antes de firmar.</p>
-              <hr class="nm-firma">
-            </div>
-            <ul class="ld-hoja__grilla">
-          <li class="ld-hoja__item"><p class="ld-disclosure-label">Qué incluye</p><span class="ld-hoja__guia" aria-hidden="true"></span><p>La máquina, los productos y los servicios de tu propuesta, uno por uno.</p></li>
-          <li class="ld-hoja__item"><p class="ld-disclosure-label">Quién responde</p><span class="ld-hoja__guia" aria-hidden="true"></span><p>A quién llamas si algo falla y por qué canal.</p></li>
-          <li class="ld-hoja__item"><p class="ld-disclosure-label">Qué documento recibes</p><span class="ld-hoja__guia" aria-hidden="true"></span><p>El documento y las condiciones se confirman en la propuesta.</p></li>
-          <li class="ld-hoja__item"><p class="ld-disclosure-label">Cómo se termina</p><span class="ld-hoja__guia" aria-hidden="true"></span><p>Las condiciones para cerrar el servicio, sin letra chica.</p></li>
-            </ul>
-            <p class="nm-nota">Las condiciones comerciales las confirma el equipo de Marley Coffee en tu propuesta.</p>
-          </div>
-        </div>
-      </details>
-      <details class="ld-disclosure"><summary class="ld-disclosure__summary"><h3 class="nm-h3 ld-condition-question">Ver condiciones a confirmar</h3></summary>
-        <div class="ld-disclosure__body">
-          <ul class="ld-conditions-list">
-            <li><strong>Compra mínima mensual:</strong> a confirmar.</li>
-            <li><strong>Plazo de entrega:</strong> a confirmar.</li>
-            <li><strong>Compatibilidad de insumos con la máquina:</strong> a confirmar.</li>
-          </ul>
-          <p class="nm-nota">Las condiciones del servicio se confirman por escrito en tu propuesta.</p>
-        </div>
-      </details>
-      <details class="ld-disclosure"><summary class="ld-disclosure__summary"><h3 class="nm-h3 ld-condition-question">Ver recursos relacionados</h3></summary>
-        <div class="ld-disclosure__body">
-          <p class="ld-contexto">
-            <a href="../../guia-servicio-cafe.html" data-contexto="guia">Guía para planificar el café de tu negocio</a>
-            <a href="../../index.html?mc_surface=landing-conveniencia-productos&amp;mc_landing=conveniencia#C10" data-attribution-handoff data-screen="C10" data-surface="landing-conveniencia-productos">Ver packs y productos</a>
-          </p>
-        </div>
-      </details>
-    </div></div></div>
-  </section>
-
-  <section class="nm-seccion nm-seccion--borde" id="contacto" aria-labelledby="contacto-titulo">
-    <div class="nm-wrap ld-contacto">
-      <div class="nm-revela">
-        <p class="nm-eyebrow">Tu propuesta</p>
-        <h2 class="nm-h2" id="contacto-titulo">¿Cómo puedes recibir una propuesta?</h2>
-        <h3 class="nm-h3">Envía tus datos para continuar el diagnóstico y la revisión de tu propuesta.</h3>
-        
-      </div>
-      <div class="nm-revela" data-retraso="1">
-        <details class="ld-form-disclosure" id="ld-form-disclosure"><summary>Completa el formulario en dos pasos</summary><div class="nm-card ld-form-caja" id="ld-form-caja">
-          <form class="ld-form" id="ld-form" novalidate data-paso="1">
-            <p class="nm-etiqueta" id="ld-paso-etiqueta" role="status">Paso 1 de 2 · tus datos</p>
-            <p class="ld-retoma" id="ld-retoma" hidden>Retomamos tu solicitud guardada. Solo falta este paso.</p>
-            <fieldset class="ld-form__paso" data-paso="1">
-              <legend class="nm-sr">Paso 1 de 2: tus datos</legend>
-              <div class="nm-campo"><label for="f-nombre">Nombre y apellido</label><input id="f-nombre" name="nombre" type="text" autocomplete="name" aria-describedby="e-nombre"><p class="nm-error" id="e-nombre" role="alert"></p></div>
-              <div class="nm-campo"><label for="f-correo">Correo de trabajo</label><input id="f-correo" name="correo" type="email" inputmode="email" autocomplete="email" aria-describedby="e-correo"><p class="nm-error" id="e-correo" role="alert"></p></div>
-              <div class="ld-form__permisos">
-                <label class="nm-check"><input type="checkbox" name="consent" id="f-consent"><span>Acepto que me contacten para responder esta solicitud.</span></label>
-                <p class="nm-error" id="e-consent" role="alert"></p>
-                <label class="nm-check"><input type="checkbox" name="marketing" id="f-marketing"><span>Quiero recibir recordatorios y guías por correo.<small>Opcional. Puedes darte de baja cuando quieras.</small></span></label>
-              </div>
-              <button class="nm-btn nm-btn--ancho" type="submit" data-accion="guardar">Guardar y seguir <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-              <p class="nm-gano">Guardamos tu solicitud para que puedas terminarla.</p>
-            </fieldset>
-            <fieldset class="ld-form__paso" data-paso="2" hidden>
-              <legend class="nm-sr">Paso 2 de 2: tu negocio</legend>
-              <p class="ld-resumen" id="ld-resumen"></p>
-              <div class="ld-form__dos">
-                <div class="nm-campo"><label for="f-empresa">Nombre de la tienda</label><input id="f-empresa" name="empresa" type="text" autocomplete="organization" aria-describedby="e-empresa"><p class="nm-error" id="e-empresa" role="alert"></p></div>
-                <div class="nm-campo"><label for="f-telefono">Teléfono</label><input id="f-telefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel" aria-describedby="e-telefono"><p class="nm-error" id="e-telefono" role="alert"></p></div>
-              </div>
-              <button class="nm-btn nm-btn--ancho" type="submit" data-accion="enviar">Enviar y ver mi solución <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-              <button class="ld-volver" type="button" data-accion="volver">Corregir mis datos</button>
-            </fieldset>
-            <button class="nm-btn nm-btn--ancho" type="submit" data-accion="directo" hidden>Enviar solicitud <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-            <details class="ld-privacidad">
-              <summary>Cómo usamos tus datos</summary>
-              <ul class="ld-privacy-points"><li><strong>Usamos tus datos para responder esta solicitud.</strong></li><li>Solo te enviamos recordatorios y guías si lo aceptas, y puedes darte de baja cuando quieras.</li><li>No guardamos lo que escribes hasta que lo envías.</li></ul>
-            </details>
-          </form>
-          <div class="ld-exito" id="ld-exito" hidden tabindex="-1">
-            <p class="nm-eyebrow">Solicitud recibida</p>
-            <p class="ld-status-title" id="ld-exito-titulo" role="status">Recibimos tu solicitud.</p>
-            <p class="nm-p">Sigue con un diagnóstico de 3 pasos para armar tu propuesta. Una persona del equipo la revisa antes de enviártela.</p>
-            <a class="nm-btn nm-btn--ancho" id="ld-continuar" href="../../index.html#C04">Continuar con el diagnóstico <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          </div>
-        </div></details>
-      </div>
-    </div>
-  </section>
-
 </main>
-
-<a class="nm-btn c3-floating-cta" data-c3-floating data-c3-hidden="true" aria-hidden="true" tabindex="-1" href="../../index.html#C04" data-attribution-handoff data-screen="C04" data-surface="landing-conveniencia">Arma tu propuesta</a>
-
-<footer class="ld-pie">
-  <div class="nm-wrap">
-    <div class="ld-pie__marca"><span class="ld-logo" aria-hidden="true"></span><span>Marley Coffee Empresas</span></div>
-    <hr class="nm-firma">
-    <p class="nm-nota">Prototipo académico de Duoc UC (TMA1103). No es un sitio oficial de Marley Coffee: no envía datos ni correos, y todo queda en este navegador. Las condiciones comerciales las confirma el equipo de Marley Coffee.</p>
-    <pre class="ld-qa" id="ld-qa" hidden></pre>
-  </div>
-</footer>
-
-<script type="application/json" id="ld-config">{"buyer":"conveniencia","slug":"conveniencia","portal":"../../index.html","pantalla":"C04","mensajeBase":"base","mensajes":{"base":{"h1":"Una pausa para tus clientes.","lead":"Calcula el consumo de café por jornada."},"continuidad":{"h1":"Prevé el consumo de tu local.","lead":"Ajusta tazas y días abiertos."},"conveniencia":{"h1":"Ordena el café en tu tienda.","lead":"Revisa tazas por jornada y reposición."},"viabilidad":{"h1":"Calcula el consumo para tu tienda.","lead":"Prueba el escenario con tus datos."},"confianza":{"h1":"Revisa las condiciones antes de decidir.","lead":"Confirma productos y quién responde."},"experiencia":{"h1":"Define dónde ofrecerás café.","lead":"Cuéntanos cómo atiendes a tus clientes."}},"calc":{"mode":"tazas","dias":30,"eventosMes":0,"gramos":9,"porPersona":1,"unidad":"tazas"}}</script>
-<script src="landing.js?v=20261123" defer></script>
+</noscript>
 </body>
 </html>

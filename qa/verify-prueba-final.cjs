@@ -160,8 +160,17 @@ async function acquisition(page) {
   const ad = page.locator('#ad-link');
   await ad.scrollIntoViewIfNeeded();
   await ad.click();
-  await page.waitForURL(/captacion\/landing\/.*utm_source=meta/);
-  await page.locator('h1').waitFor();
+  // DS7: la landing conserva su SEO y entra al mismo inicio del MVP; se llega a C02 con la intención.
+  await page.waitForURL(/\/index\.html\?.*landing=cafeterias(&|#|$)/);
+  await page.locator('#ux-hero-title').waitFor();
+  const inicio = await page.evaluate(() => ({
+    hash: (location.hash || '').split('?')[0],
+    hero: document.querySelector('.ux-hero-copy p')?.textContent.trim() || '',
+    pressed: [...document.querySelectorAll('.m5-tab[aria-pressed="true"]')].map((b) => b.textContent.trim()),
+  }));
+  assert.equal(inicio.hash, '#C02', 'la landing del anuncio entra al inicio del MVP');
+  assert.ok(inicio.hero.length > 10, 'el hero del inicio conserva su frase');
+  assert.ok(inicio.pressed.includes('Cafetería'), 'el negocio de la landing queda marcado');
 }
 
 const sessionKey = 'mc_prueba_autoguiada_v1';

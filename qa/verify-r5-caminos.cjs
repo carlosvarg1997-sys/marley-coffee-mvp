@@ -428,7 +428,9 @@ async function testViewportFlows(browser, base, vp, failures) {
       await page.goto(`${base}/index.html?motion=off#C11`, { waitUntil: 'domcontentloaded' });
       await page.waitForFunction(() => document.body.dataset.current === 'C11' && window.__r5Instalado === true);
       const alternatives = page.locator('.r3-machine-alternatives > summary');
-      if (await alternatives.count()) await alternatives.click();
+      // El pliegue se abre con el clic del DOM: la animación de entrada del catálogo puede dejar
+      // el <summary> sin "estable" y el clic de Playwright expira sin que el producto falle.
+      if (await alternatives.count()) await alternatives.first().evaluate((el) => el.click());
       const grid = await page.locator('.r3-machine-grid').waitFor({ state: 'visible', timeout: 3000 }).then(() => true, () => false);
       if (!grid) {
         const head = await page.locator('#m4-main h1').first().textContent();
@@ -468,30 +470,85 @@ async function testViewportFlows(browser, base, vp, failures) {
     }
   }
 
-  // 4) Las 8 landings: encabezados, medidas, paleta, «Arma tu propuesta» -> C04 (sin re-preguntar negocio) -> C05 directo
+  // 4) DS7 · Las 8 landings conservan su <head> (SEO) y entran al MISMO inicio del MVP (C02):
+  //    solo cambian la frase de intención y el negocio marcado; el resto del inicio es idéntico.
+  //    Las medidas y la paleta del inicio se comprueban en el bloque 3: la landing ya no tiene
+  //    maqueta propia (su cuerpo es el respaldo <noscript> y el salto).
+  const consulta = '?utm_source=google&utm_medium=cpc&utm_campaign=CL_GOOGLE_SEARCH&mc_source=serp_lab&mc_session=SERP-1&mc_phase=title&mc_variant=B&mc_query_id=2&mc_surface=resultado-organico&mc_first_click_ms=1200&mc_first_click_surface=resultado-organico&test=personas&camino=B-Google&participante=P1&journey=full';
+  const oferta = JSON.parse(fs.readFileSync(path.join(ROOT, 'recursos/datos/oferta_por_buyer.json'), 'utf8'));
+  const estructuraInicio = (s) => JSON.stringify({ secciones: s.secciones, t1: s.t1, h1: s.h1, maquinas: s.maquinas });
+  const leerInicio = () => {
+    const main = document.querySelector('#app main');
+    return {
+      h1: document.querySelector('#ux-hero-title')?.textContent.trim() || '',
+      hero: document.querySelector('.ux-hero-copy p')?.textContent.trim() || '',
+      pressed: [...document.querySelectorAll('.m5-tab[aria-pressed="true"]')].map((b) => b.textContent.trim()),
+      maquinas: document.querySelectorAll('#condiciones .cmp-home-maquina').length,
+      t1: [...document.querySelectorAll('[data-cierra-tarea="T1"]')].map((b) => b.textContent.replace(/\s+/g, ' ').trim()),
+      secciones: main ? [...main.querySelectorAll(':scope > section')].map((s) => s.id || String(s.className).split(' ')[0]) : [],
+    };
+  };
   for (const l of LANDINGS) {
     const { ctx, page, pageErrors } = await newPage(browser, vp.width, vp.height, vp.touch);
     try {
-      await page.goto(`${base}/captacion/landing/${l.slug}.html`, { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(250);
-      await checkHeadingHierarchy(page, 'main', `${tag}/landing/${l.slug}/encabezados`, failures);
-      await checkHeightsAndOverflow(page, 3000, 2200, /* 15-nov: con el aire pedido por Carlitos («cero aire»), las landings crecieron ~16 %; tope nuevo 3000/2200 */ `${tag}/landing/${l.slug}/medidas`, failures);
-      await checkPalette(page, 'body', `${tag}/landing/${l.slug}/paleta`, failures);
+      // Canon: el inicio sin landing, para exigir que la landing muestre exactamente lo mismo.
+      await page.goto(`${base}/index.html#C02`, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => document.body.dataset.current === 'C02' && window.__r5Instalado === true, null, { timeout: 10000 });
+      const canon = await page.evaluate(leerInicio);
 
-      // Barra fija en landing si visible <= 15% y sin tapar CTA héroe
-      const ldBar = await page.evaluate(() => {
-        const bar = document.querySelector('.ld-barra');
-        if (!bar) return { ok: true };
-        const st = getComputedStyle(bar);
-        if (st.display === 'none' || st.visibility === 'hidden') return { ok: true };
-        const br = bar.getBoundingClientRect();
-        if (br.height === 0) return { ok: true };
-        return { ok: br.height / window.innerHeight <= 0.15, ratio: br.height / window.innerHeight };
-      });
-      if (!ldBar.ok) recordFail(failures, `${tag}/landing/${l.slug}/barra`, `.ld-barra ocupa ${(ldBar.ratio * 100).toFixed(1)}% (> 15%)`);
+      // a) El respaldo de la landing: <head> intacto, un H1 con la intención y un enlace al inicio.
+      const crudo = fs.readFileSync(path.join(ROOT, 'captacion/landing', `${l.slug}.html`), 'utf8');
+      const respaldo = await page.evaluate((html) => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        return {
+          h1: [...doc.querySelectorAll('h1')].map((h) => h.textContent.trim()),
+          enlaces: [...doc.querySelectorAll('a[href]')].map((a) => ({ href: a.getAttribute('href'), texto: a.textContent.replace(/\s+/g, ' ').trim() })),
+          metas: [...doc.head.querySelectorAll('title,meta[name],meta[property],link[rel="canonical"]')].length,
+          ld: [...doc.querySelectorAll('script[type="application/ld+json"]')].length,
+          imgs: doc.querySelectorAll('img').length,
+        };
+      }, crudo);
+      if (respaldo.h1.length !== 1) recordFail(failures, `${tag}/landing/${l.slug}/respaldo`, `se esperaba 1 H1 y hay ${respaldo.h1.length}`);
+      const hrefEsperado = `../../index.html?landing=${l.slug}#C02`;
+      if (respaldo.enlaces.length !== 1 || respaldo.enlaces[0].href !== hrefEsperado || !/^Ver la propuesta para /.test(respaldo.enlaces[0].texto)) {
+        recordFail(failures, `${tag}/landing/${l.slug}/respaldo`, `enlace de respaldo inesperado: ${JSON.stringify(respaldo.enlaces)} (esperado ${hrefEsperado})`);
+      }
+      if (respaldo.metas < 2 || respaldo.ld !== 1) recordFail(failures, `${tag}/landing/${l.slug}/respaldo`, `el <head> perdió metadatos o JSON-LD (${respaldo.metas} metas, ${respaldo.ld} JSON-LD)`);
+      if (respaldo.imgs !== 0) recordFail(failures, `${tag}/landing/${l.slug}/respaldo`, `la landing conserva ${respaldo.imgs} imágenes del diseño viejo`);
 
-      await page.locator('a[data-cta="hero"]').click();
-      await page.waitForFunction(() => /\/index\.html/.test(location.pathname) && (location.hash || '').split('?')[0] === '#C04' && window.__r5Instalado === true, null, { timeout: 10000 });
+      // b) El salto: mismo inicio (C02) con todos los parámetros de la URL y landing=<slug>.
+      await page.goto(`${base}/captacion/landing/${l.slug}.html${consulta}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => /\/index\.html$/.test(location.pathname) && (location.hash || '').split('?')[0] === '#C02' && window.__r5Instalado === true, null, { timeout: 20000 });
+      const destino = new URL(await page.evaluate(() => location.href));
+      const antes = new URLSearchParams(consulta);
+      const perdidos = [...antes.keys()].filter((k) => destino.searchParams.get(k) !== antes.get(k));
+      const claves = [...destino.searchParams.keys()].sort().join(',');
+      const esperadas = [...antes.keys(), 'landing'].sort().join(',');
+      if (perdidos.length) recordFail(failures, `${tag}/landing/${l.slug}/salto`, `se perdieron o cambiaron parámetros: ${perdidos.join(', ')}`);
+      if (claves !== esperadas) recordFail(failures, `${tag}/landing/${l.slug}/salto`, `parámetros finales ${claves} != ${esperadas}`);
+      if (destino.searchParams.get('landing') !== l.slug) recordFail(failures, `${tag}/landing/${l.slug}/salto`, `landing=${destino.searchParams.get('landing')} != ${l.slug}`);
+      if (destino.hash !== '#C02') recordFail(failures, `${tag}/landing/${l.slug}/salto`, `destino ${destino.hash} en vez de #C02`);
+
+      // c) El inicio es el mismo: mismas secciones, mismo H1, mismos CTA. Solo cambia la frase y el negocio.
+      await page.waitForFunction(() => document.body.dataset.current === 'C02' && window.__r5Instalado === true, null, { timeout: 10000 });
+      const inicio = await page.evaluate(leerInicio);
+      const buyer = l.general ? null : oferta.buyers.find((b) => b.landing === l.slug);
+      const frase = buyer ? buyer.mensaje : canon.hero;
+      if (estructuraInicio(inicio) !== estructuraInicio(canon)) {
+        recordFail(failures, `${tag}/landing/${l.slug}/inicio`, `el inicio cambia secciones, H1 o CTA: ${estructuraInicio(inicio)} != ${estructuraInicio(canon)}`);
+      }
+      if (inicio.hero !== frase) recordFail(failures, `${tag}/landing/${l.slug}/frase`, `frase "${inicio.hero}" != "${frase}"`);
+      if (buyer) {
+        // La pestaña muestra el nombre corto: OCS → Oficinas y Eventos o catering → Eventos.
+        const marcado = l.chip === 'OCS' ? 'Oficinas' : l.chip === 'Eventos o catering' ? 'Eventos' : l.chip;
+        if (!inicio.pressed.includes(marcado)) recordFail(failures, `${tag}/landing/${l.slug}/negocio`, `no quedó marcado «${marcado}» (marcados: ${inicio.pressed.join(', ') || 'ninguno'})`);
+      } else if (inicio.hero !== canon.hero) {
+        recordFail(failures, `${tag}/landing/${l.slug}/frase`, 'la landing general no debe cambiar la frase del inicio');
+      }
+
+      // d) El traspaso que ya existía: el negocio llega al cuestionario y al CRM; C04 no lo vuelve a preguntar.
+      await page.locator('[data-cierra-tarea="T1"]').first().click();
+      await page.waitForFunction(() => (location.hash || '').split('?')[0] === '#C04', null, { timeout: 10000 });
       await page.locator('.m5-qcard').waitFor({ state: 'visible', timeout: 8000 });
 
       const negocioReAsked = await page.locator('#r4Datos [data-a="answer"][data-k="negocio"]').count();
@@ -506,7 +563,7 @@ async function testViewportFlows(browser, base, vp, failures) {
         }
       } else {
         if (negocioReAsked !== 0) {
-          recordFail(failures, `${tag}/landing/${l.slug}/C04`, `volvió a preguntar negocio (${negocioReAsked} botones) aunque venía mc_landing`);
+          recordFail(failures, `${tag}/landing/${l.slug}/C04`, `volvió a preguntar negocio (${negocioReAsked} botones) aunque venía landing=${l.slug}`);
         }
         if (deducido !== l.buyer && deducido !== l.chip) {
           recordFail(failures, `${tag}/landing/${l.slug}/C04`, `negocio deducido="${deducido}" != esperado "${l.buyer}"`);
@@ -522,6 +579,10 @@ async function testViewportFlows(browser, base, vp, failures) {
         await page.locator('#pack-resumen').waitFor({ state: 'visible' });
         if (!(await page.locator('.cmp-maquina .cmp-motivo').isVisible())) {
           recordFail(failures, `${tag}/landing/${l.slug}/C05`, 'falta la explicación de la máquina en la propuesta');
+        }
+        const negocioCrm = await page.evaluate(() => M4.get().answers.negocio || null);
+        if (!l.general && negocioCrm !== (l.chip === 'OCS' ? 'OCS' : l.chip)) {
+          recordFail(failures, `${tag}/landing/${l.slug}/traspaso`, `el negocio guardado es "${negocioCrm}" y se esperaba "${l.chip}"`);
         }
       }
       if (pageErrors.length) recordFail(failures, `${tag}/landing/${l.slug}/errores`, pageErrors.join(' | '));

@@ -27,9 +27,19 @@ async function completeDiagnostic(page, { business = 'Restaurante', commune = 'L
       await form.locator('[name="consent"]').check();
     }
     if (await page.evaluate(() => document.body.dataset.current !== 'C04')) return;
-    const next = form.locator('[data-r4-next]:visible');
-    await next.scrollIntoViewIfNeeded();
-    await next.click();
+    // El cuestionario se vuelve a dibujar al responder: el botón puede quedar reemplazado a mitad
+    // del clic. Se reintenta con la misma condición (no se relaja nada de lo que se comprueba).
+    for (let intento = 0; ; intento++) {
+      try {
+        const next = form.locator('[data-r4-next]:visible');
+        await next.scrollIntoViewIfNeeded({ timeout: 4000 });
+        await next.click({ timeout: 4000 });
+        break;
+      } catch (error) {
+        if (intento >= 2 || !/not attached|detached|not stable|Timeout/i.test(String(error.message))) throw error;
+        await page.waitForTimeout(250);
+      }
+    }
     if (!key && !isCommune) {
       await page.waitForFunction(() => document.body.dataset.current !== 'C04');
       return;

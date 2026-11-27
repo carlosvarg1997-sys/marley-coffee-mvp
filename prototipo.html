@@ -12888,9 +12888,51 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
   function buyerFor(s) {
     if (!DATA) return null;
     const source = s || M.get();
-    const value = source.answers && source.answers.negocio || source.lead && source.lead.landing && (source.lead.landing.buyer || source.lead.landing.label || source.lead.landing.negocio) || (C.ui && C.ui.biz) || new URLSearchParams(location.search).get("negocio") || "";
+    const value = source.answers && source.answers.negocio || source.lead && source.lead.landing && (source.lead.landing.buyer || source.lead.landing.label || source.lead.landing.negocio) || (C.ui && C.ui.biz) || new URLSearchParams(location.search).get("negocio") || new URLSearchParams(location.search).get("landing") || "";
     const normalized = tidy(value), id = alias[normalized] || normalized;
     return DATA.offer.buyers.find(function (b) { return b.id === id; }) || DATA.offer.buyers.find(function (b) { return tidy(b.negocio) === normalized || tidy(b.landing) === normalized; }) || null;
+  }
+  // ---------- DS7 · entrada desde las landings por intención ----------
+  // Las 8 landings conservan su <head> (SEO) y llevan a este mismo inicio con `landing=<slug>`.
+  // Aquí se traduce el slug al negocio que ya usaba el traspaso (C04, cuestionario y CRM) y se
+  // recuerda la frase de intención. El resto del inicio queda idéntico: solo cambian esa frase
+  // y el negocio marcado en «Así se vería en tu…».
+  const LANDING_SLUG = {
+    restaurantes: "restaurantes", restaurante: "restaurantes",
+    hoteles: "hoteles", hotel: "hoteles",
+    cafeterias: "cafeterias", cafeteria: "cafeterias",
+    oficinas: "oficinas", oficina: "oficinas", ocs: "oficinas",
+    panaderias: "panaderias", panaderia: "panaderias",
+    conveniencia: "conveniencia",
+    "eventos-catering": "eventos-catering", eventos: "eventos-catering",
+    empresas: "empresas", general: "empresas"
+  };
+  const LANDING_BIZ = { restaurantes: "Restaurante", hoteles: "Hotel", cafeterias: "Cafetería", oficinas: "OCS", panaderias: "Panadería", conveniencia: "Conveniencia", "eventos-catering": "Eventos o catering" };
+  function landingEntrada() {
+    const raw = tidy(new URLSearchParams(location.search).get("landing") || "");
+    if (!raw) return null;
+    const slug = LANDING_SLUG[raw] || null;
+    if (!slug) return null;
+    return { slug: slug, biz: LANDING_BIZ[slug] || null };
+  }
+  // La frase del hero solo se cambia cuando la intención de la landing manda en esta entrada:
+  // si la persona ya eligió otro negocio en este navegador, se respeta su elección y el inicio
+  // queda tal cual (no se mezcla la frase de una landing con el negocio de otra).
+  function fraseDeEntrada() { return (C.ui && C.ui.landingFrase) || ""; }
+  function aplicarEntradaDeLanding() {
+    const entrada = landingEntrada();
+    if (!entrada) return;
+    C.ui.landing = entrada.slug;
+    const yaElegido = (M.get().answers && M.get().answers.negocio) || "";
+    if (entrada.biz && yaElegido && yaElegido !== entrada.biz) return;
+    if (entrada.biz) {
+      C.ui.landingBiz = true;
+      if (!C.ui.biz) C.ui.biz = entrada.biz;
+      // El tipo de negocio se guarda para el formulario, el cuestionario y el CRM (el traspaso que ya existía).
+      if (!yaElegido) M.update(function (s) { if (!s.answers.negocio) s.answers.negocio = entrada.biz; });
+    }
+    const buyer = DATA.offer.buyers.find(function (b) { return b.landing === entrada.slug; });
+    if (buyer && buyer.mensaje) C.ui.landingFrase = buyer.mensaje;
   }
   function businessPhrase(offer) {
     return ({ oficina: "oficina", eventos: "negocio de eventos", restaurante: "restaurante", cafeteria: "cafetería", hotel: "hotel", panaderia: "panadería", conveniencia: "tienda de conveniencia" })[offer.id] || String(offer.negocio || "negocio").toLowerCase();
@@ -13100,6 +13142,10 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       .replace(/<p class="cmp-aclara">[\s\S]*?<\/p>/, '')
       .replace(/<p>(?:<strong>)?No necesitas saber qué máquina elegir\.(?:<\/strong>)?[\s\S]*?<\/p>/,
         '<p>Cuéntanos cómo sirves el café y te orientamos.</p>');
+    // DS7: al entrar desde una landing, el único texto que cambia es la frase del hero
+    // (la de intención de esa landing, tomada de oferta_por_buyer.json). El resto del inicio es el mismo.
+    const frase = fraseDeEntrada();
+    if (frase) hero = hero.replace(/(<h1\b[^>]*>[\s\S]*?<\/h1>\s*)<p>[\s\S]*?<\/p>/, function (todo, titulo) { return titulo + '<p>' + esc(frase) + '</p>'; });
     const maquinas = Object.entries(DATA.offer.maquinas).map(([id, m]) => {
       const compradores = DATA.offer.buyers.filter(b => b.maquina === id).map(b => b.etiqueta);
       return '<article class="mc-card cmp-home-maquina"><img src="' + FOTO_PENDIENTE + '" data-comodato-foto="recursos/maquinas/' + id + '_foto.webp" alt="' + esc(m.nombre) + '" width="240" height="165" loading="lazy" decoding="async" data-zoom data-zoom-grupo="maquinas">' +
@@ -13134,7 +13180,10 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
       else if (depth > 0 && --depth === 0) items.push(questions.slice(itemStart, tag.lastIndex));
     }
     const faqItem = function (q) { return q.replace('<details>', '<details class="r5-faq-item">'); };
-    faq = faq.slice(0, faqInsideStart) + '<div class="ux-head"><h2>Preguntas frecuentes</h2></div><details class="cmp-plegado"><summary>Ver preguntas frecuentes</summary><div class="r5-faq-content">' + items.slice(0, 4).map(faqItem).join("") + '<button type="button" class="r5-faq-more" data-r5-faq-more aria-expanded="false">Ver más preguntas</button><div class="r5-faq-hidden" hidden>' + items.slice(4).map(faqItem).join("") + '</div></div></details>' + faq.slice(faqEndInside);
+    // DS7: el título «Preguntas frecuentes» quedaba oculto por CSS dentro de .mc-home-recursos
+    // (el pliegue ya lo dice en su summary). Se retira el encabezado muerto para no dejar
+    // titulares fuera del árbol visible.
+    faq = faq.slice(0, faqInsideStart) + '<details class="cmp-plegado"><summary>Ver preguntas frecuentes</summary><div class="r5-faq-content">' + items.slice(0, 4).map(faqItem).join("") + '<button type="button" class="r5-faq-more" data-r5-faq-more aria-expanded="false">Ver más preguntas</button><div class="r5-faq-hidden" hidden>' + items.slice(4).map(faqItem).join("") + '</div></div></details>' + faq.slice(faqEndInside);
     const cta = strip.match(/<button\b[^>]*data-cierra-tarea="T1"[^>]*>[\s\S]*?<\/button>/)?.[0] || '';
     const ctaEnd = '<div class="r3-c02-end-actions" aria-label="Siguiente paso">' + cta + '</div>';
     const pair = '<div class="r3-c02-product-pair">' + coffee + machine + '</div>';
@@ -13664,6 +13713,7 @@ body[data-current="R02"] .m5-roles-head h1{color:#171717!important}
     const p = data[0], o = data[1];
     DATA = { prices: { lines: p.lineas.map(function (line) { return Object.assign({}, line, { catalogId: catalogId[line.k] || line.k }); }), kit: p.instalacion, filter: p.filtro, totals: p.totales, nota_cliente: p.nota_cliente }, offer: o };
     setCanonicalData();
+    aplicarEntradaDeLanding();
     install();
   }).catch(function (error) { console.error("R3 C2 no pudo cargar los datos canónicos:", error); });
 })();
@@ -13842,7 +13892,7 @@ body[data-current^="C"] .m4.m5 .r4-diag .m5-opt{min-height:44px!important}
     function currentQuestion(s, biz) {
       if (s.diag && s.diag.done) return "contact";
       const keys = questionKeys(s, biz), saved = s.diag && s.diag.r5QuestionStep;
-      if (biz && M.landingFocus('C04') && !C.ui.r4EditBiz && (!saved || saved === 'negocio') && !s.diag.step) return 'volumen';
+      if (biz && (M.landingFocus('C04') || C.ui.landingBiz) && !C.ui.r4EditBiz && (!saved || saved === 'negocio') && !s.diag.step) return 'volumen';
       if (saved && keys.indexOf(saved) >= 0) return saved;
       if (Number(s.diag && s.diag.step) >= 2) return "operacion";
       if (Number(s.diag && s.diag.step) === 1) return "volumen";
@@ -14499,13 +14549,17 @@ body:not(.r5-con-barra) .r5-aviso{bottom:calc(16px + env(safe-area-inset-bottom,
     const NEGOCIO_TXT = { oficina: "oficina", eventos: "negocio de eventos", restaurante: "restaurante", cafeteria: "cafetería", hotel: "hotel", panaderia: "panadería", conveniencia: "tienda de conveniencia" };
     const paraTu = function (offer) { return offer ? (offer.id === "oficina" ? "para Oficinas" : "para tu " + (NEGOCIO_TXT[offer.id] || String(offer.negocio || "negocio").toLowerCase())) : "para tu negocio"; };
     const NEGOCIO_LANDING = { restaurante: "Restaurante", hotel: "Hotel", cafeteria: "Cafetería", oficina: "Oficinas", eventos: "Eventos o catering", conveniencia: "Conveniencia", panaderia: "Panadería" };
+    // DS7: las landings entran con `landing=<slug>` (y conservan el alias `mc_landing` del traspaso anterior).
+    const NEGOCIO_LANDING_SLUG = { restaurantes: "Restaurante", hoteles: "Hotel", cafeterias: "Cafetería", oficinas: "OCS", panaderias: "Panadería", conveniencia: "Conveniencia", "eventos-catering": "Eventos o catering" };
     function negocioConocido(s) {
       s = s || M.get();
       const handoff = s.landingHandoff && s.landingHandoff.buyer || s.lead && s.lead.landing && s.lead.landing.buyerLabel;
       if (s.answers && s.answers.negocio) return s.answers.negocio;
       if (handoff) return handoff;
-      const slug = new URLSearchParams(location.search).get("mc_landing");
-      return NEGOCIO_LANDING[String(slug || "").toLowerCase()] || C.ui.biz || null;
+      const params = new URLSearchParams(location.search);
+      const slug = params.get("mc_landing");
+      if (slug) return NEGOCIO_LANDING[String(slug).toLowerCase()] || C.ui.biz || null;
+      return NEGOCIO_LANDING_SLUG[String(params.get("landing") || "").toLowerCase()] || C.ui.biz || null;
     }
     function muestraNegocio(s) {
       s = s || M.get();
