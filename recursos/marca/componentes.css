@@ -907,6 +907,9 @@ body[data-current="C02"] #app .mc-home-recursos > .r3-c02-end-actions { margin-t
   body[data-current="C02"] #app .m5-c02 .m5-foot { padding-block: 12px; }
 }
 @media (max-width: 767px) {
+  /* DS8a · dos secciones seguidas dentro de «Productos, servicios y ayuda» mantienen el aire mínimo
+     de 24 px (la base de 16 px se queda corta cuando «Servicios» y «Preguntas» quedan vecinas). */
+  body[data-current="C02"] #app .mc-home-recursos > .ux-section + .ux-section { margin-top: 24px !important; }
   body[data-current="C02"] #app :is(.ux-hero-actions,#condiciones) [data-cta-principal="cuentanos"] { width: 100%; }
   body[data-current="C02"] #app .m5-c02 #m4-main > .ux-hero .ux-hero-copy { padding-inline: 0 !important; }
   body[data-current="C02"] #app #negocios > .ux-wrap { width: 100%; padding-inline: 0 !important; }

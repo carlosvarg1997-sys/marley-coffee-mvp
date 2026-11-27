@@ -479,10 +479,10 @@
     if (route === 'R16') return 'R12';
     return ROUTE[route]?.menu || NAV[role]?.[0]?.[0];
   }
-  // El alias R06 de Marketing conserva el menú de cuatro entradas con el que se verificó el contrato R6;
-  // las pestañas nuevas (Postventa y Recomendados) son del CRM por rol, no de ese alias heredado.
+  // El alias R06 de Marketing conserva el menú completo de Marketing (5 entradas): la ruta heredada
+  // no le quita ninguna pestaña al rol. «Leads» queda activo porque el alias vive en esa sección.
   function navFor(route, role) {
-    if (route === 'R06' && role === 'marketing') return [['R11', 'Hoy', 'home'], ['R12', 'Leads', 'people'], ['R16', 'Recuperar', 'clock'], ['R13', 'Campañas', 'campaign']];
+    if (route === 'R06' && role === 'marketing') return NAV.marketing;
     return NAV[role] || [];
   }
 
@@ -566,6 +566,13 @@
     const menu = navFor(route, role);
     const nav = menu.map(([id, label, glyph]) => `<a class="crm2-nav-link ${activeRoute === id ? 'is-active' : ''}" href="#${id}" data-c2-go="${id}" ${activeRoute === id ? 'aria-current="page"' : ''}>${icon(glyph)}<span>${esc(label)}</span></a>`).join('');
     const userName = userFor(role);
+    const home = homeFor(role);
+    // La marca es un enlace al inicio del rol en los dos tamaños: en escritorio vive en el menú lateral
+    // y en celular en la cabecera. Así nunca queda un enlace tapado ni uno oculto que intercepte el toque.
+    const compact = window.matchMedia('(max-width: 640px)').matches;
+    const brandTarget = `href="#${home}" data-c2-go="${home}" aria-label="Ir al inicio de ${esc(roleTitle(role))}"`;
+    const sidebarBrand = `<a class="crm2-brand" ${brandTarget}><span class="crm2-brand-mark" aria-hidden="true">M</span><span><b>MARLEY COFFEE</b><small>Empresas · CRM</small></span></a>`;
+    const mobileBrand = `<a class="crm2-mobile-brand" ${brandTarget}><span class="crm2-brand-mark" aria-hidden="true">M</span><b>${esc(roleTitle(role))}</b></a>`;
     const visual = role === 'marketing'
       ? ['recursos/maquinas/cafe_al_paso_foto.webp', 'Máquina Marley Coffee de café al paso']
       : role === 'jefatura'
@@ -573,13 +580,13 @@
         : ['recursos/maquinas/bar_foto.webp', 'Máquina de espresso Marley Coffee para barra'];
     return `<div class="crm2-shell crm2-role-${role}">
       <aside class="crm2-sidebar" aria-label="Navegación del CRM">
-        <a class="crm2-brand" href="#${homeFor(role)}" data-c2-go="${homeFor(role)}"><span class="crm2-brand-mark">M</span><span><b>MARLEY COFFEE</b><small>Empresas · CRM</small></span></a>
+        ${compact ? '' : sidebarBrand}
         <div class="crm2-role-label"><span class="crm2-avatar">${esc(userName.split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase())}</span><span><b>${esc(roleTitle(role))}</b><small>${esc(userName)}</small></span></div>
         <nav class="crm2-nav">${nav}</nav>
         <button class="crm2-logout" type="button" data-c2="logout">Cerrar sesión</button>
       </aside>
       <div class="crm2-workspace">
-        <header class="crm2-topbar"><div class="crm2-mobile-brand"><span class="crm2-brand-mark">M</span><b>${esc(roleTitle(role))}</b></div><div class="crm2-search-wrap">${icon('search')}<input type="search" data-c2-search placeholder="Buscar" aria-label="Buscar contacto o cuenta" autocomplete="off"><div class="crm2-search-results" data-c2-search-results hidden></div></div><button class="crm2-alerts" type="button" data-c2-go="${role === 'jefatura' ? 'R07' : role === 'marketing' ? 'R16' : 'R01'}" aria-label="Ver avisos">${icon('bell')}<span>Avisos</span><b>${alertCount(role)}</b></button></header>
+        <header class="crm2-topbar">${mobileBrand}<div class="crm2-search-wrap">${icon('search')}<input type="search" data-c2-search placeholder="Buscar" aria-label="Buscar contacto o cuenta" autocomplete="off"><div class="crm2-search-results" data-c2-search-results hidden></div></div><button class="crm2-alerts" type="button" data-c2-go="${role === 'jefatura' ? 'R07' : role === 'marketing' ? 'R16' : 'R01'}" aria-label="Ver avisos">${icon('bell')}<span>Avisos</span><b>${alertCount(role)}</b></button></header>
         <main class="crm2-main${ES_HOY(route) ? ' crm2-main--hoy' : ''}"><header class="crm2-page-head${ES_HOY(route) ? ' crm2-page-head--hoy' : ''}"><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}${cta ? `<div class="crm2-page-cta">${cta}</div>` : ''}</header><div class="crm2-content${ES_HOY(route) ? ' crm2-content--hoy' : ''}">${content}${cta ? `<div class="crm2-cierre" data-crm2-cierre>${cta}</div>` : ''}</div></main>
       </div>
       ${actionbar}
@@ -650,8 +657,13 @@
     const cycleOverdue = account => { const stats = accountStats(account); return stats.lastAgo != null && stats.freqDays != null && Number(stats.lastAgo) > Number(stats.freqDays); };
     const risk = all.filter(cycleOverdue).sort((a,b) => Number(accountStats(b).lastAgo||0)-Number(accountStats(a).lastAgo||0));
     const riskIds = new Set(risk.map(account => String(account.id)));
-    const other = all.filter(account => !riskIds.has(String(account.id)));
+    // La cuenta que llegó por recomendación es trabajo comercial de Ventas: va a la vista,
+    // no dentro del pliegue, para cerrar el vínculo y el permiso antes de cotizar.
+    const referred = all.filter(account => account.referral && !riskIds.has(String(account.id)));
+    const referredIds = new Set(referred.map(account => String(account.id)));
+    const other = all.filter(account => !riskIds.has(String(account.id)) && !referredIds.has(String(account.id)));
     return block('En riesgo', 'Ciclo de compra vencido: hay que recuperar la cuenta.', `<div class="crm2-list">${limitedList(risk,account => accountRow(account,'risk'),'Ver todas las cuentas en riesgo')}</div>`) +
+      (referred.length ? block('Llegó por referido', 'Confirma el vínculo antes de cotizar.', `<div class="crm2-list">${referred.map(account => accountRow(account,'client')).join('')}</div>`) : '') +
       `<details class="crm2-fold"><summary>Todas las cuentas (${other.length})</summary><div class="crm2-list">${other.map(account => accountRow(account,'client')).join('') || empty('Sin cuentas adicionales','')}</div></details>`;
   }
   function salesReorder() {
@@ -1195,7 +1207,8 @@
       target.querySelectorAll('input[name="quote-channel"]').forEach(input => input.addEventListener('change', () => { quoteWizard.channel = input.value; }));
     }
   }
-  function saveQuote(status = 'Enviada · simulación') {
+  // El estado deja explícito que el envío ocurre solo en el prototipo (control del contrato R6).
+  function saveQuote(status = 'Enviada solo en el prototipo') {
     const lead = leadById(quoteWizard?.leadId);
     if (!lead) return;
     const offer = packDescription(lead);
@@ -1769,6 +1782,12 @@
     }
     window.addEventListener('hashchange', render);
     window.addEventListener('popstate', render);
+    // La marca cambia de sitio entre escritorio y celular: al cruzar el corte se vuelve a montar la vista
+    // para que quede un solo enlace visible y apretable (E-0f6207).
+    const compactQuery = window.matchMedia('(max-width: 640px)');
+    const onCompactChange = () => { if (active() && !quoteWizard) render(); };
+    if (compactQuery.addEventListener) compactQuery.addEventListener('change', onCompactChange);
+    else compactQuery.addListener?.(onCompactChange);
     M.subscribe?.(() => { if (active() && !quoteWizard) render(); });
     render();
   }

@@ -154,12 +154,14 @@
   function pantallaC05(s, p) {
     if (s.compra && s.compra.paso === 'cruce') return '<section class="cmp-sec"><div class="cmp-wrap">' + cruceHTML() + '</div></section>';
     var maquina = maquinaDe(s), mq = maquina.m, com = p.comprador, etiq = com && com.etiqueta ? com.etiqueta.toLowerCase() : '';
-    var titulo = 'Tu pack de inicio';
+    // DS8a: el titular dice el tipo de negocio que eligió la persona (hoteles, cafeterías, panaderías…),
+    // para que la pantalla del pack no se lea igual en los siete tipos. La frase propia va debajo.
+    var titulo = etiq ? 'Tu pack de inicio para ' + etiq : 'Tu pack de inicio';
     var scene = window.M4D.BUSINESS[s.answers?.negocio || com?.negocio]?.scene || 'hotel';
     var ejemplo = '<figure class="mc-pack-scene"><figcaption>Así se vería el café en tu ' +
       esc(({Hotel:'hotel',Restaurante:'restaurante','Cafetería':'cafetería',Oficinas:'oficina',OCS:'oficina'})[s.answers?.negocio] || 'negocio') +
       '</figcaption>' + window.M5UI.film(scene, { mode: 'once', deferred: true }) + '</figure>';
-    var saludo = com && com.mensaje ? '<p class="cmp-saludo">' + esc(com.mensaje) + '</p>' : '';
+    var saludo = com && com.mensaje ? '<p class="cmp-saludo" data-saludo>' + esc(com.mensaje) + '</p>' : '';
     var motivo = s.catalogJourney?.machineSource === 'cliente' ? 'Elegiste esta máquina directamente.' : window.R5?.porque?.(s, maquina.key) || mq.kind;
     var extra = s.compra && s.compra.extra ? '<p class="cmp-ok">Sumaste la taza de la marca a tu pack: su precio lo confirma tu ejecutivo.</p>' : '';
     // DS4: desde 1024 px, la máquina a la izquierda y una tarjeta fija a la derecha con
